@@ -1,0 +1,581 @@
+{
+  "source": "Tanzania Commission for Universities (TCU) approved university institutions (2025/2026 register) + NACTE/NACTVET registered technical colleges and institutes; institutions offer programmes from basic certificate to PhD. Name is the official display name; abbreviation and aliases are searchable.",
+  "note": "Includes public/private universities, university colleges, constituent colleges, campuses/centres, and major technical colleges & institutes (TCU + NACTE).",
+  "institutions": [
+    {
+      "name": "University of Dar es Salaam",
+      "abbreviation": "UDSM",
+      "aliases": ["UDSM", "Dar es Salaam University", "Chuo Kikuu cha Dar es Salaam"]
+    },
+    {
+      "name": "Sokoine University of Agriculture",
+      "abbreviation": "SUA",
+      "aliases": ["SUA", "Sokoine", "Chuo Kikuu cha Sokoine cha Kilimo"]
+    },
+    {
+      "name": "Open University of Tanzania",
+      "abbreviation": "OUT",
+      "aliases": ["OUT", "Chuo Kikuu Huria"]
+    },
+    {
+      "name": "State University of Zanzibar",
+      "abbreviation": "SUZA",
+      "aliases": ["SUZA", "Chuo Kikuu cha Zanzibar"]
+    },
+    {
+      "name": "Mzumbe University",
+      "abbreviation": "MU",
+      "aliases": ["Mzumbe", "Chuo Kikuu cha Mzumbe"]
+    },
+    {
+      "name": "Nelson Mandela African Institution of Science and Technology",
+      "abbreviation": "NM-AIST",
+      "aliases": ["NM-AIST", "Nelson Mandela", "NMAIST", "Arusha Science and Technology"]
+    },
+    {
+      "name": "Muhimbili University of Health and Allied Sciences",
+      "abbreviation": "MUHAS",
+      "aliases": ["MUHAS", "Muhimbili"]
+    },
+    {
+      "name": "Ardhi University",
+      "abbreviation": "ARU",
+      "aliases": ["ARU", "Ardhi", "Chuo Kikuu cha Ardhi"]
+    },
+    {
+      "name": "University of Dodoma",
+      "abbreviation": "UDOM",
+      "aliases": ["UDOM", "Dodoma University", "Chuo Kikuu cha Dodoma"]
+    },
+    {
+      "name": "Mbeya University of Science and Technology",
+      "abbreviation": "MUST",
+      "aliases": ["MUST", "Mbeya University", "Chuo Kikuu cha Sayansi na Teknolojia Mbeya"]
+    },
+    {
+      "name": "Moshi Co-operative University",
+      "abbreviation": "MoCU",
+      "aliases": ["MoCU", "Moshi Cooperative", "Chuo Kikuu cha Ushirika Moshi"]
+    },
+    {
+      "name": "Mwalimu Julius K. Nyerere University of Agriculture and Technology",
+      "abbreviation": "MJNUAT",
+      "aliases": ["MJNUAT", "MNUAT", "Nyerere University", "Butiama University", "Chuo Kikuu cha Kilimo na Teknolojia"]
+    },
+    {
+      "name": "Kairuki University",
+      "abbreviation": "KU",
+      "aliases": ["Kairuki", "HKMU", "Hubert Kairuki Memorial University"]
+    },
+    {
+      "name": "Abdulrahman Al-Sumait University",
+      "abbreviation": "SUMAIT",
+      "aliases": ["SUMAIT", "Al-Sumait", "Al Sumait University"]
+    },
+    {
+      "name": "Kilimanjaro Christian Medical University",
+      "abbreviation": "KCMU",
+      "aliases": ["KCMU", "KCMC", "Kilimanjaro Christian Medical University College", "KCMU College"]
+    },
+    {
+      "name": "St. Augustine University of Tanzania",
+      "abbreviation": "SAUT",
+      "aliases": ["SAUT", "St Augustine", "Augustine University", "Chuo Kikuu cha Mt. Augustino"]
+    },
+    {
+      "name": "Zanzibar University",
+      "abbreviation": "ZU",
+      "aliases": ["ZU", "Chuo Kikuu cha Zanzibar"]
+    },
+    {
+      "name": "Tumaini University Makumira",
+      "abbreviation": "TUMA",
+      "aliases": ["TUMA", "Tumaini", "Makumira"]
+    },
+    {
+      "name": "Aga Khan University",
+      "abbreviation": "AKU",
+      "aliases": ["AKU", "Aga Khan"]
+    },
+    {
+      "name": "Catholic University of Health and Allied Sciences",
+      "abbreviation": "CUHAS",
+      "aliases": ["CUHAS", "Weill Bugando", "Bugando"]
+    },
+    {
+      "name": "University of Arusha",
+      "abbreviation": "UoA",
+      "aliases": ["UoA", "Arusha University", "Chuo Kikuu cha Arusha"]
+    },
+    {
+      "name": "St. Joseph University in Tanzania",
+      "abbreviation": "SJUIT",
+      "aliases": ["SJUIT", "St Joseph University", "Dar es Salaam Institute of Technology"]
+    },
+    {
+      "name": "Teofilo Kisanji University",
+      "abbreviation": "TEKU",
+      "aliases": ["TEKU", "Teofilo Kisanji"]
+    },
+    {
+      "name": "Muslim University of Morogoro",
+      "abbreviation": "MUM",
+      "aliases": ["MUM", "Muslim University", "Chuo Kikuu cha Kiislamu Morogoro"]
+    },
+    {
+      "name": "Mwenge Catholic University",
+      "abbreviation": "MWECAU",
+      "aliases": ["MWECAU", "Mwenge"]
+    },
+    {
+      "name": "University of Iringa",
+      "abbreviation": "UoI",
+      "aliases": ["UoI", "Iringa University", "Chuo Kikuu cha Iringa"]
+    },
+    {
+      "name": "St. John's University of Tanzania",
+      "abbreviation": "SJUT",
+      "aliases": ["SJUT", "St Johns University", "St John's University"]
+    },
+    {
+      "name": "Kampala International University in Tanzania",
+      "abbreviation": "KIUT",
+      "aliases": ["KIUT", "Kampala International"]
+    },
+    {
+      "name": "United African University of Tanzania",
+      "abbreviation": "UAUT",
+      "aliases": ["UAUT", "United African"]
+    },
+    {
+      "name": "Ruaha Catholic University",
+      "abbreviation": "RUCU",
+      "aliases": ["RUCU", "Ruaha"]
+    },
+    {
+      "name": "Mwanza University",
+      "abbreviation": "MzU",
+      "aliases": ["MzU", "Mwanza University"]
+    },
+    {
+      "name": "Catholic University of Mbeya",
+      "abbreviation": "CUoM",
+      "aliases": ["CUoM", "CUCoM", "Catholic University of Mbeya"]
+    },
+    {
+      "name": "Dar es Salaam Tumaini University",
+      "abbreviation": "DarTU",
+      "aliases": ["DarTU", "TUDARCo", "Tumaini University Dar es Salaam"]
+    },
+    {
+      "name": "Rabininsia University",
+      "abbreviation": "RU",
+      "aliases": ["RU", "Rabininsia", "Rabininsia Memorial University of Health and Allied Sciences", "RMUHAS"]
+    },
+    {
+      "name": "University of Medical Sciences and Technology",
+      "abbreviation": "UMST",
+      "aliases": ["UMST", "University of Medical Sciences"]
+    },
+    {
+      "name": "Hikmah University of East Africa",
+      "abbreviation": "HUEA",
+      "aliases": ["HUEA", "Islamic University of East Africa", "IUEA", "Islamic University"]
+    },
+    {
+      "name": "Dar es Salaam University College of Education",
+      "abbreviation": "DUCE",
+      "aliases": ["DUCE", "UDSM Education College"]
+    },
+    {
+      "name": "Mkwawa University College of Education",
+      "abbreviation": "MUCE",
+      "aliases": ["MUCE", "Mkwawa"]
+    },
+    {
+      "name": "Mzumbe University Dar es Salaam Campus College",
+      "abbreviation": "MUDARCo",
+      "aliases": ["MUDARCo", "Mzumbe Dar es Salaam"]
+    },
+    {
+      "name": "Mzumbe University Mbeya Campus College",
+      "abbreviation": "MUMBCCo",
+      "aliases": ["MUMBCCo", "Mzumbe Mbeya"]
+    },
+    {
+      "name": "Mbeya College of Health and Allied Sciences",
+      "abbreviation": "MCHAS",
+      "aliases": ["MCHAS", "Mbeya College of Health"]
+    },
+    {
+      "name": "Mbeya University of Science and Technology Rukwa Campus College",
+      "abbreviation": "MUST-RC",
+      "aliases": ["MUST-RC", "MUST Rukwa"]
+    },
+    {
+      "name": "Sokoine University of Agriculture Mizengo Pinda Campus College",
+      "abbreviation": "SUA-MPC",
+      "aliases": ["SUA-MPC", "Mizengo Pinda Campus", "SUA Katavi"]
+    },
+    {
+      "name": "MUST Mtwara Campus College of Technical Education",
+      "abbreviation": "MUST-MCCTE",
+      "aliases": ["MUST-MCCTE", "MUST Mtwara"]
+    },
+    {
+      "name": "Ardhi University Mwanza Campus College",
+      "abbreviation": "ARU-MCC",
+      "aliases": ["ARU-MCC", "Ardhi Mwanza"]
+    },
+    {
+      "name": "Stefano Moshi Memorial University College",
+      "abbreviation": "SMMUCo",
+      "aliases": ["SMMUCo", "Stefano Moshi"]
+    },
+    {
+      "name": "Archbishop Mihayo University College of Tabora",
+      "abbreviation": "AMUCTA",
+      "aliases": ["AMUCTA", "Mihayo University College", "Tabora University College"]
+    },
+    {
+      "name": "Jordan University College",
+      "abbreviation": "JUCo",
+      "aliases": ["JUCo", "Jordan University College", "Tumaini University Morogoro Campus"]
+    },
+    {
+      "name": "St. Francis University College of Health and Allied Sciences",
+      "abbreviation": "SFUCHAS",
+      "aliases": ["SFUCHAS", "St Francis University College"]
+    },
+    {
+      "name": "Stella Maris Mtwara University College",
+      "abbreviation": "STeMMUCo",
+      "aliases": ["STeMMUCo", "Stella Maris"]
+    },
+    {
+      "name": "Marian University College",
+      "abbreviation": "MARUCo",
+      "aliases": ["MARUCo", "Marian University College", "Bagamoyo University College"]
+    },
+    {
+      "name": "St. Joseph University College of Health and Allied Sciences",
+      "abbreviation": "SJCHAS",
+      "aliases": ["SJCHAS", "St Joseph College of Health"]
+    },
+    {
+      "name": "Mwenge Catholic University Hedaru Campus College",
+      "abbreviation": "MWECAU-HCC",
+      "aliases": ["MWECAU-HCC", "Mwenge Hedaru"]
+    },
+    {
+      "name": "Institute of Marine Sciences",
+      "abbreviation": "IMS",
+      "aliases": ["IMS", "Institute of Marine Sciences UDSM"]
+    },
+    {
+      "name": "Kizumbi Institute of Cooperative Business Education",
+      "abbreviation": "KICoB",
+      "aliases": ["KICoB", "Kizumbi"]
+    },
+    {
+      "name": "SAUT Dar es Salaam Centre",
+      "abbreviation": "SAUT-DSM",
+      "aliases": ["SAUT-DSM", "St Augustine Dar es Salaam"]
+    },
+    {
+      "name": "SAUT Arusha Centre",
+      "abbreviation": "SAUT-AR",
+      "aliases": ["SAUT-AR", "St Augustine Arusha"]
+    },
+    {
+      "name": "Stefano Moshi Memorial University College Mwika Centre",
+      "abbreviation": "SMMUCo-Mwika",
+      "aliases": ["SMMUCo-Mwika", "Stefano Moshi Mwika"]
+    },
+    {
+      "name": "IIT Madras Zanzibar",
+      "abbreviation": "IITM-Z",
+      "aliases": ["IITM-Z", "IIT Madras Zanzibar", "Indian Institute of Technology Zanzibar"]
+    },
+    {
+      "name": "Dar es Salaam Institute of Technology",
+      "abbreviation": "DIT",
+      "aliases": ["DIT", "Dar es Salaam Institute of Technology"]
+    },
+    {
+      "name": "Arusha Technical College",
+      "abbreviation": "ATC",
+      "aliases": ["ATC", "Arusha Technical College"]
+    },
+    {
+      "name": "National Institute of Transport",
+      "abbreviation": "NIT",
+      "aliases": ["NIT", "National Institute of Transport"]
+    },
+    {
+      "name": "Dar es Salaam Maritime Institute",
+      "abbreviation": "DMI",
+      "aliases": ["DMI", "Maritime Institute"]
+    },
+    {
+      "name": "College of Business Education",
+      "abbreviation": "CBE",
+      "aliases": ["CBE", "College of Business Education"]
+    },
+    {
+      "name": "Institute of Accountancy Arusha",
+      "abbreviation": "IAA",
+      "aliases": ["IAA", "Institute of Accountancy Arusha"]
+    },
+    {
+      "name": "Tanzania Institute of Accountancy",
+      "abbreviation": "TIA",
+      "aliases": ["TIA", "Tanzania Institute of Accountancy"]
+    },
+    {
+      "name": "Institute of Finance Management",
+      "abbreviation": "IFM",
+      "aliases": ["IFM", "Institute of Finance Management"]
+    },
+    {
+      "name": "Institute of Rural Development Planning",
+      "abbreviation": "IRDP",
+      "aliases": ["IRDP", "Rural Development Planning"]
+    },
+    {
+      "name": "Local Government Training Institute",
+      "abbreviation": "LGTI",
+      "aliases": ["LGTI", "Local Government Training Institute Hombolo"]
+    },
+    {
+      "name": "Mwalimu Nyerere Memorial Academy",
+      "abbreviation": "MNMA",
+      "aliases": ["MNMA", "Nyerere Memorial Academy", "Chuo cha Nyerere"]
+    },
+    {
+      "name": "Institute of Social Work",
+      "abbreviation": "ISW",
+      "aliases": ["ISW", "Institute of Social Work"]
+    },
+    {
+      "name": "Institute of Adult Education",
+      "abbreviation": "IAE",
+      "aliases": ["IAE", "Institute of Adult Education"]
+    },
+    {
+      "name": "Institute of Tax Administration",
+      "abbreviation": "ITA",
+      "aliases": ["ITA", "Institute of Tax Administration"]
+    },
+    {
+      "name": "Eastern Africa Statistical Training Centre",
+      "abbreviation": "EASTC",
+      "aliases": ["EASTC", "Statistical Training Centre"]
+    },
+    {
+      "name": "Water Development and Management Institute",
+      "abbreviation": "WDMI",
+      "aliases": ["WDMI", "Water Development Management Institute"]
+    },
+    {
+      "name": "Institute of Lands",
+      "abbreviation": "IoL",
+      "aliases": ["IoL", "Institute of Lands Mliangano", "Mliangano"]
+    },
+    {
+      "name": "Tanzania Public Service College",
+      "abbreviation": "TPSC",
+      "aliases": ["TPSC", "Public Service College"]
+    },
+    {
+      "name": "Centre for Foreign Relations",
+      "abbreviation": "CFR",
+      "aliases": ["CFR", "Centre for Foreign Relations"]
+    },
+    {
+      "name": "Institute of Judicial Administration",
+      "abbreviation": "IJA",
+      "aliases": ["IJA", "Institute of Judicial Administration Lushoto"]
+    },
+    {
+      "name": "Law School of Tanzania",
+      "abbreviation": "LST",
+      "aliases": ["LST", "Law School of Tanzania"]
+    },
+    {
+      "name": "Institute of Procurement and Supply",
+      "abbreviation": "IPS",
+      "aliases": ["IPS", "Institute of Procurement and Supply"]
+    },
+    {
+      "name": "Tanzania Institute of Rail Technology",
+      "abbreviation": "TIRT",
+      "aliases": ["TIRT", "Rail Technology Institute", "Tanzania Institute of Rail Technology"]
+    },
+    {
+      "name": "National College of Tourism",
+      "abbreviation": "NCT",
+      "aliases": ["NCT", "National College of Tourism"]
+    },
+    {
+      "name": "College of African Wildlife Management Mweka",
+      "abbreviation": "CAWM",
+      "aliases": ["CAWM", "Mweka", "College of African Wildlife Management"]
+    },
+    {
+      "name": "Pasiansi Wildlife Training Institute",
+      "abbreviation": "PWTI",
+      "aliases": ["PWTI", "Pasiansi"]
+    },
+    {
+      "name": "Eastern and Southern African Management Institute",
+      "abbreviation": "ESAMI",
+      "aliases": ["ESAMI", "Eastern Southern African Management Institute"]
+    },
+    {
+      "name": "Institute of Public Administration Zanzibar",
+      "abbreviation": "IPA",
+      "aliases": ["IPA", "Institute of Public Administration Zanzibar"]
+    },
+    {
+      "name": "Karume Institute of Science and Technology",
+      "abbreviation": "KIST",
+      "aliases": ["KIST", "Karume Institute"]
+    },
+    {
+      "name": "Ministry of Agriculture Training Institute Uyole",
+      "abbreviation": "MATI Uyole",
+      "aliases": ["MATI Uyole", "Uyole Agricultural Training", "MATI"]
+    },
+    {
+      "name": "Livestock Training Agency",
+      "abbreviation": "LITA",
+      "aliases": ["LITA", "Livestock Training Agency"]
+    },
+    {
+      "name": "Forestry Training Institute Olmotonyi",
+      "abbreviation": "FTI Olmotonyi",
+      "aliases": ["FTI Olmotonyi", "Forestry Training Institute", "Olmotonyi"]
+    },
+    {
+      "name": "Forest Industries Training Institute",
+      "abbreviation": "FITI",
+      "aliases": ["FITI", "Forest Industries Training Institute Moshi"]
+    },
+    {
+      "name": "Fisheries Education and Training Agency",
+      "abbreviation": "FETA",
+      "aliases": ["FETA", "Fisheries Training", "Mbegani"]
+    },
+    {
+      "name": "Tanzania Training Centre for International Health",
+      "abbreviation": "TTCIH",
+      "aliases": ["TTCIH", "Tanzania Training Centre International Health Ifakara", "Ifakara"]
+    },
+    {
+      "name": "Bugando Medical Centre School of Nursing",
+      "abbreviation": "BMCSON",
+      "aliases": ["BMCSON", "Bugando Nursing School"]
+    },
+    {
+      "name": "Muhimbili School of Nursing",
+      "abbreviation": "MSON",
+      "aliases": ["MSON", "Muhimbili Nursing"]
+    },
+    {
+      "name": "Kilimanjaro Christian Medical University College School of Nursing",
+      "abbreviation": "KCMUCo SON",
+      "aliases": ["KCMUCo", "KCMU College School of Nursing", "KCMU School of Nursing"]
+    },
+    {
+      "name": "Patandi Teachers College",
+      "abbreviation": "PATANDA",
+      "aliases": ["PATANDA", "Patandi Teachers College Arusha"]
+    },
+    {
+      "name": "Butimba Teachers College",
+      "abbreviation": "BUTIMBA",
+      "aliases": ["Butimba", "Butimba Teachers College Mwanza"]
+    },
+    {
+      "name": "Marangu Teachers College",
+      "abbreviation": "MARANGU",
+      "aliases": ["Marangu Teachers College"]
+    },
+    {
+      "name": "Korogwe Teachers College",
+      "abbreviation": "KOROGWE",
+      "aliases": ["Korogwe Teachers College"]
+    },
+    {
+      "name": "Mpwapwa Teachers College",
+      "abbreviation": "MPWAPWA",
+      "aliases": ["Mpwapwa Teachers College"]
+    },
+    {
+      "name": "Tukuyu Teachers College",
+      "abbreviation": "TUKUYU",
+      "aliases": ["Tukuyu Teachers College"]
+    },
+    {
+      "name": "Mtwara Teachers College",
+      "abbreviation": "MTWARA TC",
+      "aliases": ["Mtwara Teachers College"]
+    },
+    {
+      "name": "Katoke Teachers College",
+      "abbreviation": "KATOKE",
+      "aliases": ["Katoke Teachers College"]
+    },
+    {
+      "name": "Singachini Teachers College",
+      "abbreviation": "SINGACHINI",
+      "aliases": ["Singachini Teachers College"]
+    },
+    {
+      "name": "Azania College of Management",
+      "abbreviation": "ACOM",
+      "aliases": ["ACOM", "Azania College of Management"]
+    },
+    {
+      "name": "East African Institute of Entrepreneurship and Financial Management",
+      "abbreviation": "EAIEFM",
+      "aliases": ["EAIEFM", "East African Institute of Entrepreneurship"]
+    },
+    {
+      "name": "Ruaha Tourism College",
+      "abbreviation": "RTC",
+      "aliases": ["RTC", "Ruaha Tourism College Iringa"]
+    },
+    {
+      "name": "Institute of Business Management",
+      "abbreviation": "IBM",
+      "aliases": ["IBM", "Institute of Business Management Morogoro"]
+    },
+    {
+      "name": "WAMI International College",
+      "abbreviation": "WAMI",
+      "aliases": ["WAMI", "WAMI International College Morogoro"]
+    },
+    {
+      "name": "Zanzibar College of Business Education",
+      "abbreviation": "ZCBE",
+      "aliases": ["ZCBE", "Zanzibar College of Business"]
+    },
+    {
+      "name": "Zanzibar Institute of Business Research and Technology",
+      "abbreviation": "ZIBRET",
+      "aliases": ["ZIBRET", "Zanzibar Institute of Business Research"]
+    },
+    {
+      "name": "Digital Technical College of Tanzania",
+      "abbreviation": "DTCT",
+      "aliases": ["DTCT", "Digital Technical College Mbeya"]
+    },
+    {
+      "name": "Mwanza College of Business Studies",
+      "abbreviation": "MCBS",
+      "aliases": ["MCBS", "Mwanza College of Business"]
+    }
+  ]
+}

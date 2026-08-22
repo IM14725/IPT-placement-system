@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Apply" %} — {{ slot.title }}{% endblock %}
+{% block content %}
+<div class="w-full max-w-3xl mx-auto flex flex-col gap-md">
+  <div class="flex flex-col gap-sm">
+    <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Apply to Slot" %}</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Upload your university application letter to submit your application, then complete payment." %}</p>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
+    <div class="p-lg flex flex-col gap-md">
+      <div class="flex items-start justify-between gap-sm">
+        <div class="flex flex-col gap-xs">
+          <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{{ slot.company.name }}</span>
+          <h2 class="font-headline-md text-headline-md text-on-surface">{{ slot.title }}</h2>
+        </div>
+        <span class="px-sm py-1 rounded-full bg-[#e8f5e9] text-[#1b5e20] font-label-caps text-label-caps flex items-center gap-1 whitespace-nowrap">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#1b5e20] animate-pulse"></span>
+          {{ slot.available_count }} available
+        </span>
+      </div>
+      <div class="grid grid-cols-2 gap-sm">
+        <div class="flex items-center gap-xs font-body-md text-on-surface-variant">
+          <span class="material-symbols-outlined text-[18px] text-outline">location_on</span>
+          <span>{{ slot.district }} · {{ slot.district.region }}</span>
+        </div>
+        <div class="flex items-center gap-xs font-body-md text-on-surface-variant">
+          <span class="material-symbols-outlined text-[18px] text-outline">schedule</span>
+          <span>{{ slot.role_type }}{% if slot.level %} · Year {{ slot.level }}{% endif %}</span>
+        </div>
+        {% if slot.department %}
+        <div class="flex items-center gap-xs font-body-md text-on-surface-variant col-span-2">
+          <span class="material-symbols-outlined text-[18px] text-outline">school</span>
+          <span>Dept: {{ slot.department }}</span>
+        </div>
+        {% endif %}
+        <div class="flex items-center gap-xs font-body-md text-on-surface-variant col-span-2">
+          <span class="material-symbols-outlined text-[18px] text-[#1b5e20]">payments</span>
+          {% if slot.stipend_available %}
+            <span class="font-semibold text-[#1b5e20]">TZS {{ slot.stipend_amount }}/month</span>
+          {% else %}
+            <span>Unpaid placement</span>
+          {% endif %}
+        </div>
+      </div>
+      {% if slot.description %}
+        <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">{{ slot.description }}</p>
+      {% endif %}
+    </div>
+    <div class="h-px bg-surface-container-high"></div>
+    <form method="post" enctype="multipart/form-data" class="p-lg flex flex-col gap-md" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-body-md text-on-error-container">
+          {{ form.non_field_errors.0 }}
+        </div>
+      {% endif %}
+      <div class="flex flex-col gap-xs">
+        <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.application_letter.id_for_label }}">
+          {% trans "University Application Letter" %} <span class="text-error">*</span>
+        </label>
+        <div class="ipt-field-box {% if form.application_letter.errors %}is-error{% endif %}">
+          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">description</span></span>
+          {{ form.application_letter }}
+        </div>
+        <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ form.application_letter.help_text }}</p>
+        {% if form.application_letter.errors %}
+          <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.application_letter.errors.0 }}</p>
+        {% endif %}
+      </div>
+      <div class="flex items-center justify-between gap-md pt-sm">
+        <a href="{% url 'student-marketplace' %}" class="text-primary font-body-md font-medium hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span> {% trans "Back to slots" %}
+        </a>
+        <button type="submit" class="bg-primary text-on-primary font-body-lg text-body-lg font-medium py-3 px-lg rounded-xl shadow-md hover:shadow-lg hover:bg-primary-container transition-all flex items-center justify-center gap-xs" data-loading>
+          <span data-label>{% trans "Submit & Proceed to Payment" %}</span>
+          <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

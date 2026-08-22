@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Applicants" %} — {{ slot.title }}{% endblock %}
+{% block content %}
+<section class="w-full relative pt-lg pb-md mb-md">
+  <div class="flex flex-col gap-sm">
+    <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Applicants" %}</h1>
+    <div class="flex flex-wrap items-center gap-xs font-body-md text-on-surface-variant">
+      <span class="font-bold text-primary">{{ slot.title }}</span>
+      <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+      <span>{{ slot.company.name }}</span>
+      <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+      <span class="inline-flex items-center gap-1 bg-tertiary-container/10 text-tertiary-container px-2 py-0.5 rounded-full font-metadata">
+        <span class="material-symbols-outlined text-[14px]">group</span>
+        {{ slot.available_count }}/{{ slot.capacity }} spots left
+      </span>
+    </div>
+  </div>
+</section>
+<form method="get" class="w-full max-w-xs mb-md flex flex-col gap-xs">
+  <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="applicants-education-level">{% trans "Filter by Education Level (TCU)" %}</label>
+  <select id="applicants-education-level" name="education_level" class="ipt-select" onchange="this.form.submit()">
+    <option value="">{% trans "Any qualification" %}</option>
+    {% for value, label in education_levels %}
+      <option value="{{ value }}" {% if selected_education_level == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+</form>
+{% if applications %}
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+    <div class="lg:col-span-8 xl:col-span-9 flex flex-col gap-md">
+      {% for app in applications %}
+        <div class="group relative bg-surface-container-lowest rounded-xl p-md shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row gap-lg md:items-start justify-between">
+          <div class="flex gap-md w-full md:w-auto flex-1">
+            <div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center shrink-0">
+              <span class="font-headline-md text-primary font-bold">{{ app.student.user.full_name|slice:":2"|upper }}</span>
+            </div>
+            <div class="flex flex-col gap-xs flex-1">
+              <div class="flex items-center gap-sm flex-wrap">
+                <h3 class="font-headline-md text-on-surface">{{ app.student.user.full_name }}</h3>
+                <span class="font-label-caps px-2 py-1 rounded-full uppercase tracking-wider
+                  {% if app.is_accepted %}bg-[#bbf7d0]/30 text-[#166534]
+                  {% else %}bg-[#dbeafe]/40 text-[#1e40af]{% endif %}">{% if app.is_accepted %}Accepted{% else %}Paid{% endif %}</span>
+              </div>
+              <div class="flex flex-col gap-1 mt-1">
+                <div class="flex items-center gap-xs font-body-md text-on-surface-variant">
+                  <span class="material-symbols-outlined text-[16px]">school</span>
+                  <span>{{ app.student.university }}</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-x-sm gap-y-1 font-body-md text-on-surface-variant">
+                  <span class="font-medium text-on-surface">{{ app.student.course }}</span>
+                  {% if app.student.education_level %}<span class="w-1 h-1 rounded-full bg-outline-variant"></span><span>{{ app.student.get_education_level_display }}</span>{% endif %}
+                  {% if app.student.current_year %}<span class="w-1 h-1 rounded-full bg-outline-variant"></span><span>Year {{ app.student.current_year }}</span>{% endif %}
+                  {% if app.student.district %}<span class="w-1 h-1 rounded-full bg-outline-variant"></span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">location_on</span> {{ app.student.district }}</span>{% endif %}
+                </div>
+              </div>
+              {% if app.payment %}
+                <div class="mt-sm inline-flex items-center gap-xs bg-surface-container px-sm py-1.5 rounded-lg w-fit">
+                  <span class="material-symbols-outlined text-[16px] text-[#15803d]">check_circle</span>
+                  <span class="font-metadata text-on-surface">Paid TZS {{ app.payment.amount }}</span>
+                  <span class="mx-1 text-outline-variant">|</span>
+                  <span class="font-metadata text-outline font-mono">{{ app.payment.reference_id }}</span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="flex flex-col gap-sm md:w-64 shrink-0 bg-surface-container-low p-sm rounded-lg self-stretch justify-between">
+            {% if app.application_letter %}
+              <a href="{% url 'company-applicant-letter' app.id %}" class="inline-flex items-center gap-xs font-body-md text-primary hover:text-primary-fixed-variant transition-colors font-medium">
+              <span class="material-symbols-outlined text-[18px]">note</span>
+              {% trans "View Application Letter" %}
+            </a>
+            {% endif %}
+            <a href="{% url 'company-applicant-documents' app.id %}" class="inline-flex items-center gap-xs font-body-md text-secondary hover:text-primary transition-colors font-medium">
+              <span class="material-symbols-outlined text-[18px]">description</span>
+              {% trans "View Documents" %}
+            </a>
+            {% if app.is_accepted %}
+                <div class="mt-auto w-full">
+                  <div class="flex items-start gap-xs p-2 bg-[#f0fdf4] rounded-md border border-[#bbf7d0]">
+                    <span class="material-symbols-outlined text-[#166534] text-[18px] mt-0.5">check</span>
+                    <div class="flex flex-col">
+                      <span class="font-metadata font-bold text-[#166534]">Accepted</span>
+                      <span class="font-metadata text-[#15803d]">Confirmation sent</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <form method="post" action="{% url 'company-acceptance-sms' app.id %}" class="flex flex-col gap-2 pt-2 mt-auto">
+                  {% csrf_token %}
+                  <label class="font-metadata text-on-surface-variant">{% trans "Acceptance Note (Optional)" %}</label>
+                  <input type="text" name="message" placeholder="{% trans 'e.g. Report on Monday 8 AM' %}" class="w-full bg-surface-container-lowest font-body-md text-on-surface px-3 py-2 rounded-md outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-outline-variant">
+                  <button class="w-full bg-[#166534] hover:bg-[#14532d] text-white font-body-md font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-xs transition-colors mt-1 group-hover:shadow-md" type="submit">
+                    <span class="material-symbols-outlined text-[18px]">campaign</span>
+                    {% trans "Send Confirmation" %}
+                  </button>
+                  <p class="font-metadata text-on-surface-variant">One click automatically sends the student an SMS + email confirming acceptance and asking them to open their email for the acceptance letter.</p>
+                </form>
+              {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="lg:col-span-4 xl:col-span-3 flex flex-col gap-md lg:sticky lg:top-24">
+      <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm">
+        <h3 class="font-headline-md text-on-surface mb-sm">{% trans "Slot Overview" %}</h3>
+        <div class="flex flex-col gap-sm">
+          <div class="flex justify-between items-center pb-sm border-b border-surface-container-highest">
+            <span class="font-body-md text-on-surface-variant">{% trans "Total Spots" %}</span>
+            <span class="font-headline-md text-on-surface">{{ slot.capacity }}</span>
+          </div>
+          <div class="flex justify-between items-center pb-sm border-b border-surface-container-highest">
+            <span class="font-body-md text-on-surface-variant">{% trans "Accepted" %}</span>
+            <span class="font-headline-md text-[#166534]">{{ accepted_count }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="font-body-md text-on-surface-variant">{% trans "Pending Review" %}</span>
+            <span class="font-headline-md text-[#a16207]">{{ pending_count }}</span>
+          </div>
+        </div>
+        <div class="mt-md pt-md border-t border-surface-container-highest">
+          <p class="font-metadata text-on-surface-variant mb-2">{% trans "Capacity" %}</p>
+          <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+            <div class="h-full bg-primary rounded-full" style="width: {{ fill_percent }}%"></div>
+          </div>
+          <p class="font-metadata text-right text-primary mt-1 font-medium">{{ fill_percent }}% Filled</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% include "includes/pagination.html" %}
+{% else %}
+  <div class="w-full flex flex-col items-center justify-center bg-surface-container-lowest rounded-xl p-xl shadow-sm border border-dashed border-outline-variant/50 min-h-[300px]">
+    <div class="w-16 h-16 rounded-full bg-surface-container mb-md flex items-center justify-center">
+      <span class="material-symbols-outlined text-[32px] text-outline">group_off</span>
+    </div>
+    <h3 class="font-headline-md text-on-surface mb-2">{% trans "No applicants yet" %}</h3>
+    <p class="font-body-md text-on-surface-variant text-center max-w-md">{% trans "Once students apply and complete their application fee payments, they will appear here for your review." %}</p>
+  </div>
+{% endif %}
+{% endblock %}

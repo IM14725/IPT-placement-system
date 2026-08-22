@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Verify: {{ student.user.full_name }}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-base">
+  <div class="flex items-center gap-base text-body-md text-on-surface-variant">
+    <a class="hover:text-primary transition-colors" href="{% url 'platform-verifications' %}">Queue</a>
+    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+    <span>Student Verification</span>
+  </div>
+  <div class="flex items-center justify-between">
+    <h1 class="font-display text-headline-lg text-on-surface tracking-tight">Verify: {{ student.user.full_name }}</h1>
+    <span class="px-sm py-base rounded-full bg-surface-variant text-on-surface-variant text-label-caps uppercase font-bold tracking-wider">ID: #{{ student.pk }}</span>
+  </div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg">
+  <div class="lg:col-span-8 flex flex-col gap-lg">
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
+      <div class="flex items-center justify-between pb-md">
+        <h2 class="font-headline-md text-headline-md text-on-surface">Profile Overview</h2>
+        {% if student.profile_photo %}
+          <img src="{{ student.profile_photo.url }}" alt="Profile photo" class="w-12 h-12 rounded-full object-cover shadow-sm">
+        {% else %}
+          <div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container text-headline-md font-bold shadow-sm">
+            {{ student.user.full_name|slice:":2"|upper }}
+          </div>
+        {% endif %}
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+        <div class="flex flex-col gap-base">
+          <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">Full Name</span>
+          <span class="text-body-lg text-on-surface font-medium">{{ student.user.full_name }}</span>
+        </div>
+        <div class="flex flex-col gap-base">
+          <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">Student ID</span>
+          <span class="text-body-lg text-on-surface font-medium">{{ student.student_id|default:"—" }}</span>
+        </div>
+        <div class="flex flex-col gap-base">
+          <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">Gender</span>
+          <span class="text-body-lg text-on-surface font-medium">{{ student.get_gender_display|default:"—" }}</span>
+        </div>
+        <div class="flex flex-col gap-base">
+          <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">Email</span>
+          <span class="text-body-lg text-on-surface font-medium">{{ student.user.email }}</span>
+        </div>
+        <div class="flex flex-col gap-base">
+          <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">University</span>
+          <span class="text-body-lg text-on-surface font-medium">{{ student.university }}</span>
+        </div>
+        <div class="flex flex-col gap-base">
+          <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">Course</span>
+          <span class="text-body-lg text-on-surface font-medium">{{ student.course }}</span>
+        </div>
+        <div class="flex flex-col gap-base">
+          <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">Year of Study</span>
+          <span class="text-body-lg text-on-surface font-medium">Year {{ student.current_year }}</span>
+        </div>
+        <div class="flex flex-col gap-base">
+          <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">Current GPA</span>
+          <span class="text-body-lg text-on-surface font-medium">{{ student.gpa|default:"—" }} / 4.0</span>
+        </div>
+        <div class="flex flex-col gap-base">
+          <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">Location</span>
+          <span class="text-body-lg text-on-surface font-medium">{{ student.district }}{% if student.region %}, {{ student.region }}{% endif %}</span>
+        </div>
+        <div class="flex flex-col gap-base">
+          <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">Phone</span>
+          <span class="text-body-lg text-on-surface font-medium">{{ student.user.phone|default:"—" }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md relative overflow-hidden">
+      <div class="absolute -right-8 -top-8 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+      <h2 class="font-headline-md text-headline-md text-on-surface">Verification Documents</h2>
+      {% if missing_docs %}
+        <div class="rounded-lg bg-[#fef08a]/30 border-l-2 border-[#a16207] p-sm text-body-md text-[#a16207]">
+          Missing required: {{ missing_docs|join:", " }}
+        </div>
+      {% endif %}
+      <div class="flex flex-col gap-xs">
+        {% for doc in docs %}
+          <div class="flex items-center justify-between p-sm rounded-lg bg-surface hover:bg-surface-container-low transition-colors group">
+            <div class="flex items-center gap-md">
+              <div class="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">{% if doc.doc_type == 'STUDENT_ID' %}badge{% else %}description{% endif %}</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-body-md font-medium text-on-surface">{{ doc.get_doc_type_display }}</span>
+                <span class="text-metadata text-on-surface-variant">Uploaded {{ doc.uploaded_at|timesince }} ago · {{ doc.size_bytes|filesizeformat }} {{ doc.mime_type|cut:"application/" }}</span>
+              </div>
+            </div>
+            <a href="{% url 'document-view' doc.pk %}" target="_blank" class="flex items-center gap-xs text-primary text-body-md font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+              <span class="material-symbols-outlined text-[20px]">visibility</span>
+              View
+            </a>
+          </div>
+        {% empty %}
+          <p class="text-body-md text-on-surface-variant">No documents uploaded yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="lg:col-span-4 flex flex-col gap-lg">
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
+      <h3 class="font-headline-md text-headline-md text-on-surface">Account Status</h3>
+      <div class="flex items-center gap-sm">
+        <div class="w-3 h-3 rounded-full bg-[#f59e0b] animate-pulse"></div>
+        <span class="text-body-lg font-medium text-on-surface">{{ student.get_verification_status_display }}</span>
+      </div>
+      <div class="h-1 w-full bg-surface-variant rounded-full overflow-hidden mt-sm">
+        <div class="h-full w-1/2 bg-[#f59e0b] rounded-full"></div>
+      </div>
+      <p class="text-metadata text-on-surface-variant mt-xs">Awaiting admin review of submitted documents.</p>
+      {% if student.rejection_reason %}
+        <p class="text-metadata text-error mt-xs">Last rejection: {{ student.rejection_reason }}</p>
+      {% endif %}
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
+      <h3 class="font-headline-md text-headline-md text-on-surface">Review Decision</h3>
+      <form method="post" class="flex flex-col gap-md">
+        {% csrf_token %}
+        <div class="flex flex-col gap-base">
+          <label class="text-body-md font-medium text-on-surface" for="review-notes">Internal Notes / Rejection Reason</label>
+          <textarea class="w-full bg-surface rounded-lg p-sm text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary transition-all resize-none shadow-inner" id="review-notes" name="reason" placeholder="Enter notes here..." rows="4"></textarea>
+          <p class="text-metadata text-on-surface-variant flex items-start gap-xs">
+            <span class="material-symbols-outlined text-[16px]">info</span>
+            If rejected, these notes will be sent to the student along with a request to re-upload documents.
+          </p>
+        </div>
+        <div class="flex flex-col gap-sm mt-sm">
+          <button class="w-full py-3 px-md bg-primary hover:bg-primary/90 text-on-primary rounded-lg text-body-md font-medium transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-xs" name="decision" value="approve" type="submit">
+            <span class="material-symbols-outlined text-[20px]">check_circle</span>
+            Approve Profile
+          </button>
+          <button class="w-full py-3 px-md bg-error/10 hover:bg-error/20 text-error rounded-lg text-body-md font-medium transition-all flex items-center justify-center gap-xs" name="decision" value="reject" type="submit">
+            <span class="material-symbols-outlined text-[20px]">cancel</span>
+            Reject & Request Re-upload
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

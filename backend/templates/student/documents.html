@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Document Vault" %}{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-md w-full">
+  <div class="lg:col-span-5 flex flex-col gap-md">
+    <div class="bg-surface-container rounded-xl p-md shadow-sm flex flex-col gap-sm">
+      <div>
+        <h1 class="text-headline-lg font-headline-lg text-on-surface">{% trans "Document Vault" %}</h1>
+        <p class="text-body-md text-body-md text-on-surface-variant mt-xs">
+          {% trans "Securely store and manage required documents. Ensure files are under 2MB and in PDF, PNG, JPG, DOC, or DOCX format." %}
+        </p>
+      </div>
+      <form method="post" enctype="multipart/form-data" class="flex flex-col gap-sm mt-sm">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="rounded-lg bg-error-container/30 border-l-2 border-error p-sm text-body-md text-on-error-container">{{ form.non_field_errors }}</div>
+        {% endif %}
+        {% for field in form %}
+          <div class="flex flex-col gap-xs">
+            <label class="text-body-md font-body-md font-bold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">{% if field.name == 'doc_type' %}description{% else %}upload_file{% endif %}</span></span>
+              {% if field.name == 'file' %}<div class="ipt-file-wrap">{{ field }}</div>{% else %}{{ field }}{% endif %}
+            </div>
+            {% if field.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ field.errors.0 }}</p>{% endif %}
+            {% if field.help_text %}<p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ field.help_text }}</p>{% endif %}
+          </div>
+        {% endfor %}
+        <button class="bg-primary text-on-primary text-body-md font-body-md font-bold rounded-lg py-3 px-md mt-sm shadow-sm hover:shadow-md transition-shadow flex items-center justify-center gap-xs" type="submit">
+          <span class="material-symbols-outlined text-[20px]">cloud_upload</span>
+          {% trans "Upload Document" %}
+        </button>
+      </form>
+    </div>
+    <div class="bg-surface-container-low rounded-xl p-md shadow-sm relative overflow-hidden">
+      <div class="absolute -right-8 -top-8 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
+      <div class="relative z-10">
+        <h3 class="text-headline-md font-headline-md text-on-surface flex items-center gap-xs">
+          <span class="material-symbols-outlined text-primary">shield_lock</span>
+          {% trans "Data Security" %}
+        </h3>
+        <p class="text-body-md font-body-md text-on-surface-variant mt-1">{% trans "All uploaded documents are stored securely within the IPT network and reviewed by the admin." %}</p>
+      </div>
+    </div>
+  </div>
+  <div class="lg:col-span-7 flex flex-col gap-md">
+    <div class="bg-surface-container rounded-xl shadow-sm flex flex-col overflow-hidden h-full">
+      <div class="p-md bg-surface-container-high flex items-center justify-between">
+        <h2 class="text-headline-md font-headline-md text-on-surface">{% trans "Your Documents" %}</h2>
+        <span class="bg-primary-container text-on-primary-container text-metadata font-metadata px-3 py-1 rounded-full font-bold">{{ docs|length }} Files</span>
+      </div>
+      <div class="flex flex-col flex-grow">
+        {% if docs %}
+          {% for doc in docs %}
+            <div class="flex items-center justify-between p-md hover:bg-surface-container-low transition-colors group">
+              <div class="flex items-center gap-sm min-w-0">
+                <div class="w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                  <span class="material-symbols-outlined text-primary text-[24px]">description</span>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="text-body-md font-body-md font-bold text-on-surface truncate">{{ doc.get_doc_type_display }}</span>
+                  <div class="flex items-center gap-2 text-metadata font-metadata text-on-surface-variant mt-1">
+                    <span class="truncate">{{ doc.original_name }}</span>
+                    <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+                    <span>{{ doc.size_bytes|filesizeformat }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-sm flex-shrink-0 ml-sm">
+                <div class="hidden sm:flex flex-col items-end mr-sm">
+                  <span class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Uploaded" %}</span>
+                  <span class="text-body-md font-body-md text-on-surface">{{ doc.uploaded_at|date:"M j, Y" }}</span>
+                </div>
+                <a href="{% url 'document-view' doc.id %}" target="_blank" class="text-primary hover:bg-primary/10 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                  <span class="material-symbols-outlined text-[20px]">visibility</span>
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="flex flex-col items-center justify-center py-xl px-md text-center flex-grow">
+            <div class="w-24 h-24 rounded-full bg-surface-variant flex items-center justify-center mb-sm">
+              <span class="material-symbols-outlined text-[48px] text-outline-variant">folder_open</span>
+            </div>
+            <h3 class="text-headline-md font-headline-md text-on-surface">{% trans "No documents yet" %}</h3>
+            <p class="text-body-md font-body-md text-on-surface-variant mt-2 max-w-sm">
+              {% trans "You haven't uploaded any documents. Use the form on the left to start building your vault." %}
+            </p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

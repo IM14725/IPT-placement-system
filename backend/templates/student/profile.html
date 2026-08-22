@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Student Profile" %}{% endblock %}
+{% block content %}
+<div class="w-full flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Student Profile" %}</h1>
+    <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Manage your academic details and how companies see you." %}</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg w-full items-start">
+    <div class="lg:col-span-8 flex flex-col gap-lg">
+      <div class="bg-surface-container-lowest rounded-xl p-lg shadow-md flex flex-col gap-md relative overflow-hidden auth-card">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mt-16 -mr-16 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-24 h-24 bg-secondary/5 rounded-full blur-xl -mb-12 -ml-12 pointer-events-none"></div>
+        <div class="flex items-center gap-xs relative z-10">
+          <span class="material-symbols-outlined text-primary">school</span>
+          <div class="flex flex-col">
+            <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Academic Information" %}</h2>
+            <p class="font-body-md font-body-md text-on-surface-variant">Your account is active — keep your details up to date.</p>
+          </div>
+        </div>
+        <form method="post" enctype="multipart/form-data" class="flex flex-col gap-md z-10">
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="rounded-lg bg-error-container/30 border-l-2 border-error p-sm text-body-md text-on-error-container">{{ form.non_field_errors }}</div>
+          {% endif %}
+          {% with photo=form.profile_photo %}
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-md p-md bg-surface-container-low rounded-xl">
+            <div class="relative shrink-0">
+              {% if profile and profile.profile_photo %}
+                <img src="{{ profile.profile_photo.url }}" alt="Profile photo" class="w-20 h-20 rounded-full object-cover ring-2 ring-primary/30 shadow-sm">
+              {% else %}
+                <div class="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+                  <span class="material-symbols-outlined text-[32px]">person</span>
+                </div>
+              {% endif %}
+              <span class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-container-low">
+                <span class="material-symbols-outlined text-[16px]">camera_alt</span>
+              </span>
+            </div>
+            <div class="flex flex-col gap-xs flex-1 min-w-0">
+              <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ photo.id_for_label }}">{{ photo.label }}</label>
+              <div class="ipt-field-box {% if photo.errors %}is-error{% endif %}">
+                <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">person</span></span>
+                <div class="ipt-file-wrap">
+                  {{ photo }}
+                </div>
+              </div>
+              {% if photo.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ photo.errors.0 }}</p>{% endif %}
+              {% if photo.help_text %}<p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ photo.help_text }}</p>{% endif %}
+            </div>
+          </div>
+          {% endwith %}
+          {% with idcard=form.id_card_photo %}
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-md p-md bg-surface-container-low rounded-xl">
+            <div class="relative shrink-0">
+              {% if profile and profile.id_card_photo %}
+                <img src="{{ profile.id_card_photo.url }}" alt="ID card" class="w-20 h-20 rounded-xl object-cover ring-2 ring-primary/30 shadow-sm">
+              {% else %}
+                <div class="w-20 h-20 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+                  <span class="material-symbols-outlined text-[32px]">badge</span>
+                </div>
+              {% endif %}
+            </div>
+            <div class="flex flex-col gap-xs flex-1 min-w-0">
+              <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ idcard.id_for_label }}">{{ idcard.label }}</label>
+              <div class="ipt-field-box {% if idcard.errors %}is-error{% endif %}">
+                <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">badge</span></span>
+                <div class="ipt-file-wrap">
+                  {{ idcard }}
+                </div>
+              </div>
+              {% if idcard.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ idcard.errors.0 }}</p>{% endif %}
+              {% if idcard.help_text %}<p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ idcard.help_text }}</p>{% endif %}
+            </div>
+          </div>
+          {% endwith %}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+            {% for field in form %}
+              {% if field.name != 'profile_photo' and field.name != 'id_card_photo' %}
+              <div class="flex flex-col gap-xs">
+                <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
+                  <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">
+                    {% if field.name == 'student_id' %}badge
+                    {% elif field.name == 'gender' %}person_outline
+                    {% elif field.name == 'university' %}school
+                    {% elif field.name == 'course' %}menu_book
+                    {% elif field.name == 'current_year' %}tag
+                    {% elif field.name == 'education_level' %}workspace_premium
+                    {% elif field.name == 'gpa' %}star
+                    {% elif field.name == 'region' %}map
+                    {% elif field.name == 'district' %}location_on
+                    {% elif field.name == 'ward' %}my_location
+                    {% elif field.name == 'skills' %}code
+                    {% else %}edit{% endif %}
+                  </span></span>
+                  {{ field }}
+                </div>
+                {% if field.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ field.errors.0 }}</p>{% endif %}
+                {% if field.help_text %}<p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ field.help_text }}</p>{% endif %}
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="flex justify-end mt-sm">
+            <button class="bg-primary text-on-primary hover:bg-primary/90 font-body-lg text-body-lg rounded-full px-xl py-3 shadow-sm hover:shadow-md transition-all active:scale-[0.98] flex items-center gap-xs" type="submit">
+              <span class="material-symbols-outlined text-[20px]">save</span>
+              Save Profile
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="lg:col-span-4 flex flex-col gap-lg">
+      <div class="bg-surface-container-lowest rounded-xl shadow-md p-md relative overflow-hidden">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-xl pointer-events-none"></div>
+        <div class="flex items-center gap-xs mb-md relative z-10">
+          <span class="material-symbols-outlined text-outline">verified_user</span>
+          <h3 class="font-headline-md text-headline-md text-on-surface">{% trans "Account" %}</h3>
+        </div>
+        <div class="flex flex-col items-center justify-center py-md z-10 relative">
+          {% if profile and profile.profile_photo %}
+            <img src="{{ profile.profile_photo.url }}" alt="Profile photo" class="w-16 h-16 rounded-full object-cover mb-sm shadow-sm ring-4 ring-[#e8f5e9]/40">
+          {% else %}
+            <div class="w-16 h-16 rounded-full bg-[#e8f5e9] flex items-center justify-center mb-sm shadow-sm ring-4 ring-[#e8f5e9]/40">
+              <span class="material-symbols-outlined text-[#1b5e20] text-[32px]">check_circle</span>
+            </div>
+          {% endif %}
+          <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#1b5e20] bg-[#e8f5e9]">Active</span>
+        </div>
+        <div class="h-[1px] w-full bg-surface-container-high my-sm"></div>
+        <div class="flex flex-col gap-sm">
+          <div class="flex items-center gap-xs">
+            <span class="material-symbols-outlined text-[16px] text-on-surface-variant">mail</span>
+            <span class="font-body-md text-body-md text-on-surface truncate">{{ user.email }}</span>
+          </div>
+          {% if profile.student_id %}
+            <div class="flex items-center gap-xs">
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">badge</span>
+              <span class="font-body-md text-body-md text-on-surface truncate">ID: {{ profile.student_id }}</span>
+            </div>
+          {% endif %}
+          {% if profile.gender %}
+            <div class="flex items-center gap-xs">
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">person_outline</span>
+              <span class="font-body-md text-body-md text-on-surface">{{ profile.get_gender_display }}</span>
+            </div>
+          {% endif %}
+          {% if user.phone %}
+            <div class="flex items-center gap-xs">
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">call</span>
+              <span class="font-body-md text-body-md text-on-surface">{{ user.phone }}</span>
+            </div>
+          {% endif %}
+          <div class="flex items-center gap-xs">
+            <span class="material-symbols-outlined text-[16px] text-on-surface-variant">calendar_month</span>
+            <span class="font-body-md text-body-md text-on-surface">Joined {{ user.date_joined|date:"M Y" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  window.IPT = window.IPT || {};
+  window.IPT.regions = {{ regions_json|safe }};
+  window.IPT.institutions = {{ institutions_json|safe }};
+  window.IPT.profileRegion = "{{ profile.region_id|default:'' }}";
+  window.IPT.profileDistrict = "{{ profile.district_id|default:'' }}";
+  window.IPT.profileWard = "{{ profile.ward_id|default:'' }}";
+</script>
+<script src="/static/js/institution-picker.js"></script>
+<script src="/static/js/location-cascade.js"></script>
+{% endblock %}

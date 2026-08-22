@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}Directory{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-xl">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="font-display text-display text-on-surface mb-xs">Directory</h1>
+      <p class="font-body-lg text-body-lg text-on-surface-variant">Browse every student and company on the platform.</p>
+    </div>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-md">
+      <div class="flex gap-sm border-b border-outline-variant w-full lg:w-auto relative" role="tablist">
+        <a href="?tab=students{% for k, v in filters.items %}{% if v %}&{{ k }}={{ v }}{% endif %}{% endfor %}"
+           class="px-md py-sm text-body-md font-body-md {% if tab == 'students' %}text-primary border-b-2 border-primary -mb-[1px]{% else %}text-on-surface-variant hover:text-on-surface{% endif %} flex items-center gap-xs transition-colors">
+          Students
+        </a>
+        <a href="?tab=companies{% for k, v in filters.items %}{% if v and k != 'university' and k != 'course' and k != 'year' and k != 'education_level' %}&{{ k }}={{ v }}{% endif %}{% endfor %}"
+           class="px-md py-sm text-body-md font-body-md {% if tab == 'companies' %}text-primary border-b-2 border-primary -mb-[1px]{% else %}text-on-surface-variant hover:text-on-surface{% endif %} flex items-center gap-xs transition-colors">
+          Companies
+        </a>
+      </div>
+    </div>
+
+    <form method="get" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-8 gap-md items-end">
+      <input type="hidden" name="tab" value="{{ tab }}">
+      <div class="flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="id_region">Region</label>
+        <div class="ipt-field-box">
+          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">map</span></span>
+          <select id="id_region" name="region" class="ipt-select"></select>
+        </div>
+      </div>
+      <div class="flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="id_district">District</label>
+        <div class="ipt-field-box">
+          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">location_on</span></span>
+          <select id="id_district" name="district" class="ipt-select" {% if not districts %}disabled{% endif %}></select>
+        </div>
+      </div>
+      <div class="flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="id_ward">Ward</label>
+        <div class="ipt-field-box">
+          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">my_location</span></span>
+          <select id="id_ward" name="ward" class="ipt-select" {% if not wards %}disabled{% endif %}></select>
+        </div>
+      </div>
+      {% if tab == 'students' %}
+        <div class="flex flex-col gap-xs">
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="dir-university">University</label>
+          <div class="ipt-field-box">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">school</span></span>
+            <input id="dir-university" name="university" value="{{ filters.university }}" placeholder="e.g. DIT" class="ipt-select">
+          </div>
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="dir-course">Course</label>
+          <div class="ipt-field-box">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">menu_book</span></span>
+            <input id="dir-course" name="course" value="{{ filters.course }}" placeholder="e.g. Software Engineering" class="ipt-select">
+          </div>
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="dir-year">Year</label>
+          <div class="ipt-field-box">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">calendar_month</span></span>
+            <select id="dir-year" name="year" class="ipt-select">
+              <option value="">Any year</option>
+              {% for y in years %}
+                <option value="{{ y }}" {% if filters.year == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="dir-education-level">Education Level</label>
+          <div class="ipt-field-box">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">workspace_premium</span></span>
+            <select id="dir-education-level" name="education_level" class="ipt-select">
+              <option value="">Any level (TCU)</option>
+              {% for value, label in education_levels %}
+                <option value="{{ value }}" {% if filters.education_level == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      {% else %}
+        <div class="col-span-2 lg:col-span-4"></div>
+      {% endif %}
+      <div class="flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="dir-status">Status</label>
+        <div class="ipt-field-box">
+          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">verified_user</span></span>
+          <select id="dir-status" name="status" class="ipt-select">
+            <option value="">Any status</option>
+            {% for value, label in statuses %}
+              <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="flex items-center gap-sm">
+        <button class="bg-primary text-on-primary font-body-md font-body-md px-md py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-xs" type="submit">
+          <span class="material-symbols-outlined text-[18px]">filter_alt</span>
+          Filter
+        </button>
+        <a href="?tab={{ tab }}"
+           class="h-10 flex items-center gap-xs px-md py-2 rounded-lg border border-outline-variant text-on-surface-variant font-body-md font-body-md hover:bg-surface hover:text-on-surface hover:border-outline transition-colors"
+           title="Clear all filters">
+          <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+          Clear
+        </a>
+      </div>
+    </form>
+
+    <div class="w-full overflow-x-auto">
+      <table class="w-full text-left min-w-[820px]">
+        <thead>
+          <tr class="text-metadata font-label-caps text-on-surface-variant border-b border-surface-variant">
+            {% if tab == 'students' %}
+              <th class="py-sm px-sm font-medium w-1/4">Student</th>
+              <th class="py-sm px-sm font-medium">University / Course</th>
+              <th class="py-sm px-sm font-medium">Location</th>
+              <th class="py-sm px-sm font-medium">Year</th>
+              <th class="py-sm px-sm font-medium">Status</th>
+            {% else %}
+              <th class="py-sm px-sm font-medium w-1/4">Company</th>
+              <th class="py-sm px-sm font-medium">Industry</th>
+              <th class="py-sm px-sm font-medium">Location</th>
+              <th class="py-sm px-sm font-medium">Status</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr class="border-b border-surface-variant hover:bg-surface/50 transition-colors">
+              {% if tab == 'students' %}
+                <td class="py-sm px-sm">
+                  <div class="flex items-center gap-sm">
+                    {% if row.profile_photo %}
+                      <img src="{{ row.profile_photo.url }}" alt="" class="w-10 h-10 rounded-full object-cover ring-1 ring-outline-variant shrink-0">
+                    {% else %}
+                      <div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-outline">person</span>
+                      </div>
+                    {% endif %}
+                    <div class="min-w-0">
+                      <p class="text-body-md font-headline-md text-on-surface truncate">{{ row.user.full_name }}</p>
+                      <p class="text-metadata font-metadata text-on-surface-variant truncate">{{ row.user.email }}{% if row.student_id %} · {{ row.student_id }}{% endif %}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-sm px-sm">
+                  <div class="min-w-0">
+                    <p class="text-body-md font-body-md text-on-surface truncate">{{ row.university }}</p>
+                    <p class="text-metadata font-metadata text-on-surface-variant truncate">{{ row.course }}</p>
+                  </div>
+                </td>
+                <td class="py-sm px-sm text-body-md font-body-md text-on-surface">{{ row.region.name|default:"—" }}{% if row.district %} · {{ row.district.name }}{% endif %}{% if row.ward %} · {{ row.ward.name }}{% endif %}</td>
+                <td class="py-sm px-sm text-body-md font-body-md text-on-surface">{{ row.current_year }}{% if row.education_level %} · {{ row.get_education_level_display }}{% endif %}</td>
+              {% else %}
+                <td class="py-sm px-sm">
+                  <div class="flex items-center gap-sm">
+                    <div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center shrink-0">
+                      <span class="material-symbols-outlined text-outline">apartment</span>
+                    </div>
+                    <div class="min-w-0">
+                      <p class="text-body-md font-headline-md text-on-surface truncate">{{ row.name }}</p>
+                      <p class="text-metadata font-metadata text-on-surface-variant truncate">{{ row.user.email }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-sm px-sm text-body-md font-body-md text-on-surface">{{ row.industry }}</td>
+                <td class="py-sm px-sm text-body-md font-body-md text-on-surface">{{ row.region.name|default:"—" }}{% if row.district %} · {{ row.district.name }}{% endif %}{% if row.ward %} · {{ row.ward.name }}{% endif %}</td>
+              {% endif %}
+              <td class="py-sm px-sm">
+                {% if row.is_approved or row.verification_status == 'APPROVED' %}
+                  <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#e8f5e9] text-[#1b5e20] text-label-caps font-label-caps uppercase">
+                    <span class="material-symbols-outlined text-[14px]">verified</span>
+                    Verified
+                  </span>
+                {% elif row.verification_status == 'REJECTED' %}
+                  <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-error-container text-on-error text-label-caps font-label-caps uppercase">
+                    <span class="material-symbols-outlined text-[14px]">cancel</span>
+                    Rejected
+                  </span>
+                {% else %}
+                  <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#fff4e5] text-[#a16207] text-label-caps font-label-caps uppercase">
+                    <span class="material-symbols-outlined text-[14px]">pending</span>
+                    Pending
+                  </span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="py-xl">
+                <div class="flex flex-col items-center justify-center text-center">
+                  <span class="material-symbols-outlined text-[48px] text-outline-variant mb-sm">group_off</span>
+                  <p class="font-body-md text-on-surface-variant">No records match your filters.</p>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "includes/pagination.html" %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  window.IPT = window.IPT || {};
+  window.IPT.cascadeMode = "filter";
+  window.IPT.regions = {{ regions_json|safe }};
+  window.IPT.institutions = {{ institutions_json|safe }};
+  window.IPT.profileRegion = "{{ filters.region|default:'' }}";
+  window.IPT.profileDistrict = "{{ filters.district|default:'' }}";
+  window.IPT.profileWard = "{{ filters.ward|default:'' }}";
+</script>
+<script src="/static/js/institution-picker.js"></script>
+<script src="/static/js/location-cascade.js"></script>
+{% endblock %}

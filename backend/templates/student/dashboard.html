@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Student Dashboard" %}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
+    <div class="flex flex-col gap-xs">
+      <h1 class="font-display text-display text-on-surface">{% trans "Student Dashboard" %}</h1>
+      <p class="font-body-lg font-body-lg text-on-surface-variant">{{ user.full_name|default:user.email }}</p>
+    </div>
+    <a href="{% url 'student-marketplace' %}" class="bg-primary text-on-primary px-lg py-sm rounded-full text-body-md font-body-md font-bold shadow-md hover:shadow-lg transition-shadow flex items-center gap-xs">
+      <span class="material-symbols-outlined">search</span>
+      {% trans "Browse Slots" %}
+    </a>
+  </div>
+
+  {% if not profile %}
+    <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-md text-body-md">
+      <div class="flex items-start gap-sm">
+        <span class="material-symbols-outlined text-tertiary">assignment_ind</span>
+        <div>
+          <p class="font-headline-md text-headline-md text-on-surface">{% trans "Complete your profile to start applying" %}</p>
+          <p class="text-on-surface-variant mt-1">{% trans "Upload your Student ID and Results Matrix - the platform admin will verify your account." %}</p>
+        </div>
+      </div>
+      <a href="{% url 'student-profile' %}" class="shrink-0 bg-primary text-on-primary px-md py-sm rounded-lg font-semibold hover:bg-primary-container transition-colors">{% trans "Complete Profile" %}</a>
+    </div>
+  {% else %}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+      <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-surface-container rounded-full blur-xl group-hover:bg-primary-container/20 transition-colors"></div>
+        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-xs relative z-10">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">school</span>
+        </div>
+        <p class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">{% trans "University" %}</p>
+        <p class="font-headline-md font-headline-md text-on-surface truncate">{{ profile.university }}</p>
+      </div>
+      <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-surface-container rounded-full blur-xl group-hover:bg-secondary-container/20 transition-colors"></div>
+        <div class="w-12 h-12 rounded-full bg-secondary-container/10 flex items-center justify-center mb-xs relative z-10">
+          <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+        </div>
+        <p class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Course" %}</p>
+        <p class="font-headline-md font-headline-md text-on-surface truncate">{{ profile.course }}</p>
+      </div>
+      <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-surface-container rounded-full blur-xl group-hover:bg-tertiary-container/20 transition-colors"></div>
+        <div class="w-12 h-12 rounded-full bg-tertiary-container/10 flex items-center justify-center mb-xs relative z-10">
+          <span class="material-symbols-outlined text-tertiary-container" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+        </div>
+        <p class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Year / GPA" %}</p>
+        <p class="font-headline-md font-headline-md text-on-surface">Year {{ profile.current_year }}{% if profile.gpa %} · {{ profile.gpa }}{% endif %}</p>
+      </div>
+      <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-surface-container rounded-full blur-xl group-hover:bg-primary-container/20 transition-colors"></div>
+        <div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-xs relative z-10">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+        </div>
+        <p class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Account" %}</p>
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-metadata font-metadata bg-[#e8f5e9] text-[#1b5e20]">{% trans "Active" %}</span>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="flex flex-col gap-md">
+    <h2 class="font-headline-lg text-headline-lg text-on-surface">{% trans "Recent Applications" %}</h2>
+    {% if applications %}
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left min-w-[640px]">
+            <thead>
+              <tr class="text-metadata font-label-caps text-on-surface-variant uppercase border-b border-surface-variant">
+                <th class="py-sm px-md font-medium">#</th>
+                <th class="py-sm px-md font-medium">{% trans "Slot" %}</th>
+                <th class="py-sm px-md font-medium">{% trans "Company" %}</th>
+                <th class="py-sm px-md font-medium">{% trans "Status" %}</th>
+                <th class="py-sm px-md font-medium text-right">{% trans "Payment" %}</th>
+              </tr>
+            </thead>
+            <tbody class="font-body-md font-body-md text-on-surface">
+              {% for app in applications %}
+                <tr class="border-b border-surface-variant hover:bg-surface-container-low/50 transition-colors">
+                  <td class="py-sm px-md text-on-surface-variant">#{{ app.id }}</td>
+                  <td class="py-sm px-md font-medium">{{ app.slot.title }}</td>
+                  <td class="py-sm px-md">{{ app.slot.company.name }}</td>
+                  <td class="py-sm px-md">
+                    {% if app.status == 'PAID' %}<span class="px-2 py-0.5 rounded-full text-metadata font-metadata bg-[#e8f5e9] text-[#1b5e20]">{% trans "Paid" %}</span>
+                    {% elif app.status == 'UNPAID' %}<span class="px-2 py-0.5 rounded-full text-metadata font-metadata bg-error-container text-on-error-container">{% trans "Unpaid" %}</span>
+                    {% else %}<span class="px-2 py-0.5 rounded-full text-metadata font-metadata bg-[#fef08a]/40 text-[#a16207]">{% trans "Pending" %}</span>{% endif %}
+                  </td>
+                  <td class="py-sm px-md text-right">
+                    {% if app.payment %}
+                      {% if app.payment.is_paid %}<span class="text-[#1b5e20] font-medium">TZS {{ app.payment.amount }}</span>
+                      {% else %}<a href="{% url 'student-payment' app.payment.id %}" class="text-primary font-semibold hover:underline">{% trans "Pay Now" %}</a>{% endif %}
+                    {% else %}<span class="text-on-surface-variant">-</span>{% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <p class="text-body-md text-body-md text-on-surface-variant">{% trans "You have not applied to any slots yet." %}</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

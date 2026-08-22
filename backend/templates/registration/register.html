@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block title %}Create Account{% endblock %}
+{% block content %}
+<div class="w-full max-w-[1080px] mx-auto my-md auth-card bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden flex flex-col lg:flex-row min-h-[640px]">
+  <!-- Brand panel -->
+  <div class="relative hidden lg:flex lg:w-[44%] auth-card-panel bg-secondary text-on-secondary flex-col justify-between p-xl overflow-hidden">
+    <div class="absolute -right-16 -bottom-16 w-72 h-72 bg-secondary-fixed rounded-full opacity-20 pointer-events-none"></div>
+    <div class="absolute -left-10 top-1/3 w-40 h-40 bg-primary-container rounded-full opacity-20 blur-2xl pointer-events-none"></div>
+    <div class="relative z-10 flex items-center gap-xs font-headline-lg font-headline-md tracking-tight">
+      <span class="material-symbols-outlined text-[28px]">domain</span>
+      IPT Marketplace
+    </div>
+    <div class="relative z-10 flex flex-col gap-md">
+      <h2 class="font-display text-display leading-tight tracking-tight">
+        Join the marketplace for <span class="text-secondary-fixed">real-world training.</span>
+      </h2>
+      <div class="flex flex-col gap-sm">
+        <div class="flex items-center gap-sm text-on-secondary/90">
+          <span class="w-9 h-9 rounded-lg bg-secondary-fixed/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">school</span>
+          </span>
+          <span class="font-body-md text-body-md">{% trans "Find IPT slots that match your field" %}</span>
+        </div>
+        <div class="flex items-center gap-sm text-on-secondary/90">
+          <span class="w-9 h-9 rounded-lg bg-secondary-fixed/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">business_center</span>
+          </span>
+          <span class="font-body-md text-body-md">{% trans "Post openings and manage applicants" %}</span>
+        </div>
+        <div class="flex items-center gap-sm text-on-secondary/90">
+          <span class="w-9 h-9 rounded-lg bg-secondary-fixed/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">verified_user</span>
+          </span>
+          <span class="font-body-md text-body-md">{% trans "Strict verification keeps it trustworthy" %}</span>
+        </div>
+      </div>
+    </div>
+    <span class="relative z-10 font-metadata text-metadata text-on-secondary/60">© 2024 IPT Marketplace</span>
+  </div>
+
+  <!-- Form panel -->
+  <div class="relative flex-1 flex items-center justify-center p-lg lg:p-xl">
+    <div class="w-full max-w-md flex flex-col gap-lg">
+      <div class="flex flex-col items-center text-center gap-xs lg:hidden">
+        <div class="w-16 h-16 rounded-full bg-secondary-container/20 flex items-center justify-center mb-xs">
+          <span class="material-symbols-outlined text-secondary text-[32px]">person_add</span>
+        </div>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface">{% trans "Create your account" %}</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Join the marketplace as a student or company." %}</p>
+      </div>
+
+      <div class="hidden lg:flex flex-col gap-xs">
+        <span class="font-label-caps text-label-caps text-secondary uppercase tracking-widest">{% trans "Register" %}</span>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface">{% trans "Create your account" %}</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Join the marketplace as a student or company." %}</p>
+      </div>
+
+       <form method="post" class="flex flex-col gap-md" novalidate data-loading-form>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-body-md text-on-error-container flex items-start gap-xs">
+            <span class="material-symbols-outlined text-[18px] mt-px">error</span>
+            <span>{{ form.non_field_errors.0 }}</span>
+          </div>
+        {% endif %}
+
+        <!-- Role selector cards -->
+        <div class="flex flex-col gap-xs">
+          <span class="font-body-md text-body-md font-semibold text-on-surface">{% trans "I am a..." %}</span>
+          <div class="grid grid-cols-2 gap-sm" id="role-cards">
+            {% for radio in form.role %}
+              <label class="relative cursor-pointer">
+                {{ radio.tag }}
+                <span class="flex flex-col items-center gap-xs p-md rounded-xl border-2 border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:border-primary/50 transition-all peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:text-primary">
+                  <span class="material-symbols-outlined text-[28px]">{% if radio.choice_label == 'Student' %}school{% else %}business_center{% endif %}</span>
+                  <span class="font-body-md text-body-md font-semibold">{{ radio.choice_label }}</span>
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+          {% if form.role.errors %}<p class="font-metadata text-metadata text-error">{{ form.role.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="flex flex-col gap-xs">
+          <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.email.id_for_label }}">{% trans "Email address" %}</label>
+          <div class="ipt-field-box {% if form.email.errors %}is-error{% endif %}">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">mail</span></span>
+            {{ form.email }}
+          </div>
+          <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "We'll send your login and receipts here." %}</p>
+          {% if form.email.errors %}
+            <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.email.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-md" data-student-name>
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.first_name.id_for_label }}">{% trans "First name" %}</label>
+            <div class="ipt-field-box {% if form.first_name.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">badge</span></span>
+              {{ form.first_name }}
+            </div>
+            {% if form.first_name.errors %}
+              <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.first_name.errors.0 }}</p>
+            {% endif %}
+          </div>
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.last_name.id_for_label }}">{% trans "Last name" %}</label>
+            <div class="ipt-field-box {% if form.last_name.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">badge</span></span>
+              {{ form.last_name }}
+            </div>
+            {% if form.last_name.errors %}
+              <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.last_name.errors.0 }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-xs" data-company-name style="display:none">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.company_name.id_for_label }}">{% trans "Company name" %}</label>
+          <div class="ipt-field-box {% if form.company_name.errors %}is-error{% endif %}">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">apartment</span></span>
+            {{ form.company_name }}
+          </div>
+          <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Use the registered trading name of your company." %}</p>
+          {% if form.company_name.errors %}
+            <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.company_name.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="flex flex-col gap-xs">
+          <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.phone.id_for_label }}">{% trans "Phone number" %} <span class="text-on-surface-variant font-normal" data-phone-suffix></span></label>
+          <div class="ipt-field-box {% if form.phone.errors %}is-error{% endif %}">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">call</span></span>
+            {{ form.phone }}
+          </div>
+          <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Optional - use 2556 or 2557 followed by 8 digits, e.g. 255712345678." %}</p>
+          {% if form.phone.errors %}
+            <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.phone.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="flex flex-col gap-xs">
+          <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.password1.id_for_label }}">{% trans "Password" %}</label>
+          <div class="ipt-field-box {% if form.password1.errors %}is-error{% endif %}">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span>
+            {{ form.password1 }}
+            <button type="button" class="ipt-field-action" onclick="togglePassword(this, '{{ form.password1.id_for_label }}')" aria-label="Show password">
+              <span class="material-symbols-outlined text-[20px]" data-icon="eye">visibility</span>
+            </button>
+          </div>
+          <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Use at least 8 characters with letters and numbers." %}</p>
+          {% if form.password1.errors %}
+            <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.password1.errors.0 }}</p>
+          {% endif %}
+          <div class="flex items-center gap-sm mt-xs" id="pw-meter" style="display:none">
+            <div class="flex-1 h-1.5 rounded-full bg-surface-variant overflow-hidden">
+              <div id="pw-meter-bar" class="h-full rounded-full transition-all duration-300" style="width:0%"></div>
+            </div>
+            <span id="pw-meter-label" class="font-metadata text-metadata text-on-surface-variant w-24 text-right"></span>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-xs">
+          <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.password2.id_for_label }}">Confirm password</label>
+          <div class="ipt-field-box {% if form.password2.errors %}is-error{% endif %}">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span>
+            {{ form.password2 }}
+            <button type="button" class="ipt-field-action" onclick="togglePassword(this, '{{ form.password2.id_for_label }}')" aria-label="Show password">
+              <span class="material-symbols-outlined text-[20px]" data-icon="eye">visibility</span>
+            </button>
+          </div>
+          {% if form.password2.errors %}
+            <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.password2.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <button class="w-full bg-secondary text-on-secondary font-body-lg text-body-lg font-medium py-3 rounded-lg shadow-md hover:shadow-lg hover:bg-secondary-container transition-all flex items-center justify-center gap-xs disabled:opacity-60 disabled:cursor-not-allowed" type="submit" data-loading>
+          <span data-label>{% trans "Create Account" %}</span>
+          <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+        </button>
+      </form>
+
+      <div class="flex items-center justify-center gap-2 text-on-surface-variant/70">
+        <span class="font-metadata text-metadata">{% trans "Already registered?" %}</span>
+        <a class="font-metadata text-metadata text-primary font-semibold hover:underline" href="{% url 'login' %}">{% trans "Login" %}</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  function togglePassword(btn, id) {
+    const input = document.getElementById(id);
+    const icon = btn.querySelector('[data-icon]');
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    icon.textContent = show ? "visibility_off" : "visibility";
+  }
+  const studentNameEl = document.querySelector('[data-student-name]');
+  const companyNameEl = document.querySelector('[data-company-name]');
+  const phoneSuffix = document.querySelector('[data-phone-suffix]');
+  function syncNameFields() {
+    const company = document.querySelector('input[name="role"]:checked')?.value === 'COMPANY';
+    studentNameEl.style.display = company ? 'none' : '';
+    companyNameEl.style.display = company ? '' : 'none';
+    phoneSuffix.textContent = company ? '(company line)' : '';
+  }
+  document.querySelectorAll('input[name="role"]').forEach(r => r.addEventListener('change', syncNameFields));
+  syncNameFields();
+  const pwInput = document.getElementById('{{ form.password1.id_for_label }}');
+  const meter = document.getElementById('pw-meter');
+  const bar = document.getElementById('pw-meter-bar');
+  const label = document.getElementById('pw-meter-label');
+  function ratePassword() {
+    const v = pwInput.value;
+    if (!v) { meter.style.display = 'none'; return; }
+    meter.style.display = 'flex';
+    let score = 0;
+    if (v.length >= 8) score++;
+    if (v.length >= 12) score++;
+    if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+    if (/\d/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    const levels = [
+      { pct: 20, color: '#ba1a1a', text: 'Weak' },
+      { pct: 40, color: '#ba1a1a', text: 'Weak' },
+      { pct: 60, color: '#f9a825', text: 'Fair' },
+      { pct: 80, color: '#2e7d32', text: 'Good' },
+      { pct: 100, color: '#2e7d32', text: 'Strong' }
+    ];
+    const lvl = levels[Math.min(score, 4)];
+    bar.style.width = lvl.pct + '%';
+    bar.style.backgroundColor = lvl.color;
+    label.textContent = lvl.text;
+    label.style.color = lvl.color;
+  }
+  pwInput.addEventListener('input', ratePassword);
+</script>
+{% endblock %}

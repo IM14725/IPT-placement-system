@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Audit Logs{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-md relative">
+    <div class="flex flex-col gap-xs z-10">
+      <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">System Administration</span>
+      <h1 class="font-display text-display text-on-surface">Audit Logs</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-2">
+        A comprehensive, immutable record of all system activities, user interactions, and configuration changes across the IPT Marketplace platform.
+      </p>
+    </div>
+    <div class="absolute -top-xl -right-xl w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-0"></div>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm flex flex-col w-full overflow-hidden relative">
+    <form class="p-md bg-surface-container-low flex flex-col md:flex-row gap-md items-center justify-between border-b border-surface-container-highest" method="get">
+      <div class="flex-1 w-full max-w-md relative">
+        <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+        <input name="q" class="w-full pl-xl pr-sm py-2 bg-surface-container-lowest focus:bg-surface-container-lowest border-2 border-transparent focus:border-primary rounded-lg transition-all font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 outline-none" placeholder="Search by User, Action, or IP Address..." type="text" value="{{ q }}">
+      </div>
+      <div class="flex flex-wrap gap-sm items-center w-full md:w-auto">
+        <div class="flex items-center gap-xs bg-surface-container-lowest px-sm py-1.5 rounded-lg shadow-sm">
+          <span class="material-symbols-outlined text-[18px] text-on-surface-variant">filter_list</span>
+          <select name="module" class="bg-transparent border-none outline-none font-metadata text-metadata text-on-surface pr-xs cursor-pointer" onchange="this.form.submit()">
+            <option value="">All Modules</option>
+            {% for m in modules %}
+              <option value="{{ m }}" {% if module == m %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="flex items-center gap-xs px-md py-2 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-full transition-all shadow-sm font-metadata text-metadata">
+          <span class="material-symbols-outlined text-[18px]">filter_alt</span>
+          Apply Filters
+        </button>
+      </div>
+    </form>
+
+    <div class="overflow-x-auto w-full">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-surface-container-lowest font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">
+            <th class="px-md py-sm font-medium w-[180px]">Timestamp</th>
+            <th class="px-md py-sm font-medium">Actor</th>
+            <th class="px-md py-sm font-medium">Action Event</th>
+            <th class="px-md py-sm font-medium">Module</th>
+            <th class="px-md py-sm font-medium hidden lg:table-cell">IP Address</th>
+          </tr>
+        </thead>
+        <tbody class="font-body-md text-body-md text-on-surface">
+          {% for log in logs %}
+            <tr class="hover:bg-surface-container-low/50 transition-colors group border-t border-surface-container">
+              <td class="px-md py-sm">
+                <div class="flex flex-col gap-base">
+                  <span class="text-on-surface font-medium">{{ log.created_at|date:"M j, Y" }}</span>
+                  <span class="text-on-surface-variant text-metadata font-metadata">{{ log.created_at|date:"H:i:s" }}</span>
+                </div>
+              </td>
+              <td class="px-md py-sm">
+                <div class="flex items-center gap-sm">
+                  <div class="w-8 h-8 rounded-full {% if log.is_system %}bg-surface-container-high{% else %}bg-secondary-container{% endif %} flex items-center justify-center shrink-0">
+                    {% if log.is_system %}
+                      <span class="material-symbols-outlined text-on-surface text-[16px]">robot_2</span>
+                    {% else %}
+                      <span class="font-metadata text-metadata {% if log.is_system %}text-on-surface{% else %}text-on-secondary-container{% endif %} font-bold">{{ log.actor_label|slice:":2"|upper }}</span>
+                    {% endif %}
+                  </div>
+                  <div class="flex flex-col gap-base">
+                    <span class="font-medium text-on-surface">{{ log.actor_label }}</span>
+                    <span class="text-metadata font-metadata {% if log.is_system %}text-on-surface-variant{% else %}text-primary{% endif %}">{{ log.actor.role|default:"System" }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="px-md py-sm">
+                <div class="flex items-center gap-sm">
+                  <span class="font-medium">{{ log.action }}</span>
+                </div>
+                {% if log.description %}
+                  <div class="text-metadata font-metadata text-on-surface-variant mt-1">{{ log.description|truncatechars:70 }}</div>
+                {% endif %}
+              </td>
+              <td class="px-md py-sm">
+                <span class="px-2 py-1 bg-surface-container rounded-md text-metadata font-metadata text-on-surface-variant">{{ log.module }}</span>
+              </td>
+              <td class="px-md py-sm hidden lg:table-cell">
+                <span class="font-mono text-on-surface">{{ log.ip_address|default:"Internal" }}</span>
+              </td>
+            </tr>
+          {% empty %}
+            <tr class="border-t border-surface-container">
+              <td colspan="5" class="px-md py-xl text-center">
+                <span class="material-symbols-outlined text-[40px] text-outline-variant">history</span>
+                <p class="font-body-md text-on-surface-variant mt-sm">No audit records match your filters.</p>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="p-md border-t border-surface-container-highest flex items-center justify-between">
+      <span class="font-metadata text-metadata text-on-surface-variant">Showing {{ logs|length }} log(s)</span>
+    </div>
+    {% include "includes/pagination.html" %}
+  </div>
+</div>
+{% endblock %}

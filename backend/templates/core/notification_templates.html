@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}Notification Templates{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex items-end justify-between w-full">
+    <div class="flex flex-col gap-xs">
+      <h1 class="font-display text-display text-on-surface">Notification Templates</h1>
+      <p class="font-body-lg text-body-lg text-on-surface-variant">Manage the content for automated system messages across Email and SMS channels.</p>
+    </div>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-lg min-h-[600px]">
+    <div class="lg:w-1/3 flex flex-col bg-surface-container-lowest shadow-sm rounded-xl overflow-hidden flex-shrink-0">
+      <div class="p-md bg-surface-container-low flex items-center justify-between">
+        <div class="relative w-full">
+          <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+          <input id="template-search" class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md py-sm pl-xl pr-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/50" placeholder="Search templates..." type="text" oninput="filterTemplates(this.value)">
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto" id="template-list">
+        {% for t in templates %}
+          <a class="w-full text-left p-md hover:bg-surface-container-low cursor-pointer transition-colors border-l-4 {% if selected and selected.pk == t.pk %}border-primary bg-primary/5{% else %}border-transparent{% endif %} relative overflow-hidden group block" href="{% url 'platform-templates' %}?key={{ t.key }}">
+            <div class="flex items-center justify-between mb-xs">
+              <span class="font-headline-md text-headline-md text-on-surface">{{ t.name }}</span>
+              <div class="{% if t.channel == 'EMAIL' %}bg-secondary/10{% else %}bg-tertiary/10{% endif %} px-sm py-[2px] rounded-full flex items-center gap-xs">
+                <span class="material-symbols-outlined text-[14px] {% if t.channel == 'EMAIL' %}text-secondary{% else %}text-tertiary{% endif %}">{% if t.channel == 'EMAIL' %}mail{% else %}sms{% endif %}</span>
+                <span class="font-label-caps text-label-caps {% if t.channel == 'EMAIL' %}text-secondary{% else %}text-tertiary{% endif %} uppercase">{{ t.get_channel_display }}</span>
+              </div>
+            </div>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-sm">{{ t.description }}</p>
+            <div class="flex items-center justify-between text-on-surface-variant/70">
+              <span class="font-metadata text-metadata">Updated: {{ t.updated_at|date:"M j, Y" }}</span>
+              <span class="font-metadata text-metadata text-primary group-hover:underline">Edit</span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="flex-1 bg-surface-container-lowest shadow-sm rounded-xl overflow-hidden flex flex-col relative">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+      {% if selected %}
+        <form method="post" class="flex flex-col flex-1">
+          {% csrf_token %}
+          <input type="hidden" name="key" value="{{ selected.key }}">
+          <div class="p-md bg-surface-container flex items-center justify-between relative z-10">
+            <div>
+              <h2 class="font-headline-lg text-headline-lg text-on-surface mb-xs">{{ selected.name }}</h2>
+              <div class="flex items-center gap-md">
+                <span class="font-metadata text-metadata text-on-surface-variant">Trigger: <span class="font-bold text-on-surface">{{ selected.trigger_label|default:"—" }}</span></span>
+                <span class="font-metadata text-metadata text-on-surface-variant">•</span>
+                <span class="font-metadata text-metadata text-on-surface-variant">Channel: <span class="font-bold text-on-surface">{{ selected.get_channel_display }}</span></span>
+              </div>
+            </div>
+            <div class="flex gap-sm">
+              <a href="{% url 'platform-templates' %}" class="bg-surface-container-lowest text-primary hover:bg-primary/5 px-md py-sm rounded-lg font-body-md text-body-md font-medium transition-all shadow-sm">Discard</a>
+              <button class="bg-primary text-on-primary hover:bg-primary/90 px-md py-sm rounded-lg font-body-md text-body-md font-medium transition-all shadow-sm flex items-center gap-xs" type="submit">
+                <span class="material-symbols-outlined text-[18px]">save</span>
+                Save Changes
+              </button>
+            </div>
+          </div>
+          <div class="flex-1 overflow-y-auto p-lg flex flex-col xl:flex-row gap-lg relative z-10">
+            <div class="xl:w-1/2 flex flex-col gap-md">
+              <div class="flex items-center gap-md">
+                <div class="flex flex-col gap-xs flex-1">
+                  <label class="font-headline-md text-headline-md text-on-surface" for="id_channel">Channel</label>
+                  <select id="id_channel" name="channel" class="w-full bg-surface text-on-surface font-body-md text-body-md p-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-surface-variant">
+                    <option value="EMAIL" {% if selected.channel == 'EMAIL' %}selected{% endif %}>Email</option>
+                    <option value="SMS" {% if selected.channel == 'SMS' %}selected{% endif %}>SMS</option>
+                  </select>
+                </div>
+                <div class="flex flex-col gap-xs flex-1">
+                  <label class="font-headline-md text-headline-md text-on-surface" for="id_trigger">Trigger Label</label>
+                  <input id="id_trigger" name="trigger_label" class="w-full bg-surface text-on-surface font-body-md text-body-md p-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-surface-variant" type="text" value="{{ selected.trigger_label }}">
+                </div>
+              </div>
+              <div class="flex flex-col gap-xs">
+                <label class="font-headline-md text-headline-md text-on-surface" for="id_name">Name</label>
+                <input id="id_name" name="name" class="w-full bg-surface text-on-surface font-body-md text-body-md p-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-surface-variant" type="text" value="{{ selected.name }}">
+              </div>
+              <div class="flex flex-col gap-xs">
+                <label class="font-headline-md text-headline-md text-on-surface" for="id_subject">Subject</label>
+                <input id="id_subject" name="subject" class="w-full bg-surface text-on-surface font-body-md text-body-md p-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-surface-variant" type="text" value="{{ selected.subject }}" oninput="updatePreview()">
+              </div>
+              <div class="flex flex-col gap-xs flex-1">
+                <div class="flex items-center justify-between">
+                  <label class="font-headline-md text-headline-md text-on-surface" for="id_body">Message Body</label>
+                  <div class="flex items-center gap-sm bg-surface-container-low px-sm py-1 rounded-md">
+                    <span class="font-metadata text-metadata text-on-surface-variant">Insert Variable:</span>
+                    <select class="bg-transparent font-metadata text-metadata text-primary focus:outline-none cursor-pointer" onchange="insertVar(this)">
+                      <option value="{student_name}">{student_name}</option>
+                      <option value="{company_name}">{company_name}</option>
+                      <option value="{slot_title}">{slot_title}</option>
+                      <option value="{app_id}">{app_id}</option>
+                      <option value="{reason}">{reason}</option>
+                    </select>
+                  </div>
+                </div>
+                <textarea id="id_body" name="body" class="w-full flex-1 min-h-[280px] bg-surface text-on-surface font-body-md text-body-md p-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none border border-surface-variant leading-relaxed font-mono" oninput="updatePreview()">{{ selected.body }}</textarea>
+              </div>
+              <div class="flex flex-col gap-xs">
+                <label class="font-headline-md text-headline-md text-on-surface" for="id_desc">Description</label>
+                <input id="id_desc" name="description" class="w-full bg-surface text-on-surface font-body-md text-body-md p-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-surface-variant" type="text" value="{{ selected.description }}">
+              </div>
+              <label class="flex items-center gap-sm cursor-pointer">
+                <input type="checkbox" name="is_active" {% if selected.is_active %}checked{% endif %} class="w-4 h-4 accent-[#3525cd]">
+                <span class="font-body-md text-on-surface">Active</span>
+              </label>
+            </div>
+            <div class="xl:w-1/2 flex flex-col gap-md">
+              <label class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs">
+                <span class="material-symbols-outlined text-on-surface-variant text-[20px]">preview</span>
+                Live Preview
+              </label>
+              <div class="bg-surface-container-low rounded-xl p-md flex-1 flex flex-col">
+                <div class="bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden flex-1 flex flex-col border border-surface-variant/50">
+                  <div class="p-md bg-surface-container-low border-b border-surface-variant/50 flex flex-col gap-sm">
+                    <div class="flex items-center gap-sm">
+                      <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">IPT</div>
+                      <div>
+                        <div class="font-body-md text-body-md font-bold text-on-surface">IPT Marketplace</div>
+                        <div class="font-metadata text-metadata text-on-surface-variant">to <span id="preview-to">student@university.edu</span></div>
+                      </div>
+                    </div>
+                    <div class="font-headline-md text-headline-md text-on-surface mt-sm" id="preview-subject"></div>
+                  </div>
+                  <div class="p-lg bg-surface-container-lowest font-body-lg text-body-lg text-on-surface whitespace-pre-wrap flex-1" id="preview-body"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      {% else %}
+        <div class="flex-1 flex flex-col items-center justify-center p-lg">
+          <span class="material-symbols-outlined text-[48px] text-outline-variant mb-sm">email</span>
+          <p class="font-body-md text-on-surface-variant">Select a template to edit, or create one.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  function filterTemplates(value) {
+    const term = value.toLowerCase();
+    document.querySelectorAll('#template-list > a').forEach(item => {
+      item.style.display = item.textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
+  }
+  function insertVar(select) {
+    const ta = document.getElementById('id_body');
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    ta.value = ta.value.slice(0, start) + select.value + ta.value.slice(end);
+    ta.focus();
+    updatePreview();
+  }
+  function substitute(text) {
+    const samples = {
+      student_name: 'Alex Johnson', company_name: 'Acme Industrial Solutions',
+      slot_title: 'Software Engineering Intern', app_id: '42',
+      reason: 'Transcript appears tampered', login_url: 'https://ipt-marketplace.com/login',
+      support_email: 'support@ipt-marketplace.com', amount: '15,000', currency: 'TZS',
+      reference_id: 'IPT-ABC123', paid_at: '2024-10-24 14:30'
+    };
+    return (text || '').replace(/\{(\w+)\}/g, (m, k) => samples[k] ?? m);
+  }
+  function updatePreview() {
+    document.getElementById('preview-subject').textContent = substitute(document.getElementById('id_subject').value);
+    document.getElementById('preview-body').textContent = substitute(document.getElementById('id_body').value);
+  }
+  updatePreview();
+</script>
+{% endblock %}

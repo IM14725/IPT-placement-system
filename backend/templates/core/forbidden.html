@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Access Denied{% endblock %}
+{% block content %}
+<div class="w-full flex flex-col items-center justify-center min-h-[60vh]">
+  <div class="flex flex-col items-center gap-sm mb-md">
+    <div class="w-20 h-20 rounded-2xl bg-error/10 flex items-center justify-center text-error mb-sm">
+      <span class="material-symbols-outlined text-[44px]" style="font-variation-settings: 'FILL' 1;">block</span>
+    </div>
+    <p class="font-headline-lg text-headline-lg text-on-surface font-bold">403 — Access Denied</p>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-sm text-center">You do not have permission to view this page. Please contact the platform administrator if you believe this is an error.</p>
+  </div>
+  <a href="{% url 'home' %}" class="inline-flex items-center gap-xs bg-primary text-on-primary font-body-md text-body-md font-medium px-xl py-3 rounded-full shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5">
+    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+    Back to Home
+  </a>
+</div>
+{% endblock %}

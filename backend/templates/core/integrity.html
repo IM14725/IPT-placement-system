@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Integrity Ledger{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-md relative">
+    <div class="flex flex-col gap-xs z-10">
+      <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">System Administration</span>
+      <h1 class="font-display text-display text-on-surface">Integrity Ledger</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-2">
+        Enterprise immutability layer. Critical records are SHA-256 sealed into an append-only, hash-chained ledger; finalized rows are write-protected at the database level. Any edit, deletion, or reordering is detectable here.
+      </p>
+    </div>
+    <div class="absolute -top-xl -right-xl w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-0"></div>
+  </div>
+
+  <div class="flex flex-wrap gap-md">
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex-1 min-w-[180px]">
+      <div class="flex items-center gap-xs text-on-surface-variant mb-1">
+        <span class="material-symbols-outlined text-[18px]">link</span>
+        <span class="font-metadata text-metadata uppercase tracking-wider">Ledger Rows</span>
+      </div>
+      <span class="font-headline-lg text-headline-lg text-on-surface">{{ ledger_total }}</span>
+    </div>
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex-1 min-w-[180px]">
+      <div class="flex items-center gap-xs text-on-surface-variant mb-1">
+        <span class="material-symbols-outlined text-[18px]">verified_user</span>
+        <span class="font-metadata text-metadata uppercase tracking-wider">Status</span>
+      </div>
+      {% if total_issues == 0 %}
+        <span class="inline-flex items-center gap-1 text-[#166534] font-headline-md"><span class="material-symbols-outlined">check_circle</span> Intact</span>
+      {% else %}
+        <span class="inline-flex items-center gap-1 text-error font-headline-md"><span class="material-symbols-outlined">gpp_bad</span> {{ total_issues }} issue(s)</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+    <div class="p-md bg-surface-container-low border-b border-surface-container-highest">
+      <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs">
+        <span class="material-symbols-outlined text-primary">security</span> Record Verification
+      </h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-md p-md">
+      {% for block in summary %}
+        <div class="bg-surface-container-low rounded-xl p-md flex flex-col gap-sm">
+          <div class="flex items-center justify-between">
+            <h3 class="font-headline-md text-headline-md text-on-surface">{{ block.label }}</h3>
+            <span class="font-metadata text-metadata text-on-surface-variant bg-surface-container-high px-2 py-1 rounded-full">{{ block.ledger_count }} sealed</span>
+          </div>
+          {% if block.issues %}
+            <ul class="flex flex-col gap-xs">
+              {% for issue in block.issues %}
+                <li class="flex items-start gap-xs text-body-md text-error">
+                  <span class="material-symbols-outlined text-[16px] mt-0.5">report</span>
+                  <span>{{ issue }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="flex items-center gap-xs text-body-md text-[#166534]">
+              <span class="material-symbols-outlined text-[16px]">verified</span>
+              All {{ block.ledger_count }} {{ block.rtype }} record(s) match their sealed hashes.
+            </p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+    <div class="p-md bg-surface-container-low border-b border-surface-container-highest">
+      <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs">
+        <span class="material-symbols-outlined text-primary">account_tree</span> Hash Chain
+      </h2>
+    </div>
+    <div class="p-md">
+      {% if chain_issues %}
+        <ul class="flex flex-col gap-xs">
+          {% for issue in chain_issues %}
+            <li class="flex items-start gap-xs text-body-md text-error">
+              <span class="material-symbols-outlined text-[16px] mt-0.5">broken_image</span>
+              <span>{{ issue }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="flex items-center gap-xs text-body-md text-[#166534]">
+          <span class="material-symbols-outlined text-[16px]">link</span>
+          All {{ ledger_total }} ledger entries link correctly (prev-hash chain intact).
+        </p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

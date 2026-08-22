@@ -1,0 +1,634 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: ipt-marketplace\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-08-22 00:00+0300\n"
+"Language: sw\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "&copy; 2024 IPT Marketplace. All rights reserved."
+msgstr "&copy; 2024 IPT Marketplace. Haki zote zimehifadhiwa."
+
+msgid "/mo"
+msgstr "/mwezi"
+
+msgid "/month"
+msgstr "/mwezi"
+
+msgid "A clear headshot (max 2MB)."
+msgstr "Picha ya uso ulio wazi (chini ya MB 2)."
+
+msgid "A clear photo of your student ID card (max 2MB)."
+msgstr "Picha ya wazi ya kadi yako ya utambulisho (chini ya MB 2)."
+
+msgid "A secure marketplace for students to find verified IPT slots and companies to manage talent efficiently."
+msgstr "Soko salama linalowasaidia wanafunzi kupata nafasi za IPT zilizothibitishwa na kampuni kusimamia vipaji kwa ufanisi."
+
+msgid "Academic Information"
+msgstr "Taarifa za Kielimu"
+
+msgid "Acceptance Note (Optional)"
+msgstr "Ujumbe wa Kubali (Si lazima)"
+
+msgid "Accepted"
+msgstr "Imekubaliwa"
+
+msgid "Account"
+msgstr "Akaunti"
+
+msgid "Active"
+msgstr "Hai"
+
+msgid "All Districts"
+msgstr "Wilaya Zote"
+
+msgid "All Regions"
+msgstr "Mikoa Yote"
+
+msgid "All uploaded documents are stored securely within the IPT network and reviewed by the admin."
+msgstr "Nyaraka zote zilizopakiwa huhifadhiwa kwa usalama ndani ya mtandao wa IPT na hukaguliwa na msimamizi."
+
+msgid "Already registered?"
+msgstr "Umejisajili tayari?"
+
+msgid "Any Level"
+msgstr "Kiwango chochote"
+
+msgid "Any Qualification"
+msgstr "Kiwango chochote"
+
+msgid "Any qualification"
+msgstr "Kiwango chochote"
+
+msgid "Applicants"
+msgstr "Waombaji"
+
+msgid "Application letter attached"
+msgstr "Barua ya maombi imeambatanishwa"
+
+msgid "Apply"
+msgstr "Omba"
+
+msgid "Apply Now"
+msgstr "Omba Sasa"
+
+msgid "Apply to Slot"
+msgstr "Omba Nafasi"
+
+msgid "Approved"
+msgstr "Imeidhinishwa"
+
+msgid "Audit"
+msgstr "Ukaguzi"
+
+msgid "Available"
+msgstr "Zinapatikana"
+
+msgid "Awaiting Payment"
+msgstr "Inasubiri Malipo"
+
+msgid "BRELA Registration Certificate"
+msgstr "Cheti cha Usajili wa BRELA"
+
+msgid "Bachelor's"
+msgstr "Shahada"
+
+msgid "Back to slots"
+msgstr "Rudi kwenye nafazi"
+
+msgid "Browse Slots"
+msgstr "Vinjari Nafasi"
+
+msgid "Browse and filter live training opportunities tailored to your academic background and career goals."
+msgstr "Vinjari na chuja nafasi za mafunzo zinazopatikana kulingana na elimu yako na malengo yako ya kazi."
+
+msgid "Built on trust. We enforce strict document verification protocols for both students and companies to ensure a safe and professional ecosystem."
+msgstr "Imejengwa juu ya uaminifu. Tunatekeleza utaratibu mkali wa uthibitisho wa nyaraka kwa wanafunzi na kampuni ili kuhakikisha mazingira salama na ya kitaalamu."
+
+msgid "Business License"
+msgstr "Leseni ya Biashara"
+
+msgid "Cancel"
+msgstr "Ghairi"
+
+msgid "Capacity"
+msgstr "Uwezo"
+
+msgid "Certificate"
+msgstr "Cheti"
+
+msgid "Closed"
+msgstr "Imefungwa"
+
+msgid "Company"
+msgstr "Kampuni"
+
+msgid "Company name"
+msgstr "Jina la kampuni"
+
+msgid "Complete Profile"
+msgstr "Kamilisha Wasifu"
+
+msgid "Complete your profile to start applying"
+msgstr "Kamilisha wasifu wako iliuanze kuomba"
+
+msgid "Confirm password"
+msgstr "Thibitisha nenosiri"
+
+msgid "Connect students with companies for <br class=\"hidden sm:block\"> <span class=\"text-primary\">Industrial Practical Training.</span>"
+msgstr "Unganisha wanafunzi na kampuni kwa <br class=\"hidden sm:block\"> <span class=\"text-primary\">Mafunzo ya Vitendo ya Viwanda.</span>"
+
+msgid "Course"
+msgstr "Kozi"
+
+msgid "Create Account"
+msgstr "Fungua Akaunti"
+
+msgid "Create First Slot"
+msgstr "Unda Nafasi ya Kwanza"
+
+msgid "Create a new opportunity for emerging talent."
+msgstr "Unda fursa mpya kwa vipaji ibuka."
+
+msgid "Create an account"
+msgstr "Fungua akaunti"
+
+msgid "Create your account"
+msgstr "Fungua akaunti yako"
+
+msgid "Curriculum Vitae"
+msgstr "Wasifu (CV)"
+
+msgid "Dashboard"
+msgstr "Dashibodi"
+
+msgid "Data Security"
+msgstr "Usalama wa Taarifa"
+
+msgid "Department / Course"
+msgstr "Idara / Kozi"
+
+msgid "Dept:"
+msgstr "Idara:"
+
+msgid "Directory"
+msgstr "Orodha"
+
+msgid "District"
+msgstr "Wilaya"
+
+msgid "Document Vault"
+msgstr "Hifadhi ya Nyaraka"
+
+msgid "Edit Slot"
+msgstr "Hariri Nafasi"
+
+msgid "Education Level (TCU)"
+msgstr "Kiwango cha Elimu (TCU)"
+
+msgid "Email address"
+msgstr "Barua pepe"
+
+msgid "FULL"
+msgstr "IMEJAA"
+
+msgid "Female"
+msgstr "Mwanamke"
+
+msgid "Filter by Education Level (TCU)"
+msgstr "Chuja kwa Kiwango cha Elimu (TCU)"
+
+msgid "Find IPT slots that match your field"
+msgstr "Tafuta nafasi za IPT zinazolingana na fani yako"
+
+msgid "Find a Slot"
+msgstr "Tafuta Nafasi"
+
+msgid "Find an IPT Slot"
+msgstr "Tafuta Nafasi ya IPT"
+
+msgid "First name"
+msgstr "Jina la kwanza"
+
+msgid "For Companies"
+msgstr "Kwa Kampuni"
+
+msgid "For Students"
+msgstr "Kwa Wanafunzi"
+
+msgid "Forgot password?"
+msgstr "Umesahau nenosiri?"
+
+msgid "Full"
+msgstr "Imejaa"
+
+msgid "Get Started"
+msgstr "Anza"
+
+msgid "Higher Diploma"
+msgstr "Diploma ya Juu"
+
+msgid "I am a..."
+msgstr "Mimi ni..."
+
+msgid "ID card photo"
+msgstr "Picha ya kadi ya utambulisho"
+
+msgid "IPT Marketplace — Student & Company Matching"
+msgstr "Soko la IPT — Kuunganisha Wanafunzi na Kampuni"
+
+msgid "Instant SMS & email updates"
+msgstr "Sasisho za papo hapo kwa SMS na barua pepe"
+
+msgid "Integrity"
+msgstr "Uadilifu"
+
+msgid "Join the marketplace as a student or company."
+msgstr "Jiunge na soko kama mwanafunzi au kampuni."
+
+msgid "Join the marketplace for <span class=\"text-secondary-fixed\">real-world training.</span>"
+msgstr "Jiunge na soko la <span class=\"text-secondary-fixed\">mafunzo ya vitendo.</span>"
+
+msgid "Language"
+msgstr "Lugha"
+
+msgid "Last name"
+msgstr "Jina la mwisho"
+
+msgid "Ledger"
+msgstr "Daftari"
+
+msgid "Level / Year of Study"
+msgstr "Kiwango / Mwaka wa Masomo"
+
+msgid "Level 10 — Doctorate (PhD)"
+msgstr "Kiwango cha 10 — Udaktari (PhD)"
+
+msgid "Level 4 — Certificate"
+msgstr "Kiwango cha 4 — Cheti"
+
+msgid "Level 5 — Technician Certificate"
+msgstr "Kiwango cha 5 — Cheti cha Mfundi"
+
+msgid "Level 6 — Ordinary Diploma"
+msgstr "Kiwango cha 6 — Diploma"
+
+msgid "Level 7 — Higher Diploma"
+msgstr "Kiwango cha 7 — Diploma ya Juu"
+
+msgid "Level 8 — Bachelor's Degree"
+msgstr "Kiwango cha 8 — Shahada"
+
+msgid "Level 9 — Master's Degree"
+msgstr "Kiwango cha 9 — Uzamili"
+
+msgid "Loading slots..."
+msgstr "Inapakia nafazi..."
+
+msgid "Loading..."
+msgstr "Inapakia..."
+
+msgid "Location Details"
+msgstr "Maelezo ya Mahali"
+
+msgid "Log in to manage your IPT applications."
+msgstr "Ingia ili kudhibiti maombi yako ya IPT."
+
+msgid "Login"
+msgstr "Ingia"
+
+msgid "Logout"
+msgstr "Toka"
+
+msgid "Male"
+msgstr "Mwanaume"
+
+msgid "Manage your academic details and how companies see you."
+msgstr "Dhibiti taarifa zako za kielimu na jinsi kampuni zinavyokuona."
+
+msgid "Manage your active training opportunities, track applications, and update availability across all your programs."
+msgstr "Simamia nafasi zako za mafunzo, fuatilia maombi, na Sasisha upatikanaji wa programu zako zote."
+
+msgid "Master's"
+msgstr "Uzamili"
+
+msgid "Metrics"
+msgstr "Vipimo"
+
+msgid "Minimum TCU qualification: Level 4 Certificate to Level 10 PhD."
+msgstr "Kiwango cha chini cha TCU: Cheti cha Kiwango 4 hadi Udaktari wa Kiwango 10."
+
+msgid "My Applications"
+msgstr "Maombi Yangu"
+
+msgid "My Slots"
+msgstr "Nafasi Zangu"
+
+msgid "New Slot"
+msgstr "Nafasi Mpya"
+
+msgid "New to the marketplace?"
+msgstr "Mgeni sokoni?"
+
+msgid "No applicants yet"
+msgstr "Hakuna waombaji bado"
+
+msgid "No applications yet"
+msgstr "Hakuna maombi bado"
+
+msgid "No documents yet"
+msgstr "Hakuna nyaraka bado"
+
+msgid "No slots created yet"
+msgstr "Hakuna nafazi zilizoundwa bado"
+
+msgid "No slots match your filters."
+msgstr "Hakuna nafasi zinazolingana na vichujio vyako."
+
+msgid "Offer a monthly stipend to interns."
+msgstr "Toa posho ya mwezi kwa wanafunzi wanaofanya mazoezi."
+
+msgid "Once students apply and complete their application fee payments, they will appear here for your review."
+msgstr "Wanafunzi wakituma maombi na kukamilisha malipo yao ya ada, wataonekana hapa kwa uhakiki wako."
+
+msgid "One-tap mobile money payments"
+msgstr "Malipo ya pesa mtandaooni kwa mbofyo mmoja"
+
+msgid "Open"
+msgstr "Wazi"
+
+msgid "Optional - use 2556 or 2557 followed by 8 digits, e.g. 255712345678."
+msgstr "Si lazima - tumia 2556 au 2557 ikifuatiwa na tarakimu 8, mfano 255712345678."
+
+msgid "Ordinary Diploma"
+msgstr "Diploma"
+
+msgid "Paid"
+msgstr "Imelipwa"
+
+msgid "Password"
+msgstr "Nenosiri"
+
+msgid "Paused"
+msgstr "Imesimamishwa"
+
+msgid "Pay Now"
+msgstr "Lipa Sasa"
+
+msgid "Pay by {{ deadline }} to keep your seat"
+msgstr "Lipa ifikapo {{ deadline }} iliuhifadhi nafasi yako"
+
+msgid "Pay fee to proceed to review"
+msgstr "Lipa ada iliendelee na uhakiki"
+
+msgid "Payment"
+msgstr "Malipo"
+
+msgid "Payment Expired"
+msgstr "Muda wa Malipo Umeisha"
+
+msgid "Payment verified, Placement confirmed"
+msgstr "Malipo yamethibitishwa, uwekaji umethibitishwa"
+
+msgid "Pending"
+msgstr "Inasubiri"
+
+msgid "Pending Review"
+msgstr "Inasubiri Uhakiki"
+
+msgid "Pending company decision"
+msgstr "Inasubiri uamuzi wa kampuni"
+
+msgid "PhD"
+msgstr "Udaktari"
+
+msgid "Phone number"
+msgstr "Namba ya simu"
+
+msgid "Platform Features"
+msgstr "Vipengele vya Jukwaa"
+
+msgid "Post Slot"
+msgstr "Tangaza Nafasi"
+
+msgid "Post a New Slot"
+msgstr "Tangaza Nafasi Mpya"
+
+msgid "Post openings and manage applicants"
+msgstr "Tangaza nafasi na udhibiti waombaji"
+
+msgid "Post verified training slots, review applications from pre-verified students, and manage communication via instant SMS alerts."
+msgstr "Tangaza nafasi za mafunzo zilizothibitishwa, pitia maombi kutoka kwa wanafunzi waliothibitishwa, na udhibiti mawasiliano kwa SMS za papo hapo."
+
+msgid "Profile"
+msgstr "Wasifu"
+
+msgid "Profile photo"
+msgstr "Picha ya wasifu"
+
+msgid "Queue"
+msgstr "Foleni"
+
+msgid "Re-book Slot"
+msgstr "Weka Nafasi Tena"
+
+msgid "Recent Applications"
+msgstr "Maombi ya Karibuni"
+
+msgid "Region"
+msgstr "Mkoa"
+
+msgid "Register"
+msgstr "Jisajili"
+
+msgid "Rejected"
+msgstr "Imekataliwa"
+
+msgid "Required skills (comma separated)"
+msgstr "Ujuzi unaohitajika (zikitenganishwa kwa koma)"
+
+msgid "Roles"
+msgstr "Majukumu"
+
+msgid "Save Changes"
+msgstr "Hifadhi Mabadiliko"
+
+msgid "Secure & Verified"
+msgstr "Salama & Thibitishwa"
+
+msgid "Securely store and manage required documents. Ensure files are under 2MB and in PDF, PNG, JPG, DOC, or DOCX format."
+msgstr "Hifadhi na dhibiti nyaraka muhimu kwa usalama. Hakikisha faili ni chini ya MB 2 na kwa umbizo la PDF, PNG, JPG, DOC, au DOCX."
+
+msgid "Semester Results Matrix"
+msgstr "Matokeo ya Semista"
+
+msgid "Send Confirmation"
+msgstr "Tuma Uthibitisho"
+
+msgid "Separate skills with commas, e.g. Python, SQL, Communication."
+msgstr "Tenganisha ujuzi kwa koma, mfano Python, SQL, Mawasiliano."
+
+msgid "Separate skills with commas."
+msgstr "Tenganisha ujuzi kwa koma."
+
+msgid "Settings"
+msgstr "Mipangilio"
+
+msgid "Sign in"
+msgstr "Ingia"
+
+msgid "Skills (comma separated)"
+msgstr "Ujuzi (zikitenganishwa kwa koma)"
+
+msgid "Slot"
+msgstr "Nafasi"
+
+msgid "Slot Full"
+msgstr "Nafasi Imejaa"
+
+msgid "Slot Overview"
+msgstr "Muhtasari wa Nafasi"
+
+msgid "Slot released - re-book to start a new application"
+msgstr "Nafasi imetolewa - weka tena iliuanze maombi mapya"
+
+msgid "Slots"
+msgstr "Nafasi"
+
+msgid "Spots Filled"
+msgstr "Viti Vilivyojazwa"
+
+msgid "Status"
+msgstr "Hali"
+
+msgid "Stipend"
+msgstr "Posho"
+
+msgid "Strict verification keeps it trustworthy"
+msgstr "Uthibitisho mkali unauhakikisha uaminifu"
+
+msgid "Student Dashboard"
+msgstr "Dashibodi ya Mwanafunzi"
+
+msgid "Student ID Card"
+msgstr "Kadi ya Utambulisho ya Mwanafunzi"
+
+msgid "Student Profile"
+msgstr "Wasifu wa Mwanafunzi"
+
+msgid "Submit & Proceed to Payment"
+msgstr "Tuma & Endelea Kulipa"
+
+msgid "TIN Certificate"
+msgstr "Cheti cha TIN"
+
+msgid "Technician Certificate"
+msgstr "Cheti cha Mfundi"
+
+msgid "Templates"
+msgstr "Templeti"
+
+msgid "The letter from your university requesting the placement (PDF/image/DOC, max 2MB)."
+msgstr "Barua kutoka chuo chikooomba uwekaji (PDF/picha/DOC, chini ya MB 2)."
+
+msgid "Timeline Complete"
+msgstr "Mtiririko Umekamilika"
+
+msgid "Total Applications"
+msgstr "Maombi Yote"
+
+msgid "Total Slots"
+msgstr "Nafasi Zote"
+
+msgid "Total Spots"
+msgstr "Viti Vyote"
+
+msgid "Track your placement requests and complete required payments."
+msgstr "Fuatilia maombi yako ya uwekaji na ukamilishe malipo yanayohitajika."
+
+msgid "Under Review"
+msgstr "Chini ya Uhakiki"
+
+msgid "University"
+msgstr "Chuo Kikuu"
+
+msgid "University Application Letter"
+msgstr "Barua ya Maombi ya Chuo Kikuu"
+
+msgid "University Introduction Letter"
+msgstr "Barua ya Utambulisho kutoka Chuo"
+
+msgid "Unpaid"
+msgstr "Haijalipwa"
+
+msgid "Upload Document"
+msgstr "Pakia Waraka"
+
+msgid "Upload your Student ID and Results Matrix - the platform admin will verify your account."
+msgstr "Pakia Kadi yako ya Utambulisho na Matokeo - msimamizi wa jukwaa atathibitisha akaunti yako."
+
+msgid "Upload your university application letter to submit your application, then complete payment."
+msgstr "Pakia barua yako ya maombi kutoka chuo kikuu iliutume ombi lako, kisha ukamilishe malipo."
+
+msgid "Uploaded"
+msgstr "Imepakiwa"
+
+msgid "Use at least 8 characters with letters and numbers."
+msgstr "Tumia herufi 8 au zaidi zenye herufi na tarakimu."
+
+msgid "Use the registered trading name of your company."
+msgstr "Tumia jina la biashara lililosajiliwa la kampuni yako."
+
+msgid "Verification required to apply."
+msgstr "Uthibitisho unahitajika kuomba."
+
+msgid "Verified students, verified companies"
+msgstr "Wanafunzi waliothibitishwa, kampuni zilizothibitishwa"
+
+msgid "Verify your academic documents, browse available training slots, and secure your placement with one-tap mobile money."
+msgstr "Thibitisha nyaraka zako za kielimu, vinjari nafasi za mafunzo, na uhakikishe uwekaji wako kwa malipo ya pesa mtandaooni."
+
+msgid "View Application Letter"
+msgstr "Angalia Barua ya Maombi"
+
+msgid "View Documents"
+msgstr "Angalia Nyaraka"
+
+msgid "View your profile"
+msgstr "Angalia wasifu wako"
+
+msgid "We'll send your login and receipts here."
+msgstr "Tutakutumia taarifa zako za kuingia na malipo hapa."
+
+msgid "Welcome Back"
+msgstr "Karibu Tena"
+
+msgid "Welcome back"
+msgstr "Karibu tena"
+
+msgid "Welcome back to your <span class=\"text-primary-fixed\">training journey.</span>"
+msgstr "Karibu tena katika <span class=\"text-primary-fixed\">safari yako ya mafunzo.</span>"
+
+msgid "Year"
+msgstr "Mwaka"
+
+msgid "Year / GPA"
+msgstr "Mwaka / GPA"
+
+msgid "You have not applied to any slots yet."
+msgstr "Bado hujawahi kuomba nafasi yoyote."
+
+msgid "You have not applied to any slots."
+msgstr "Hujawahi kuomba nafasi yoyote."
+
+msgid "You haven't posted any training opportunities. Create your first slot to start receiving applications."
+msgstr "Hujatangaza nafasi yoyote ya mafunzo. Unda nafasi yako ya kwanza ianzishe kupokea maombi."
+
+msgid "You haven't uploaded any documents. Use the form on the left to start building your vault."
+msgstr "Hujapakia nyaraka yoyote. Tumia fomu upande wa kushoto kuanza kujenga hifadhi yako."
+
+msgid "Your Documents"
+msgstr "Nyaraka Zako"

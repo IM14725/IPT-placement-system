@@ -1,0 +1,19 @@
+Django==6.1
+djangorestframework==3.18.0
+psycopg[binary]==3.3.4
+django-environ==0.14.0
+Pillow==12.3.0
+filetype==1.2.0
+reportlab==5.0.0
+
+# Workers & realtime
+celery==5.6.3
+redis==8.1.0
+fastapi==0.141.1
+uvicorn[standard]==0.52.3
+websockets==17.0.1
+httpx==0.28.1
+sqlalchemy==2.0.52
+asyncpg==0.31.0
+pydantic-settings==2.15.0
+python-multipart==0.0.32

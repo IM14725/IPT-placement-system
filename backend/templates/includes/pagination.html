@@ -1,0 +1,19 @@
+{% if page_obj.has_other_pages %}
+<nav class="flex items-center justify-between gap-sm mt-lg" aria-label="Pagination">
+  <span class="font-metadata text-metadata text-on-surface-variant">
+    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+  </span>
+  <div class="flex items-center gap-xs">
+    {% if page_obj.has_previous %}
+    <a class="bg-transparent text-primary font-metadata text-metadata uppercase tracking-wider border-2 border-primary hover:bg-primary/5 transition-colors duration-300 px-md py-sm rounded-lg" href="?page={{ page_obj.previous_page_number }}{% if querystring %}&amp;{{ querystring }}{% endif %}">&larr; Previous</a>
+    {% else %}
+    <span class="bg-transparent text-on-surface-variant font-metadata text-metadata uppercase tracking-wider border-2 border-outline-variant px-md py-sm rounded-lg opacity-50 pointer-events-none">&larr; Previous</span>
+    {% endif %}
+    {% if page_obj.has_next %}
+    <a class="px-md py-sm rounded-lg bg-primary text-on-primary font-metadata text-metadata uppercase tracking-wider shadow-md hover:shadow-xl transition-all duration-300" href="?page={{ page_obj.next_page_number }}{% if querystring %}&amp;{{ querystring }}{% endif %}">Next &rarr;</a>
+    {% else %}
+    <span class="px-md py-sm rounded-lg bg-primary/40 text-on-primary font-metadata text-metadata uppercase tracking-wider opacity-50 pointer-events-none">Next &rarr;</span>
+    {% endif %}
+  </div>
+</nav>
+{% endif %}

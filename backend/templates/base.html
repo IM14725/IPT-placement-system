@@ -1,0 +1,254 @@
+{% load static i18n %}<!DOCTYPE html>
+<html lang="{% get_current_language as CUR_LANG %}{{ CUR_LANG }}" class="bg-background">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}IPT Marketplace{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-tertiary-fixed-variant": "#7b2f00", "outline": "#777587", "on-primary-fixed-variant": "#3323cc",
+            "on-secondary": "#ffffff", "on-primary": "#ffffff", "tertiary-fixed": "#ffdbcc", "on-secondary-fixed": "#07006c",
+            "inverse-surface": "#2e3132", "inverse-on-surface": "#f0f1f2", "error": "#ba1a1a", "on-surface": "#191c1d",
+            "background": "#f8f9fa", "surface-container-lowest": "#ffffff", "surface-tint": "#4d44e3",
+            "secondary": "#4648d4", "surface-container-highest": "#e1e3e4", "on-primary-container": "#dad7ff",
+            "on-error-container": "#93000a", "tertiary": "#7e3000", "on-secondary-container": "#fffbff",
+            "primary": "#3525cd", "on-primary-fixed": "#0f0069", "primary-container": "#4f46e5", "on-error": "#ffffff",
+            "tertiary-fixed-dim": "#ffb695", "surface-container-low": "#f3f4f5", "surface-bright": "#f8f9fa",
+            "secondary-container": "#6063ee", "secondary-fixed-dim": "#c0c1ff", "on-background": "#191c1d",
+            "surface-dim": "#d9dadb", "surface": "#f8f9fa", "primary-fixed": "#e2dfff", "primary-fixed-dim": "#c3c0ff",
+            "surface-container": "#edeeef", "secondary-fixed": "#e1e0ff", "outline-variant": "#c7c4d8",
+            "on-secondary-fixed-variant": "#2f2ebe", "surface-variant": "#e1e3e4", "on-tertiary-fixed": "#351000",
+            "inverse-primary": "#c3c0ff", "on-tertiary": "#ffffff", "on-surface-variant": "#464555",
+            "on-tertiary-container": "#ffd2be", "error-container": "#ffdad6", "surface-container-high": "#e7e8e9",
+            "tertiary-container": "#a44100"
+          },
+          borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+          spacing: { base: "4px", xs: "8px", md: "24px", gutter: "24px", "container-max": "1280px", lg: "32px", xl: "48px", sm: "16px" },
+           fontFamily: { "headline-md": ["Inter"], "body-md": ["Inter"], metadata: ["Inter"], display: ["Inter"], "label-caps": ["Inter"], "body-lg": ["Inter"], "headline-lg": ["Inter"] },
+          fontSize: {
+            "headline-md": ["20px", { lineHeight: "28px" }], "headline-lg": ["28px", { lineHeight: "34px" }],
+            "display": ["36px", { lineHeight: "44px", letterSpacing: "-0.02em" }],
+            "body-lg": ["16px", { lineHeight: "24px" }], "body-md": ["14px", { lineHeight: "20px" }],
+            "metadata": ["12px", { lineHeight: "16px" }], "label-caps": ["11px", { lineHeight: "12px", letterSpacing: "0.05em" }]
+          },
+          keyframes: {
+            spin: { to: { transform: "rotate(360deg)" } }
+          },
+          animation: {
+            spin: "spin 0.9s linear infinite",
+            pulse: "pulse 1.5s ease-in-out infinite"
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { overscroll-behavior: none; }
+    ::-webkit-scrollbar { display: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Loading overlay + spinner for submit buttons (plain CSS, no Tailwind dep). */
+    #ipt-form-loading {
+      position: fixed; inset: 0; z-index: 200;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(248, 249, 250, 0.65);
+      backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    }
+    #ipt-form-loading .ipt-loading-box {
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      padding: 32px; border-radius: 16px; background: #ffffff;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+    }
+    #ipt-form-loading .ipt-spinner {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 4px solid #c3c0ff; border-top-color: #3525cd;
+      animation: ipt-spin 0.9s linear infinite;
+    }
+    @keyframes ipt-spin { to { transform: rotate(360deg); } }
+    #ipt-form-loading .ipt-loading-text {
+      font-family: "Inter", sans-serif; font-size: 13px; line-height: 18px;
+      color: #464555; text-align: center;
+    }
+
+    /* IPT field component: distinct icon chip, input area, and description */
+    .ipt-field-box { display: flex; align-items: stretch; border: 1px solid #c7c4d8; border-radius: 0.5rem; background: #ffffff; overflow: hidden; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+    .ipt-field-box:focus-within { border-color: #3525cd; box-shadow: 0 0 0 2px rgba(53, 37, 205, 0.3); }
+    .ipt-field-icon { display: flex; align-items: center; justify-content: center; width: 46px; flex: none; background: #edeeef; color: #464555; border-right: 1px solid #c7c4d8; }
+    .ipt-field-box > input { flex: 1; min-width: 0; border: none !important; outline: none !important; background: transparent !important; box-shadow: none !important; padding: 10px 12px; color: #191c1d; font-family: "Inter", sans-serif; font-size: 14px; line-height: 20px; }
+    .ipt-field-box > input::placeholder { color: #777587; }
+    .ipt-field-box > select {
+      flex: 1; min-width: 0; margin: 0;
+      border: none !important; outline: none !important;
+      background-color: transparent !important; box-shadow: none !important;
+      padding: 10px 38px 10px 12px; color: #191c1d;
+      font-family: "Inter", sans-serif; font-size: 14px; line-height: 20px;
+      appearance: none; -webkit-appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23464555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center; background-size: 18px;
+    }
+    .ipt-field-box > select:disabled { color: #777587; cursor: not-allowed; }
+    .ipt-field-box > select option { color: #191c1d; background: #ffffff; }
+    .ipt-field-box > textarea {
+      flex: 1; min-width: 0; border: none !important; outline: none !important;
+      background: transparent !important; box-shadow: none !important;
+      padding: 10px 12px; color: #191c1d; font-family: "Inter", sans-serif;
+      font-size: 14px; line-height: 20px; resize: vertical;
+    }
+    .ipt-field-box > .ipt-file-wrap { flex: 1; min-width: 0; padding: 6px 12px; display: flex; align-items: center; }
+    .ipt-field-box > .ipt-combobox { flex: 1; min-width: 0; position: relative; display: flex; align-items: stretch; }
+    .ipt-field-box > .ipt-combobox > input { flex: 1; min-width: 0; border: none !important; outline: none !important; background: transparent !important; box-shadow: none !important; padding: 10px 12px; color: #191c1d; font-family: "Inter", sans-serif; font-size: 14px; line-height: 20px; }
+    .ipt-field-box > .ipt-combobox > input::placeholder { color: #777587; }
+    .ipt-field-box.ipt-has-combobox { overflow: visible; }
+    .ipt-field-box.ipt-has-combobox > .ipt-field-icon { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; }
+    .ipt-file-input { width: 100%; color: #464555; font-family: "Inter", sans-serif; font-size: 13px; line-height: 20px; cursor: pointer; }
+    .ipt-file-input::file-selector-button { margin-right: 10px; border: none; background: #3525cd; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-family: "Inter", sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+    .ipt-file-input::file-selector-button:hover { background: #4f46e5; }
+    .ipt-field-action { display: flex; align-items: center; justify-content: center; padding: 0 10px; color: #464555; border-left: 1px solid #c7c4d8; background: #ffffff; cursor: pointer; flex: none; transition: color 0.15s ease, background 0.15s ease; }
+    .ipt-field-action:hover { color: #191c1d; background: #f3f4f5; }
+    .ipt-field-box.is-error { border-color: #ba1a1a; box-shadow: 0 0 0 2px rgba(186, 26, 26, 0.3); }
+    .ipt-field-desc { display: flex; align-items: center; gap: 6px; margin-top: 6px; color: #464555; font-size: 12px; line-height: 16px; font-family: "Inter", sans-serif; }
+    .ipt-field-desc .material-symbols-outlined { font-size: 14px; }
+    .ipt-field-error { display: flex; align-items: center; gap: 6px; margin-top: 6px; color: #ba1a1a; font-size: 12px; line-height: 16px; font-family: "Inter", sans-serif; }
+    .ipt-field-error .material-symbols-outlined { font-size: 14px; }
+
+    /* Media upload preview: confirm the selected file before submitting */
+    .ipt-media-preview { display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 10px 12px; border: 1px solid #c7c4d8; border-radius: 0.5rem; background: #f3f4f5; }
+    .ipt-media-preview.hidden { display: none; }
+    .ipt-media-thumb { width: 56px; height: 56px; flex: none; border-radius: 0.5rem; overflow: hidden; background: #e1e3e4; display: flex; align-items: center; justify-content: center; }
+    .ipt-media-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ipt-media-icon { color: #ba1a1a; font-size: 30px; }
+    .ipt-media-icon:not(.pdf) { color: #3525cd; }
+    .ipt-media-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .ipt-media-name { color: #191c1d; font-size: 13px; line-height: 18px; font-weight: 600; font-family: "Inter", sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ipt-media-sub { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .ipt-media-size { color: #464555; font-size: 12px; line-height: 16px; font-family: "Inter", sans-serif; }
+    .ipt-media-badge { display: inline-flex; align-items: center; gap: 4px; color: #1b5e20; background: #e8f5e9; font-size: 11px; line-height: 16px; font-family: "Inter", sans-serif; font-weight: 500; padding: 1px 8px; border-radius: 9999px; }
+    .ipt-media-badge .material-symbols-outlined { font-size: 12px; }
+    .ipt-media-remove { flex: none; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: none; background: transparent; color: #464555; border-radius: 9999px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
+    .ipt-media-remove:hover { background: #e1e3e4; color: #ba1a1a; }
+    .ipt-media-remove .material-symbols-outlined { font-size: 20px; }
+
+    /* Select wrapper with trailing caret for filter bars */
+    .ipt-filter-select { position: relative; display: flex; align-items: center; }
+    .ipt-filter-select > select { position: relative; z-index: 1; }
+    .ipt-filter-caret { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; color: #464555; pointer-events: none; font-size: 18px; }
+
+    /* Page transition for auth screens */
+    @keyframes auth-fade-up {
+      from { opacity: 0; transform: translateY(18px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .auth-card { animation: auth-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .auth-card .auth-card-panel { animation: auth-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both; }
+  </style>
+</head>
+<body class="bg-background min-h-screen text-on-surface font-body-md">
+  <nav class="fixed top-0 inset-x-0 z-50 bg-primary text-white shadow-lg shadow-primary/20">
+    <div class="max-w-[1280px] mx-auto px-md h-16 flex items-center justify-between gap-md">
+      <a href="{% url 'home' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight">
+        <span class="material-symbols-outlined text-[24px]">domain</span>
+        <span class="hidden sm:block">IPT Marketplace</span>
+      </a>
+      <div class="flex items-center gap-sm text-body-md">
+        <form action="{% url 'set_language' %}" method="post" class="flex items-center">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <label class="sr-only" for="language-switcher">{% trans "Language" %}</label>
+          <select name="language" id="language-switcher" onchange="this.form.submit()"
+                  class="bg-white/10 text-white text-metadata rounded-lg pl-sm pr-xs py-1.5 cursor-pointer border border-white/25 focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none">
+            {% get_current_language as CURRENT_LANGUAGE %}
+            {% get_available_languages as AVAILABLE_LANGUAGES %}
+            {% get_language_info_list for AVAILABLE_LANGUAGES as langs %}
+            {% for lang in langs %}
+              <option class="text-on-surface" value="{{ lang.code }}"{% if lang.code == CURRENT_LANGUAGE %} selected{% endif %}>{{ lang.name_local|capfirst }}</option>
+            {% endfor %}
+          </select>
+        </form>
+        {% if user.is_authenticated %}
+          {% if user.is_student %}
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'student-dashboard' %}">{% trans "Dashboard" %}</a>
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'student-marketplace' %}">{% trans "Find a Slot" %}</a>
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'student-applications' %}">{% trans "My Applications" %}</a>
+          {% elif user.is_company %}
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'company-dashboard' %}">{% trans "Dashboard" %}</a>
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'company-slots' %}">{% trans "Slots" %}</a>
+          {% else %}
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-verifications' %}">{% trans "Queue" %}</a>
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-directory' %}">{% trans "Directory" %}</a>
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-ledger' %}">{% trans "Ledger" %}</a>
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-metrics' %}">{% trans "Metrics" %}</a>
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-templates' %}">{% trans "Templates" %}</a>
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-audit-logs' %}">{% trans "Audit" %}</a>
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-roles' %}">{% trans "Roles" %}</a>
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-integrity' %}">{% trans "Integrity" %}</a>
+            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-settings' %}">{% trans "Settings" %}</a>
+          {% endif %}
+          <a href="{{ nav_user.url }}" class="hidden md:flex items-center gap-2 pl-sm pr-md py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors" title="{% trans 'View your profile' %}">
+            {% if nav_user.photo %}
+              <img src="{{ nav_user.photo }}" alt="{% trans 'Profile' %}" class="w-7 h-7 rounded-full object-cover ring-2 ring-white/40">
+            {% else %}
+              <span class="w-7 h-7 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-metadata">{{ nav_user.name|slice:":1"|upper }}</span>
+            {% endif %}
+            <span class="text-on-primary text-metadata font-semibold max-w-[120px] truncate">{{ nav_user.name }}</span>
+          </a>
+          <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'logout' %}">{% trans "Logout" %}</a>
+        {% else %}
+          <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'login' %}">{% trans "Login" %}</a>
+          <a class="bg-surface-container-lowest text-primary px-md py-1.5 rounded-full font-semibold text-metadata uppercase tracking-wider hover:bg-primary-fixed transition-colors" href="{% url 'register' %}">{% trans "Register" %}</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-[1280px] mx-auto px-md pt-24 pb-md">
+    {% if messages %}
+      <div class="mb-md space-y-sm">
+        {% for message in messages %}
+          <div class="rounded-xl px-md py-sm text-body-md shadow-sm flex items-center gap-xs
+            {% if message.tags == 'error' %}bg-error-container text-on-error-container
+            {% elif message.tags == 'success' %}bg-[#e8f5e9] text-[#1b5e20]
+            {% else %}bg-primary-fixed text-on-primary-fixed{% endif %}">
+            <span class="material-symbols-outlined text-[18px]">
+              {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}check_circle{% else %}info{% endif %}
+            </span>
+            {{ message }}          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="w-full bg-surface-container py-lg mt-xl">
+    <div class="max-w-[1280px] mx-auto px-md text-center text-on-surface-variant text-metadata">
+      {% blocktrans %}&copy; 2024 IPT Marketplace. All rights reserved.{% endblocktrans %}
+    </div>
+  </footer>
+
+  <div id="toast-container" class="fixed bottom-md right-md z-[100] flex flex-col gap-sm items-end w-80"></div>
+
+   <script src="{% static 'js/app.js' %}"></script>
+   <script src="{% static 'js/media-preview.js' %}"></script>
+   <script src="{% static 'js/form-loading.js' %}"></script>
+  {% if user.is_authenticated %}
+    <script>
+      window.IPT = window.IPT || {};
+      window.IPT.currentUserId = {{ user.id }};
+      window.IPT.csrf = "{{ csrf_token }}";
+      window.IPT.userRole = "{{ user.role }}";
+    </script>
+    <script src="{% static 'js/ws.js' %}"></script>
+  {% endif %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

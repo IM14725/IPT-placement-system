@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}Platform Metrics{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <section class="w-full relative pt-lg pb-md">
+    <div class="flex flex-col gap-sm">
+      <h1 class="font-display text-display text-on-surface tracking-tight">Platform Metrics</h1>
+      <p class="font-body-md text-on-surface-variant">A live overview of marketplace activity.</p>
+    </div>
+  </section>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-md">
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
+      <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant mb-sm">
+        <span class="material-symbols-outlined">group</span>
+      </div>
+      <p class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Users</p>
+      <p class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ data.users }}</p>
+    </div>
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
+      <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-sm">
+        <span class="material-symbols-outlined">school</span>
+      </div>
+      <p class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Students</p>
+      <p class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ data.students }}</p>
+      <p class="font-metadata text-metadata text-[#1b5e20]">{{ data.students_verified }} verified</p>
+    </div>
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
+      <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-sm">
+        <span class="material-symbols-outlined">business</span>
+      </div>
+      <p class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Companies</p>
+      <p class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ data.companies }}</p>
+      <p class="font-metadata text-metadata text-[#1b5e20]">{{ data.companies_approved }} approved</p>
+    </div>
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
+      <div class="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary mb-sm">
+        <span class="material-symbols-outlined">work</span>
+      </div>
+      <p class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Slots</p>
+      <p class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ data.slots }}</p>
+      <p class="font-metadata text-metadata text-on-surface-variant">{{ data.slots_open }} open · {{ data.slots_full }} full</p>
+    </div>
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
+      <div class="w-10 h-10 rounded-full bg-[#e8f5e9]/60 flex items-center justify-center text-[#1b5e20] mb-sm">
+        <span class="material-symbols-outlined">assignment_turned_in</span>
+      </div>
+      <p class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Applications</p>
+      <p class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ data.applications }}</p>
+      <p class="font-metadata text-metadata text-on-surface-variant">{{ data.applications_paid }} paid · {{ data.applications_accepted }} accepted</p>
+    </div>
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
+      <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-sm">
+        <span class="material-symbols-outlined">payments</span>
+      </div>
+      <p class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Payments</p>
+      <p class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ data.payments }}</p>
+    </div>
+    <div class="col-span-2 md:col-span-2 bg-surface-container-lowest rounded-xl p-lg shadow-sm relative overflow-hidden">
+      <div class="absolute -right-10 -top-10 w-40 h-40 bg-primary/5 rounded-full blur-2xl"></div>
+      <div class="flex items-center gap-md relative z-10">
+        <div class="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+        </div>
+        <div class="flex flex-col">
+          <p class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Total Fees Collected</p>
+          <p class="font-headline-lg text-headline-lg text-on-surface font-bold">TZS {{ data.total_fees }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trend charts -->
+  <section class="flex flex-col gap-md mt-md">
+    <div class="flex items-center gap-sm">
+      <span class="material-symbols-outlined text-primary">monitoring</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">Activity Trends (last 30 days)</h2>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-md">
+      <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
+        <div class="flex items-center gap-sm mb-sm">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+          <h3 class="font-body-md font-semibold text-on-surface">Revenue</h3>
+        </div>
+        <div class="relative h-64">
+          <canvas id="revenue-chart" aria-label="Revenue chart" role="img"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
+        <div class="flex items-center gap-sm mb-sm">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">login</span>
+          <h3 class="font-body-md font-semibold text-on-surface">Daily Logins</h3>
+        </div>
+        <div class="relative h-64">
+          <canvas id="login-chart" aria-label="Daily logins chart" role="img"></canvas>
+        </div>
+      </div>
+
+      <div class="lg:col-span-2 bg-surface-container-lowest rounded-xl p-lg shadow-sm">
+        <div class="flex items-center gap-sm mb-sm">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">search</span>
+          <h3 class="font-body-md font-semibold text-on-surface">Slot Searches</h3>
+        </div>
+        <div class="relative h-64">
+          <canvas id="search-chart" aria-label="Slot searches chart" role="img"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+{{ data.revenue_series|json_script:"revenue-data" }}
+{{ data.login_series|json_script:"login-data" }}
+{{ data.search_series|json_script:"search-data" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  (function () {
+    "use strict";
+    if (typeof Chart === "undefined") return;
+
+    function readSeries(id) {
+      var el = document.getElementById(id);
+      if (!el) return [];
+      try { return JSON.parse(el.textContent); } catch (e) { return []; }
+    }
+    function labels(series) { return series.map(function (s) { return s.date.slice(5); }); }
+    function values(series) { return series.map(function (s) { return s.value; }); }
+
+    var fontFamily = "'Inter', sans-serif";
+    Chart.defaults.font.family = fontFamily;
+    Chart.defaults.color = "#464555";
+
+    var revenue = readSeries("revenue-data");
+    var login = readSeries("login-data");
+    var search = readSeries("search-data");
+
+    if (revenue.length) {
+      new Chart(document.getElementById("revenue-chart"), {
+        type: "bar",
+        data: {
+          labels: labels(revenue),
+          datasets: [{
+            label: "Fees collected (TZS)",
+            data: values(revenue),
+            backgroundColor: "rgba(53, 37, 205, 0.75)",
+            hoverBackgroundColor: "#3525cd",
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: function (v) { return v >= 1000 ? (v / 1000) + "k" : v; } } }
+          }
+        }
+      });
+    }
+
+    if (login.length) {
+      new Chart(document.getElementById("login-chart"), {
+        type: "line",
+        data: {
+          labels: labels(login),
+          datasets: [{
+            label: "Logins",
+            data: values(login),
+            borderColor: "#3525cd",
+            backgroundColor: "rgba(53, 37, 205, 0.12)",
+            fill: true, tension: 0.35, pointRadius: 2
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+    }
+
+    if (search.length) {
+      new Chart(document.getElementById("search-chart"), {
+        type: "line",
+        data: {
+          labels: labels(search),
+          datasets: [{
+            label: "Searches",
+            data: values(search),
+            borderColor: "#6063ee",
+            backgroundColor: "rgba(96, 99, 238, 0.12)",
+            fill: true, tension: 0.35, pointRadius: 2
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+    }
+  })();
+</script>
+{% endblock %}

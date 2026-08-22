@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Payment Ledger{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <section class="w-full relative pt-lg pb-md">
+    <div class="flex flex-col gap-sm">
+      <h1 class="font-display text-display text-on-surface tracking-tight">Payment Ledger</h1>
+      <p class="font-body-md text-on-surface-variant">Verified application fee transactions across the platform.</p>
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm relative overflow-hidden flex items-center gap-md">
+      <div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
+      <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span>
+      </div>
+      <div class="flex flex-col relative z-10">
+        <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Total Fees Collected</span>
+        <span class="font-headline-lg text-headline-lg text-on-surface font-bold">TZS {{ total_fees }}</span>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm relative overflow-hidden flex items-center gap-md">
+      <div class="absolute -right-10 -top-10 w-32 h-32 bg-tertiary/10 rounded-full blur-2xl"></div>
+      <div class="w-12 h-12 rounded-full bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+      </div>
+      <div class="flex flex-col relative z-10">
+        <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Paid Transactions</span>
+        <span class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ paid_count }}</span>
+      </div>
+    </div>
+  </div>
+
+  {% if payments %}
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+      <div class="px-lg py-md bg-surface flex items-center justify-between border-b border-surface-container">
+        <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-sm">
+          <span class="material-symbols-outlined text-primary">table_rows</span>
+          Transactions
+        </h2>
+        <span class="font-metadata text-on-surface-variant bg-surface-container px-3 py-1 rounded-full">{{ payments|length }} records</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-body-md">
+          <thead>
+            <tr class="text-left text-metadata text-on-surface-variant uppercase tracking-wider border-b border-surface-container">
+              <th class="px-lg py-3 font-semibold">Reference</th>
+              <th class="px-lg py-3 font-semibold">Student</th>
+              <th class="px-lg py-3 font-semibold">Slot</th>
+              <th class="px-lg py-3 font-semibold">Company</th>
+              <th class="px-lg py-3 font-semibold text-right">Amount</th>
+              <th class="px-lg py-3 font-semibold">Paid At</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container">
+            {% for p in payments %}
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-lg py-md font-mono text-metadata text-primary">{{ p.reference_id }}</td>
+                <td class="px-lg py-md font-medium text-on-surface">{{ p.student.user.email }}</td>
+                <td class="px-lg py-md text-on-surface">{{ p.application.slot.title }}</td>
+                <td class="px-lg py-md text-on-surface-variant">{{ p.application.slot.company.name }}</td>
+                <td class="px-lg py-md text-right font-semibold text-on-surface">TZS {{ p.amount }}</td>
+                <td class="px-lg py-md text-on-surface-variant">{{ p.paid_at|date:"M j, Y H:i" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "includes/pagination.html" %}
+    </div>
+  {% else %}
+    <div class="w-full flex flex-col items-center justify-center bg-surface-container-lowest rounded-xl p-xl shadow-sm border border-dashed border-outline-variant/50 min-h-[240px]">
+      <div class="w-16 h-16 rounded-full bg-surface-container mb-md flex items-center justify-center">
+        <span class="material-symbols-outlined text-[32px] text-outline">receipt_long</span>
+      </div>
+      <h3 class="font-headline-md text-on-surface mb-2">No verified payments yet</h3>
+      <p class="font-body-md text-on-surface-variant">Paid applications will appear here for reconciliation.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

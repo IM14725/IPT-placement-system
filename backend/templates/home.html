@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "IPT Marketplace — Student & Company Matching" %}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <!-- Hero Section -->
+  <section class="relative flex flex-col items-center justify-center w-full px-md py-xl overflow-hidden min-h-[60vh]">
+    <div class="absolute inset-0 z-0 pointer-events-none opacity-30">
+      <svg class="absolute w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+        <defs>
+          <radialGradient cx="50%" cy="50%" fx="50%" fy="50%" id="heroGlow" r="50%">
+            <stop offset="0%" stop-color="#3525cd" stop-opacity="0.2"></stop>
+            <stop offset="100%" stop-color="#3525cd" stop-opacity="0"></stop>
+          </radialGradient>
+        </defs>
+        <circle cx="50" cy="50" fill="url(#heroGlow)" r="40"></circle>
+        <circle cx="20" cy="80" fill="url(#heroGlow)" r="30"></circle>
+        <circle cx="80" cy="20" fill="url(#heroGlow)" r="30"></circle>
+      </svg>
+    </div>
+    <div class="relative z-10 flex flex-col items-center max-w-[800px] text-center gap-lg">
+      <h1 class="font-display text-display text-on-background tracking-tight">
+        {% blocktrans %}Connect students with companies for <br class="hidden sm:block"> <span class="text-primary">Industrial Practical Training.</span>{% endblocktrans %}
+      </h1>
+      <p class="font-body-lg text-body-lg text-on-surface-variant max-w-[600px]">
+        {% trans "A secure marketplace for students to find verified IPT slots and companies to manage talent efficiently." %}
+      </p>
+      <div class="flex flex-row gap-md mt-sm">
+        <a href="{% url 'register' %}" class="px-lg py-sm rounded-full bg-primary text-on-primary font-metadata text-metadata uppercase tracking-wider shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-xs">
+          <span>{% trans "Get Started" %}</span>
+          <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+        </a>
+        <a href="{% url 'login' %}" class="px-lg py-sm rounded-full bg-transparent text-primary font-metadata text-metadata uppercase tracking-wider border-2 border-primary hover:bg-primary/5 transition-colors duration-300">
+          {% trans "Login" %}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="w-full max-w-container-max mx-auto px-md py-lg">
+    <div class="flex items-center gap-sm mb-lg">
+      <div class="w-8 h-[2px] bg-primary"></div>
+      <span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">{% trans "Platform Features" %}</span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+      <div class="group relative bg-surface-container rounded-2xl p-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden min-h-[280px] flex flex-col justify-between hover:-translate-y-1">
+        <div class="absolute -right-8 -top-8 w-32 h-32 bg-secondary-container rounded-full opacity-10 group-hover:scale-150 transition-transform duration-700 ease-out"></div>
+        <div class="relative z-10 flex flex-col gap-sm">
+          <div class="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-md mb-xs">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span>
+          </div>
+          <h3 class="font-headline-md text-headline-md text-on-surface">For Students</h3>
+          <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+            Verify your academic documents, browse available training slots, and secure your placement with one-tap mobile money.
+          </p>
+        </div>
+      </div>
+      <div class="group relative bg-primary text-on-primary rounded-2xl p-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden min-h-[280px] flex flex-col justify-between hover:-translate-y-2">
+        <div class="absolute -left-12 -bottom-12 w-48 h-48 bg-primary-fixed rounded-full opacity-20 group-hover:scale-150 transition-transform duration-700 ease-out"></div>
+        <div class="relative z-10 flex flex-col gap-sm">
+          <div class="w-12 h-12 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center shadow-md mb-xs">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">business_center</span>
+          </div>
+          <h3 class="font-headline-md text-headline-md">For Companies</h3>
+          <p class="font-body-md text-body-md text-on-primary/80 leading-relaxed">
+            Post verified training slots, review applications from pre-verified students, and manage communication via instant SMS alerts.
+          </p>
+        </div>
+      </div>
+      <div class="group relative bg-surface-container rounded-2xl p-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden min-h-[280px] flex flex-col justify-between hover:-translate-y-1">
+        <div class="absolute right-0 top-1/2 -translate-y-1/2 w-32 h-64 bg-tertiary-container opacity-5 blur-2xl group-hover:opacity-10 transition-opacity duration-500"></div>
+        <div class="relative z-10 flex flex-col gap-sm">
+          <div class="w-12 h-12 rounded-xl bg-tertiary-container text-on-tertiary-container flex items-center justify-center shadow-md mb-xs">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+          </div>
+          <h3 class="font-headline-md text-headline-md text-on-surface">{% trans "Secure & Verified" %}</h3>
+          <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+            {% trans "Built on trust. We enforce strict document verification protocols for both students and companies to ensure a safe and professional ecosystem." %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

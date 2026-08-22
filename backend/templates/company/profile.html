@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Company Profile{% endblock %}
+{% block content %}
+<div class="w-full flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <h1 class="font-display text-display text-on-surface tracking-tight">Company Profile</h1>
+    <p class="font-body-lg text-body-lg text-on-surface-variant">Tell students about your organization and where you are located.</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg w-full items-start">
+    <div class="lg:col-span-7 flex flex-col gap-lg">
+      <div class="bg-surface-container-lowest rounded-xl p-lg shadow-md flex flex-col gap-md relative overflow-hidden auth-card">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mt-16 -mr-16 pointer-events-none"></div>
+        <div class="flex items-center gap-xs relative z-10">
+          <span class="material-symbols-outlined text-primary">business_center</span>
+          <div class="flex flex-col">
+            <h2 class="font-headline-md text-headline-md text-on-surface">Company Information</h2>
+            <p class="font-body-md font-body-md text-on-surface-variant">Your account is active — keep your details up to date.</p>
+          </div>
+        </div>
+        <form method="post" class="flex flex-col gap-md z-10">
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="rounded-lg bg-error-container/30 border-l-2 border-error p-sm text-body-md text-on-error-container">{{ form.non_field_errors }}</div>
+          {% endif %}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+            {% for field in form %}
+              <div class="flex flex-col gap-xs {% if field.name == 'description' %}md:col-span-2{% endif %}">
+                <label class="font-body-md font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
+                  <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">
+                    {% if field.name == 'name' %}badge
+                    {% elif field.name == 'industry' %}factory
+                    {% elif field.name == 'description' %}description
+                    {% elif field.name == 'region' %}map
+                    {% elif field.name == 'district' %}location_on
+                    {% elif field.name == 'ward' %}my_location
+                    {% elif field.name == 'street' %}home
+                    {% else %}edit{% endif %}
+                  </span></span>
+                  {{ field }}
+                </div>
+                {% if field.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ field.errors.0 }}</p>{% endif %}
+                {% if field.help_text %}<p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ field.help_text }}</p>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          <div class="flex justify-end mt-sm">
+            <button class="bg-primary text-on-primary hover:bg-primary/90 font-body-lg text-body-lg rounded-full px-xl py-3 shadow-sm hover:shadow-md transition-all active:scale-[0.98] flex items-center gap-xs" type="submit">
+              <span class="material-symbols-outlined text-[20px]">save</span>
+              Save Profile
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="lg:col-span-5 flex flex-col gap-lg">
+      <div class="bg-surface-container rounded-xl p-md shadow-sm flex flex-col gap-sm">
+        <div>
+          <h3 class="text-headline-md font-headline-md text-on-surface">Corporate Documents</h3>
+          <p class="text-body-md font-body-md text-on-surface-variant mt-xs">Upload BRELA certificate, TIN and business license (< 2MB each) for admin verification.</p>
+        </div>
+        <form method="post" enctype="multipart/form-data" action="{% url 'company-upload-doc' %}" class="flex flex-col gap-sm mt-sm">
+          {% csrf_token %}
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ upload_form.doc_type.id_for_label }}">{{ upload_form.doc_type.label }}</label>
+            <div class="ipt-field-box">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">description</span></span>
+              {{ upload_form.doc_type }}
+            </div>
+          </div>
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ upload_form.file.id_for_label }}">{{ upload_form.file.label }}</label>
+            <div class="ipt-field-box">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">upload_file</span></span>
+              <div class="ipt-file-wrap">{{ upload_form.file }}</div>
+            </div>
+            {% if upload_form.file.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ upload_form.file.errors.0 }}</p>{% endif %}
+          </div>
+          <button class="bg-primary text-on-primary text-body-md font-body-md font-bold rounded-lg py-3 px-md mt-sm shadow-sm hover:shadow-md transition-shadow flex items-center justify-center gap-xs" type="submit">
+            <span class="material-symbols-outlined text-[20px]">cloud_upload</span>
+            Upload Document
+          </button>
+        </form>
+        {% if docs %}
+          <div class="flex flex-col gap-xs mt-sm">
+            {% for doc in docs %}
+              <div class="flex items-center justify-between p-sm rounded-lg bg-surface hover:bg-surface-container-low transition-colors group">
+                <div class="flex items-center gap-sm min-w-0">
+                  <div class="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary shrink-0">
+                    <span class="material-symbols-outlined">description</span>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-body-md font-medium text-on-surface truncate">{{ doc.get_doc_type_display }}</span>
+                    <span class="text-metadata text-on-surface-variant truncate">{{ doc.original_name }}</span>
+                  </div>
+                </div>
+                <a href="{% url 'document-view' doc.id %}" target="_blank" class="flex items-center gap-xs text-primary text-body-md font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span class="material-symbols-outlined text-[20px]">visibility</span>
+                  View
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      {% if company %}
+        <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm">
+          <div class="flex items-center gap-xs mb-md">
+            <span class="material-symbols-outlined text-outline">verified_user</span>
+            <h3 class="font-headline-md font-headline-md text-on-surface">Account</h3>
+          </div>
+          <div class="flex items-center gap-xs">
+            {% if company.is_approved %}
+              <span class="material-symbols-outlined text-[#1b5e20] text-[20px]">verified</span>
+              <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#1b5e20] bg-[#e8f5e9]">Verified</span>
+            {% elif company.verification_status == 'REJECTED' %}
+              <span class="material-symbols-outlined text-error text-[20px]">cancel</span>
+              <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-on-error bg-error-container">Rejected</span>
+            {% else %}
+              <span class="material-symbols-outlined text-[#a16207] text-[20px]">pending</span>
+              <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#a16207] bg-[#fff4e5]">Pending Verification</span>
+            {% endif %}
+          </div>
+          <div class="h-[1px] w-full bg-surface-container-high my-sm"></div>
+          <div class="flex flex-col gap-sm">
+            <div class="flex items-center gap-xs">
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">mail</span>
+              <span class="font-body-md text-body-md text-on-surface truncate">{{ user.email }}</span>
+            </div>
+            {% if user.phone %}
+              <div class="flex items-center gap-xs">
+                <span class="material-symbols-outlined text-[16px] text-on-surface-variant">call</span>
+                <span class="font-body-md text-body-md text-on-surface">{{ user.phone }}</span>
+              </div>
+            {% endif %}
+            <div class="flex items-center gap-xs">
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">calendar_month</span>
+              <span class="font-body-md text-body-md text-on-surface">Joined {{ user.date_joined|date:"M Y" }}</span>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  window.IPT = window.IPT || {};
+  window.IPT.regions = {{ regions_json|safe }};
+  window.IPT.profileRegion = "{{ company.region_id|default:'' }}";
+  window.IPT.profileDistrict = "{{ company.district_id|default:'' }}";
+  window.IPT.profileWard = "{{ company.ward_id|default:'' }}";
+</script>
+<script src="/static/js/location-cascade.js"></script>
+{% endblock %}

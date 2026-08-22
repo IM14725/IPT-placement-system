@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}Verification Queue{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-xl">
+  <div class="flex flex-col gap-lg">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="font-display text-display text-on-surface mb-xs">Verification Queue</h1>
+        <p class="font-body-lg text-body-lg text-on-surface-variant">Review and approve student and company verification requests.</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+      <div class="bg-surface-container rounded-xl p-md flex items-center justify-between relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+        <div class="absolute -right-8 -top-8 w-32 h-32 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
+        <div class="flex flex-col gap-xs relative z-10">
+          <span class="text-metadata font-label-caps text-on-surface-variant uppercase tracking-wider">Total Pending</span>
+          <span class="text-display font-display text-primary">{{ total_pending }}</span>
+        </div>
+        <div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center relative z-10">
+          <span class="material-symbols-outlined text-on-primary-container">pending_actions</span>
+        </div>
+      </div>
+      <div class="bg-surface-container rounded-xl p-md flex items-center justify-between relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+        <div class="absolute -right-8 -top-8 w-32 h-32 bg-secondary/5 rounded-full blur-2xl group-hover:bg-secondary/10 transition-colors"></div>
+        <div class="flex flex-col gap-xs relative z-10">
+          <span class="text-metadata font-label-caps text-on-surface-variant uppercase tracking-wider">Verified Today</span>
+          <span class="text-display font-display text-on-surface">{{ verified_today }}</span>
+        </div>
+        <div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center relative z-10">
+          <span class="material-symbols-outlined text-on-secondary-container">check_circle</span>
+        </div>
+      </div>
+      <div class="bg-surface-container rounded-xl p-md flex items-center justify-between relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+        <div class="absolute -right-8 -top-8 w-32 h-32 bg-tertiary/5 rounded-full blur-2xl group-hover:bg-tertiary/10 transition-colors"></div>
+        <div class="flex flex-col gap-xs relative z-10">
+          <span class="text-metadata font-label-caps text-on-surface-variant uppercase tracking-wider">Review Queue</span>
+          <span class="text-display font-display text-on-surface">{{ student_pending }}<span class="text-headline-md font-body-md">S</span> · {{ company_pending }}<span class="text-headline-md font-body-md">C</span></span>
+        </div>
+        <div class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center relative z-10">
+          <span class="material-symbols-outlined text-on-tertiary-container">timer</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-md">
+      <div aria-label="Verification Queues" class="flex gap-sm border-b border-outline-variant w-full lg:w-auto relative" role="tablist">
+        <button aria-selected="true" class="px-md py-sm text-body-md font-body-md text-primary border-b-2 border-primary -mb-[1px] flex items-center gap-xs transition-colors" onclick="switchTab('students')" role="tab">
+          Students
+          <span class="bg-primary-container text-on-primary-container text-metadata font-metadata px-2 py-0.5 rounded-full">{{ student_pending }}</span>
+        </button>
+        <button aria-selected="false" class="px-md py-sm text-body-md font-body-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-xs" onclick="switchTab('companies')" role="tab">
+          Companies
+          <span class="bg-surface-variant text-on-surface-variant text-metadata font-metadata px-2 py-0.5 rounded-full">{{ company_pending }}</span>
+        </button>
+      </div>
+      <div class="flex items-center gap-sm w-full lg:w-auto">
+        <div class="relative w-full lg:w-64">
+          <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+          <input id="queue-search" class="w-full pl-xl pr-sm py-2 bg-surface rounded-lg border border-outline-variant focus:border-primary focus:outline-none transition-colors text-body-md font-body-md text-on-surface placeholder:text-outline-variant" placeholder="Search by name..." type="text" oninput="filterQueue(this.value)">
+        </div>
+      </div>
+    </div>
+
+    <div class="w-full animate-fade-in" id="tab-students">
+      {% if students %}
+        <div class="w-full overflow-x-auto">
+          <table class="w-full text-left min-w-[800px]">
+            <thead>
+              <tr class="text-metadata font-label-caps text-on-surface-variant border-b border-surface-variant">
+                <th class="py-sm px-sm font-medium w-1/3">Applicant</th>
+                <th class="py-sm px-sm font-medium">Institution / Course</th>
+                <th class="py-sm px-sm font-medium">Submitted</th>
+                <th class="py-sm px-sm font-medium">Status</th>
+                <th class="py-sm px-sm font-medium text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody class="queue-rows">
+              {% for s in students %}
+                <tr class="border-b border-surface-variant hover:bg-surface/50 transition-colors group queue-row" data-name="{{ s.user.full_name|lower }} {{ s.university|lower }} {{ s.user.email|lower }}">
+                  <td class="py-sm px-sm">
+                    <div class="flex items-center gap-sm">
+                      <div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-outline">person</span>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-body-md font-headline-md text-on-surface truncate">{{ s.user.full_name }}</p>
+                        <p class="text-metadata font-metadata text-on-surface-variant truncate">{{ s.user.email }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-sm px-sm">
+                    <div class="min-w-0">
+                      <p class="text-body-md font-body-md text-on-surface truncate">{{ s.university }}</p>
+                      <p class="text-metadata font-metadata text-on-surface-variant truncate">{{ s.course }}</p>
+                    </div>
+                  </td>
+                  <td class="py-sm px-sm text-body-md font-body-md text-on-surface">{{ s.created_at|timesince }} ago</td>
+                  <td class="py-sm px-sm">
+                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-tertiary-container/30 text-tertiary text-label-caps font-label-caps uppercase">
+                      <span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+                      Pending
+                    </span>
+                  </td>
+                  <td class="py-sm px-sm text-right">
+                    <a class="inline-flex items-center justify-center px-sm py-1.5 border border-primary text-primary text-body-md font-metadata rounded-lg hover:bg-primary/5 transition-colors" href="{% url 'platform-student-verification' s.pk %}">
+                      Review Details
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="flex flex-col items-center justify-center py-xl text-center">
+          <span class="material-symbols-outlined text-[48px] text-outline-variant mb-sm">how_to_reg</span>
+          <p class="font-body-md text-on-surface-variant">No students awaiting verification.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="w-full hidden" id="tab-companies">
+      {% if companies %}
+        <div class="w-full overflow-x-auto">
+          <table class="w-full text-left min-w-[800px]">
+            <thead>
+              <tr class="text-metadata font-label-caps text-on-surface-variant border-b border-surface-variant">
+                <th class="py-sm px-sm font-medium w-1/3">Company</th>
+                <th class="py-sm px-sm font-medium">Industry</th>
+                <th class="py-sm px-sm font-medium">Submitted</th>
+                <th class="py-sm px-sm font-medium">Status</th>
+                <th class="py-sm px-sm font-medium text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody class="queue-rows">
+              {% for c in companies %}
+                <tr class="border-b border-surface-variant hover:bg-surface/50 transition-colors group queue-row" data-name="{{ c.name|lower }} {{ c.industry|lower }} {{ c.user.email|lower }}">
+                  <td class="py-sm px-sm">
+                    <div class="flex items-center gap-sm">
+                      <div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-outline">apartment</span>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-body-md font-headline-md text-on-surface truncate">{{ c.name }}</p>
+                        <p class="text-metadata font-metadata text-on-surface-variant truncate">HR: {{ c.user.email }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-sm px-sm">
+                    <p class="text-body-md font-body-md text-on-surface truncate">{{ c.industry }}</p>
+                  </td>
+                  <td class="py-sm px-sm text-body-md font-body-md text-on-surface">{{ c.created_at|timesince }} ago</td>
+                  <td class="py-sm px-sm">
+                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-tertiary-container/30 text-tertiary text-label-caps font-label-caps uppercase">
+                      <span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+                      Pending
+                    </span>
+                  </td>
+                  <td class="py-sm px-sm text-right">
+                    <a class="inline-flex items-center justify-center px-sm py-1.5 border border-primary text-primary text-body-md font-metadata rounded-lg hover:bg-primary/5 transition-colors" href="{% url 'platform-company-verification' c.pk %}">
+                      Review Details
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="flex flex-col items-center justify-center py-xl text-center">
+          <span class="material-symbols-outlined text-[48px] text-outline-variant mb-sm">domain_verification</span>
+          <p class="font-body-md text-on-surface-variant">No companies awaiting verification.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  function switchTab(tabId) {
+    const tabs = ['students', 'companies'];
+    tabs.forEach(tab => {
+      const btn = document.querySelector(`button[onclick="switchTab('${tab}')"]`);
+      const content = document.getElementById(`tab-${tab}`);
+      if (tab === tabId) {
+        btn.classList.add('text-primary', 'border-b-2', 'border-primary', '-mb-[1px]');
+        btn.classList.remove('text-on-surface-variant');
+        btn.setAttribute('aria-selected', 'true');
+        btn.querySelector('span').classList.add('bg-primary-container', 'text-on-primary-container');
+        btn.querySelector('span').classList.remove('bg-surface-variant', 'text-on-surface-variant');
+        content.classList.remove('hidden');
+        content.classList.add('animate-fade-in');
+      } else {
+        btn.classList.remove('text-primary', 'border-b-2', 'border-primary', '-mb-[1px]');
+        btn.classList.add('text-on-surface-variant');
+        btn.setAttribute('aria-selected', 'false');
+        btn.querySelector('span').classList.remove('bg-primary-container', 'text-on-primary-container');
+        btn.querySelector('span').classList.add('bg-surface-variant', 'text-on-surface-variant');
+        content.classList.add('hidden');
+        content.classList.remove('animate-fade-in');
+      }
+    });
+  }
+  function filterQueue(value) {
+    const term = value.toLowerCase();
+    document.querySelectorAll('.queue-row').forEach(row => {
+      row.style.display = row.getAttribute('data-name').includes(term) ? '' : 'none';
+    });
+  }
+</script>
+<style>
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+</style>
+{% endblock %}

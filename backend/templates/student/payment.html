@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Pay Application Fee{% endblock %}
+{% block content %}
+<div class="relative w-full max-w-lg mx-auto bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden flex flex-col">
+  <div class="absolute top-0 left-0 w-full h-32 bg-primary/5 blur-3xl rounded-full transform -translate-y-1/2"></div>
+  <div class="relative z-10 p-lg flex flex-col gap-lg">
+    <div class="flex flex-col items-center text-center gap-xs">
+      <div class="w-16 h-16 rounded-full bg-primary-container/20 flex items-center justify-center mb-sm">
+        <span class="material-symbols-outlined text-primary text-[32px]">payments</span>
+      </div>
+      <h1 class="font-headline-lg text-headline-lg text-on-surface">Pay Application Fee</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant">Complete your payment to finalize your application.</p>
+    </div>
+    <div class="flex flex-col gap-xs bg-surface p-sm rounded-lg">
+      <div class="flex justify-between items-center">
+        <span class="font-metadata text-metadata text-on-surface-variant">Slot Title</span>
+        <span class="font-body-md text-body-md text-on-surface font-medium">{{ payment.application.slot.title }}</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="font-metadata text-metadata text-on-surface-variant">Company</span>
+        <span class="font-body-md text-body-md text-on-surface font-medium">{{ payment.application.slot.company.name }}</span>
+      </div>
+      <div class="flex justify-between items-center mt-xs pt-xs border-t border-surface-dim/50">
+        <span class="font-metadata text-metadata text-on-surface-variant">Reference</span>
+        <span class="font-label-caps text-label-caps text-on-surface bg-surface-container px-2 py-1 rounded tracking-widest">{{ payment.reference_id }}</span>
+      </div>
+    </div>
+    <div class="flex flex-col items-center justify-center bg-surface-container py-md px-lg rounded-lg shadow-inner">
+      <span class="font-label-caps text-label-caps text-on-surface-variant mb-1">Amount Due</span>
+      <div class="flex items-baseline gap-xs">
+        <span class="font-headline-md text-headline-md text-on-surface">TZS</span>
+        <span class="font-display text-display text-primary">{{ payment.amount }}</span>
+      </div>
+    </div>
+    <div class="flex flex-col gap-md">
+      <div class="flex flex-col gap-xs">
+        <label class="font-body-md text-body-md font-medium text-on-surface" for="pay-method">Payment Method</label>
+        <div class="relative">
+          <select id="pay-method" class="w-full appearance-none bg-surface-container-lowest border border-outline-variant text-on-surface font-body-md text-body-md rounded-lg px-sm py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer">
+            <option value="M_PESA">M-Pesa</option>
+            <option value="TIGO_PESA">Tigo Pesa</option>
+            <option value="AIRTEL_MONEY">Airtel Money</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-sm top-1/2 transform -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+        </div>
+      </div>
+      <div class="flex flex-col gap-xs">
+        <label class="font-body-md text-body-md font-medium text-on-surface" for="pay-phone">Mobile Number</label>
+        <div class="relative flex items-center">
+          <span class="absolute left-sm font-body-md text-body-md text-on-surface-variant pointer-events-none">+255</span>
+          <input id="pay-phone" type="text" value="{{ user.phone }}" placeholder="7XX XXX XXX" class="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-body-md text-body-md rounded-lg pl-14 pr-sm py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+        </div>
+        <span class="font-metadata text-metadata text-on-surface-variant">A push notification will be sent to this number to authorize the payment.</span>
+      </div>
+      <button id="pay-btn" class="w-full bg-primary text-on-primary font-body-lg text-body-lg font-medium py-3 rounded-lg shadow-md hover:shadow-lg hover:bg-primary-container transition-all flex items-center justify-center gap-xs">
+        <span>Pay Now</span>
+        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+      </button>
+      <p id="pay-status" class="font-metadata text-metadata text-center text-on-surface-variant"></p>
+      <div class="flex items-center justify-center gap-2 text-on-surface-variant/70">
+        <span class="material-symbols-outlined text-[16px]">lock</span>
+        <span class="font-metadata text-metadata">Secure Payment Gateway</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  window.IPT = window.IPT || {};
+  window.IPT.paymentRef = "{{ payment.reference_id }}";
+  window.IPT.paymentAmount = "{{ payment.amount }}";
+  window.IPT.realtimeUrl = "http://" + location.hostname + ":8001";
+</script>
+<script src="/static/js/payments.js"></script>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Verify: {{ company.name }}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col gap-sm">
+    <div class="flex items-center gap-base text-body-md text-on-surface-variant">
+      <a class="hover:text-primary transition-colors" href="{% url 'platform-verifications' %}">Queue</a>
+      <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+      <span>Company Verification</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <h1 class="font-display text-display text-on-surface tracking-tight">Verify: {{ company.name }}</h1>
+      <span class="px-sm py-base rounded-full bg-surface-variant text-on-surface-variant text-label-caps uppercase font-bold tracking-wider">ID: #{{ company.pk }}</span>
+    </div>
+  </div>
+
+  <div class="w-full flex flex-col lg:flex-row gap-gutter">
+    <div class="flex-1 flex flex-col gap-lg">
+      <div class="bg-surface-container rounded-xl p-md shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none"></div>
+        <div class="flex items-center gap-sm mb-lg">
+          <span class="material-symbols-outlined text-primary text-[32px] font-light">domain</span>
+          <h2 class="font-headline-lg text-headline-lg text-on-surface">Company Profile Overview</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-md gap-x-xl relative z-10">
+          <div class="flex flex-col gap-xs">
+            <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Company Name</span>
+            <span class="font-body-lg text-body-lg text-on-surface font-medium truncate">{{ company.name }}</span>
+          </div>
+          <div class="flex flex-col gap-xs">
+            <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Industry</span>
+            <span class="font-body-lg text-body-lg text-on-surface truncate">{{ company.industry }}</span>
+          </div>
+          <div class="flex flex-col gap-xs">
+            <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Contact Email</span>
+            <span class="font-body-lg text-body-lg text-on-surface font-mono">{{ company.user.email }}</span>
+          </div>
+          <div class="flex flex-col gap-xs">
+            <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Phone</span>
+            <span class="font-body-lg text-body-lg text-on-surface">{{ company.user.phone|default:"—" }}</span>
+          </div>
+          <div class="flex flex-col gap-xs md:col-span-2">
+            <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Location</span>
+            <div class="flex items-start gap-xs">
+              <span class="material-symbols-outlined text-outline-variant text-[20px] mt-[2px]">location_on</span>
+              <span class="font-body-lg text-body-lg text-on-surface">{{ company.street|default:"" }} {{ company.district }}{% if company.region %}, {{ company.region }}{% endif %}</span>
+            </div>
+          </div>
+          {% if company.description %}
+            <div class="flex flex-col gap-xs md:col-span-2">
+              <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Description</span>
+              <span class="font-body-lg text-body-lg text-on-surface">{{ company.description }}</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="bg-surface-container rounded-xl p-md shadow-sm">
+        <div class="flex items-center justify-between mb-lg">
+          <div class="flex items-center gap-sm">
+            <span class="material-symbols-outlined text-primary text-[28px] font-light">description</span>
+            <h3 class="font-headline-md text-headline-md text-on-surface">Verification Documents</h3>
+          </div>
+        </div>
+        {% if missing_docs %}
+          <div class="rounded-lg bg-[#fef08a]/30 border-l-2 border-[#a16207] p-sm text-body-md text-[#a16207] mb-sm">
+            Missing required: {{ missing_docs|join:", " }}
+          </div>
+        {% endif %}
+        <div class="flex flex-col gap-sm">
+          {% for doc in docs %}
+            <div class="flex items-center justify-between bg-surface p-sm rounded-lg hover:bg-surface-dim transition-colors group cursor-pointer">
+              <div class="flex items-center gap-md min-w-0">
+                <div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0 group-hover:bg-primary-container transition-colors">
+                  <span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-primary-container">description</span>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="font-body-md text-body-md text-on-surface font-medium truncate">{{ doc.get_doc_type_display }}</span>
+                  <span class="font-metadata text-metadata text-outline truncate">Uploaded {{ doc.uploaded_at|timesince }} ago · {{ doc.size_bytes|filesizeformat }}</span>
+                </div>
+              </div>
+              <a href="{% url 'document-view' doc.pk %}" target="_blank" class="px-sm py-xs rounded-full bg-primary/10 text-primary font-body-md text-body-md font-medium hover:bg-primary hover:text-on-primary transition-all flex items-center gap-xs">
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                <span>View</span>
+              </a>
+            </div>
+          {% empty %}
+            <p class="font-body-md text-body-md text-on-surface-variant">No documents uploaded yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="w-full lg:w-[400px] flex flex-col gap-lg shrink-0">
+      <div class="bg-surface-container rounded-xl p-md shadow-sm relative overflow-hidden">
+        <div class="absolute -right-4 -top-4 w-32 h-32 bg-secondary-container/20 rounded-full blur-2xl pointer-events-none"></div>
+        <h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest mb-sm">Account Status</h3>
+        <div class="flex items-center gap-sm bg-secondary-container/10 p-sm rounded-lg inline-flex mb-xl">
+          <div class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-secondary"></span>
+          </div>
+          <span class="font-body-md text-body-md text-secondary font-bold uppercase tracking-wide">{{ company.get_verification_status_display }}</span>
+        </div>
+        {% if company.rejection_reason %}
+          <p class="font-metadata text-metadata text-error mb-xl">Last rejection: {{ company.rejection_reason }}</p>
+        {% endif %}
+        <div class="flex flex-col gap-sm">
+          <h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Review Decision</h3>
+          <form method="post" class="flex flex-col gap-base">
+            {% csrf_token %}
+            <label class="font-body-md text-body-md font-bold text-on-surface" for="review-notes">Internal Notes / Rejection Reason</label>
+            <textarea class="w-full bg-surface border border-outline-variant rounded-lg p-sm font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none placeholder:text-outline-variant" id="review-notes" name="reason" placeholder="Add notes or specify what needs to be re-uploaded..." rows="4"></textarea>
+            <div class="flex flex-col gap-sm mt-sm">
+              <button class="w-full py-3 bg-primary text-on-primary rounded-full font-body-md text-body-md font-bold hover:bg-primary/90 hover:shadow-lg transition-all flex items-center justify-center gap-xs" name="decision" value="approve" type="submit">
+                <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                Approve Company
+              </button>
+              <button class="w-full py-3 bg-error-container text-on-error-container rounded-full font-body-md text-body-md font-bold hover:bg-error-container/80 transition-all flex items-center justify-center gap-xs" name="decision" value="reject" type="submit">
+                <span class="material-symbols-outlined text-[20px]">history</span>
+                Reject & Request Re-upload
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="bg-surface-container rounded-xl p-md shadow-sm flex flex-col items-center text-center">
+        <div class="w-16 h-16 rounded-full bg-surface-variant flex items-center justify-center mb-sm">
+          <span class="material-symbols-outlined text-outline text-[32px]">shield_person</span>
+        </div>
+        <h4 class="font-body-md text-body-md text-on-surface font-bold mb-xs">Verification Standards</h4>
+        <p class="font-metadata text-metadata text-on-surface-variant">Ensure all documents match the company name exactly. Tax clearance must be from the current fiscal year. Review ILS compliance guidelines for further details.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

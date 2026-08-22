@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Login" %}{% endblock %}
+{% block content %}
+<div class="w-full max-w-[1080px] mx-auto my-md auth-card bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden flex flex-col lg:flex-row min-h-[640px]">
+  <!-- Brand panel -->
+  <div class="relative hidden lg:flex lg:w-[44%] auth-card-panel bg-primary text-on-primary flex-col justify-between p-xl overflow-hidden">
+    <div class="absolute -right-16 -bottom-16 w-72 h-72 bg-primary-fixed rounded-full opacity-20 pointer-events-none"></div>
+    <div class="absolute -left-10 top-1/3 w-40 h-40 bg-secondary-container rounded-full opacity-20 blur-2xl pointer-events-none"></div>
+    <div class="relative z-10 flex items-center gap-xs font-headline-lg font-headline-md tracking-tight">
+      <span class="material-symbols-outlined text-[28px]">domain</span>
+      IPT Marketplace
+    </div>
+    <div class="relative z-10 flex flex-col gap-md">
+      <h2 class="font-display text-display leading-tight tracking-tight">
+        {% blocktrans %}Welcome back to your <span class="text-primary-fixed">training journey.</span>{% endblocktrans %}
+      </h2>
+      <div class="flex flex-col gap-sm">
+        <div class="flex items-center gap-sm text-on-primary/90">
+          <span class="w-9 h-9 rounded-lg bg-primary-fixed/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">badge</span>
+          </span>
+          <span class="font-body-md text-body-md">{% trans "Verified students, verified companies" %}</span>
+        </div>
+        <div class="flex items-center gap-sm text-on-primary/90">
+          <span class="w-9 h-9 rounded-lg bg-primary-fixed/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">bolt</span>
+          </span>
+          <span class="font-body-md text-body-md">{% trans "One-tap mobile money payments" %}</span>
+        </div>
+        <div class="flex items-center gap-sm text-on-primary/90">
+          <span class="w-9 h-9 rounded-lg bg-primary-fixed/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">notifications_active</span>
+          </span>
+          <span class="font-body-md text-body-md">{% trans "Instant SMS & email updates" %}</span>
+        </div>
+      </div>
+    </div>
+    <span class="relative z-10 font-metadata text-metadata text-on-primary/60">© 2024 IPT Marketplace</span>
+  </div>
+
+  <!-- Form panel -->
+  <div class="relative flex-1 flex items-center justify-center p-lg lg:p-xl">
+    <div class="w-full max-w-md flex flex-col gap-lg">
+      <div class="flex flex-col items-center text-center gap-xs lg:hidden">
+        <div class="w-16 h-16 rounded-full bg-primary-container/20 flex items-center justify-center mb-xs">
+          <span class="material-symbols-outlined text-primary text-[32px]">login</span>
+        </div>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface">{% trans "Welcome Back" %}</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Log in to manage your IPT applications." %}</p>
+      </div>
+
+      <div class="hidden lg:flex flex-col gap-xs">
+        <span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">{% trans "Sign in" %}</span>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface">{% trans "Welcome back" %}</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Log in to manage your IPT applications." %}</p>
+      </div>
+
+      <form method="post" class="flex flex-col gap-md" novalidate data-loading-form>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-body-md text-on-error-container flex items-start gap-xs">
+            <span class="material-symbols-outlined text-[18px] mt-px">error</span>
+            <span>{{ form.non_field_errors.0 }}</span>
+          </div>
+        {% endif %}
+
+        <div class="flex flex-col gap-xs">
+          <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.email.id_for_label }}">{% trans "Email address" %}</label>
+          <div class="ipt-field-box {% if form.email.errors %}is-error{% endif %}">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">mail</span></span>
+            {{ form.email }}
+          </div>
+          {% if form.email.errors %}
+            <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.email.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="flex flex-col gap-xs">
+          <div class="flex items-center justify-between">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.password.id_for_label }}">{% trans "Password" %}</label>
+            <a href="{% url 'forgot-password' %}" class="font-metadata text-metadata text-primary font-semibold hover:underline">{% trans "Forgot password?" %}</a>
+          </div>
+          <div class="ipt-field-box {% if form.password.errors %}is-error{% endif %}">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span>
+            {{ form.password }}
+            <button type="button" class="ipt-field-action" onclick="togglePassword(this, '{{ form.password.id_for_label }}')" aria-label="Show password">
+              <span class="material-symbols-outlined text-[20px]" data-icon="eye">visibility</span>
+            </button>
+          </div>
+          {% if form.password.errors %}
+            <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.password.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <button class="w-full bg-primary text-on-primary font-body-lg text-body-lg font-medium py-3 rounded-lg shadow-md hover:shadow-lg hover:bg-primary-container transition-all flex items-center justify-center gap-xs disabled:opacity-60 disabled:cursor-not-allowed" type="submit" data-loading>
+          <span data-label>{% trans "Login" %}</span>
+          <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+        </button>
+      </form>
+
+      <div class="relative flex items-center gap-md">
+        <div class="flex-1 h-px bg-outline-variant"></div>
+        <span class="font-metadata text-metadata text-on-surface-variant">{% trans "New to the marketplace?" %}</span>
+        <div class="flex-1 h-px bg-outline-variant"></div>
+      </div>
+
+      <a href="{% url 'register' %}" class="w-full text-center bg-surface-container text-on-surface font-body-md text-body-md font-semibold py-3 rounded-lg hover:bg-surface-container-high transition-colors flex items-center justify-center gap-xs">
+        <span class="material-symbols-outlined text-[18px]">person_add</span>
+        {% trans "Create an account" %}
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  function togglePassword(btn, id) {
+    const input = document.getElementById(id);
+    const icon = btn.querySelector('[data-icon]');
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    icon.textContent = show ? "visibility_off" : "visibility";
+  }
+</script>
+{% endblock %}

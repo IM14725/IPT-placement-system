@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Find an IPT Slot" %}{% endblock %}
+{% block content %}
+<div class="w-full flex flex-col gap-md">
+  <div class="w-full flex flex-col gap-sm">
+    <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Find an IPT Slot" %}</h1>
+    <p class="font-body-lg text-body-lg text-on-surface-variant max-w-[600px]">{% trans "Browse and filter live training opportunities tailored to your academic background and career goals." %}</p>
+  </div>
+
+  {% if not profile or not profile.is_verified %}
+    <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex items-start gap-sm text-body-md text-on-surface-variant">
+      <span class="material-symbols-outlined text-tertiary">info</span>
+      {% if not profile %}
+        Complete your <a class="font-semibold text-primary underline" href="{% url 'student-profile' %}">profile</a> and upload your verification documents before applying.
+      {% else %}
+        Your account is <span class="font-semibold">{{ profile.get_verification_status_display }}</span>.
+        Once approved, you can apply to slots. <a class="font-semibold text-primary underline" href="{% url 'student-documents' %}">Upload documents</a>
+        {% if profile.verification_status == 'REJECTED' %} · Reason: {{ profile.rejection_reason }}{% endif %}
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <!-- Filter Bar -->
+  <div class="w-full bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col lg:flex-row gap-sm items-end relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none"></div>
+    <div class="w-full lg:w-1/5 flex flex-col gap-xs relative z-10">
+      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Region" %}</label>
+      <div class="ipt-filter-select">
+        <select id="filter-region" class="w-full h-10 px-sm pr-8 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer">
+          <option value="">{% trans "All Regions" %}</option>
+          {% for r in regions %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}
+        </select>
+        <span class="ipt-filter-caret"><span class="material-symbols-outlined">expand_more</span></span>
+      </div>
+    </div>
+    <div class="w-full lg:w-1/5 flex flex-col gap-xs relative z-10">
+      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "District" %}</label>
+      <div class="ipt-filter-select">
+        <select id="filter-district" class="w-full h-10 px-sm pr-8 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+          <option value="">{% trans "All Districts" %}</option>
+        </select>
+        <span class="ipt-filter-caret"><span class="material-symbols-outlined">expand_more</span></span>
+      </div>
+    </div>
+    <div class="w-full lg:w-1/5 flex flex-col gap-xs relative z-10">
+      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Department / Course" %}</label>
+      <input id="filter-department" type="text" placeholder="e.g. Computer Science" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow">
+    </div>
+    <div class="w-full lg:w-1/5 flex flex-col gap-xs relative z-10">
+      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Level / Year of Study" %}</label>
+      <select id="filter-level" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer">
+        <option value="">{% trans "Any Level" %}</option>
+        {% for y in "123456" %}<option value="{{ y }}">{% blocktrans %}Year {{ y }}{% endblocktrans %}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="w-full lg:w-1/5 flex flex-col gap-xs relative z-10">
+      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Education Level (TCU)" %}</label>
+      <select id="filter-education-level" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer">
+        <option value="">{% trans "Any Qualification" %}</option>
+        {% for value, label in education_levels %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <!-- Results Grid -->
+    <div id="slot-results" class="grid grid-cols-1 md:grid-cols-2 gap-lg w-full">
+    <div class="col-span-full font-body-md text-body-md text-on-surface-variant">{% trans "Loading slots..." %}</div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  window.IPT = window.IPT || {};
+  window.IPT.canApply = {{ can_apply|yesno:"true,false" }};
+  window.IPT.i18n = {
+    applyNow: "{% trans 'Apply Now' %}",
+    slotFull: "{% trans 'Slot Full' %}",
+    verificationRequired: "{% trans 'Verification required to apply.' %}",
+    unpaid: "{% trans 'Unpaid' %}",
+    perMonth: "{% trans '/month' %}",
+    dept: "{% trans 'Dept:' %}",
+    available: "{% trans 'Available' %}",
+    full: "{% trans 'FULL' %}",
+    noMatch: "{% trans 'No slots match your filters.' %}",
+    loading: "{% trans 'Loading...' %}",
+    year: "{% trans 'Year' %}"
+  };
+</script>
+<script src="/static/js/marketplace.js"></script>
+{% endblock %}
