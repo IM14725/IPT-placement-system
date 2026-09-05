@@ -2,6 +2,7 @@ Django==6.1
 djangorestframework==3.18.0
 psycopg[binary]==3.3.4
 django-environ==0.14.0
+dj-database-url==2.2.0
 Pillow==12.3.0
 filetype==1.2.0
 reportlab==5.0.0
