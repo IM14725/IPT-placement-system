@@ -13,7 +13,6 @@ class PaymentMethod(models.TextChoices):
 
 
 class PaymentGateway(models.TextChoices):
-    MOCK = "MOCK", "Mock Simulator"
     SELCOM = "SELCOM", "Selcom"
     PESAPAL = "PESAPAL", "Pesapal"
 
@@ -42,9 +41,10 @@ class Payment(TimeStampedModel):
     )
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     currency = models.CharField(max_length=3, default="TZS")
+    phone_number = models.CharField(max_length=20, blank=True)
     method = models.CharField(max_length=15, choices=PaymentMethod.choices)
     gateway = models.CharField(
-        max_length=15, choices=PaymentGateway.choices, default=PaymentGateway.MOCK
+        max_length=15, choices=PaymentGateway.choices, default=PaymentGateway.SELCOM
     )
     gateway_txn_id = models.CharField(max_length=100, blank=True)
     callback_payload = models.JSONField(default=dict, blank=True)

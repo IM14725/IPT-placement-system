@@ -621,14 +621,14 @@ def directory(request):
             qs = qs.filter(verification_status=status)
         rows = qs
 
-    regions = list(Region.objects.order_by("name").values("id", "name"))
+    regions = [{"id": str(r["id"]), "name": r["name"]} for r in Region.objects.order_by("name").values("id", "name")]
     districts = (
-        list(District.objects.filter(region_id=region_id).order_by("name").values("id", "name"))
+        [{"id": str(d["id"]), "name": d["name"]} for d in District.objects.filter(region_id=region_id).order_by("name").values("id", "name")]
         if region_id
         else []
     )
     wards = (
-        list(Ward.objects.filter(district_id=district_id).order_by("name").values("id", "name"))
+        [{"id": str(w["id"]), "name": w["name"]} for w in Ward.objects.filter(district_id=district_id).order_by("name").values("id", "name")]
         if district_id
         else []
     )

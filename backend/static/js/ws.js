@@ -7,7 +7,7 @@
 
   function connect() {
     if (!window.IPT.currentUserId) return;
-    fetch("/api/auth/my-token/", { credentials: "same-origin" })
+    fetch("/api/auth/my-token/", { credentials: "same-origin", cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         var url = "ws://" + location.hostname + ":8001/ws/notifications/" + window.IPT.currentUserId + "?token=" + data.token;

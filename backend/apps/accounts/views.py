@@ -155,7 +155,10 @@ def dashboard_redirect(request):
     return redirect(_dashboard_url(request.user))
 
 
+from django.views.decorators.cache import never_cache
+
 @login_required
+@never_cache
 def my_token(request):
     token, _ = Token.objects.get_or_create(user=request.user)
     return JsonResponse({"token": token.key, "user_id": request.user.id})

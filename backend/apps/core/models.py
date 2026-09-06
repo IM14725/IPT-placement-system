@@ -1,8 +1,10 @@
+import uuid
 from django.conf import settings
 from django.db import models
 
 
 class TimeStampedModel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -19,6 +21,7 @@ class LedgerSnapshot(TimeStampedModel):
 
 class AuditLog(models.Model):
     """Immutable record of administrative / system activity."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -44,9 +47,10 @@ class AuditLog(models.Model):
 
 class IntegrityRecord(models.Model):
     """Append-only, tamper-evident ledger of sealed critical records."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     record_type = models.CharField(max_length=30, db_index=True)
-    record_id = models.PositiveBigIntegerField()
+    record_id = models.UUIDField()
     record_hash = models.CharField(max_length=64)
     prev_hash = models.CharField(max_length=64, default="", blank=True)
     payload = models.JSONField(default=dict, blank=True)
@@ -62,6 +66,7 @@ class IntegrityRecord(models.Model):
 
 class PlatformSetting(models.Model):
     """Key/value platform configuration editable from the admin console."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     key = models.CharField(max_length=80, unique=True)
     label = models.CharField(max_length=200)

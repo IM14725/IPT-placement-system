@@ -44,7 +44,7 @@
           <span class="material-symbols-outlined absolute right-sm top-1/2 transform -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
         </div>
       </div>
-      <div class="flex flex-col gap-xs">
+      <div id="phone-group" class="flex flex-col gap-xs">
         <label class="font-body-md text-body-md font-medium text-on-surface" for="pay-phone">Mobile Number</label>
         <div class="relative flex items-center">
           <span class="absolute left-sm font-body-md text-body-md text-on-surface-variant pointer-events-none">+255</span>
@@ -70,6 +70,7 @@
   window.IPT = window.IPT || {};
   window.IPT.paymentRef = "{{ payment.reference_id }}";
   window.IPT.paymentAmount = "{{ payment.amount }}";
+  window.IPT.appId = "{{ payment.application.id }}";
   window.IPT.realtimeUrl = "http://" + location.hostname + ":8001";
 </script>
 <script src="/static/js/payments.js"></script>

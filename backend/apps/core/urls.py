@@ -10,12 +10,12 @@ urlpatterns = [
     path("verifications/", views.verification_queue, name="platform-verifications"),
     path("directory/", views.directory, name="platform-directory"),
     path(
-        "verifications/students/<int:pk>/",
+        "verifications/students/<uuid:pk>/",
         views.student_verification,
         name="platform-student-verification",
     ),
     path(
-        "verifications/companies/<int:pk>/",
+        "verifications/companies/<uuid:pk>/",
         views.company_verification,
         name="platform-company-verification",
     ),

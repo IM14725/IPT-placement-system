@@ -72,6 +72,11 @@
         .then(function (resp) {
           // Follows 3xx redirects automatically (success → final page).
           return resp.text().then(function (html) {
+            if (resp.redirected) {
+              window.location.href = resp.url;
+              return;
+            }
+
             if (resp.status >= 400) {
               // Rate-limited (429) or error: server re-rendered the page with the
               // form + errors. Swap the fresh <form> in place and dismiss the
@@ -96,8 +101,7 @@
               return;
             }
 
-            // 200 without a form = the success page (e.g. dashboard after a
-            // followed redirect). Navigate to its final URL to display it.
+            // Fallback for success without redirect (if any)
             window.location.href = resp.url;
           });
         })

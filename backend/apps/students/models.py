@@ -76,7 +76,7 @@ class StudentProfile(TimeStampedModel):
     verification_status = models.CharField(
         max_length=10,
         choices=VerificationStatus.choices,
-        default=VerificationStatus.PENDING,
+        default=VerificationStatus.APPROVED,
     )
     rejection_reason = models.TextField(blank=True)
     reviewed_by = models.ForeignKey(

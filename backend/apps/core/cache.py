@@ -255,7 +255,10 @@ def invalidate_locations():
 def _load_regions():
     from apps.locations.models import Region
 
-    return list(Region.objects.values("id", "name", "slug").order_by("name"))
+    return [
+        {"id": str(r["id"]), "name": r["name"], "slug": r["slug"]}
+        for r in Region.objects.values("id", "name", "slug").order_by("name")
+    ]
 
 
 def _load_districts(region_id):
@@ -264,7 +267,10 @@ def _load_districts(region_id):
     qs = District.objects.all()
     if region_id:
         qs = qs.filter(region_id=region_id)
-    return list(qs.values("id", "name", "region_id").order_by("name"))
+    return [
+        {"id": str(d["id"]), "name": d["name"], "region_id": str(d["region_id"])}
+        for d in qs.values("id", "name", "region_id").order_by("name")
+    ]
 
 
 def _load_wards(district_id):
@@ -273,7 +279,10 @@ def _load_wards(district_id):
     qs = Ward.objects.all()
     if district_id:
         qs = qs.filter(district_id=district_id)
-    return list(qs.values("id", "name", "district_id").order_by("name"))
+    return [
+        {"id": str(w["id"]), "name": w["name"], "district_id": str(w["district_id"])}
+        for w in qs.values("id", "name", "district_id").order_by("name")
+    ]
 
 
 def get_institutions():

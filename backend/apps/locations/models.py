@@ -1,7 +1,9 @@
+import uuid
 from django.db import models
 
 
 class Region(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=120, unique=True)
     slug = models.SlugField(max_length=120, unique=True)
 
@@ -13,6 +15,7 @@ class Region(models.Model):
 
 
 class District(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=140)
     region = models.ForeignKey(
         Region, on_delete=models.CASCADE, related_name="districts"
@@ -29,6 +32,7 @@ class District(models.Model):
 
 
 class Ward(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=160)
     district = models.ForeignKey(
         District, on_delete=models.CASCADE, related_name="wards"

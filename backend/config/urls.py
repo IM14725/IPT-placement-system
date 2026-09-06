@@ -16,6 +16,7 @@ urlpatterns = [
     path("api/locations/", include("apps.locations.urls")),
     path("api/auth/token/", drf_views.obtain_auth_token, name="api_token"),
     path("api/slots/", include("apps.slots.urls")),
+    path("api/payments/", include("apps.payments.urls")),
 ]
 
 if settings.DEBUG:

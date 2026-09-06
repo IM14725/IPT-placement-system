@@ -1,3 +1,4 @@
+import uuid
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
@@ -10,6 +11,7 @@ class UserRole(models.TextChoices):
 
 class AdminRole(models.Model):
     """Administrative role with a capability matrix for the admin console."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     name = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=255, blank=True)
@@ -57,6 +59,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = None
     email = models.EmailField("email address", unique=True)
     role = models.CharField(
