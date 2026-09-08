@@ -70,7 +70,6 @@
           <table class="w-full text-left min-w-[640px]">
             <thead>
               <tr class="text-metadata font-label-caps text-on-surface-variant uppercase border-b border-surface-variant">
-                <th class="py-sm px-md font-medium">#</th>
                 <th class="py-sm px-md font-medium">{% trans "Slot" %}</th>
                 <th class="py-sm px-md font-medium">{% trans "Company" %}</th>
                 <th class="py-sm px-md font-medium">{% trans "Status" %}</th>
@@ -80,7 +79,6 @@
             <tbody class="font-body-md font-body-md text-on-surface">
               {% for app in applications %}
                 <tr class="border-b border-surface-variant hover:bg-surface-container-low/50 transition-colors">
-                  <td class="py-sm px-md text-on-surface-variant">#{{ app.id }}</td>
                   <td class="py-sm px-md font-medium">{{ app.slot.title }}</td>
                   <td class="py-sm px-md">{{ app.slot.company.name }}</td>
                   <td class="py-sm px-md">

@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <form method="get" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-8 gap-md items-end">
+    <form method="get" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-md items-end">
       <input type="hidden" name="tab" value="{{ tab }}">
       <div class="flex flex-col gap-xs">
         <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="id_region">Region</label>
@@ -62,18 +62,6 @@
           </div>
         </div>
         <div class="flex flex-col gap-xs">
-          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="dir-year">Year</label>
-          <div class="ipt-field-box">
-            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">calendar_month</span></span>
-            <select id="dir-year" name="year" class="ipt-select">
-              <option value="">Any year</option>
-              {% for y in years %}
-                <option value="{{ y }}" {% if filters.year == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        <div class="flex flex-col gap-xs">
           <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="dir-education-level">Education Level</label>
           <div class="ipt-field-box">
             <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">workspace_premium</span></span>
@@ -86,21 +74,20 @@
           </div>
         </div>
       {% else %}
-        <div class="col-span-2 lg:col-span-4"></div>
-      {% endif %}
-      <div class="flex flex-col gap-xs">
-        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="dir-status">Status</label>
-        <div class="ipt-field-box">
-          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">verified_user</span></span>
-          <select id="dir-status" name="status" class="ipt-select">
-            <option value="">Any status</option>
-            {% for value, label in statuses %}
-              <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
+        <div class="flex flex-col gap-xs">
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="dir-status">Status</label>
+          <div class="ipt-field-box">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">verified_user</span></span>
+            <select id="dir-status" name="status" class="ipt-select">
+              <option value="">Any status</option>
+              {% for value, label in statuses %}
+                <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-      </div>
-      <div class="flex items-center gap-sm">
+      {% endif %}
+      <div class="col-span-full flex items-center gap-sm mt-xs">
         <button class="bg-primary text-on-primary font-body-md font-body-md px-md py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-xs" type="submit">
           <span class="material-symbols-outlined text-[18px]">filter_alt</span>
           Filter

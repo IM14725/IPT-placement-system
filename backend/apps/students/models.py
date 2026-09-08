@@ -46,7 +46,7 @@ class StudentProfile(TimeStampedModel):
     )
     university = models.CharField(max_length=200)
     course = models.CharField(max_length=200)
-    current_year = models.PositiveSmallIntegerField()
+    current_year = models.PositiveSmallIntegerField(null=True, blank=True)
     education_level = models.PositiveSmallIntegerField(
         null=True,
         blank=True,

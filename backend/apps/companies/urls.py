@@ -6,6 +6,7 @@ urlpatterns = [
     path("dashboard/", views.dashboard, name="company-dashboard"),
     path("profile/", views.profile, name="company-profile"),
     path("profile/upload/", views.upload_document, name="company-upload-doc"),
+    path("profile/upload/<uuid:doc_id>/delete/", views.delete_document, name="company-delete-doc"),
     path("slots/", views.slot_list, name="company-slots"),
     path("slots/new/", views.slot_create, name="company-slot-create"),
     path("slots/<uuid:slot_id>/edit/", views.slot_edit, name="company-slot-edit"),

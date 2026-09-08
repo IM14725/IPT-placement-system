@@ -32,6 +32,16 @@ def dashboard(request):
     if not request.user.is_company:
         return HttpResponseForbidden("Company account required.")
     company = _get_company(request)
+    if company is None:
+        messages.info(request, "Complete your company profile first.")
+        return redirect("company-profile")
+        
+    doc_types = set(Document.objects.filter(owner=request.user).values_list("doc_type", flat=True))
+    required = {Document.DocType.BRELA_CERT, Document.DocType.TIN_CERT, Document.DocType.BUSINESS_LICENSE}
+    if not required.issubset(doc_types):
+        messages.warning(request, "Please upload all 3 required corporate documents before proceeding.")
+        return redirect("company-profile")
+        
     slots = Slot.objects.filter(company=company).order_by("-created_at")[:8]
     return render(
         request,
@@ -57,7 +67,7 @@ def profile(request):
         form = CompanyProfileForm(instance=instance, initial={"name": request.user.first_name})
 
     docs = Document.objects.filter(owner=request.user)
-    upload_form = CompanyDocumentUploadForm()
+    upload_form = CompanyDocumentUploadForm(user=request.user)
     regions = get_regions()
     return render(
         request,
@@ -76,7 +86,7 @@ def profile(request):
 def upload_document(request):
     if not request.user.is_company:
         return HttpResponseForbidden("Company account required.")
-    form = CompanyDocumentUploadForm(request.POST, request.FILES)
+    form = CompanyDocumentUploadForm(request.POST, request.FILES, user=request.user)
     if form.is_valid():
         file = request.FILES["file"]
         try:
@@ -95,11 +105,30 @@ def upload_document(request):
     return redirect("company-profile")
 
 
+@login_required
+def delete_document(request, doc_id):
+    if not request.user.is_company or request.method != "POST":
+        return HttpResponseForbidden("Company account and POST required.")
+    doc = get_object_or_404(Document, id=doc_id, owner=request.user)
+    doc_type_name = doc.get_doc_type_display()
+    doc.file.delete(save=False)
+    doc.delete()
+    messages.success(request, f"{doc_type_name} deleted. You must upload a replacement.")
+    return redirect("company-profile")
+
+
 def _require_approved_company(request):
     company = _get_company(request)
     if company is None:
         messages.info(request, "Complete your company profile first.")
         return None
+        
+    doc_types = set(Document.objects.filter(owner=request.user).values_list("doc_type", flat=True))
+    required = {Document.DocType.BRELA_CERT, Document.DocType.TIN_CERT, Document.DocType.BUSINESS_LICENSE}
+    if not required.issubset(doc_types):
+        messages.warning(request, "Please upload all 3 required corporate documents before proceeding.")
+        return None
+
     if not company.is_approved:
         messages.warning(request, "Your company must be approved by the platform admin to post slots.")
         return None

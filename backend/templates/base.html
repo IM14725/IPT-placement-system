@@ -257,6 +257,44 @@
         }
       });
     }
+
+    // Auto-capitalize first letter of text inputs
+    document.addEventListener('input', function(e) {
+      const el = e.target;
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+        const type = el.type ? el.type.toLowerCase() : '';
+        if (!['password', 'email', 'number', 'url', 'tel', 'hidden'].includes(type)) {
+          if (el.value.length === 1 && el.value[0] >= 'a' && el.value[0] <= 'z') {
+            el.value = el.value.toUpperCase();
+          }
+        }
+      }
+    });
+
+    document.addEventListener('change', function(e) {
+      const el = e.target;
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+        const type = el.type ? el.type.toLowerCase() : '';
+        if (!['password', 'email', 'number', 'url', 'tel', 'hidden'].includes(type)) {
+          if (el.value.length > 0) {
+            el.value = el.value.charAt(0).toUpperCase() + el.value.slice(1);
+          }
+        }
+      }
+    });
+
+    // Add autocapitalize attribute for mobile keyboards
+    document.addEventListener('focus', function(e) {
+      const el = e.target;
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+        const type = el.type ? el.type.toLowerCase() : '';
+        if (!['password', 'email', 'number', 'url', 'tel', 'hidden'].includes(type)) {
+          if (!el.hasAttribute('autocapitalize')) {
+            el.setAttribute('autocapitalize', 'sentences');
+          }
+        }
+      }
+    }, true);
   </script>
   {% block scripts %}{% endblock %}
 </body>

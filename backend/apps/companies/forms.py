@@ -46,17 +46,31 @@ class CompanyProfileForm(forms.ModelForm):
 
 class CompanyDocumentUploadForm(forms.Form):
     doc_type = forms.ChoiceField(
-        choices=[
-            (Document.DocType.BRELA_CERT, "BRELA Registration Certificate"),
-            (Document.DocType.TIN_CERT, "TIN Certificate"),
-            (Document.DocType.BUSINESS_LICENSE, "Business License"),
-        ],
+        choices=[],
         widget=forms.Select(attrs={"class": "ipt-select"}),
     )
     file = forms.FileField(
         label="File (< 2MB)",
         widget=forms.ClearableFileInput(attrs={"class": "ipt-file-input", "accept": ".pdf,.png,.jpg,.jpeg,.doc,.docx"}),
     )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        all_choices = [
+            (Document.DocType.BRELA_CERT, "BRELA Registration Certificate"),
+            (Document.DocType.TIN_CERT, "TIN Certificate"),
+            (Document.DocType.BUSINESS_LICENSE, "Business License"),
+        ]
+        if user:
+            existing_types = set(
+                Document.objects.filter(owner=user).values_list("doc_type", flat=True)
+            )
+            self.fields["doc_type"].choices = [
+                c for c in all_choices if c[0] not in existing_types
+            ]
+        else:
+            self.fields["doc_type"].choices = all_choices
 
 
 class SlotForm(forms.ModelForm):
@@ -76,7 +90,6 @@ class SlotForm(forms.ModelForm):
             "district",
             "street",
             "department",
-            "level",
             "education_level",
             "capacity",
             "stipend_available",
@@ -91,7 +104,6 @@ class SlotForm(forms.ModelForm):
             "district": forms.Select(attrs={"class": "ipt-select", "id": "id_district"}),
             "street": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "department": forms.TextInput(attrs={"class": FIELD_CLASS}),
-            "level": forms.NumberInput(attrs={"class": FIELD_CLASS, "min": 1, "max": 8}),
             "education_level": forms.Select(attrs={"class": "ipt-select"}),
             "capacity": forms.NumberInput(attrs={"class": FIELD_CLASS, "min": 1}),
             "stipend_available": forms.CheckboxInput(attrs={"class": "rounded border-gray-300"}),
