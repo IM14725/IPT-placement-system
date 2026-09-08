@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.education import EducationLevel
+from apps.core.education import EducationLevel, AcademicYear
 from apps.core.models import TimeStampedModel
 
 
@@ -29,7 +29,12 @@ class Slot(TimeStampedModel):
     )
     street = models.CharField(max_length=255, blank=True)
     department = models.CharField(max_length=200, blank=True)
-    level = models.PositiveSmallIntegerField(null=True, blank=True)
+    academic_year = models.PositiveSmallIntegerField(
+        null=True, 
+        blank=True,
+        choices=AcademicYear.choices,
+        help_text="Required if Higher Diploma is selected"
+    )
     education_level = models.PositiveSmallIntegerField(
         null=True,
         blank=True,

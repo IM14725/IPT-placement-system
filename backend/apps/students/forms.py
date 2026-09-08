@@ -41,6 +41,7 @@ class StudentProfileForm(forms.ModelForm):
             "id_card_photo",
             "university",
             "course",
+            "academic_year",
             "education_level",
             "gpa",
             "region",
@@ -53,6 +54,7 @@ class StudentProfileForm(forms.ModelForm):
             "gender": forms.Select(attrs={"class": "ipt-select"}),
             "university": forms.TextInput(attrs={"class": FIELD_CLASS, "autocomplete": "off"}),
             "course": forms.TextInput(attrs={"class": FIELD_CLASS}),
+            "academic_year": forms.Select(attrs={"class": "ipt-select"}),
             "education_level": forms.Select(attrs={"class": "ipt-select"}),
             "gpa": forms.NumberInput(attrs={"class": FIELD_CLASS, "step": "0.01", "min": 0, "max": 5}),
             "region": forms.Select(attrs={"class": "ipt-select", "id": "id_region"}),
@@ -95,6 +97,16 @@ class StudentProfileForm(forms.ModelForm):
 
     def clean_skills(self):
         return normalize_skills(self.cleaned_data.get("skills"))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        edu_level = cleaned_data.get("education_level")
+        academic_year = cleaned_data.get("academic_year")
+        if edu_level == 7 and not academic_year:
+            self.add_error("academic_year", "Academic year is required for Higher Diploma.")
+        elif edu_level != 7:
+            cleaned_data["academic_year"] = None
+        return cleaned_data
 
     def save(self, commit=True):
         instance = super().save(commit=False)

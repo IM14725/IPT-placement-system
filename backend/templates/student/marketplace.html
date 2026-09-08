@@ -47,13 +47,20 @@
       <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Department / Course" %}</label>
       <input id="filter-department" type="text" placeholder="e.g. Computer Science" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow">
     </div>
-    <div class="w-full flex-1 flex flex-col gap-xs relative z-10">
-      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Education Level (TCU)" %}</label>
-      <select id="filter-education-level" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer">
-        <option value="">{% trans "Any Qualification" %}</option>
-        {% for value, label in education_levels %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-      </select>
-    </div>
+      <div class="flex-1 min-w-[200px] flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Education Level (TCU)" %}</label>
+        <select id="filter-education-level" name="education_level" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer">
+          <option value="">{% trans "Any Qualification" %}</option>
+          {% for value, label in education_levels %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="flex-1 min-w-[200px] flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Academic Year</label>
+        <select id="filter-academic-year" name="academic_year" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer">
+          <option value="">Any Year</option>
+          {% for value, label in academic_years %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </div>
   </div>
 
   <!-- Results Grid -->

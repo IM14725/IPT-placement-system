@@ -91,6 +91,7 @@ class SlotForm(forms.ModelForm):
             "street",
             "department",
             "education_level",
+            "academic_year",
             "capacity",
             "stipend_available",
             "stipend_amount",
@@ -105,6 +106,7 @@ class SlotForm(forms.ModelForm):
             "street": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "department": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "education_level": forms.Select(attrs={"class": "ipt-select"}),
+            "academic_year": forms.Select(attrs={"class": "ipt-select"}),
             "capacity": forms.NumberInput(attrs={"class": FIELD_CLASS, "min": 1}),
             "stipend_available": forms.CheckboxInput(attrs={"class": "rounded border-gray-300"}),
             "stipend_amount": forms.NumberInput(attrs={"class": FIELD_CLASS, "step": "0.01"}),
@@ -132,6 +134,14 @@ class SlotForm(forms.ModelForm):
             self.add_error("stipend_amount", "Enter the monthly stipend amount.")
         elif not stipend:
             cleaned["stipend_amount"] = None
+
+        edu_level = cleaned.get("education_level")
+        academic_year = cleaned.get("academic_year")
+        if edu_level == 7 and not academic_year:
+            self.add_error("academic_year", "Academic year is required for Higher Diploma.")
+        elif edu_level != 7:
+            cleaned["academic_year"] = None
+
         return cleaned
 
     def save(self, commit=True):

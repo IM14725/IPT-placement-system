@@ -28,6 +28,14 @@ class EducationLevel(models.IntegerChoices):
     DOCTORATE = 10, _("Level 10 — Doctorate (PhD)")
 
 
+class AcademicYear(models.IntegerChoices):
+    YEAR_1 = 1, _("First Year / Year 1")
+    YEAR_2 = 2, _("Second Year / Year 2")
+    YEAR_3 = 3, _("Third Year / Year 3")
+
+def academic_year_choices():
+    return list(AcademicYear.choices)
+
 def education_level_choices():
     """Choices for form/filter dropdowns (value, label) in TCU order."""
     return list(EducationLevel.choices)

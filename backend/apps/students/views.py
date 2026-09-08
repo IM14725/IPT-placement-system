@@ -13,7 +13,7 @@ from apps.applications.forms import ApplicationLetterForm
 from apps.applications.models import Application
 from apps.applications.services import SlotFullError, create_application
 from apps.core.cache import get_institutions, get_regions, get_verification_status
-from apps.core.education import education_level_choices
+from apps.core.education import education_level_choices, academic_year_choices
 from apps.core.immutability import sha256_bytes
 from apps.core.rate_limit import token_bucket
 from apps.documents.models import Document
@@ -130,6 +130,7 @@ def marketplace(request):
             "profile": profile,
             "regions": regions,
             "education_levels": education_level_choices(),
+            "academic_years": academic_year_choices(),
             "can_apply": can_apply,
         },
     )

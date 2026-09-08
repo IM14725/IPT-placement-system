@@ -9,8 +9,8 @@
   var region = document.getElementById("filter-region");
   var district = document.getElementById("filter-district");
   var department = document.getElementById("filter-department");
-  var level = document.getElementById("filter-level");
   var educationLevel = document.getElementById("filter-education-level");
+  var academicYear = document.getElementById("filter-academic-year");
   var results = document.getElementById("slot-results");
 
   var page = 1;
@@ -31,8 +31,8 @@
     if (region.value) params.set("region", region.value);
     if (district.value) params.set("district", district.value);
     if (department.value.trim()) params.set("department", department.value.trim());
-    if (level.value) params.set("level", level.value);
     if (educationLevel.value) params.set("education_level", educationLevel.value);
+    if (academicYear.value) params.set("academic_year", academicYear.value);
     return params;
   }
 
@@ -139,7 +139,7 @@
       "</div>" +
       '<div class="flex items-center gap-xs">' +
       '<span class="material-symbols-outlined text-outline text-[18px]">schedule</span>' +
-      '<span class="font-metadata text-metadata text-on-surface-variant truncate">' + esc(s.role_type) + (s.education_level_display ? " · " + esc(s.education_level_display) : s.level ? " · " + esc(t("year", "Year")) + " " + esc(s.level) : "") + "</span>" +
+      '<span class="font-metadata text-metadata text-on-surface-variant truncate">' + esc(s.role_type) + (s.education_level_display ? " · " + esc(s.education_level_display) : "") + (s.academic_year_display ? " - " + esc(s.academic_year_display) : "") + "</span>" +
       "</div>" +
       (s.department ? '<div class="col-span-2 flex items-center gap-xs"><span class="material-symbols-outlined text-outline text-[18px]">school</span><span class="font-metadata text-metadata text-on-surface-variant truncate">' + esc(t("dept", "Dept:")) + " " + esc(s.department) + "</span></div>" : "") +
       '<div class="col-span-2 flex items-center gap-xs">' +
@@ -185,8 +185,8 @@
   });
   district.addEventListener("change", load);
   department.addEventListener("input", function () { clearTimeout(window.__iptDebounce); window.__iptDebounce = setTimeout(load, 350); });
-  level.addEventListener("change", load);
   educationLevel.addEventListener("change", load);
+  academicYear.addEventListener("change", load);
 
   load();
 })();

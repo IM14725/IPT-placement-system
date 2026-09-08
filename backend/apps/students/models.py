@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.education import EducationLevel
+from apps.core.education import EducationLevel, AcademicYear
 from apps.core.models import TimeStampedModel
 
 
@@ -46,7 +46,12 @@ class StudentProfile(TimeStampedModel):
     )
     university = models.CharField(max_length=200)
     course = models.CharField(max_length=200)
-    current_year = models.PositiveSmallIntegerField(null=True, blank=True)
+    academic_year = models.PositiveSmallIntegerField(
+        null=True, 
+        blank=True,
+        choices=AcademicYear.choices,
+        help_text="Required if Higher Diploma is selected"
+    )
     education_level = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
@@ -94,7 +99,7 @@ class StudentProfile(TimeStampedModel):
 
     @property
     def level(self):
-        return self.current_year
+        return self.academic_year
 
     def __str__(self):
         return f"{self.user.email} ({self.university})"

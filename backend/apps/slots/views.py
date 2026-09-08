@@ -20,20 +20,20 @@ class SlotSearchThrottle(TokenBucketThrottle):
     refill_per_second = 20.0
 
 
-def _signature(region, district, department, level, education_level):
+def _signature(region, district, department, academic_year, education_level):
     raw = "|".join(
         [
             region or "",
             district or "",
             (department or "").lower(),
-            level or "",
+            academic_year or "",
             education_level or "",
         ]
     )
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
 
 
-def _load_slot_search(region, district, department, level, education_level):
+def _load_slot_search(region, district, department, academic_year, education_level):
     """Run the search query with counts aggregated in a single DB hit."""
     qs = (
         Slot.objects.filter(
@@ -49,10 +49,12 @@ def _load_slot_search(region, district, department, level, education_level):
         qs = qs.filter(district_id=district)
     if department:
         qs = qs.filter(department__icontains=department)
-    if level:
-        qs = qs.filter(level=level)
+    if academic_year:
+        qs = qs.filter(academic_year=academic_year)
     if education_level:
         qs = qs.filter(education_level=education_level)
+        if education_level == "7" and academic_year:
+            qs = qs.filter(academic_year=academic_year)
 
     slots = list(qs)
     slot_ids = [s.id for s in slots]
@@ -77,7 +79,7 @@ def _load_slot_search(region, district, department, level, education_level):
 class SlotSearchView(APIView):
     """Marketplace search with live filter reduction.
 
-    Query params: region, district, department, level, education_level.
+    Query params: region, district, department, academic_year, education_level.
     All slots from APPROVED companies are returned (including FULL ones so the
     front-end can render a "Slot Full" state); filters narrow the list.
 
@@ -94,7 +96,7 @@ class SlotSearchView(APIView):
         region = request.query_params.get("region")
         district = request.query_params.get("district")
         department = request.query_params.get("department")
-        level = request.query_params.get("level")
+        academic_year = request.query_params.get("academic_year")
         education_level = request.query_params.get("education_level")
 
         from apps.core.cache import incr_daily
@@ -102,14 +104,14 @@ class SlotSearchView(APIView):
         incr_daily("searches")
 
         key = slot_search_key(
-            _signature(region, district, department, level, education_level)
+            _signature(region, district, department, academic_year, education_level)
         )
         ttl = getattr(settings, "SLOT_SEARCH_CACHE_TTL", 20)
         data = cache_get_or_set(
             key,
             ttl,
             producer=lambda: _load_slot_search(
-                region, district, department, level, education_level
+                region, district, department, academic_year, education_level
             ),
         )
 

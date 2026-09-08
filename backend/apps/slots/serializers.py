@@ -14,6 +14,7 @@ class SlotSerializer(serializers.ModelSerializer):
     available_count = serializers.SerializerMethodField()
     booked_count = serializers.SerializerMethodField()
     education_level_display = serializers.SerializerMethodField()
+    academic_year_display = serializers.SerializerMethodField()
 
     class Meta:
         model = Slot
@@ -31,9 +32,10 @@ class SlotSerializer(serializers.ModelSerializer):
             "district_name",
             "street",
             "department",
-            "level",
+            "academic_year",
             "education_level",
             "education_level_display",
+            "academic_year_display",
             "capacity",
             "booked_count",
             "available_count",
@@ -61,3 +63,6 @@ class SlotSerializer(serializers.ModelSerializer):
 
     def get_education_level_display(self, obj):
         return education_level_label(obj.education_level)
+
+    def get_academic_year_display(self, obj):
+        return obj.get_academic_year_display() if obj.academic_year else ""

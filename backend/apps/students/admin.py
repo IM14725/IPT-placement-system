@@ -39,7 +39,7 @@ class StudentProfileAdmin(VerificationAdminMixin, admin.ModelAdmin):
         "user",
         "university",
         "course",
-        "current_year",
+        "academic_year",
         "education_level",
         "gpa",
         "view_documents",
@@ -51,7 +51,7 @@ class StudentProfileAdmin(VerificationAdminMixin, admin.ModelAdmin):
     list_editable = ("verification_status",)
     readonly_fields = ("created_at", "updated_at", "reviewed_at")
     fieldsets = (
-        (None, {"fields": ("user", "university", "course", "current_year", "education_level", "gpa", "skills")}),
+        (None, {"fields": ("user", "university", "course", "academic_year", "education_level", "gpa", "skills")}),
         ("Location", {"fields": ("region", "district")}),
         ("Verification", {"fields": ("verification_status", "rejection_reason", "reviewed_by", "reviewed_at")}),
     )

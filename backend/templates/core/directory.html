@@ -73,6 +73,18 @@
             </select>
           </div>
         </div>
+        <div class="flex flex-col gap-xs">
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="dir-academic-year">Academic Year</label>
+          <div class="ipt-field-box">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">tag</span></span>
+            <select id="dir-academic-year" name="academic_year" class="ipt-select">
+              <option value="">Any year</option>
+              {% for value, label in academic_years %}
+                <option value="{{ value }}" {% if filters.academic_year == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
       {% else %}
         <div class="flex flex-col gap-xs">
           <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="dir-status">Status</label>
@@ -145,7 +157,7 @@
                   </div>
                 </td>
                 <td class="py-sm px-sm text-body-md font-body-md text-on-surface">{{ row.region.name|default:"—" }}{% if row.district %} · {{ row.district.name }}{% endif %}{% if row.ward %} · {{ row.ward.name }}{% endif %}</td>
-                <td class="py-sm px-sm text-body-md font-body-md text-on-surface">{{ row.current_year }}{% if row.education_level %} · {{ row.get_education_level_display }}{% endif %}</td>
+                <td class="py-sm px-sm text-body-md font-body-md text-on-surface">{{ row.get_academic_year_display|default:"" }}{% if row.academic_year and row.education_level %} - {% endif %}{% if row.education_level %}{{ row.get_education_level_display }}{% endif %}</td>
               {% else %}
                 <td class="py-sm px-sm">
                   <div class="flex items-center gap-sm">

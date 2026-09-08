@@ -295,6 +295,27 @@
         }
       }
     }, true);
+
+    document.addEventListener("DOMContentLoaded", function() {
+      function toggleAcademicYear() {
+        document.querySelectorAll('select[name="education_level"]').forEach(function(eduSelect) {
+          var form = eduSelect.closest('form') || document;
+          var yearSelect = form.querySelector('select[name="academic_year"]');
+          if (!yearSelect) return;
+          var wrapper = yearSelect.closest('.flex.flex-col') || yearSelect.parentElement;
+          if (eduSelect.value === '7') {
+            wrapper.style.display = '';
+          } else {
+            wrapper.style.display = 'none';
+            yearSelect.value = '';
+          }
+        });
+      }
+      document.querySelectorAll('select[name="education_level"]').forEach(function(eduSelect) {
+        eduSelect.addEventListener('change', toggleAcademicYear);
+      });
+      toggleAcademicYear();
+    });
   </script>
   {% block scripts %}{% endblock %}
 </body>

@@ -587,6 +587,7 @@ def directory(request):
     course = (request.GET.get("course") or "").strip()
     year = request.GET.get("year") or None
     education_level = request.GET.get("education_level") or None
+    academic_year = request.GET.get("academic_year") or None
     status = request.GET.get("status") or None
 
     if tab == "companies":
@@ -617,6 +618,8 @@ def directory(request):
             qs = qs.filter(current_year=year)
         if education_level:
             qs = qs.filter(education_level=education_level)
+            if education_level == "7" and academic_year:
+                qs = qs.filter(academic_year=academic_year)
         if status:
             qs = qs.filter(verification_status=status)
         rows = qs
@@ -634,7 +637,7 @@ def directory(request):
     )
     years = [i for i in range(1, 9)]
     statuses = VerificationStatus.choices
-    from apps.core.education import education_level_choices
+    from apps.core.education import education_level_choices, academic_year_choices
     from apps.core.cache import get_institutions
     from apps.core.pagination import paginate
     from urllib.parse import urlencode
@@ -663,9 +666,10 @@ def directory(request):
                 "ward": ward_id,
                 "university": university,
                 "course": course,
-                "year": year,
+                "year": year or "",
                 "education_level": education_level or "",
-                "status": status,
+                "academic_year": academic_year or "",
+                "status": status or "",
             },
         },
     )
