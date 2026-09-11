@@ -7,32 +7,34 @@
   <div class="relative hidden lg:flex lg:w-[44%] auth-card-panel bg-primary text-on-primary flex-col justify-between p-xl overflow-hidden">
     <div class="absolute -right-16 -bottom-16 w-72 h-72 bg-primary-fixed rounded-full opacity-20 pointer-events-none"></div>
     <div class="absolute -left-10 top-1/3 w-40 h-40 bg-secondary-container rounded-full opacity-20 blur-2xl pointer-events-none"></div>
-    <div class="relative z-10 flex items-center gap-xs font-headline-lg font-headline-md tracking-tight mb-2">
-      <img src="{% static 'images/logo.jpg' %}" alt="IPT Marketplace" class="h-10 w-auto rounded">
-      IPT Marketplace
-    </div>
-    <div class="relative z-10 flex flex-col gap-sm">
-      <h2 class="font-display text-display leading-tight tracking-tight">
-        {% blocktrans %}Welcome back to your <span class="text-primary-fixed">training journey.</span>{% endblocktrans %}
-      </h2>
+    <div class="flex flex-col gap-xl z-10 relative">
+      <div class="flex items-center gap-xs font-headline-lg font-headline-md tracking-tight mb-2">
+        <img src="{% static 'images/logo.jpg' %}" alt="IPT Marketplace" class="h-10 w-auto rounded">
+        IPT Marketplace
+      </div>
       <div class="flex flex-col gap-sm">
-        <div class="flex items-center gap-sm text-on-primary/90">
-          <span class="w-9 h-9 rounded-lg bg-primary-fixed/20 flex items-center justify-center">
-            <span class="material-symbols-outlined text-[20px]">badge</span>
-          </span>
-          <span class="font-body-md text-body-md">{% trans "Verified students, verified companies" %}</span>
-        </div>
-        <div class="flex items-center gap-sm text-on-primary/90">
-          <span class="w-9 h-9 rounded-lg bg-primary-fixed/20 flex items-center justify-center">
-            <span class="material-symbols-outlined text-[20px]">bolt</span>
-          </span>
-          <span class="font-body-md text-body-md">{% trans "One-tap mobile money payments" %}</span>
-        </div>
-        <div class="flex items-center gap-sm text-on-primary/90">
-          <span class="w-9 h-9 rounded-lg bg-primary-fixed/20 flex items-center justify-center">
-            <span class="material-symbols-outlined text-[20px]">notifications_active</span>
-          </span>
-          <span class="font-body-md text-body-md">{% trans "Instant SMS & email updates" %}</span>
+        <h2 class="font-display text-display leading-tight tracking-tight">
+          {% blocktrans %}Welcome back to your <span class="text-primary-fixed">training journey.</span>{% endblocktrans %}
+        </h2>
+        <div class="flex flex-col gap-sm">
+          <div class="flex items-center gap-sm text-on-primary/90">
+            <span class="w-9 h-9 rounded-lg bg-primary-fixed/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[20px]">badge</span>
+            </span>
+            <span class="font-body-md text-body-md">{% trans "Verified students, verified companies" %}</span>
+          </div>
+          <div class="flex items-center gap-sm text-on-primary/90">
+            <span class="w-9 h-9 rounded-lg bg-primary-fixed/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[20px]">bolt</span>
+            </span>
+            <span class="font-body-md text-body-md">{% trans "One-tap mobile money payments" %}</span>
+          </div>
+          <div class="flex items-center gap-sm text-on-primary/90">
+            <span class="w-9 h-9 rounded-lg bg-primary-fixed/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[20px]">notifications_active</span>
+            </span>
+            <span class="font-body-md text-body-md">{% trans "Instant SMS & email updates" %}</span>
+          </div>
         </div>
       </div>
     </div>
