@@ -36,7 +36,7 @@ CATALOG = {
     "Logout": "Toka",
     "Login": "Ingia",
     "Register": "Jisajili",
-    "&copy; 2024 IPT Marketplace. All rights reserved.": "&copy; 2024 IPT Marketplace. Haki zote zimehifadhiwa.",
+    "All rights reserved. Designed by semauya.": "Haki zote zimehifadhiwa. Imeundwa na semauya.",
     # --- auth ---
     "Welcome back to your <span class=\"text-primary-fixed\">training journey.</span>": "Karibu tena katika <span class=\"text-primary-fixed\">safari yako ya mafunzo.</span>",
     "Verified students, verified companies": "Wanafunzi waliothibitishwa, kampuni zilizothibitishwa",
