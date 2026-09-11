@@ -161,19 +161,19 @@
     <div class="max-w-[1280px] mx-auto px-md h-16 flex items-center justify-between gap-md">
       {% if user.is_authenticated %}
         {% if user.is_student %}
-          <a href="{% url 'student-dashboard' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight">
+          <a href="{% url 'student-dashboard' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight shrink-0 whitespace-nowrap">
         {% elif user.is_company %}
-          <a href="{% url 'company-dashboard' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight">
+          <a href="{% url 'company-dashboard' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight shrink-0 whitespace-nowrap">
         {% else %}
-          <a href="{% url 'platform-verifications' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight">
+          <a href="{% url 'platform-verifications' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight shrink-0 whitespace-nowrap">
         {% endif %}
       {% else %}
-        <a href="{% url 'home' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight">
+        <a href="{% url 'home' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight shrink-0 whitespace-nowrap">
       {% endif %}
-        <img src="{% static 'images/logo.jpg' %}" alt="IPT Marketplace" class="h-8 w-auto rounded">
+        <img src="{% static 'images/logo.jpg' %}" alt="IPT Marketplace" class="h-8 w-auto rounded shrink-0">
         <span class="hidden sm:block">IPT Marketplace</span>
       </a>
-      <div class="flex items-center gap-sm text-body-md">
+      <div class="flex items-center gap-sm text-body-md overflow-x-auto no-scrollbar">
         <form action="{% url 'set_language' %}" method="post" class="flex items-center">
           {% csrf_token %}
           <input type="hidden" name="next" value="{{ request.path }}">
