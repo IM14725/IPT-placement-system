@@ -1,4 +1,4 @@
-{% load static i18n %}<!DOCTYPE html>
+{% load static i18n nav_tags %}<!DOCTYPE html>
 <html lang="{% get_current_language as CUR_LANG %}{{ CUR_LANG }}" class="bg-background">
 <head>
   <meta charset="utf-8">
@@ -110,6 +110,9 @@
     .ipt-field-box > .ipt-combobox > input { flex: 1; min-width: 0; border: none !important; outline: none !important; background: transparent !important; box-shadow: none !important; padding: 10px 12px; color: #191c1d; font-family: "Inter", sans-serif; font-size: 14px; line-height: 20px; }
     .ipt-field-box > .ipt-combobox > input::placeholder { color: #777587; }
     .ipt-field-box.ipt-has-combobox { overflow: visible; }
+    /* Active nav link indicator */
+    .nav-link.active { background: rgba(255, 255, 255, 0.2); color: #fff !important; }
+    .nav-link.active:hover { background: rgba(255, 255, 255, 0.3); }
     .ipt-field-box.ipt-has-combobox > .ipt-field-icon { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; }
     .ipt-file-input { width: 100%; color: #464555; font-family: "Inter", sans-serif; font-size: 13px; line-height: 20px; cursor: pointer; }
     .ipt-file-input::file-selector-button { margin-right: 10px; border: none; background: #3525cd; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-family: "Inter", sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
@@ -156,7 +159,17 @@
 <body class="bg-background min-h-screen text-on-surface font-body-md">
   <nav class="fixed top-0 inset-x-0 z-50 bg-primary text-white shadow-lg shadow-primary/20">
     <div class="max-w-[1280px] mx-auto px-md h-16 flex items-center justify-between gap-md">
-      <a href="{% url 'home' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight">
+      {% if user.is_authenticated %}
+        {% if user.is_student %}
+          <a href="{% url 'student-dashboard' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight">
+        {% elif user.is_company %}
+          <a href="{% url 'company-dashboard' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight">
+        {% else %}
+          <a href="{% url 'platform-verifications' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight">
+        {% endif %}
+      {% else %}
+        <a href="{% url 'home' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight">
+      {% endif %}
         <span class="material-symbols-outlined text-[24px]">domain</span>
         <span class="hidden sm:block">IPT Marketplace</span>
       </a>
@@ -177,22 +190,22 @@
         </form>
         {% if user.is_authenticated %}
           {% if user.is_student %}
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'student-dashboard' %}">{% trans "Dashboard" %}</a>
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'student-marketplace' %}">{% trans "Find a Slot" %}</a>
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'student-applications' %}">{% trans "My Applications" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'student-dashboard' 'student-profile' 'student-documents' %}" href="{% url 'student-dashboard' %}">{% trans "Dashboard" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'student-marketplace' %}" href="{% url 'student-marketplace' %}">{% trans "Find a Slot" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'student-applications' 'student-payment' %}" href="{% url 'student-applications' %}">{% trans "My Applications" %}</a>
           {% elif user.is_company %}
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'company-dashboard' %}">{% trans "Dashboard" %}</a>
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'company-slots' %}">{% trans "Slots" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'company-dashboard' 'company-profile' %}" href="{% url 'company-dashboard' %}">{% trans "Dashboard" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'company-slots' 'company-slot-new' 'company-slot-edit' 'company-applicants' 'company-applicant-documents' %}" href="{% url 'company-slots' %}">{% trans "Slots" %}</a>
           {% else %}
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-verifications' %}">{% trans "Queue" %}</a>
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-directory' %}">{% trans "Directory" %}</a>
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-ledger' %}">{% trans "Ledger" %}</a>
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-metrics' %}">{% trans "Metrics" %}</a>
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-templates' %}">{% trans "Templates" %}</a>
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-audit-logs' %}">{% trans "Audit" %}</a>
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-roles' %}">{% trans "Roles" %}</a>
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-integrity' %}">{% trans "Integrity" %}</a>
-            <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'platform-settings' %}">{% trans "Settings" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-verifications' 'platform-student-verification' 'platform-company-verification' %}" href="{% url 'platform-verifications' %}">{% trans "Queue" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-directory' %}" href="{% url 'platform-directory' %}">{% trans "Directory" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-ledger' %}" href="{% url 'platform-ledger' %}">{% trans "Ledger" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-metrics' %}" href="{% url 'platform-metrics' %}">{% trans "Metrics" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-templates' %}" href="{% url 'platform-templates' %}">{% trans "Templates" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-audit-logs' %}" href="{% url 'platform-audit-logs' %}">{% trans "Audit" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-roles' %}" href="{% url 'platform-roles' %}">{% trans "Roles" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-integrity' %}" href="{% url 'platform-integrity' %}">{% trans "Integrity" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-settings' %}" href="{% url 'platform-settings' %}">{% trans "Settings" %}</a>
           {% endif %}
           <a href="{{ nav_user.url }}" class="hidden md:flex items-center gap-2 pl-sm pr-md py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors" title="{% trans 'View your profile' %}">
             {% if nav_user.photo %}

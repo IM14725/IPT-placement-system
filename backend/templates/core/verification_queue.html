@@ -1,19 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Verification Queue{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Verification Queue" %}{% endblock %}
 {% block content %}
 <div class="flex flex-col gap-xl">
   <div class="flex flex-col gap-lg">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="font-display text-display text-on-surface mb-xs">Verification Queue</h1>
-        <p class="font-body-lg text-body-lg text-on-surface-variant">Review and approve student and company verification requests.</p>
+        <h1 class="font-display text-display text-on-surface mb-xs">{% trans "Verification Queue" %}</h1>
+        <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Review and approve student and company verification requests." %}</p>
       </div>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
       <div class="bg-surface-container rounded-xl p-md flex items-center justify-between relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
         <div class="absolute -right-8 -top-8 w-32 h-32 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
         <div class="flex flex-col gap-xs relative z-10">
-          <span class="text-metadata font-label-caps text-on-surface-variant uppercase tracking-wider">Total Pending</span>
+          <span class="text-metadata font-label-caps text-on-surface-variant uppercase tracking-wider">{% trans "Total Pending" %}</span>
           <span class="text-display font-display text-primary">{{ total_pending }}</span>
         </div>
         <div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center relative z-10">
@@ -23,7 +24,7 @@
       <div class="bg-surface-container rounded-xl p-md flex items-center justify-between relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
         <div class="absolute -right-8 -top-8 w-32 h-32 bg-secondary/5 rounded-full blur-2xl group-hover:bg-secondary/10 transition-colors"></div>
         <div class="flex flex-col gap-xs relative z-10">
-          <span class="text-metadata font-label-caps text-on-surface-variant uppercase tracking-wider">Verified Today</span>
+          <span class="text-metadata font-label-caps text-on-surface-variant uppercase tracking-wider">{% trans "Verified Today" %}</span>
           <span class="text-display font-display text-on-surface">{{ verified_today }}</span>
         </div>
         <div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center relative z-10">
@@ -33,7 +34,7 @@
       <div class="bg-surface-container rounded-xl p-md flex items-center justify-between relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
         <div class="absolute -right-8 -top-8 w-32 h-32 bg-tertiary/5 rounded-full blur-2xl group-hover:bg-tertiary/10 transition-colors"></div>
         <div class="flex flex-col gap-xs relative z-10">
-          <span class="text-metadata font-label-caps text-on-surface-variant uppercase tracking-wider">Review Queue</span>
+          <span class="text-metadata font-label-caps text-on-surface-variant uppercase tracking-wider">{% trans "Review Queue" %}</span>
           <span class="text-display font-display text-on-surface">{{ student_pending }}<span class="text-headline-md font-body-md">S</span> · {{ company_pending }}<span class="text-headline-md font-body-md">C</span></span>
         </div>
         <div class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center relative z-10">
@@ -47,18 +48,18 @@
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-md">
       <div aria-label="Verification Queues" class="flex gap-sm border-b border-outline-variant w-full lg:w-auto relative" role="tablist">
         <button aria-selected="true" class="px-md py-sm text-body-md font-body-md text-primary border-b-2 border-primary -mb-[1px] flex items-center gap-xs transition-colors" onclick="switchTab('students')" role="tab">
-          Students
+          {% trans "Students" %}
           <span class="bg-primary-container text-on-primary-container text-metadata font-metadata px-2 py-0.5 rounded-full">{{ student_pending }}</span>
         </button>
         <button aria-selected="false" class="px-md py-sm text-body-md font-body-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-xs" onclick="switchTab('companies')" role="tab">
-          Companies
+          {% trans "Companies" %}
           <span class="bg-surface-variant text-on-surface-variant text-metadata font-metadata px-2 py-0.5 rounded-full">{{ company_pending }}</span>
         </button>
       </div>
       <div class="flex items-center gap-sm w-full lg:w-auto">
         <div class="relative w-full lg:w-64">
           <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
-          <input id="queue-search" class="w-full pl-xl pr-sm py-2 bg-surface rounded-lg border border-outline-variant focus:border-primary focus:outline-none transition-colors text-body-md font-body-md text-on-surface placeholder:text-outline-variant" placeholder="Search by name..." type="text" oninput="filterQueue(this.value)">
+          <input id="queue-search" class="w-full pl-xl pr-sm py-2 bg-surface rounded-lg border border-outline-variant focus:border-primary focus:outline-none transition-colors text-body-md font-body-md text-on-surface placeholder:text-outline-variant" placeholder="{% trans "Search by name..." %}" type="text" oninput="filterQueue(this.value)">
         </div>
       </div>
     </div>
@@ -69,11 +70,11 @@
           <table class="w-full text-left min-w-[800px]">
             <thead>
               <tr class="text-metadata font-label-caps text-on-surface-variant border-b border-surface-variant">
-                <th class="py-sm px-sm font-medium w-1/3">Applicant</th>
-                <th class="py-sm px-sm font-medium">Institution / Course</th>
-                <th class="py-sm px-sm font-medium">Submitted</th>
-                <th class="py-sm px-sm font-medium">Status</th>
-                <th class="py-sm px-sm font-medium text-right">Action</th>
+                <th class="py-sm px-sm font-medium w-1/3">{% trans "Applicant" %}</th>
+                <th class="py-sm px-sm font-medium">{% trans "Institution / Course" %}</th>
+                <th class="py-sm px-sm font-medium">{% trans "Submitted" %}</th>
+                <th class="py-sm px-sm font-medium">{% trans "Status" %}</th>
+                <th class="py-sm px-sm font-medium text-right">{% trans "Action" %}</th>
               </tr>
             </thead>
             <tbody class="queue-rows">
@@ -100,12 +101,12 @@
                   <td class="py-sm px-sm">
                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-tertiary-container/30 text-tertiary text-label-caps font-label-caps uppercase">
                       <span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
-                      Pending
+                      {% trans "Pending" %}
                     </span>
                   </td>
                   <td class="py-sm px-sm text-right">
                     <a class="inline-flex items-center justify-center px-sm py-1.5 border border-primary text-primary text-body-md font-metadata rounded-lg hover:bg-primary/5 transition-colors" href="{% url 'platform-student-verification' s.pk %}">
-                      Review Details
+                      {% trans "Review Details" %}
                     </a>
                   </td>
                 </tr>
@@ -116,7 +117,7 @@
       {% else %}
         <div class="flex flex-col items-center justify-center py-xl text-center">
           <span class="material-symbols-outlined text-[48px] text-outline-variant mb-sm">how_to_reg</span>
-          <p class="font-body-md text-on-surface-variant">No students awaiting verification.</p>
+          <p class="font-body-md text-on-surface-variant">{% trans "No students awaiting verification." %}</p>
         </div>
       {% endif %}
     </div>
@@ -127,11 +128,11 @@
           <table class="w-full text-left min-w-[800px]">
             <thead>
               <tr class="text-metadata font-label-caps text-on-surface-variant border-b border-surface-variant">
-                <th class="py-sm px-sm font-medium w-1/3">Company</th>
-                <th class="py-sm px-sm font-medium">Industry</th>
-                <th class="py-sm px-sm font-medium">Submitted</th>
-                <th class="py-sm px-sm font-medium">Status</th>
-                <th class="py-sm px-sm font-medium text-right">Action</th>
+                <th class="py-sm px-sm font-medium w-1/3">{% trans "Company" %}</th>
+                <th class="py-sm px-sm font-medium">{% trans "Industry" %}</th>
+                <th class="py-sm px-sm font-medium">{% trans "Submitted" %}</th>
+                <th class="py-sm px-sm font-medium">{% trans "Status" %}</th>
+                <th class="py-sm px-sm font-medium text-right">{% trans "Action" %}</th>
               </tr>
             </thead>
             <tbody class="queue-rows">
@@ -155,12 +156,12 @@
                   <td class="py-sm px-sm">
                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-tertiary-container/30 text-tertiary text-label-caps font-label-caps uppercase">
                       <span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
-                      Pending
+                      {% trans "Pending" %}
                     </span>
                   </td>
                   <td class="py-sm px-sm text-right">
                     <a class="inline-flex items-center justify-center px-sm py-1.5 border border-primary text-primary text-body-md font-metadata rounded-lg hover:bg-primary/5 transition-colors" href="{% url 'platform-company-verification' c.pk %}">
-                      Review Details
+                      {% trans "Review Details" %}
                     </a>
                   </td>
                 </tr>
@@ -171,7 +172,7 @@
       {% else %}
         <div class="flex flex-col items-center justify-center py-xl text-center">
           <span class="material-symbols-outlined text-[48px] text-outline-variant mb-sm">domain_verification</span>
-          <p class="font-body-md text-on-surface-variant">No companies awaiting verification.</p>
+          <p class="font-body-md text-on-surface-variant">{% trans "No companies awaiting verification." %}</p>
         </div>
       {% endif %}
     </div>

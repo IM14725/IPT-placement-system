@@ -660,6 +660,7 @@ def directory(request):
             "years": years,
             "statuses": statuses,
             "education_levels": education_level_choices(),
+            "academic_years": academic_year_choices(),
             "filters": {
                 "region": region_id,
                 "district": district_id,

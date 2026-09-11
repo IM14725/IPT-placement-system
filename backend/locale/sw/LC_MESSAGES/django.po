@@ -632,3 +632,165 @@ msgstr "Hujapakia nyaraka yoyote. Tumia fomu upande wa kushoto kuanza kujenga hi
 
 msgid "Your Documents"
 msgstr "Nyaraka Zako"
+
+msgid "Company Profile"
+msgstr "Wasifu wa Kampuni"
+
+msgid "Tell students about your organization and where you are located."
+msgstr "Waambie wanafunzi kuhusu shirika lako na unapokuwa."
+
+msgid "Company Information"
+msgstr "Taarifa za Kampuni"
+
+msgid "Your account is active — keep your details up to date."
+msgstr "Akaunti yako ni hai — weka taarifa zako zilizosasa."
+
+msgid "Save Profile"
+msgstr "Hifadhi Wasifu"
+
+msgid "Corporate Documents"
+msgstr "Nyaraka za Shirika"
+
+msgid "Upload BRELA certificate, TIN and business license (< 2MB each) for admin verification."
+msgstr "Pakia cheti cha BRELA, TIN na leseni ya biashara (< 2MB kila moja) kwa uthibitisho wa msimamizi."
+
+msgid "Upload Document"
+msgstr "Pakia Waraka"
+
+msgid "All required documents uploaded."
+msgstr "Nyaraka zote zinazohitajika zimepakiwa."
+
+msgid "View"
+msgstr "Angalia"
+
+msgid "Delete"
+msgstr "Futa"
+
+msgid "Are you sure you want to delete this document? You will be required to upload a replacement before continuing."
+msgstr "Je, una uhakika unataka kufuta waraka huu? Utahitaji kupakia mbadala kabla ya kuendelea."
+
+msgid "Account"
+msgstr "Akaunti"
+
+msgid "Verified"
+msgstr "Ime thibitishwa"
+
+msgid "Rejected"
+msgstr "Imekataliwa"
+
+msgid "Pending Verification"
+msgstr "Inasubiri Uthibitisho"
+
+msgid "Joined"
+msgstr "Ulijisajili"
+
+msgid "Company Dashboard"
+msgstr "Dashibodi ya Kampuni"
+
+msgid "Manage your opportunities and review applicants."
+msgstr "Simamia fursa zako na ukaguzi waombaji."
+
+msgid "New Slot"
+msgstr "Nafasi Mpya"
+
+msgid "Welcome!"
+msgstr "Karibu!"
+
+msgid "Complete your company profile and upload your BRELA, TIN and license documents to get verified."
+msgstr "Kamilisha wasifu wako wa kampuni na upakie vyeti vya BRELA, TIN na leseni ili kupata uthibitisho."
+
+msgid "Go to profile"
+msgstr "Nenda kwenye wasifu"
+
+msgid "Your company is"
+msgstr "Kampuni yako ni"
+
+msgid "You can fill in your profile, but you can only post slots once the platform admin approves you."
+msgstr "Unaweza kujaza wasifu wako, lakini unaweza kuweka nafasi tu baada ya msimamizi wa jukwaa kukuidhinisha."
+
+msgid "Reason:"
+msgstr "Sababu:"
+
+msgid "You can now post slots, review applicants, and send acceptance SMS."
+msgstr "Sasa unaweza kutangaza nafasi, ukaguzi waombaji, na kutuma SMS za kukubali."
+
+msgid "Company"
+msgstr "Kampuni"
+
+msgid "Verification"
+msgstr "Uthibitisho"
+
+msgid "Active Slots"
+msgstr "Nafasi Zinazofanya Kazi"
+
+msgid "Recent Slots"
+msgstr "Nafasi za Hivi Karibuni"
+
+msgid "spots left"
+msgstr "viti vilivyobaki"
+
+msgid "View Applicants"
+msgstr "Angalia Waombaji"
+
+msgid "No slots yet"
+msgstr "Hakuna nafasi bado"
+
+msgid "You haven't posted any training opportunities. Create your first slot to start receiving applications."
+msgstr "Hujatangaza nafasi yoyote ya mafunzo. Unda nafasi yako ya kwanza kuanza kupokea maombi."
+
+msgid "Post your first slot"
+msgstr "Tangaza nafasi yako ya kwanza"
+
+msgid "Verification Queue"
+msgstr "Foleni la Uthibitisho"
+
+msgid "Review and approve student and company verification requests."
+msgstr "Ukaguzi na uidhinishe maombi ya uthibitisho ya wanafunzi na kampuni."
+
+msgid "Total Pending"
+msgstr "Jumla ya Inayosubiri"
+
+msgid "Verified Today"
+msgstr "Ime thibitishwa Leo"
+
+msgid "Review Queue"
+msgstr "Foleni la Ukaguzi"
+
+msgid "Students"
+msgstr "Wanafunzi"
+
+msgid "Companies"
+msgstr "Kampuni"
+
+msgid "Search by name..."
+msgstr "Tafuta kwa jina..."
+
+msgid "Applicant"
+msgstr "Mwaombaji"
+
+msgid "Institution / Course"
+msgstr "Chuo / Kozi"
+
+msgid "Submitted"
+msgstr "Imetumwa"
+
+msgid "Status"
+msgstr "Hali"
+
+msgid "Action"
+msgstr "Kitendo"
+
+msgid "Pending"
+msgstr "Inasubiri"
+
+msgid "Review Details"
+msgstr "Angalia Maelezo"
+
+msgid "No students awaiting verification."
+msgstr "Hakuna wanafunzi wanaosubiri uthibitisho."
+
+msgid "Industry"
+msgstr "Viwanda"
+
+msgid "No companies awaiting verification."
+msgstr "Hakuna kampuni zinazosubiri uthibitisho."

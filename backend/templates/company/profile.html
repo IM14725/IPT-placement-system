@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Company Profile{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Company Profile" %}{% endblock %}
 {% block content %}
 <div class="w-full flex flex-col gap-lg">
   <div class="flex flex-col gap-xs">
-    <h1 class="font-display text-display text-on-surface tracking-tight">Company Profile</h1>
-    <p class="font-body-lg text-body-lg text-on-surface-variant">Tell students about your organization and where you are located.</p>
+    <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Company Profile" %}</h1>
+    <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Tell students about your organization and where you are located." %}</p>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg w-full items-start">
@@ -14,8 +15,8 @@
         <div class="flex items-center gap-xs relative z-10">
           <span class="material-symbols-outlined text-primary">business_center</span>
           <div class="flex flex-col">
-            <h2 class="font-headline-md text-headline-md text-on-surface">Company Information</h2>
-            <p class="font-body-md font-body-md text-on-surface-variant">Your account is active — keep your details up to date.</p>
+            <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Company Information" %}</h2>
+            <p class="font-body-md font-body-md text-on-surface-variant">{% trans "Your account is active — keep your details up to date." %}</p>
           </div>
         </div>
         <form method="post" class="flex flex-col gap-md z-10">
@@ -48,7 +49,7 @@
           <div class="flex justify-end mt-sm">
             <button class="bg-primary text-on-primary hover:bg-primary/90 font-body-lg text-body-lg rounded-full px-xl py-3 shadow-sm hover:shadow-md transition-all active:scale-[0.98] flex items-center gap-xs" type="submit">
               <span class="material-symbols-outlined text-[20px]">save</span>
-              Save Profile
+              {% trans "Save Profile" %}
             </button>
           </div>
         </form>
@@ -58,8 +59,8 @@
     <div class="lg:col-span-5 flex flex-col gap-lg">
       <div class="bg-surface-container rounded-xl p-md shadow-sm flex flex-col gap-sm">
         <div>
-          <h3 class="text-headline-md font-headline-md text-on-surface">Corporate Documents</h3>
-          <p class="text-body-md font-body-md text-on-surface-variant mt-xs">Upload BRELA certificate, TIN and business license (< 2MB each) for admin verification.</p>
+          <h3 class="text-headline-md font-headline-md text-on-surface">{% trans "Corporate Documents" %}</h3>
+          <p class="text-body-md font-body-md text-on-surface-variant mt-xs">{% trans "Upload BRELA certificate, TIN and business license (< 2MB each) for admin verification." %}</p>
         </div>
           {% if upload_form.fields.doc_type.choices %}
           <form method="post" enctype="multipart/form-data" action="{% url 'company-upload-doc' %}" class="flex flex-col gap-sm mt-sm">
@@ -81,13 +82,13 @@
             </div>
             <button class="bg-primary text-on-primary text-body-md font-body-md font-bold rounded-lg py-3 px-md mt-sm shadow-sm hover:shadow-md transition-shadow flex items-center justify-center gap-xs" type="submit">
               <span class="material-symbols-outlined text-[20px]">cloud_upload</span>
-              Upload Document
+              {% trans "Upload Document" %}
             </button>
           </form>
           {% else %}
           <div class="mt-sm p-sm bg-[#e8f5e9] text-[#1b5e20] rounded-lg flex items-center gap-xs font-body-md">
             <span class="material-symbols-outlined">check_circle</span>
-            All required documents uploaded.
+            {% trans "All required documents uploaded." %}
           </div>
           {% endif %}
           {% if docs %}
@@ -104,12 +105,12 @@
                     </div>
                   </div>
                   <div class="flex items-center gap-sm shrink-0">
-                    <a href="{% url 'document-view' doc.id %}" target="_blank" class="flex items-center text-primary text-body-md font-medium opacity-0 group-hover:opacity-100 transition-opacity" title="View">
+                    <a href="{% url 'document-view' doc.id %}" target="_blank" class="flex items-center text-primary text-body-md font-medium opacity-0 group-hover:opacity-100 transition-opacity" title="{% trans "View" %}">
                       <span class="material-symbols-outlined text-[20px]">visibility</span>
                     </a>
-                    <form method="post" action="{% url 'company-delete-doc' doc.id %}" onsubmit="return confirm('Are you sure you want to delete this document? You will be required to upload a replacement before continuing.');">
+                    <form method="post" action="{% url 'company-delete-doc' doc.id %}" onsubmit="return confirm('{% trans "Are you sure you want to delete this document? You will be required to upload a replacement before continuing." %}');">
                       {% csrf_token %}
-                      <button type="submit" class="flex items-center text-error opacity-0 group-hover:opacity-100 transition-opacity" title="Delete">
+                      <button type="submit" class="flex items-center text-error opacity-0 group-hover:opacity-100 transition-opacity" title="{% trans "Delete" %}">
                         <span class="material-symbols-outlined text-[20px]">delete</span>
                       </button>
                     </form>
@@ -123,18 +124,18 @@
         <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm">
           <div class="flex items-center gap-xs mb-md">
             <span class="material-symbols-outlined text-outline">verified_user</span>
-            <h3 class="font-headline-md font-headline-md text-on-surface">Account</h3>
+            <h3 class="font-headline-md font-headline-md text-on-surface">{% trans "Account" %}</h3>
           </div>
           <div class="flex items-center gap-xs">
             {% if company.is_approved %}
               <span class="material-symbols-outlined text-[#1b5e20] text-[20px]">verified</span>
-              <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#1b5e20] bg-[#e8f5e9]">Verified</span>
+              <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#1b5e20] bg-[#e8f5e9]">{% trans "Verified" %}</span>
             {% elif company.verification_status == 'REJECTED' %}
               <span class="material-symbols-outlined text-error text-[20px]">cancel</span>
-              <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-on-error bg-error-container">Rejected</span>
+              <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-on-error bg-error-container">{% trans "Rejected" %}</span>
             {% else %}
               <span class="material-symbols-outlined text-[#a16207] text-[20px]">pending</span>
-              <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#a16207] bg-[#fff4e5]">Pending Verification</span>
+              <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#a16207] bg-[#fff4e5]">{% trans "Pending Verification" %}</span>
             {% endif %}
           </div>
           <div class="h-[1px] w-full bg-surface-container-high my-sm"></div>
@@ -151,7 +152,7 @@
             {% endif %}
             <div class="flex items-center gap-xs">
               <span class="material-symbols-outlined text-[16px] text-on-surface-variant">calendar_month</span>
-              <span class="font-body-md text-body-md text-on-surface">Joined {{ user.date_joined|date:"M Y" }}</span>
+              <span class="font-body-md text-body-md text-on-surface">{% trans "Joined" %} {{ user.date_joined|date:"M Y" }}</span>
             </div>
           </div>
         </div>

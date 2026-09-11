@@ -1,16 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Company Dashboard{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Company Dashboard" %}{% endblock %}
 {% block content %}
 <div class="flex flex-col gap-lg">
   <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
     <div class="flex flex-col gap-xs">
-      <h1 class="text-display font-display text-on-surface">Company Dashboard</h1>
-      <p class="text-body-lg font-body-lg text-on-surface-variant">Manage your opportunities and review applicants.</p>
+      <h1 class="text-display font-display text-on-surface">{% trans "Company Dashboard" %}</h1>
+      <p class="text-body-lg font-body-lg text-on-surface-variant">{% trans "Manage your opportunities and review applicants." %}</p>
     </div>
     {% if company and company.is_approved %}
       <a href="{% url 'company-slot-create' %}" class="bg-primary text-on-primary px-lg py-sm rounded-full text-body-md font-body-md font-bold shadow-md hover:shadow-lg transition-shadow flex items-center gap-xs">
         <span class="material-symbols-outlined">add</span>
-        New Slot
+        {% trans "New Slot" %}
       </a>
     {% endif %}
   </div>
@@ -20,19 +21,19 @@
       <div class="flex items-start gap-sm">
         <span class="material-symbols-outlined text-tertiary">factory</span>
         <div>
-          <p class="font-headline-md text-headline-md text-on-surface">Welcome!</p>
-          <p class="text-on-surface-variant mt-1">Complete your company profile and upload your BRELA, TIN and license documents to get verified.</p>
+          <p class="font-headline-md text-headline-md text-on-surface">{% trans "Welcome!" %}</p>
+          <p class="text-on-surface-variant mt-1">{% trans "Complete your company profile and upload your BRELA, TIN and license documents to get verified." %}</p>
         </div>
       </div>
-      <a href="{% url 'company-profile' %}" class="shrink-0 bg-primary text-on-primary px-md py-sm rounded-lg font-semibold hover:bg-primary-container transition-colors">Go to profile</a>
+      <a href="{% url 'company-profile' %}" class="shrink-0 bg-primary text-on-primary px-md py-sm rounded-lg font-semibold hover:bg-primary-container transition-colors">{% trans "Go to profile" %}</a>
     </div>
   {% elif not company.is_approved %}
     <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex items-start gap-sm text-body-md">
       <span class="material-symbols-outlined text-[#a16207]">info</span>
       <div>
-        <p class="font-headline-md text-headline-md text-on-surface">Your company is {{ company.get_verification_status_display }}</p>
-        <p class="text-on-surface-variant mt-1">You can fill in your profile, but you can only post slots once the platform admin approves you.
-          {% if company.rejection_reason %} Reason: <span class="font-semibold">{{ company.rejection_reason }}</span>{% endif %}
+        <p class="font-headline-md text-headline-md text-on-surface">{% trans "Your company is" %} {{ company.get_verification_status_display }}</p>
+        <p class="text-on-surface-variant mt-1">{% trans "You can fill in your profile, but you can only post slots once the platform admin approves you." %}
+          {% if company.rejection_reason %} {% trans "Reason:" %} <span class="font-semibold">{{ company.rejection_reason }}</span>{% endif %}
         </p>
       </div>
     </div>
@@ -40,8 +41,8 @@
     <div class="bg-primary-container/10 p-md rounded-xl flex items-start gap-md">
       <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
       <div class="flex flex-col">
-        <span class="text-headline-md font-headline-md text-on-surface">Verified</span>
-        <span class="text-body-md font-body-md text-on-surface-variant">You can now post slots, review applicants, and send acceptance SMS.</span>
+        <span class="text-headline-md font-headline-md text-on-surface">{% trans "Verified" %}</span>
+        <span class="text-body-md font-body-md text-on-surface-variant">{% trans "You can now post slots, review applicants, and send acceptance SMS." %}</span>
       </div>
     </div>
   {% endif %}
@@ -54,7 +55,7 @@
           <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">factory</span>
         </div>
         <div class="flex flex-col relative z-10">
-          <span class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">Company</span>
+          <span class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Company" %}</span>
           <span class="text-headline-md font-headline-md text-on-surface truncate">{{ company.name }}</span>
           <span class="text-body-md font-body-md text-on-surface-variant">{{ company.industry }}</span>
         </div>
@@ -65,13 +66,13 @@
           <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
         </div>
         <div class="flex flex-col relative z-10">
-          <span class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">Verification</span>
+          <span class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Verification" %}</span>
           {% if company.is_approved %}
-            <span class="text-headline-md font-headline-md text-[#1b5e20]">Verified</span>
+            <span class="text-headline-md font-headline-md text-[#1b5e20]">{% trans "Verified" %}</span>
           {% elif company.verification_status == 'REJECTED' %}
-            <span class="text-headline-md font-headline-md text-error">Rejected</span>
+            <span class="text-headline-md font-headline-md text-error">{% trans "Rejected" %}</span>
           {% else %}
-            <span class="text-headline-md font-headline-md text-[#a16207]">Pending</span>
+            <span class="text-headline-md font-headline-md text-[#a16207]">{% trans "Pending" %}</span>
           {% endif %}
         </div>
       </div>
@@ -81,7 +82,7 @@
           <span class="material-symbols-outlined text-tertiary-container" style="font-variation-settings: 'FILL' 1;">work</span>
         </div>
         <div class="flex flex-col relative z-10">
-          <span class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">Active Slots</span>
+          <span class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Active Slots" %}</span>
           <span class="text-display font-display text-on-surface">{{ slots.count }}</span>
         </div>
       </div>
@@ -90,7 +91,7 @@
 
   {% if company and company.is_approved %}
     <div class="flex flex-col gap-md mt-lg">
-      <h2 class="text-headline-lg font-headline-lg text-on-surface">Recent Slots</h2>
+      <h2 class="text-headline-lg font-headline-lg text-on-surface">{% trans "Recent Slots" %}</h2>
       {% if slots %}
         <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
           {% for slot in slots %}
@@ -102,11 +103,11 @@
                 <div class="flex flex-col min-w-0">
                   <span class="text-headline-md font-headline-md text-on-surface truncate">{{ slot.title }}</span>
                   <span class="text-body-md font-body-md text-on-surface-variant">
-                    {{ slot.district }} · <span class="text-primary font-bold">{{ slot.available_count }}/{{ slot.capacity }}</span> spots left · {{ slot.get_status_display }}
+                    {{ slot.district }} · <span class="text-primary font-bold">{{ slot.available_count }}/{{ slot.capacity }}</span> {% trans "spots left" %} · {{ slot.get_status_display }}
                   </span>
                 </div>
               </div>
-              <a href="{% url 'company-applicants' slot.id %}" class="text-primary hover:text-primary-container font-body-md font-bold transition-colors shrink-0">View Applicants</a>
+              <a href="{% url 'company-applicants' slot.id %}" class="text-primary hover:text-primary-container font-body-md font-bold transition-colors shrink-0">{% trans "View Applicants" %}</a>
             </div>
           {% endfor %}
         </div>
@@ -115,11 +116,11 @@
           <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mb-sm">
             <span class="material-symbols-outlined text-[32px] text-outline">work_off</span>
           </div>
-          <h3 class="font-headline-md font-headline-md text-on-surface mb-2">No slots yet</h3>
-          <p class="font-body-md font-body-md text-on-surface-variant text-center max-w-md mb-lg">Post your first slot to start receiving applications.</p>
+          <h3 class="font-headline-md font-headline-md text-on-surface mb-2">{% trans "No slots yet" %}</h3>
+          <p class="font-body-md font-body-md text-on-surface-variant text-center max-w-md mb-lg">{% trans "You haven't posted any training opportunities. Create your first slot to start receiving applications." %}</p>
           <a href="{% url 'company-slot-create' %}" class="bg-primary text-on-primary font-body-md font-body-md px-md py-sm rounded-lg hover:bg-primary-container transition-colors shadow-sm flex items-center gap-base">
             <span class="material-symbols-outlined text-[20px]">add</span>
-            Post your first slot
+            {% trans "Post your first slot" %}
           </a>
         </div>
       {% endif %}
