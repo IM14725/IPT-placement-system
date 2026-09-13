@@ -70,7 +70,41 @@
         headers: { "X-Requested-With": "XMLHttpRequest" },
       })
         .then(function (resp) {
-          // Follows 3xx redirects automatically (success → final page).
+          // Check for Celery task dispatch (HTTP 202 Accepted)
+          if (resp.status === 202 && resp.headers.get("X-Task-Id")) {
+            var taskId = resp.headers.get("X-Task-Id");
+            function poll() {
+              fetch("/auth/task-status/" + taskId + "/")
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                  if (d.status === 'SUCCESS') {
+                    var fd = new FormData();
+                    fd.append("token", d.token);
+                    var csrfInput = form.querySelector('[name=csrfmiddlewaretoken]');
+                    if (csrfInput) fd.append("csrfmiddlewaretoken", csrfInput.value);
+                    fetch("/auth/finalize/", { method: "POST", body: fd })
+                      .then(function(fr) {
+                        if (fr.redirected) window.location.href = fr.url;
+                        else window.location.href = "/";
+                      });
+                  } else if (d.status === 'ERROR') {
+                    hideOverlay();
+                    form.removeAttribute("data-loading-submitting");
+                    var errBox = document.createElement('div');
+                    errBox.className = 'rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-body-md text-on-error-container flex items-start gap-xs mb-md';
+                    errBox.innerHTML = '<span class="material-symbols-outlined text-[18px] mt-px">error</span><span>' + (d.message || "Authentication failed") + '</span>';
+                    form.insertBefore(errBox, form.firstChild);
+                  } else {
+                    setTimeout(poll, 1500);
+                  }
+                })
+                .catch(function() { setTimeout(poll, 1500); });
+            }
+            poll();
+            return;
+          }
+
+          // Follows 3xx redirects automatically (success -> final page).
           return resp.text().then(function (html) {
             if (resp.redirected) {
               window.location.href = resp.url;

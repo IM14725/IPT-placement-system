@@ -97,6 +97,10 @@ def register(request):
             }
             
             task = process_registration_task.delay(form_data)
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                resp = HttpResponse(status=202)
+                resp['X-Task-Id'] = task.id
+                return resp
             return render(request, "registration/processing.html", {"task_id": task.id, "action": "register"})
     else:
         form = RegisterForm()
@@ -129,6 +133,10 @@ def user_login(request):
             email = form.cleaned_data["email"]
             password = form.cleaned_data["password"]
             task = process_login_task.delay(email, password)
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                resp = HttpResponse(status=202)
+                resp['X-Task-Id'] = task.id
+                return resp
             return render(request, "registration/processing.html", {"task_id": task.id, "action": "login"})
     else:
         form = LoginForm()
