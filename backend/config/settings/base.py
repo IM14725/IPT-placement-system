@@ -144,6 +144,12 @@ BEEM_API_KEY = env("BEEM_API_KEY", default="")
 BEEM_SECRET_KEY = env("BEEM_SECRET_KEY", default="")
 BEEM_SENDER_ID = env("BEEM_SENDER_ID", default="IPT")
 
+# Payment Configuration (Selcom)
+SELCOM_BASE_URL = env("SELCOM_BASE_URL", default="https://apitest.selcommobile.com")
+SELCOM_API_KEY = env("SELCOM_API_KEY", default="MOCK_API_KEY")
+SELCOM_API_SECRET = env("SELCOM_API_SECRET", default="MOCK_API_SECRET")
+SELCOM_VENDOR_TILL = env("SELCOM_VENDOR_TILL", default="MOCK_TILL")
+
 # Upload limits (bytes) - strict 2MB per spec
 MAX_UPLOAD_SIZE = 2 * 1024 * 1024
 ALLOWED_DOC_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "webp", "doc", "docx"}
