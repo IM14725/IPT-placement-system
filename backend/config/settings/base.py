@@ -127,7 +127,22 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+if env("SMTP_HOST", default=""):
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = env("SMTP_HOST")
+    EMAIL_PORT = env.int("SMTP_PORT", default=587)
+    EMAIL_HOST_USER = env("SMTP_USER", default="")
+    EMAIL_HOST_PASSWORD = env("SMTP_PASSWORD", default="")
+    EMAIL_USE_TLS = env.bool("SMTP_USE_TLS", default=True)
+    DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    DEFAULT_FROM_EMAIL = "noreply@iptmarketplace.com"
+
+# SMS Configuration
+BEEM_API_KEY = env("BEEM_API_KEY", default="")
+BEEM_SECRET_KEY = env("BEEM_SECRET_KEY", default="")
+BEEM_SENDER_ID = env("BEEM_SENDER_ID", default="IPT")
 
 # Upload limits (bytes) - strict 2MB per spec
 MAX_UPLOAD_SIZE = 2 * 1024 * 1024

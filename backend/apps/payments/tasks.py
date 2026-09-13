@@ -59,5 +59,5 @@ def receipt_email(payment_id):
         subject=subject,
         body=body,
     )
-    throttled_dispatch(message)
+    throttled_dispatch(message, attachments=[pdf_path])
     return {"message_id": message.id, "pdf": pdf_path}
