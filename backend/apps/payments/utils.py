@@ -9,21 +9,11 @@ def send_selcom_wallet_pull(transaction_id, phone_number, amount):
     Sends a Direct USSD push payload targeting Selcom's checkout workflow.
     """
     base_url = getattr(settings, 'SELCOM_BASE_URL', 'https://apitest.selcommobile.com')
-    url = f"{base_url}/v1/checkout/create-order-minimal"
-    
     api_key = getattr(settings, 'SELCOM_API_KEY', 'MOCK_API_KEY')
     api_secret = getattr(settings, 'SELCOM_API_SECRET', 'MOCK_API_SECRET')
     vendor_till = getattr(settings, 'SELCOM_VENDOR_TILL', 'MOCK_TILL')
-
-    # Base64 Auth header format commonly used by Selcom
-    auth_str = f"{api_key}:{api_secret}"
-    encoded_auth = base64.b64encode(auth_str.encode('utf-8')).decode('utf-8')
-
-    headers = {
-        "Authorization": f"Basic {encoded_auth}",
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    }
+    
+    # The selcom_apigw_client handles header generation internally
 
     # Structure minimum parameters requested by Selcom checkout order endpoints
     payload = {
@@ -41,9 +31,14 @@ def send_selcom_wallet_pull(transaction_id, phone_number, amount):
             # Auto-approve the initiation locally when keys are mocked
             return 200, {"result": "SUCCESS", "transid": "MOCK-INITIATED-123", "message": "Mock prompt initiated."}
             
-        response = requests.post(url, json=payload, headers=headers, timeout=20)
-        return response.status_code, response.json()
-    except requests.exceptions.RequestException as e:
+        from selcom_apigw_client import apigwClient
+        client = apigwClient.Client(base_url, api_key, api_secret)
+        response_data = client.postFunc("/v1/checkout/create-order-minimal", payload)
+        
+        # Determine pseudo HTTP code based on resultcode
+        http_code = 200 if response_data.get("resultcode") == "000" or response_data.get("result") == "SUCCESS" else 400
+        return http_code, response_data
+    except Exception as e:
         return 500, {"result": "FAIL", "message": str(e)}
 
 
