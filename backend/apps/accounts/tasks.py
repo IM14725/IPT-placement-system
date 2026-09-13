@@ -23,7 +23,8 @@ def process_registration_task(form_data):
             
         user = User(
             email=email,
-            role=form_data.get("role")
+            role=form_data.get("role"),
+            phone=form_data.get("phone", "")
         )
         user.set_password(form_data.get("password1"))
         

@@ -93,6 +93,7 @@ def register(request):
                 "company_name": form.cleaned_data.get("company_name"),
                 "first_name": form.cleaned_data.get("first_name"),
                 "last_name": form.cleaned_data.get("last_name"),
+                "phone": form.cleaned_data.get("phone"),
             }
             
             task = process_registration_task.delay(form_data)
@@ -280,7 +281,7 @@ def finalize_auth(request):
         try:
             user_id = signer.unsign(token)
             user = User.objects.get(id=user_id)
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect(_dashboard_url(user))
         except Exception:
             messages.error(request, 'Authentication failed. Please try again.')
