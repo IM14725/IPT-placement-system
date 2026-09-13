@@ -182,14 +182,38 @@ def apply(request, slot_id):
                 application.application_letter = letter
                 application.letter_original_name = letter.name
                 application.letter_sha256 = _file_sha256(letter)
+                
+                is_credit = profile.reapplication_credit
+                if is_credit:
+                    application.can_cancel = False
+                    application.status = "PAID"
+                    
                 application.save(
                     update_fields=[
                         "application_letter",
                         "letter_original_name",
                         "letter_sha256",
+                        "can_cancel",
+                        "status",
                         "updated_at",
                     ]
                 )
+                
+                if is_credit:
+                    Payment.objects.create(
+                        student=profile,
+                        application=application,
+                        amount=_APPLICATION_FEE,
+                        status="PAID",
+                        is_paid=True,
+                        gateway_txn_id="CREDIT-REAPPLICATION",
+                        paid_at=application.created_at
+                    )
+                    profile.reapplication_credit = False
+                    profile.save(update_fields=["reapplication_credit", "updated_at"])
+                    messages.success(request, "Application submitted successfully using your cancellation credit.")
+                    return redirect("student-applications")
+
                 payment = getattr(application, "payment", None)
                 if payment is None:
                     payment = Payment.objects.create(
@@ -247,3 +271,60 @@ def view_document(request, doc_id):
         if actual != doc.sha256:
             return HttpResponseGone("This document failed its integrity check and is unavailable.")
     return FileResponse(doc.file.open("rb"), content_type=doc.mime_type or "application/octet-stream")
+
+
+@login_required
+@token_bucket(capacity=3, refill_per_second=1 / 60, scope="student-cancel", methods=["POST"])
+def cancel_application(request, app_id):
+    if not request.user.is_student:
+        return HttpResponseForbidden("Student account required.")
+    
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    application = get_object_or_404(
+        Application.objects.select_related("payment", "slot", "student"),
+        id=app_id, student__user=request.user
+    )
+    
+    if request.method == "POST":
+        if not application.can_cancel:
+            messages.error(request, "This application cannot be cancelled. You can only cancel once per payment.")
+            return redirect("student-applications")
+            
+        if not application.is_paid:
+            messages.error(request, "Only paid applications can be cancelled.")
+            return redirect("student-applications")
+            
+        if not application.payment or not application.payment.paid_at:
+            messages.error(request, "Payment information is missing.")
+            return redirect("student-applications")
+            
+        # 24 hour check
+        if timezone.now() > application.payment.paid_at + timedelta(hours=24):
+            messages.error(request, "The 24-hour cancellation window has passed.")
+            return redirect("student-applications")
+            
+        if application.is_accepted:
+             messages.error(request, "Application has already been accepted by the company.")
+             return redirect("student-applications")
+             
+        # Execute cancellation
+        application.status = "CANCELLED"
+        application.can_cancel = False
+        application.save(update_fields=["status", "can_cancel", "updated_at"])
+        
+        # Free up slot
+        application.slot.refresh_status()
+        
+        # Give credit
+        profile = application.student
+        profile.reapplication_credit = True
+        profile.save(update_fields=["reapplication_credit", "updated_at"])
+        
+        # Note: You also need to notify the company. 
+        # A notification system can be hooked here, but for now we trust the db update.
+        
+        messages.success(request, "Application cancelled successfully. Your slot was returned and you now have a credit to apply for a new slot without paying.")
+        
+    return redirect("student-applications")

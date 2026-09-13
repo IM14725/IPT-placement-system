@@ -43,7 +43,7 @@
             <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Location</span>
             <div class="flex items-start gap-xs">
               <span class="material-symbols-outlined text-outline-variant text-[20px] mt-[2px]">location_on</span>
-              <span class="font-body-lg text-body-lg text-on-surface">{{ company.street|default:"" }} {{ company.district }}{% if company.region %}, {{ company.region }}{% endif %}</span>
+              <span class="font-body-lg text-body-lg text-on-surface">{% if company.street %}{{ company.street }}, {% endif %}{% if company.district %}{{ company.district.name }}{% if company.region %}, {% endif %}{% endif %}{{ company.region.name|default:"" }}</span>
             </div>
           </div>
           {% if company.description %}
@@ -95,16 +95,27 @@
       <div class="bg-surface-container rounded-xl p-md shadow-sm relative overflow-hidden">
         <div class="absolute -right-4 -top-4 w-32 h-32 bg-secondary-container/20 rounded-full blur-2xl pointer-events-none"></div>
         <h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest mb-sm">Account Status</h3>
-        <div class="flex items-center gap-sm bg-secondary-container/10 p-sm rounded-lg inline-flex mb-xl">
-          <div class="relative flex h-3 w-3">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-3 w-3 bg-secondary"></span>
+        {% if company.is_verified %}
+          <div class="flex items-center gap-sm bg-[#e8f5e9] p-sm rounded-lg inline-flex mb-xl">
+            <div class="relative flex h-3 w-3">
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-[#1b5e20]"></span>
+            </div>
+            <span class="font-body-md text-body-md text-[#1b5e20] font-bold uppercase tracking-wide">{{ company.get_verification_status_display }}</span>
           </div>
-          <span class="font-body-md text-body-md text-secondary font-bold uppercase tracking-wide">{{ company.get_verification_status_display }}</span>
-        </div>
+        {% else %}
+          <div class="flex items-center gap-sm bg-secondary-container/10 p-sm rounded-lg inline-flex mb-xl">
+            <div class="relative flex h-3 w-3">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-secondary"></span>
+            </div>
+            <span class="font-body-md text-body-md text-secondary font-bold uppercase tracking-wide">{{ company.get_verification_status_display }}</span>
+          </div>
+        {% endif %}
         {% if company.rejection_reason %}
           <p class="font-metadata text-metadata text-error mb-xl">Last rejection: {{ company.rejection_reason }}</p>
         {% endif %}
+        
+        {% if not company.is_verified %}
         <div class="flex flex-col gap-sm">
           <h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Review Decision</h3>
           <form method="post" class="flex flex-col gap-base">
@@ -123,7 +134,22 @@
             </div>
           </form>
         </div>
+        {% endif %}
+      <div class="bg-surface-container rounded-xl p-md shadow-sm flex flex-col gap-sm">
+        <h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest mb-xs">Administrative Actions</h3>
+        <a href="{% url 'platform-company-edit' company.id %}" class="w-full py-3 bg-surface-variant text-on-surface-variant rounded-full font-body-md text-body-md font-bold hover:bg-surface-variant/80 transition-all flex items-center justify-center gap-xs">
+          <span class="material-symbols-outlined text-[20px]">edit</span>
+          Edit Profile
+        </a>
+        <form method="post" onsubmit="return confirm('Are you sure you want to deactivate this account? It will be hidden from the platform.');">
+          {% csrf_token %}
+          <button class="w-full py-3 bg-error-container text-on-error-container rounded-full font-body-md text-body-md font-bold hover:bg-error-container/80 transition-all flex items-center justify-center gap-xs" name="decision" value="deactivate" type="submit">
+            <span class="material-symbols-outlined text-[20px]">delete</span>
+            Deactivate Account
+          </button>
+        </form>
       </div>
+
       <div class="bg-surface-container rounded-xl p-md shadow-sm flex flex-col items-center text-center">
         <div class="w-16 h-16 rounded-full bg-surface-variant flex items-center justify-center mb-sm">
           <span class="material-symbols-outlined text-outline text-[32px]">shield_person</span>

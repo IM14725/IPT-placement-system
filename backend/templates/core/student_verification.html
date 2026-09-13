@@ -51,9 +51,15 @@
           <span class="text-body-lg text-on-surface font-medium">{{ student.course }}</span>
         </div>
         <div class="flex flex-col gap-base">
+          <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">Education Level</span>
+          <span class="text-body-lg text-on-surface font-medium">{{ student.get_education_level_display|default:"—" }}</span>
+        </div>
+        {% if student.education_level == 7 %}
+        <div class="flex flex-col gap-base">
           <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">Year of Study</span>
           <span class="text-body-lg text-on-surface font-medium">Year {{ student.current_year }}</span>
         </div>
+        {% endif %}
         <div class="flex flex-col gap-base">
           <span class="text-label-caps text-on-surface-variant uppercase tracking-wider">Current GPA</span>
           <span class="text-body-lg text-on-surface font-medium">{{ student.gpa|default:"—" }} / 4.0</span>
@@ -78,6 +84,23 @@
         </div>
       {% endif %}
       <div class="flex flex-col gap-xs">
+        {% if student.id_card_photo %}
+          <div class="flex items-center justify-between p-sm rounded-lg bg-surface hover:bg-surface-container-low transition-colors group">
+            <div class="flex items-center gap-md">
+              <div class="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">badge</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-body-md font-medium text-on-surface">Student ID Card</span>
+                <span class="text-metadata text-on-surface-variant">Image File</span>
+              </div>
+            </div>
+            <a href="{{ student.id_card_photo.url }}" target="_blank" class="flex items-center gap-xs text-primary text-body-md font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+              <span class="material-symbols-outlined text-[20px]">visibility</span>
+              View
+            </a>
+          </div>
+        {% endif %}
         {% for doc in docs %}
           <div class="flex items-center justify-between p-sm rounded-lg bg-surface hover:bg-surface-container-low transition-colors group">
             <div class="flex items-center gap-md">
@@ -95,7 +118,9 @@
             </a>
           </div>
         {% empty %}
-          <p class="text-body-md text-on-surface-variant">No documents uploaded yet.</p>
+          {% if not student.id_card_photo %}
+            <p class="text-body-md text-on-surface-variant">No documents uploaded yet.</p>
+          {% endif %}
         {% endfor %}
       </div>
     </div>
@@ -104,19 +129,31 @@
   <div class="lg:col-span-4 flex flex-col gap-lg">
     <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
       <h3 class="font-headline-md text-headline-md text-on-surface">Account Status</h3>
-      <div class="flex items-center gap-sm">
-        <div class="w-3 h-3 rounded-full bg-[#f59e0b] animate-pulse"></div>
-        <span class="text-body-lg font-medium text-on-surface">{{ student.get_verification_status_display }}</span>
-      </div>
-      <div class="h-1 w-full bg-surface-variant rounded-full overflow-hidden mt-sm">
-        <div class="h-full w-1/2 bg-[#f59e0b] rounded-full"></div>
-      </div>
-      <p class="text-metadata text-on-surface-variant mt-xs">Awaiting admin review of submitted documents.</p>
+      {% if student.is_verified %}
+        <div class="flex items-center gap-sm">
+          <div class="w-3 h-3 rounded-full bg-[#10b981]"></div>
+          <span class="text-body-lg font-medium text-on-surface">{{ student.get_verification_status_display }}</span>
+        </div>
+        <div class="h-1 w-full bg-surface-variant rounded-full overflow-hidden mt-sm">
+          <div class="h-full w-full bg-[#10b981] rounded-full"></div>
+        </div>
+        <p class="text-metadata text-on-surface-variant mt-xs">This student account is approved and active.</p>
+      {% else %}
+        <div class="flex items-center gap-sm">
+          <div class="w-3 h-3 rounded-full bg-[#f59e0b] animate-pulse"></div>
+          <span class="text-body-lg font-medium text-on-surface">{{ student.get_verification_status_display }}</span>
+        </div>
+        <div class="h-1 w-full bg-surface-variant rounded-full overflow-hidden mt-sm">
+          <div class="h-full w-1/2 bg-[#f59e0b] rounded-full"></div>
+        </div>
+        <p class="text-metadata text-on-surface-variant mt-xs">Awaiting admin review of submitted documents.</p>
+      {% endif %}
       {% if student.rejection_reason %}
         <p class="text-metadata text-error mt-xs">Last rejection: {{ student.rejection_reason }}</p>
       {% endif %}
     </div>
 
+    {% if not student.is_verified %}
     <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
       <h3 class="font-headline-md text-headline-md text-on-surface">Review Decision</h3>
       <form method="post" class="flex flex-col gap-md">
@@ -141,6 +178,25 @@
         </div>
       </form>
     </div>
+    {% endif %}
+
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
+      <h3 class="font-headline-md text-headline-md text-on-surface">Administrative Actions</h3>
+      <div class="flex flex-col gap-sm">
+        <a href="{% url 'platform-student-edit' student.id %}" class="w-full py-3 px-md bg-surface-variant hover:bg-surface-variant/80 text-on-surface-variant rounded-lg text-body-md font-medium transition-all flex items-center justify-center gap-xs">
+          <span class="material-symbols-outlined text-[20px]">edit</span>
+          Edit Profile
+        </a>
+        <form method="post" onsubmit="return confirm('Are you sure you want to deactivate this account? It will be hidden from the platform.');">
+          {% csrf_token %}
+          <button class="w-full py-3 px-md bg-error/10 hover:bg-error/20 text-error rounded-lg text-body-md font-medium transition-all flex items-center justify-center gap-xs" name="decision" value="deactivate" type="submit">
+            <span class="material-symbols-outlined text-[20px]">delete</span>
+            Deactivate Account
+          </button>
+        </form>
+      </div>
+    </div>
+
   </div>
 </div>
 {% endblock %}

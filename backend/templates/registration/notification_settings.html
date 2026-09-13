@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Notification Settings" %} — IPT Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-xl flex flex-col gap-lg">
+
+  {# ── Page header ── #}
+  <div class="flex flex-col gap-xs">
+    <h1 class="font-display-sm text-display-sm text-on-surface">{% trans "Notification Settings" %}</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% trans "Control which messages we send you. You can change these at any time." %}
+    </p>
+  </div>
+
+  <form method="post" class="flex flex-col gap-lg">
+    {% csrf_token %}
+
+    {# ── Card 1: Promotional SMS toggle ── #}
+    <div class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-md">
+      <div class="flex items-center gap-sm">
+        <span class="material-symbols-outlined text-primary text-[22px]">campaign</span>
+        <h2 class="font-title-lg text-title-lg text-on-surface">{% trans "Marketing & Promotions" %}</h2>
+      </div>
+
+      {# Toggle row #}
+      <label class="flex items-center justify-between gap-md cursor-pointer group select-none">
+        <div class="flex flex-col gap-[2px]">
+          <span class="font-body-lg text-on-surface group-hover:text-primary transition-colors">
+            {% trans "Promotional SMS & Email notifications" %}
+          </span>
+          <span class="font-body-md text-body-md text-on-surface-variant">
+            {% trans "New company slots, platform news, special offers, and event invitations." %}
+          </span>
+        </div>
+
+        {# Pill toggle — checked = opted IN (i.e. promo_sms_optout is False) #}
+        <div class="relative shrink-0">
+          <input
+            type="checkbox"
+            name="promo_notifications"
+            id="promo_notifications"
+            class="sr-only peer"
+            {% if not user.promo_sms_optout %}checked{% endif %}
+          >
+          {# Track #}
+          <div class="w-12 h-6 rounded-full border-2 transition-colors
+                      border-outline bg-surface-container-high
+                      peer-checked:border-primary peer-checked:bg-primary">
+          </div>
+          {# Thumb #}
+          <div class="absolute top-[4px] left-[4px] w-4 h-4 rounded-full shadow transition-all
+                      bg-outline
+                      peer-checked:translate-x-6 peer-checked:bg-on-primary">
+          </div>
+        </div>
+      </label>
+
+      <p class="font-body-sm text-body-sm text-on-surface-variant">
+        {% trans "Toggle ON to receive promotional messages. Toggle OFF to opt out." %}
+      </p>
+    </div>
+
+    {# ── Card 2: Non-optional system alerts info box ── #}
+    <div class="rounded-2xl bg-surface-container p-lg flex gap-sm items-start shadow-sm">
+      <span class="material-symbols-outlined text-secondary text-[22px] shrink-0 mt-0.5">info</span>
+      <div class="flex flex-col gap-xs">
+        <p class="font-title-sm text-title-sm text-on-surface">{% trans "System-critical alerts cannot be turned off" %}</p>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {% blocktrans %}The following notifications are required to operate your account and cannot be disabled:{% endblocktrans %}
+        </p>
+        <ul class="list-disc list-outside ml-5 space-y-xs font-body-md text-body-md text-on-surface-variant">
+          <li>{% trans "Payment confirmations and receipts" %}</li>
+          <li>{% trans "Internship slot updates and status changes" %}</li>
+          <li>{% trans "Application decisions from companies" %}</li>
+          <li>{% trans "Security alerts (password changes, sign-in from new device)" %}</li>
+          <li>{% trans "Legal and policy update notices" %}</li>
+        </ul>
+      </div>
+    </div>
+
+    {# ── Save button ── #}
+    <div class="flex items-center gap-md">
+      <button
+        type="submit"
+        class="inline-flex items-center gap-xs px-lg py-sm rounded-full bg-primary text-on-primary
+               font-metadata text-metadata uppercase tracking-wider shadow
+               hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+      >
+        <span class="material-symbols-outlined text-[16px]">save</span>
+        {% trans "Save Preferences" %}
+      </button>
+      <a href="javascript:history.back()"
+         class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors">
+        {% trans "Cancel" %}
+      </a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

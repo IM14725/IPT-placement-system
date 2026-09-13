@@ -221,3 +221,43 @@ def _dashboard_url(user):
     if user.is_company:
         return "company-dashboard"
     return "platform-verifications"
+
+
+# ── Feature 1: Notification Opt-Out Settings ─────────────────────────────────
+
+@login_required
+def notification_settings(request):
+    """Allow users to opt out of promotional SMS/email notifications (T&C §9.1)."""
+    if request.method == "POST":
+        # Checkbox is only sent when checked (opted IN); absence means opted OUT
+        promo_opted_in = request.POST.get("promo_notifications") == "on"
+        request.user.promo_sms_optout = not promo_opted_in
+        request.user.save(update_fields=["promo_sms_optout"])
+        messages.success(request, "Your notification preferences have been saved.")
+        return redirect("notification-settings")
+    return render(request, "registration/notification_settings.html")
+
+
+# ── Feature 2: Account Deletion Request ──────────────────────────────────────
+
+@login_required
+def request_account_deletion(request):
+    """Allow users to request account deletion as required by T&C §13."""
+    from django.utils import timezone as tz
+    if request.method == "POST":
+        confirm_email = (request.POST.get("confirm_email") or "").strip().lower()
+        if confirm_email == request.user.email:
+            request.user.deletion_requested_at = tz.now()
+            request.user.is_active = False
+            request.user.save(update_fields=["deletion_requested_at", "is_active"])
+            logout(request)
+            messages.success(
+                request,
+                "Your account deletion request has been received. "
+                "Your account is now deactivated and will be deleted in accordance with the PDPA.",
+            )
+            return redirect("home")
+        else:
+            messages.error(request, "The email address you entered does not match your account email.")
+            return redirect("delete-account")
+    return render(request, "registration/delete_account.html")

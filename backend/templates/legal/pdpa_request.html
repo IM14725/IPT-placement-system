@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "PDPA Rights Request" %} — IPT Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-xl flex flex-col gap-lg">
+
+  {# ── Page header ── #}
+  <div class="flex flex-col gap-xs">
+    <div class="flex items-center gap-sm">
+      <span class="material-symbols-outlined text-primary text-[28px]">shield</span>
+      <h1 class="font-display-sm text-display-sm text-on-surface">{% trans "PDPA Rights Request" %}</h1>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% trans "Exercise your rights under the Personal Data Protection Act (PDPA) 2022. Select the type of request below." %}
+    </p>
+  </div>
+
+  {% if user.is_authenticated %}
+
+  <form method="post" id="pdpa-form" class="flex flex-col gap-lg">
+    {% csrf_token %}
+
+    {# ── Radio cards ── #}
+    <div class="flex flex-col gap-sm" role="radiogroup" aria-label="{% trans 'Request type' %}">
+
+      {# Portability #}
+      <label class="cursor-pointer">
+        <input type="radio" name="request_type" value="portability" class="sr-only peer" required>
+        <div class="rounded-2xl border-2 border-outline-variant bg-surface-container-lowest p-md flex items-start gap-sm
+                    peer-checked:border-primary peer-checked:bg-primary-fixed/20 transition-all">
+          <span class="material-symbols-outlined text-primary text-[22px] shrink-0 mt-0.5">download</span>
+          <div>
+            <p class="font-title-sm text-title-sm text-on-surface">{% trans "Export My Data (JSON)" %}</p>
+            <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Download a JSON file of all data we hold about you. Starts immediately." %}</p>
+          </div>
+        </div>
+      </label>
+
+      {# Access #}
+      <label class="cursor-pointer">
+        <input type="radio" name="request_type" value="access" class="sr-only peer">
+        <div class="rounded-2xl border-2 border-outline-variant bg-surface-container-lowest p-md flex items-start gap-sm
+                    peer-checked:border-primary peer-checked:bg-primary-fixed/20 transition-all">
+          <span class="material-symbols-outlined text-primary text-[22px] shrink-0 mt-0.5">visibility</span>
+          <div>
+            <p class="font-title-sm text-title-sm text-on-surface">{% trans "Request Data Copy" %}</p>
+            <p class="font-body-md text-body-md text-on-surface-variant">{% trans "We will prepare and send you a complete copy within 21 days." %}</p>
+          </div>
+        </div>
+      </label>
+
+      {# Correction #}
+      <label class="cursor-pointer">
+        <input type="radio" name="request_type" value="correction" class="sr-only peer" data-needs-details>
+        <div class="rounded-2xl border-2 border-outline-variant bg-surface-container-lowest p-md flex items-start gap-sm
+                    peer-checked:border-primary peer-checked:bg-primary-fixed/20 transition-all">
+          <span class="material-symbols-outlined text-primary text-[22px] shrink-0 mt-0.5">edit</span>
+          <div>
+            <p class="font-title-sm text-title-sm text-on-surface">{% trans "Correct My Data" %}</p>
+            <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Describe what needs correcting. We will update it within 21 days." %}</p>
+          </div>
+        </div>
+      </label>
+
+      {# Erasure #}
+      <label class="cursor-pointer">
+        <input type="radio" name="request_type" value="erasure" class="sr-only peer" data-needs-details>
+        <div class="rounded-2xl border-2 border-outline-variant bg-surface-container-lowest p-md flex items-start gap-sm
+                    peer-checked:border-primary peer-checked:bg-primary-fixed/20 transition-all">
+          <span class="material-symbols-outlined text-error text-[22px] shrink-0 mt-0.5">delete_forever</span>
+          <div>
+            <p class="font-title-sm text-title-sm text-on-surface">{% trans "Request Data Erasure" %}</p>
+            <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Request deletion of your account and personal data." %}</p>
+          </div>
+        </div>
+      </label>
+
+      {# Withdraw Consent #}
+      <label class="cursor-pointer">
+        <input type="radio" name="request_type" value="withdraw_consent" class="sr-only peer" data-needs-details>
+        <div class="rounded-2xl border-2 border-outline-variant bg-surface-container-lowest p-md flex items-start gap-sm
+                    peer-checked:border-primary peer-checked:bg-primary-fixed/20 transition-all">
+          <span class="material-symbols-outlined text-secondary text-[22px] shrink-0 mt-0.5">cancel</span>
+          <div>
+            <p class="font-title-sm text-title-sm text-on-surface">{% trans "Withdraw Consent" %}</p>
+            <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Withdraw consent for non-essential data processing." %}</p>
+          </div>
+        </div>
+      </label>
+
+    </div>
+
+    {# ── Additional details textarea (shown conditionally) ── #}
+    <div id="details-section" class="hidden flex flex-col gap-xs">
+      <label for="details" class="font-body-lg text-on-surface">{% trans "Additional Details" %}</label>
+      <textarea
+        name="details"
+        id="details"
+        rows="4"
+        maxlength="500"
+        placeholder="{% trans 'Please provide as much detail as possible to help us process your request quickly.' %}"
+        class="w-full rounded-xl border border-outline bg-surface px-md py-sm
+               font-body-md text-body-md text-on-surface placeholder-on-surface-variant/50
+               focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none"
+      ></textarea>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">{% trans "Maximum 500 characters." %}</p>
+    </div>
+
+    {# ── Submit button ── #}
+    <button
+      type="submit"
+      class="self-start inline-flex items-center gap-xs px-lg py-sm rounded-full
+             bg-primary text-on-primary font-metadata text-metadata uppercase tracking-wider
+             shadow hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+    >
+      <span class="material-symbols-outlined text-[16px]">send</span>
+      {% trans "Submit Request" %}
+    </button>
+  </form>
+
+  <script>
+    (function () {
+      var detailsSection = document.getElementById('details-section');
+      var radios = document.querySelectorAll('input[name="request_type"]');
+      var noDetailsValues = new Set(['portability', 'access']);
+
+      function updateDetails() {
+        var selected = document.querySelector('input[name="request_type"]:checked');
+        if (selected && !noDetailsValues.has(selected.value)) {
+          detailsSection.classList.remove('hidden');
+        } else {
+          detailsSection.classList.add('hidden');
+        }
+      }
+
+      radios.forEach(function (r) { r.addEventListener('change', updateDetails); });
+    })();
+  </script>
+
+  {% else %}
+  {# ── Login prompt for unauthenticated users ── #}
+  <div class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-md items-start">
+    <span class="material-symbols-outlined text-primary text-[32px]">lock</span>
+    <p class="font-body-lg text-on-surface">
+      {% blocktrans %}
+        You need to be logged in to submit a PDPA rights request.
+      {% endblocktrans %}
+    </p>
+    <a href="{% url 'login' %}?next={% url 'legal-pdpa-request' %}"
+       class="inline-flex items-center gap-xs px-lg py-sm rounded-full bg-primary text-on-primary
+              font-metadata text-metadata uppercase tracking-wider shadow hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+      <span class="material-symbols-outlined text-[16px]">login</span>
+      {% trans "Log In to Continue" %}
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

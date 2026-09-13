@@ -13,6 +13,7 @@ class ApplicationStatus(models.TextChoices):
     PENDING = "PENDING", _("Pending")
     PAID = "PAID", _("Paid")
     UNPAID = "UNPAID", _("Unpaid")
+    CANCELLED = "CANCELLED", _("Cancelled")
 
 
 PAYMENT_DEADLINE_HOURS = 3
@@ -34,6 +35,7 @@ class Application(TimeStampedModel):
         choices=ApplicationStatus.choices,
         default=ApplicationStatus.PENDING,
     )
+    can_cancel = models.BooleanField(default=True)
     payment_deadline = models.DateTimeField(null=True, blank=True)
     is_accepted = models.BooleanField(default=False)
     company_message = models.TextField(blank=True)
@@ -74,6 +76,16 @@ class Application(TimeStampedModel):
             {"key": "paid", "label": "Paid", "done": paid},
             {"key": "accepted", "label": "Accepted", "done": accepted},
         ]
+
+    @property
+    def is_cancellable(self):
+        from django.utils import timezone
+        from datetime import timedelta
+        if not self.can_cancel or self.status != ApplicationStatus.PAID or self.is_accepted:
+            return False
+        if not hasattr(self, 'payment') or not self.payment or not self.payment.paid_at:
+            return False
+        return timezone.now() <= self.payment.paid_at + timedelta(hours=24)
 
     def accept(self):
         self.is_accepted = True

@@ -78,6 +78,7 @@ class StudentProfile(TimeStampedModel):
         on_delete=models.SET_NULL,
         related_name="students",
     )
+    reapplication_credit = models.BooleanField(default=False)
     verification_status = models.CharField(
         max_length=10,
         choices=VerificationStatus.choices,

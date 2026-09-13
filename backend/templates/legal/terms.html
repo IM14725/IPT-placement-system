@@ -1,0 +1,735 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Terms & Conditions — IPT Marketplace" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto flex flex-col gap-lg pb-xl">
+
+    <div class="flex flex-col gap-sm">
+    <div class="flex items-center gap-sm">
+      <div class="w-8 h-[2px] bg-primary"></div>
+      <span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">{% trans "Legal" %}</span>
+    </div>
+    <h1 class="font-headline-lg text-headline-lg text-on-background tracking-tight">{% trans "Terms &amp; Conditions" %}</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% trans "Effective date: 1 September 2026 &nbsp;·&nbsp; Governing law: United Republic of Tanzania" %}
+    </p>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+      {% blocktrans %}
+        These Terms and Conditions ("Terms") constitute a legally binding agreement between you and
+        <strong>Semauya Limited</strong> ("we", "us", "Platform") governing your use of the
+        IPT Marketplace (<em>ipt.semauya.co.tz</em>).  By creating an account or accessing any
+        part of the Platform you confirm that you have read, understood, and agree to be bound by
+        these Terms and all applicable laws of the United Republic of Tanzania.
+      {% endblocktrans %}
+    </p>
+  </div>
+
+    <nav class="bg-surface-container rounded-2xl p-lg shadow-sm">
+    <p class="font-label-caps text-label-caps text-primary uppercase tracking-widest mb-sm">{% trans "Contents" %}</p>
+    <ol class="list-decimal list-inside space-y-1 font-body-md text-body-md text-on-surface-variant columns-1 sm:columns-2">
+      <li><a href="#acceptance"       class="hover:text-primary transition-colors">{% trans "Acceptance of Terms" %}</a></li>
+      <li><a href="#users"            class="hover:text-primary transition-colors">{% trans "User Accounts &amp; Responsibilities" %}</a></li>
+      <li><a href="#data"             class="hover:text-primary transition-colors">{% trans "Data Accuracy (PDPA 2022)" %}</a></li>
+      <li><a href="#placements"       class="hover:text-primary transition-colors">{% trans "Nature of IPT Placements" %}</a></li>
+      <li><a href="#payments"         class="hover:text-primary transition-colors">{% trans "Payments &amp; Non-Refundability" %}</a></li>
+      <li><a href="#slots"            class="hover:text-primary transition-colors">{% trans "Slot Selection, Hold &amp; Finality" %}</a></li>
+      <li><a href="#cancellation"     class="hover:text-primary transition-colors">{% trans "Cancellation &amp; Application Credit" %}</a></li>
+      <li><a href="#company-review"   class="hover:text-primary transition-colors">{% trans "Company Review Obligation" %}</a></li>
+      <li><a href="#communications"   class="hover:text-primary transition-colors">{% trans "Communications &amp; Messaging" %}</a></li>
+      <li><a href="#ip"               class="hover:text-primary transition-colors">{% trans "Intellectual Property" %}</a></li>
+      <li><a href="#prohibited"       class="hover:text-primary transition-colors">{% trans "Prohibited Conduct" %}</a></li>
+      <li><a href="#liability"        class="hover:text-primary transition-colors">{% trans "Limitation of Liability" %}</a></li>
+      <li><a href="#termination"      class="hover:text-primary transition-colors">{% trans "Termination" %}</a></li>
+      <li><a href="#amendments"       class="hover:text-primary transition-colors">{% trans "Amendments" %}</a></li>
+      <li><a href="#governing-law"    class="hover:text-primary transition-colors">{% trans "Governing Law &amp; Disputes" %}</a></li>
+    </ol>
+  </nav>
+
+  
+  <section id="acceptance" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">1</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Acceptance of Terms" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        By accessing or using the IPT Marketplace — whether as a <strong>Student</strong>, a
+        <strong>Company</strong>, or an <strong>Institution</strong> — you agree to comply with
+        these Terms and all regulations of the United Republic of Tanzania, including but not
+        limited to the <em>Personal Data Protection Act, 2022</em>; the
+        <em>Electronic Transactions Act (Cap. 442)</em> and its 2026 Order; the
+        <em>Cybercrimes Act, 2015</em>; the <em>Employment and Labour Relations Act, 2004</em>;
+        the <em>Fair Competition Act, 2003</em>; and the
+        <em>Electronic and Postal Communications Act (EPOCA)</em>.
+      {% endblocktrans %}
+    </p>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        If you do not agree to these Terms, you must not create an account or use the Platform.
+        Minors under the age of 18 may only use the Platform with verifiable institutional
+        enrollment and the consent of their educational institution.
+      {% endblocktrans %}
+    </p>
+  </section>
+
+  
+  <section id="users" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">2</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "User Accounts &amp; Responsibilities" %}</h2>
+    </div>
+
+    <div class="flex flex-col gap-md">
+            <div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs">
+        <div class="flex items-center gap-xs">
+          <span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings:'FILL' 1;">school</span>
+          <h3 class="font-body-md font-semibold text-on-surface">{% trans "Students" %}</h3>
+        </div>
+        <ul class="list-disc list-inside space-y-1 font-body-md text-body-md text-on-surface-variant">
+          <li>{% trans "You must be actively enrolled in an accredited Tanzanian university or technical institution." %}</li>
+          <li>{% trans "You must provide truthful academic information (university, course, year of study, GPA) and upload genuine supporting documents." %}</li>
+          <li>{% trans "You are solely responsible for the accuracy of your profile at all times." %}</li>
+          <li>{% trans "One (1) active application per student is permitted at any given time." %}</li>
+          <li>{% trans "You must not impersonate another student or submit forged documents." %}</li>
+        </ul>
+      </div>
+
+            <div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs">
+        <div class="flex items-center gap-xs">
+          <span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings:'FILL' 1;">business_center</span>
+          <h3 class="font-body-md font-semibold text-on-surface">{% trans "Companies" %}</h3>
+        </div>
+        <ul class="list-disc list-inside space-y-1 font-body-md text-body-md text-on-surface-variant">
+          <li>{% trans "You must be a legally registered entity in Tanzania and upload valid BRELA certificate, TIN, and business license." %}</li>
+          <li>{% trans "All posted slots must describe genuine, safe, and supervised training environments." %}</li>
+          <li>{% trans "You must accurately state the number of available slots, location, department requirements, and stipend terms." %}</li>
+          <li>{% trans "Companies must not post fictitious slots or collect any fees directly from students outside the Platform." %}</li>
+          <li>{% trans "You are responsible for reviewing applicants within the mandatory review period defined in Section 8." %}</li>
+        </ul>
+      </div>
+
+            <div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs">
+        <div class="flex items-center gap-xs">
+          <span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings:'FILL' 1;">account_balance</span>
+          <h3 class="font-body-md font-semibold text-on-surface">{% trans "Institutions" %}</h3>
+        </div>
+        <ul class="list-disc list-inside space-y-1 font-body-md text-body-md text-on-surface-variant">
+          <li>{% trans "Only accredited Tanzanian tertiary institutions may authorize student verifications." %}</li>
+          <li>{% trans "Institutions that participate in the Platform confirm that they have the authority to verify the enrollment status of their students." %}</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  
+  <section id="data" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">3</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Data Accuracy &amp; System Integrity (PDPA 2022)" %}</h2>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "3.1 Obligation to Provide Accurate Information" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          In accordance with the <em>Personal Data Protection Act, 2022</em> (PDPA), all Students and
+          Companies must provide <strong>complete, accurate, and up-to-date</strong> information
+          upon registration and throughout their use of the Platform.  You are strictly required
+          to update your profile immediately if any academic, personal, or corporate details change.
+        {% endblocktrans %}
+      </p>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          Providing misleading, false, or outdated information is a direct violation of these Terms
+          and may result in immediate <strong>account suspension or permanent ban</strong>, forfeiture
+          of any pending application credit, and referral to the relevant regulatory or law-enforcement
+          authority.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "3.2 Fraud Prevention &amp; Legal Disclosure" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          We are committed to maintaining a safe and lawful environment.  If we detect that an account
+          is being used <strong>illegally, fraudulently, or for any purpose outside the intended scope
+          of facilitating academic IPT placements</strong>, we reserve the right to process and retain
+          your data to protect our legitimate interests under the PDPA.
+        {% endblocktrans %}
+      </p>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          We may disclose your personal information and activity logs to law-enforcement or regulatory
+          authorities <strong>without your direct consent</strong> where it is necessary to comply with
+          a legal obligation or assist in a formal investigation as permitted by Section 27 of the PDPA.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="rounded-xl bg-primary-fixed/30 border border-primary/20 p-md flex gap-sm">
+      <span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">shield</span>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          <strong>Your PDPA rights:</strong> You have the right to access, correct, and request the
+          deletion of your personal data.  To exercise these rights, contact us at
+          <strong>privacy@semauya.co.tz</strong>.  We will respond within 21 days as required by law.
+        {% endblocktrans %}
+      </p>
+    </div>
+  </section>
+
+  
+  <section id="placements" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">4</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Nature of IPT Placements" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        The IPT Marketplace acts <strong>solely as an intermediary</strong> to connect students
+        seeking Industrial Practical Training with companies willing to host them.  The Platform does
+        not guarantee a successful placement, a positive evaluation outcome, or any future employment.
+      {% endblocktrans %}
+    </p>
+    <div class="rounded-xl bg-surface-container border border-outline-variant p-md flex gap-sm">
+      <span class="material-symbols-outlined text-tertiary text-[20px] shrink-0 mt-0.5">gavel</span>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          Pursuant to the <em>Employment and Labour Relations Act, 2004</em>, an IPT placement
+          facilitated through this Platform constitutes an <strong>academic training arrangement</strong>
+          only and does <strong>not</strong> create an employer-employee relationship, an employment
+          contract, or any entitlement to wages, benefits, or statutory protections afforded to
+          employees under Tanzanian labour law, unless separately agreed in writing between the student
+          and the company.
+        {% endblocktrans %}
+      </p>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        Companies hosting students must nonetheless ensure a safe, professional, and supervised
+        working environment and comply with all applicable Tanzanian occupational health and safety
+        regulations throughout the training period.
+      {% endblocktrans %}
+    </p>
+  </section>
+
+  
+  <section id="payments" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">5</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Payments &amp; Non-Refundability" %}</h2>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "5.1 Electronic Payment Mandate" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          All platform fees are processed exclusively via approved electronic payment channels
+          — M-Pesa, Tigo Pesa, and Airtel Money — in full compliance with the
+          <em>Electronic Transactions (Mandatory Electronic Payments for Specified Transactions)
+          Order, 2026</em>.  Cash payments are not accepted.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "5.2 Transaction Levies" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          Mobile money transfers are subject to standard network-operator processing charges and the
+          Government's <strong>Electronic Money Transaction Levy</strong>.  These additional charges
+          are borne by the user (student) and are separate from the Platform fee.  The Platform fee
+          displayed at checkout represents the amount due to Semauya Limited and does not include
+          operator levies.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "5.3 Payment Completion" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          A transaction is only deemed <strong>successful and complete</strong> upon receipt of a
+          final digital confirmation from the mobile money provider via our payment gateway.
+          Initiating a transfer does not constitute payment.  Applications are activated only after
+          confirmed settlement.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="rounded-xl bg-error-container border border-error/30 p-md flex gap-sm">
+      <span class="material-symbols-outlined text-error text-[20px] shrink-0 mt-0.5">money_off</span>
+      <div class="flex flex-col gap-xs">
+        <p class="font-body-md font-semibold text-on-error-container">{% trans "5.4 Strict Non-Refundability Policy" %}</p>
+        <p class="font-body-md text-body-md text-on-error-container">
+          {% blocktrans %}
+            All processing and platform fees paid by students are <strong>strictly non-refundable</strong>.
+            By completing a transaction, the student irrevocably acknowledges that they are not
+            entitled to a refund under any circumstances, including but not limited to:
+          {% endblocktrans %}
+        </p>
+        <ul class="list-disc list-inside space-y-0.5 font-body-md text-body-md text-on-error-container">
+          <li>{% trans "Rejection of the application by a company." %}</li>
+          <li>{% trans "Voluntary withdrawal from the IPT programme." %}</li>
+          <li>{% trans "Failure to secure a final placement within the academic period." %}</li>
+          <li>{% trans "Account suspension resulting from policy violations." %}</li>
+        </ul>
+        <p class="font-body-md text-body-md text-on-error-container mt-xs">
+          {% blocktrans %}
+            Instead, an eligible fee converts to an <strong>Application Credit</strong> that entitles
+            the student to select an alternate slot within the active academic placement period
+            (see Section 7).
+          {% endblocktrans %}
+        </p>
+      </div>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "5.5 Failed or Duplicate Transactions" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          In the event of a <strong>failed or duplicate mobile money transaction</strong>, the student
+          must report the issue to <strong>support@semauya.co.tz</strong> within 48 hours, providing
+          the transaction reference number.  We will investigate and, where a confirmed duplicate
+          charge is verified, initiate a reversal within <strong>14 business days</strong>.  Mobile
+          network downtime does not entitle a student to a placement slot until confirmed settlement
+          is received.
+        {% endblocktrans %}
+      </p>
+    </div>
+  </section>
+
+  
+  <section id="slots" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">6</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Slot Selection, Hold &amp; Finality of Approval" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        When a student submits a paid application for an available IPT slot, the following binding
+        conditions immediately apply:
+      {% endblocktrans %}
+    </p>
+    <ol class="list-decimal list-outside ml-5 space-y-sm font-body-md text-body-md text-on-surface-variant">
+      <li>
+        <strong>{% trans "Exclusive Slot Hold:" %}</strong>
+        {% blocktrans %}
+          The selected slot is immediately and exclusively reserved for the applicant.
+          No other student may apply for that specific vacancy during the 24-hour cooling-off
+          period defined in Section 8.
+        {% endblocktrans %}
+      </li>
+      <li>
+        <strong>{% trans "Irrevocability Upon Approval:" %}</strong>
+        {% blocktrans %}
+          Once a company registers an official approval in the system, the slot assignment is
+          <strong>final and binding</strong>.  The student's cancellation mechanism is permanently
+          disabled for that application.  No slot changes, swaps, or reassignment requests will be
+          accepted after approval.
+        {% endblocktrans %}
+      </li>
+      <li>
+        <strong>{% trans "No Transfers:" %}</strong>
+        {% blocktrans %}
+          An approved placement slot cannot be transferred to another student under any circumstances.
+        {% endblocktrans %}
+      </li>
+    </ol>
+    <div class="rounded-xl bg-primary-fixed/30 border border-primary/20 p-md flex gap-sm">
+      <span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">info</span>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          This rule exists under the principles of the <em>Fair Competition Act, 2003</em> to prevent
+          slot hoarding, protect companies from last-minute abandonment, and maintain platform integrity.
+          Students are strongly advised to verify their choice before completing payment.
+        {% endblocktrans %}
+      </p>
+    </div>
+  </section>
+
+  
+  <section id="cancellation" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">7</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Cancellation, Reassignment &amp; Application Credit" %}</h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
+            <div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs">
+        <div class="flex items-center gap-xs">
+          <span class="flex items-center justify-center w-7 h-7 rounded-full bg-secondary text-on-secondary text-metadata font-bold shrink-0">1</span>
+          <p class="font-body-md font-semibold text-on-surface">{% trans "Student Cancels (before approval)" %}</p>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {% blocktrans %}
+            A student may cancel a pending application at any point <strong>strictly before</strong>
+            the company issues a formal approval, by clicking "Cancel Application" in their
+            dashboard.  A confirmation modal will be displayed before the action is finalised.
+          {% endblocktrans %}
+        </p>
+      </div>
+            <div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs">
+        <div class="flex items-center gap-xs">
+          <span class="flex items-center justify-center w-7 h-7 rounded-full bg-secondary text-on-secondary text-metadata font-bold shrink-0">2</span>
+          <p class="font-body-md font-semibold text-on-surface">{% trans "Automated Notifications Sent" %}</p>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {% blocktrans %}
+            Upon cancellation, the system immediately transmits an electronic notice to both the
+            company (whose slot has been returned) and the Platform administrators.  This serves
+            as verifiable proof of withdrawal under the <em>Electronic Transactions Act, Cap. 442</em>.
+          {% endblocktrans %}
+        </p>
+      </div>
+            <div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs">
+        <div class="flex items-center gap-xs">
+          <span class="flex items-center justify-center w-7 h-7 rounded-full bg-secondary text-on-secondary text-metadata font-bold shrink-0">3</span>
+          <p class="font-body-md font-semibold text-on-surface">{% trans "Slot Released Immediately" %}</p>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {% blocktrans %}
+            The designated slot is immediately relinquished and returned to the public directory
+            for other applicants, preventing vacancy hoarding.
+          {% endblocktrans %}
+        </p>
+      </div>
+            <div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs">
+        <div class="flex items-center gap-xs">
+          <span class="flex items-center justify-center w-7 h-7 rounded-full bg-secondary text-on-secondary text-metadata font-bold shrink-0">4</span>
+          <p class="font-body-md font-semibold text-on-surface">{% trans "Application Credit Granted" %}</p>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {% blocktrans %}
+            As platform fees are non-refundable, cancellation does not trigger any financial
+            reimbursement.  Instead, the student's payment remains valid as a one-time
+            <strong>Application Credit</strong>, entitling them to select and apply for an
+            alternate available slot within the active academic placement period.
+            <br><br>
+            <strong>IMPORTANT:</strong> Students are strictly limited to one (1) cancellation per application fee. If a student cancels and uses their credit for an alternate slot, that second application is final and cannot be cancelled.
+          {% endblocktrans %}
+        </p>
+      </div>
+    </div>
+
+    <div class="rounded-xl bg-error-container/50 border border-error/20 p-md flex gap-sm">
+      <span class="material-symbols-outlined text-error text-[20px] shrink-0 mt-0.5">block</span>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          <strong>Post-Approval Lock:</strong> Once a company approves an application, the
+          cancellation mechanism is permanently disabled for that slot.  No further
+          changes or cancellations will be accepted under any circumstances.
+        {% endblocktrans %}
+      </p>
+    </div>
+  </section>
+
+  
+  <section id="company-review" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">8</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Company Review Obligation &amp; 24-Hour Cooling-Off Period" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        To protect applicants from impulsive decisions and provide fair deliberation time, all
+        submitted applications are subject to a mandatory <strong>24-hour cooling-off period</strong>
+        in accordance with the principles of the <em>Electronic Transactions Act, Cap. 442</em>.
+      {% endblocktrans %}
+    </p>
+    <ol class="list-decimal list-outside ml-5 space-y-sm font-body-md text-body-md text-on-surface-variant">
+      <li>
+        <strong>{% trans "Mandatory Review Delay:" %}</strong>
+        {% blocktrans %}
+          Companies are restricted from approving or rejecting an application until exactly
+          <strong>24 hours</strong> have elapsed from the time of submission.  The approval and
+          rejection controls remain disabled within this window.
+        {% endblocktrans %}
+      </li>
+      <li>
+        <strong>{% trans "Exclusive Hold During Window:" %}</strong>
+        {% blocktrans %}
+          The slot is temporarily reserved for the applicant during the 24-hour period.
+          Other students cannot apply for the same vacancy until the hold expires or the
+          student cancels.
+        {% endblocktrans %}
+      </li>
+      <li>
+        <strong>{% trans "Student's Right to Withdraw:" %}</strong>
+        {% blocktrans %}
+          Students retain the unrestricted right to cancel their application at any point
+          during this 24-hour window, triggering the process described in Section 7.
+        {% endblocktrans %}
+      </li>
+      <li>
+        <strong>{% trans "Post-Window Review:" %}</strong>
+        {% blocktrans %}
+          Once the 24-hour period expires, the student's right to independently cancel
+          is suspended.  The company is then authorised to issue a final approval or rejection
+          at their discretion.  Companies are encouraged to review all pending applications
+          promptly to avoid unnecessary slot unavailability.
+        {% endblocktrans %}
+      </li>
+    </ol>
+    <div class="rounded-xl bg-[#e8f5e9] border border-[#a5d6a7] p-md flex gap-sm">
+      <span class="material-symbols-outlined text-[#1b5e20] text-[20px] shrink-0 mt-0.5">timer</span>
+      <p class="font-body-md text-body-md text-[#1b5e20]">
+        {% blocktrans %}
+          Companies that fail to review applications within a reasonable time after the
+          cooling-off window may impact the student's academic timeline.  Semauya Limited
+          reserves the right to follow up with companies and, in extreme cases of inactivity,
+          intervene to protect student interests.
+        {% endblocktrans %}
+      </p>
+    </div>
+  </section>
+
+  
+  <section id="communications" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">9</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Communications, Messaging &amp; SMS Notifications" %}</h2>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "9.1 Consent &amp; Opt-Out" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          By registering on the Platform, you consent to receive electronic communications —
+          including in-app notifications and <strong>SMS alerts</strong> — necessary for platform
+          functionality in accordance with the <em>Personal Data Protection Act, 2022</em> and the
+          <em>Electronic and Postal Communications Act (EPOCA)</em>.  These include application
+          status updates, payment confirmations, slot approval/rejection notices, and security alerts.
+        {% endblocktrans %}
+      </p>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          You retain the right to opt out of <strong>non-essential promotional messages</strong>
+          at any time via your account notification settings or by contacting
+          <strong>support@semauya.co.tz</strong>.  Opting out of system-critical alerts
+          (e.g., payment confirmations) is not permitted as they are essential for service delivery.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "9.2 Registered Sender ID" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          All SMS communications are dispatched through the Beem Africa SMS gateway using an
+          alphanumeric Sender ID registered with the Tanzania Communications Regulatory Authority
+          (TCRA) and approved by local network operators, in compliance with TCRA regulations.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "9.3 Prohibited Content in Messaging" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          Under the <em>Cybercrimes Act, 2015</em> and the EPOCA Online Content Regulations, 2020,
+          users are strictly prohibited from using any Platform messaging or communication feature
+          to transmit:
+        {% endblocktrans %}
+      </p>
+      <ul class="list-disc list-inside space-y-0.5 font-body-md text-body-md text-on-surface-variant">
+        <li>{% trans "Defamatory, threatening, abusive, or obscene content." %}</li>
+        <li>{% trans "Spam or unsolicited bulk messages." %}</li>
+        <li>{% trans "Fraudulent, misleading, or impersonation content." %}</li>
+        <li>{% trans "Content that harasses or cyberbullies any individual." %}</li>
+        <li>{% trans "Malicious software, links, or attachments." %}</li>
+        <li>{% trans "Content that violates any Tanzanian law." %}</li>
+      </ul>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "9.4 Moderation &amp; Liability" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          While we do not pre-screen all messages, we reserve the right to monitor, investigate,
+          and remove content that violates these Terms and to suspend or permanently ban accounts
+          responsible for such violations.  We are not liable for user-generated content transmitted
+          via the Platform's messaging features.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="rounded-xl bg-surface-container border border-outline-variant p-md flex gap-sm">
+      <span class="material-symbols-outlined text-on-surface-variant text-[20px] shrink-0 mt-0.5">warning</span>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          <strong>9.5 Delivery Delays:</strong>  SMS and in-app notifications are dispatched via an
+          asynchronous background queue (Celery/Redis).  Semauya Limited is not liable for delayed
+          or undelivered messages caused by mobile network operator outages, third-party gateway
+          failures, or periods of high platform traffic.  Users should not rely solely on SMS
+          notifications for time-sensitive placement decisions and should check their dashboard
+          regularly.
+        {% endblocktrans %}
+      </p>
+    </div>
+  </section>
+
+  
+  <section id="ip" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">10</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Intellectual Property" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        All Platform source code, design assets, logos, trade names, data compilations, and
+        proprietary algorithms are the exclusive intellectual property of <strong>Semauya Limited</strong>
+        and are protected under applicable Tanzanian intellectual property law and international treaties.
+      {% endblocktrans %}
+    </p>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        Users are granted a limited, non-exclusive, non-transferable licence to access and use
+        the Platform solely for the purposes described in these Terms.  You may not copy,
+        reproduce, modify, reverse-engineer, distribute, or create derivative works from any
+        part of the Platform without our prior written consent.
+      {% endblocktrans %}
+    </p>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        You retain ownership of documents and content you upload.  By uploading, you grant
+        Semauya Limited a limited, royalty-free licence to store, process, and share that content
+        with authorised parties (companies, institutions, administrators) strictly for the purposes
+        of the IPT placement process.
+      {% endblocktrans %}
+    </p>
+  </section>
+
+  
+  <section id="prohibited" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">11</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Prohibited Conduct" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        In addition to the content rules in Section 9, the following conduct is strictly forbidden
+        and may constitute a criminal offence under the <em>Cybercrimes Act, 2015</em>:
+      {% endblocktrans %}
+    </p>
+    <ul class="list-disc list-outside ml-5 space-y-1 font-body-md text-body-md text-on-surface-variant">
+      <li>{% trans "Uploading malicious files, scripts, or documents designed to harm the Platform, other users, or third-party systems." %}</li>
+      <li>{% trans "Attempting to gain unauthorised access to any account, system, or database." %}</li>
+      <li>{% trans "Misrepresenting your identity, academic credentials, or corporate registration." %}</li>
+      <li>{% trans "Creating multiple accounts to circumvent bans, fees, or slot restrictions." %}</li>
+      <li>{% trans "Scraping, crawling, or automated data extraction from the Platform without written authorisation." %}</li>
+      <li>{% trans "Using the Platform for any purpose unrelated to IPT placement facilitation." %}</li>
+      <li>{% trans "Soliciting or accepting direct payments from students or companies outside the Platform." %}</li>
+    </ul>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        Violations will result in immediate account suspension and may be reported to the
+        Tanzania Police Force, the TCRA, or other relevant authorities.
+      {% endblocktrans %}
+    </p>
+  </section>
+
+  
+  <section id="liability" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">12</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Limitation of Liability" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        To the maximum extent permitted by Tanzanian law, Semauya Limited shall not be liable for:
+      {% endblocktrans %}
+    </p>
+    <ul class="list-disc list-outside ml-5 space-y-1 font-body-md text-body-md text-on-surface-variant">
+      <li>{% trans "Any failure to secure an IPT placement." %}</li>
+      <li>{% trans "Losses arising from mobile network downtime or failed payment gateway transactions beyond our control." %}</li>
+      <li>{% trans "The conduct, safety, or professionalism of any company or student during the placement period." %}</li>
+      <li>{% trans "Delays in SMS delivery caused by third-party operators." %}</li>
+      <li>{% trans "Loss of data resulting from unauthorised access, force majeure, or acts of God." %}</li>
+      <li>{% trans "Any indirect, incidental, special, or consequential damages arising from your use of the Platform." %}</li>
+    </ul>
+  </section>
+
+  
+  <section id="termination" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">13</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Termination" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        We reserve the right to suspend or permanently terminate any account, at any time and
+        without prior notice, if a user is found to have violated these Terms, engaged in fraudulent
+        activity, or acted in a manner detrimental to the Platform's integrity or any other user.
+        Upon termination, your right to access the Platform ceases immediately.  Non-refundable
+        fees already paid shall not be returned upon termination for cause.
+      {% endblocktrans %}
+    </p>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        You may also delete your own account at any time by contacting <strong>support@semauya.co.tz</strong>.
+        Deletion requests will be processed in accordance with the PDPA within 30 days.
+        Certain data may be retained for legally mandated periods even after account deletion.
+      {% endblocktrans %}
+    </p>
+    {% if user.is_authenticated %}
+    <a href="{% url 'delete-account' %}" class="inline-flex items-center gap-xs mt-sm px-lg py-sm rounded-full bg-error text-on-error font-metadata text-metadata uppercase tracking-wider hover:opacity-90 transition-opacity">
+      <span class="material-symbols-outlined text-[16px]">delete_forever</span> Request Account Deletion
+    </a>
+    {% endif %}
+  </section>
+
+  
+  <section id="amendments" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">14</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Amendments" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        We may update these Terms from time to time to reflect changes in law, platform features,
+        or operational requirements.  Material changes will be communicated via an in-app banner
+        and, where practical, by SMS or email at least <strong>14 days</strong> before they take
+        effect.  Continued use of the Platform after the effective date constitutes acceptance of
+        the revised Terms.
+      {% endblocktrans %}
+    </p>
+  </section>
+
+  
+  <section id="governing-law" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">15</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Governing Law &amp; Dispute Resolution" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        These Terms are governed by and construed in accordance with the laws of the
+        <strong>United Republic of Tanzania</strong>.  Any dispute arising from or relating to
+        these Terms or your use of the Platform shall be first referred to informal mediation
+        by contacting <strong>legal@semauya.co.tz</strong>.  If unresolved within 30 days,
+        the matter shall be submitted to the exclusive jurisdiction of the competent courts
+        of Tanzania.
+      {% endblocktrans %}
+    </p>
+  </section>
+
+    <div class="bg-surface-container rounded-2xl p-lg flex flex-col sm:flex-row gap-md items-start sm:items-center justify-between shadow-sm">
+    <div class="flex flex-col gap-xs">
+      <p class="font-body-md font-semibold text-on-surface">{% trans "Questions about these Terms?" %}</p>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}Reach our legal team at <strong>legal@semauya.co.tz</strong> or write to Semauya Limited, Dar es Salaam, Tanzania.{% endblocktrans %}
+      </p>
+    </div>
+    <a href="{% url 'legal-privacy' %}"
+       class="shrink-0 inline-flex items-center gap-xs px-lg py-sm rounded-full bg-primary text-on-primary font-metadata text-metadata uppercase tracking-wider shadow hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+      <span>{% trans "Privacy Policy" %}</span>
+      <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+    </a>
+  </div>
+
+</div>
+{% endblock %}
+

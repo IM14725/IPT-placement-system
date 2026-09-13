@@ -24,3 +24,12 @@ def nav_user(request):
             "name": user.full_name or user.email,
         }
     }
+
+
+def tc_update_banner(request):
+    """Return the T&C update banner text if the platform setting is active (T&C §14)."""
+    from apps.core.models import PlatformSetting
+    setting = PlatformSetting.objects.filter(key="tc_update_banner", value_bool=True).first()
+    if setting and setting.value_text:
+        return {"tc_update_banner": setting.value_text}
+    return {"tc_update_banner": None}

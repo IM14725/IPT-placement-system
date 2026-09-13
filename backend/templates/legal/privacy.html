@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Privacy Policy — IPT Marketplace" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto flex flex-col gap-lg pb-xl">
+
+    <div class="flex flex-col gap-sm">
+    <div class="flex items-center gap-sm">
+      <div class="w-8 h-[2px] bg-primary"></div>
+      <span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">{% trans "Legal" %}</span>
+    </div>
+    <h1 class="font-headline-lg text-headline-lg text-on-background tracking-tight">{% trans "Privacy Policy" %}</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% trans "Effective date: 1 September 2026 &nbsp;·&nbsp; Data Controller: Semauya Limited" %}
+    </p>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+      {% blocktrans %}
+        Semauya Limited ("we", "us") operates the IPT Marketplace and is the <strong>Data
+        Controller</strong> as defined under the <em>Personal Data Protection Act, 2022</em>
+        (PDPA) of Tanzania.  This Privacy Policy explains what personal data we collect, why
+        we collect it, how we use and protect it, and what rights you hold under Tanzanian law.
+      {% endblocktrans %}
+    </p>
+  </div>
+
+    <nav class="bg-surface-container rounded-2xl p-lg shadow-sm">
+    <p class="font-label-caps text-label-caps text-primary uppercase tracking-widest mb-sm">{% trans "Contents" %}</p>
+    <ol class="list-decimal list-inside space-y-1 font-body-md text-body-md text-on-surface-variant columns-1 sm:columns-2">
+      <li><a href="#what-we-collect"   class="hover:text-primary transition-colors">{% trans "What We Collect" %}</a></li>
+      <li><a href="#why-we-collect"    class="hover:text-primary transition-colors">{% trans "Why We Collect It (Lawful Basis)" %}</a></li>
+      <li><a href="#how-we-use"        class="hover:text-primary transition-colors">{% trans "How We Use Your Data" %}</a></li>
+      <li><a href="#sharing"           class="hover:text-primary transition-colors">{% trans "Sharing &amp; Disclosure" %}</a></li>
+      <li><a href="#storage"           class="hover:text-primary transition-colors">{% trans "Storage, Security &amp; Retention" %}</a></li>
+      <li><a href="#your-rights"       class="hover:text-primary transition-colors">{% trans "Your PDPA Rights" %}</a></li>
+      <li><a href="#cookies"           class="hover:text-primary transition-colors">{% trans "Cookies &amp; Session Data" %}</a></li>
+      <li><a href="#children"          class="hover:text-primary transition-colors">{% trans "Minors" %}</a></li>
+      <li><a href="#contact-privacy"   class="hover:text-primary transition-colors">{% trans "Contact Us" %}</a></li>
+    </ol>
+  </nav>
+
+  
+  <section id="what-we-collect" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">1</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "What Personal Data We Collect" %}</h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
+
+            <div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs">
+        <div class="flex items-center gap-xs">
+          <span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings:'FILL' 1;">school</span>
+          <h3 class="font-body-md font-semibold text-on-surface">{% trans "Students" %}</h3>
+        </div>
+        <ul class="list-disc list-inside space-y-0.5 font-body-md text-body-md text-on-surface-variant">
+          <li>{% trans "Full name, email address, phone number." %}</li>
+          <li>{% trans "University/institution, course, year of study, GPA." %}</li>
+          <li>{% trans "Region and district of residence." %}</li>
+          <li>{% trans "Uploaded documents: Student ID Card, Results Matrix, CV, Introduction Letter." %}</li>
+          <li>{% trans "Mobile money number used for payment." %}</li>
+          <li>{% trans "Application history and placement status." %}</li>
+          <li>{% trans "IP address, device type, and session logs." %}</li>
+        </ul>
+      </div>
+
+            <div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs">
+        <div class="flex items-center gap-xs">
+          <span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings:'FILL' 1;">business_center</span>
+          <h3 class="font-body-md font-semibold text-on-surface">{% trans "Companies" %}</h3>
+        </div>
+        <ul class="list-disc list-inside space-y-0.5 font-body-md text-body-md text-on-surface-variant">
+          <li>{% trans "Company name, industry, description, registered address." %}</li>
+          <li>{% trans "Contact email and phone number of the account holder." %}</li>
+          <li>{% trans "BRELA certificate, TIN, and business licence (uploaded documents)." %}</li>
+          <li>{% trans "Slot listings, applicant review actions, and acceptance records." %}</li>
+          <li>{% trans "IP address, device type, and session logs." %}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rounded-xl bg-primary-fixed/30 border border-primary/20 p-md flex gap-sm">
+      <span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">info</span>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          We collect only the minimum data necessary for the purposes described below
+          (<strong>data minimisation principle</strong>, PDPA 2022).  You are not required to
+          provide sensitive data beyond what is needed for verification and placement.
+        {% endblocktrans %}
+      </p>
+    </div>
+  </section>
+
+  
+  <section id="why-we-collect" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">2</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Why We Collect It — Lawful Basis" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        Under the PDPA 2022, every processing activity must rest on a recognised lawful basis.
+        The following table outlines our lawful bases:
+      {% endblocktrans %}
+    </p>
+    <div class="overflow-x-auto rounded-xl border border-outline-variant">
+      <table class="w-full font-body-md text-body-md text-on-surface-variant border-collapse">
+        <thead>
+          <tr class="bg-surface-container text-on-surface font-semibold">
+            <th class="text-left px-md py-sm border-b border-outline-variant">{% trans "Processing Activity" %}</th>
+            <th class="text-left px-md py-sm border-b border-outline-variant">{% trans "Lawful Basis (PDPA)" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-outline-variant/50 hover:bg-surface-container/50">
+            <td class="px-md py-sm">{% trans "Account registration &amp; identity verification" %}</td>
+            <td class="px-md py-sm">{% trans "Contractual necessity; Consent" %}</td>
+          </tr>
+          <tr class="border-b border-outline-variant/50 hover:bg-surface-container/50">
+            <td class="px-md py-sm">{% trans "Sharing profile with companies for placement review" %}</td>
+            <td class="px-md py-sm">{% trans "Consent (given at registration)" %}</td>
+          </tr>
+          <tr class="border-b border-outline-variant/50 hover:bg-surface-container/50">
+            <td class="px-md py-sm">{% trans "Processing payments and issuing receipts" %}</td>
+            <td class="px-md py-sm">{% trans "Contractual necessity; Legal obligation" %}</td>
+          </tr>
+          <tr class="border-b border-outline-variant/50 hover:bg-surface-container/50">
+            <td class="px-md py-sm">{% trans "Sending SMS notifications (application status, receipts)" %}</td>
+            <td class="px-md py-sm">{% trans "Contractual necessity; Consent" %}</td>
+          </tr>
+          <tr class="border-b border-outline-variant/50 hover:bg-surface-container/50">
+            <td class="px-md py-sm">{% trans "Audit logging for fraud prevention and platform integrity" %}</td>
+            <td class="px-md py-sm">{% trans "Legitimate interests of the controller" %}</td>
+          </tr>
+          <tr class="hover:bg-surface-container/50">
+            <td class="px-md py-sm">{% trans "Disclosure to law enforcement for criminal investigations" %}</td>
+            <td class="px-md py-sm">{% trans "Legal obligation (PDPA s. 27; Cybercrimes Act)" %}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  
+  <section id="how-we-use" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">3</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "How We Use Your Data" %}</h2>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "3.1 Placement Facilitation" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          By registering, you consent to your data being shared with prospective employers and
+          educational institutions <strong>strictly for placement facilitation purposes</strong>.
+          This includes sharing your verified academic profile, uploaded documents, and contact
+          details with companies that you apply to.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "3.2 Your Data Accuracy Obligation" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          The PDPA 2022 legally mandates that data controllers take reasonable steps to ensure
+          collected personal data is <strong>complete, accurate, relevant, and up to date</strong>.
+          By accepting these terms, you acknowledge that you bear the primary responsibility
+          to maintain the accuracy of your profile information at all times.
+        {% endblocktrans %}
+      </p>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          <strong>Students</strong> must update their academic information (course, year of study,
+          GPA, and institution) immediately upon any change.  <strong>Companies</strong> must keep
+          their registration details, contact information, and slot listings current and accurate.
+          Profile information provided on the Platform may be relied upon by institutions, companies,
+          and administrators to make binding placement decisions.  Providing false or misleading
+          information constitutes a violation of these Terms and the PDPA.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "3.3 Payment Processing" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          Mobile money transaction data (reference number, amount, mobile number, timestamp)
+          is processed to confirm payment and issue digital receipts.  This data is retained
+          for financial audit purposes as required by Tanzanian law.  We do not store your
+          full mobile money PIN or bank account credentials.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "3.4 Communications" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          We use your email and phone number to send system-critical notifications (application
+          updates, payment confirmations, slot acceptance/rejection).  Your contact details
+          are not sold to third parties or used for advertising without your explicit consent.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "3.5 Security &amp; Fraud Prevention" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          We process session logs, IP addresses, and audit trails to detect unauthorised access,
+          prevent fraud, and maintain platform integrity.  This processing is based on our
+          <em>legitimate interests</em> as Data Controller under the PDPA.  If we detect that an
+          account is being used illegally or for purposes outside the intended scope of IPT
+          placement, we may retain and process your data to investigate and prevent further harm.
+        {% endblocktrans %}
+      </p>
+    </div>
+  </section>
+
+  
+  <section id="sharing" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">4</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Sharing &amp; Disclosure" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        We do not sell, rent, or trade your personal data.  We share it only in the following
+        limited circumstances:
+      {% endblocktrans %}
+    </p>
+    <ul class="list-disc list-outside ml-5 space-y-sm font-body-md text-body-md text-on-surface-variant">
+      <li>
+        <strong>{% trans "Companies you apply to:" %}</strong>
+        {% blocktrans %}Your verified student profile and documents are visible to companies
+        whose slots you have applied for, strictly for placement review.{% endblocktrans %}
+      </li>
+      <li>
+        <strong>{% trans "Platform administrators:" %}</strong>
+        {% blocktrans %}Semauya Limited staff with administrative roles access your data solely
+        to verify accounts, moderate content, resolve disputes, and maintain the Platform.{% endblocktrans %}
+      </li>
+      <li>
+        <strong>{% trans "Payment processors:" %}</strong>
+        {% blocktrans %}Mobile money gateway providers (M-Pesa, Tigo Pesa, Airtel Money) receive
+        the minimum data required to process your transaction.  They operate under their own
+        TCRA-regulated privacy frameworks.{% endblocktrans %}
+      </li>
+      <li>
+        <strong>{% trans "SMS service providers:" %}</strong>
+        {% blocktrans %}Your phone number is shared with our registered SMS gateway (Beem Africa)
+        solely to deliver system notifications.{% endblocktrans %}
+      </li>
+      <li>
+        <strong>{% trans "Law enforcement &amp; regulators:" %}</strong>
+        {% blocktrans %}We may disclose your personal information and activity logs to the
+        Tanzania Police Force, TCRA, or other competent authorities without prior notice
+        where required by a lawful order or where necessary to prevent or investigate a crime,
+        as permitted by Section 27 of the PDPA.{% endblocktrans %}
+      </li>
+    </ul>
+  </section>
+
+  
+  <section id="storage" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">5</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Storage, Security &amp; Retention" %}</h2>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "5.1 Where Data Is Stored" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          Your data is stored on secured servers located in or accessible from Tanzania.  Uploaded
+          documents are stored in an access-controlled media directory.  Database records are
+          protected by role-based access controls and encrypted at rest where technically feasible.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "5.2 Security Measures" %}</h3>
+      <ul class="list-disc list-inside space-y-0.5 font-body-md text-body-md text-on-surface-variant">
+        <li>{% trans "All communications are encrypted in transit via HTTPS/TLS." %}</li>
+        <li>{% trans "Passwords are stored using a strong one-way hashing algorithm (PBKDF2/Argon2)." %}</li>
+        <li>{% trans "Rate limiting and CSRF protection are enforced on all sensitive endpoints." %}</li>
+        <li>{% trans "Audit logs record all privileged actions performed by staff." %}</li>
+        <li>{% trans "WebSocket connections are authenticated and scoped to the individual user." %}</li>
+      </ul>
+    </div>
+
+        <div class="flex flex-col gap-xs">
+      <h3 class="font-body-md font-semibold text-on-surface">{% trans "5.3 Retention Periods" %}</h3>
+      <div class="overflow-x-auto rounded-xl border border-outline-variant">
+        <table class="w-full font-body-md text-body-md text-on-surface-variant border-collapse">
+          <thead>
+            <tr class="bg-surface-container text-on-surface font-semibold">
+              <th class="text-left px-md py-sm border-b border-outline-variant">{% trans "Data Category" %}</th>
+              <th class="text-left px-md py-sm border-b border-outline-variant">{% trans "Retention Period" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-outline-variant/50 hover:bg-surface-container/50">
+              <td class="px-md py-sm">{% trans "Active account data" %}</td>
+              <td class="px-md py-sm">{% trans "For the lifetime of the account" %}</td>
+            </tr>
+            <tr class="border-b border-outline-variant/50 hover:bg-surface-container/50">
+              <td class="px-md py-sm">{% trans "Payment records &amp; transaction logs" %}</td>
+              <td class="px-md py-sm">{% trans "7 years (Tanzanian tax &amp; finance law)" %}</td>
+            </tr>
+            <tr class="border-b border-outline-variant/50 hover:bg-surface-container/50">
+              <td class="px-md py-sm">{% trans "Application &amp; placement records" %}</td>
+              <td class="px-md py-sm">{% trans "5 years after academic year closes" %}</td>
+            </tr>
+            <tr class="border-b border-outline-variant/50 hover:bg-surface-container/50">
+              <td class="px-md py-sm">{% trans "Audit logs &amp; security events" %}</td>
+              <td class="px-md py-sm">{% trans "3 years" %}</td>
+            </tr>
+            <tr class="hover:bg-surface-container/50">
+              <td class="px-md py-sm">{% trans "Deleted account data" %}</td>
+              <td class="px-md py-sm">{% trans "Anonymised or erased within 30 days of request (except legally mandated records)" %}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  
+  <section id="your-rights" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">6</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Your Rights Under the PDPA 2022" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        As a data subject under the PDPA, you have the following enforceable rights:
+      {% endblocktrans %}
+    </p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-sm">
+      <div class="bg-surface-container rounded-xl p-md flex gap-xs items-start">
+        <span class="material-symbols-outlined text-secondary text-[18px] mt-0.5 shrink-0">visibility</span>
+        <div>
+          <p class="font-body-md font-semibold text-on-surface">{% trans "Right of Access" %}</p>
+          <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Request a copy of all personal data we hold about you." %}</p>
+        </div>
+      </div>
+
+      <div class="bg-surface-container rounded-xl p-md flex gap-xs items-start">
+        <span class="material-symbols-outlined text-secondary text-[18px] mt-0.5 shrink-0">edit</span>
+        <div>
+          <p class="font-body-md font-semibold text-on-surface">{% trans "Right to Correction" %}</p>
+          <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Request correction of inaccurate or incomplete data." %}</p>
+        </div>
+      </div>
+
+      <div class="bg-surface-container rounded-xl p-md flex gap-xs items-start">
+        <span class="material-symbols-outlined text-secondary text-[18px] mt-0.5 shrink-0">delete</span>
+        <div>
+          <p class="font-body-md font-semibold text-on-surface">{% trans "Right to Erasure" %}</p>
+          <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Request deletion of your data, subject to legal retention obligations." %}</p>
+        </div>
+      </div>
+
+      <div class="bg-surface-container rounded-xl p-md flex gap-xs items-start">
+        <span class="material-symbols-outlined text-secondary text-[18px] mt-0.5 shrink-0">download</span>
+        <div>
+          <p class="font-body-md font-semibold text-on-surface">{% trans "Right to Portability" %}</p>
+          <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Receive your data in a structured, machine-readable format." %}</p>
+        </div>
+      </div>
+
+      <div class="bg-surface-container rounded-xl p-md flex gap-xs items-start">
+        <span class="material-symbols-outlined text-secondary text-[18px] mt-0.5 shrink-0">cancel</span>
+        <div>
+          <p class="font-body-md font-semibold text-on-surface">{% trans "Withdraw Consent" %}</p>
+          <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Withdraw consent for processing where consent is the lawful basis, without affecting prior lawful processing." %}</p>
+        </div>
+      </div>
+
+      <div class="bg-surface-container rounded-xl p-md flex gap-xs items-start">
+        <span class="material-symbols-outlined text-secondary text-[18px] mt-0.5 shrink-0">balance</span>
+        <div>
+          <p class="font-body-md font-semibold text-on-surface">{% trans "Lodge a Complaint" %}</p>
+          <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Submit a complaint to the Personal Data Protection Commission (PDPC) of Tanzania if you believe your rights have been violated." %}</p>
+        </div>
+      </div>
+    </div>
+    <div class="rounded-xl bg-primary-fixed/30 border border-primary/20 p-md flex gap-sm">
+      <span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">mail</span>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% blocktrans %}
+          To exercise any of the above rights, email <strong>privacy@semauya.co.tz</strong>
+          with the subject line "PDPA Rights Request" and your account email address.
+          We will respond within <strong>21 days</strong> as required by the PDPA.
+        {% endblocktrans %}
+      </p>
+    </div>
+    {% if user.is_authenticated %}
+    <a href="{% url 'legal-pdpa-request' %}" class="inline-flex items-center gap-xs px-lg py-sm rounded-full bg-primary text-on-primary font-metadata text-metadata uppercase tracking-wider shadow hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 self-start">
+      <span class="material-symbols-outlined text-[16px]">shield</span>
+      <span>Submit a PDPA Rights Request</span>
+    </a>
+    {% else %}
+    <p class="font-body-md text-body-md text-on-surface-variant"><a href="{% url 'login' %}" class="text-primary hover:underline">Log in</a> to submit a PDPA rights request directly from the platform.</p>
+    {% endif %}
+  </section>
+
+  
+  <section id="cookies" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">7</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Cookies &amp; Session Data" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        We use the following strictly necessary cookies and session mechanisms:
+      {% endblocktrans %}
+    </p>
+    <ul class="list-disc list-outside ml-5 space-y-sm font-body-md text-body-md text-on-surface-variant">
+      <li>
+        <strong>sessionid:</strong>
+        {% blocktrans %}Maintains your authenticated session.  Expires when you log out or after
+        a period of inactivity.{% endblocktrans %}
+      </li>
+      <li>
+        <strong>csrftoken:</strong>
+        {% blocktrans %}Protects against Cross-Site Request Forgery (CSRF) attacks.
+        Required for all form submissions.{% endblocktrans %}
+      </li>
+      <li>
+        <strong>{% trans "Language preference cookie:" %}</strong>
+        {% blocktrans %}Stores your selected language (Swahili or English) across sessions.{% endblocktrans %}
+      </li>
+    </ul>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        We do not use third-party advertising or tracking cookies.  WebSocket connections
+        (for real-time notifications) are authenticated via your session and do not store
+        additional tracking data.
+      {% endblocktrans %}
+    </p>
+  </section>
+
+  
+  <section id="children" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">8</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Minors" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        The Platform is not designed for use by individuals under the age of 18 as a general
+        matter.  Where a student under 18 is verifiably enrolled in a Tanzanian tertiary
+        institution and participates via institutional authorisation, we process only the
+        minimum data necessary for the placement process.  If we discover that we have
+        collected personal data from a minor without appropriate institutional backing, we
+        will delete that data promptly.
+      {% endblocktrans %}
+    </p>
+  </section>
+
+  
+  <section id="contact-privacy" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+    <div class="flex items-center gap-sm">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">9</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Contact Our Data Protection Officer" %}</h2>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% blocktrans %}
+        If you have any questions, complaints, or requests relating to this Privacy Policy or
+        our data practices, please contact our Data Protection Officer:
+      {% endblocktrans %}
+    </p>
+    <div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs font-body-md text-body-md text-on-surface-variant">
+      <div class="flex items-center gap-xs">
+        <span class="material-symbols-outlined text-secondary text-[18px]">business</span>
+        <span><strong>{% trans "Semauya Limited" %}</strong></span>
+      </div>
+      <div class="flex items-center gap-xs">
+        <span class="material-symbols-outlined text-secondary text-[18px]">location_on</span>
+        <span>{% trans "Dar es Salaam, United Republic of Tanzania" %}</span>
+      </div>
+      <div class="flex items-center gap-xs">
+        <span class="material-symbols-outlined text-secondary text-[18px]">mail</span>
+        <a href="mailto:privacy@semauya.co.tz" class="text-primary hover:underline">privacy@semauya.co.tz</a>
+      </div>
+      <div class="flex items-center gap-xs">
+        <span class="material-symbols-outlined text-secondary text-[18px]">support_agent</span>
+        <a href="mailto:support@semauya.co.tz" class="text-primary hover:underline">support@semauya.co.tz</a>
+      </div>
+    </div>
+  </section>
+
+    <div class="bg-surface-container rounded-2xl p-lg flex flex-col sm:flex-row gap-md items-start sm:items-center justify-between shadow-sm">
+    <div class="flex flex-col gap-xs">
+      <p class="font-body-md font-semibold text-on-surface">{% trans "Ready to read our Terms?" %}</p>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% trans "Our Terms &amp; Conditions outline user obligations, payment rules, and the slot selection process." %}
+      </p>
+    </div>
+    <a href="{% url 'legal-terms' %}"
+       class="shrink-0 inline-flex items-center gap-xs px-lg py-sm rounded-full bg-primary text-on-primary font-metadata text-metadata uppercase tracking-wider shadow hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+      <span>{% trans "Terms &amp; Conditions" %}</span>
+      <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+    </a>
+  </div>
+
+</div>
+{% endblock %}
+

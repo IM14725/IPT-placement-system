@@ -61,7 +61,7 @@
         return r.json(); 
       })
       .then(function (init) {
-        status.textContent = "📲 Selcom Prompt Sent! Check your phone screen now and enter your Mobile Money PIN.";
+        status.textContent = "📲 Check your phone screen now and enter your Mobile Money PIN.";
         startPolling(init.transaction_id || txUuid);
       })
       .catch(function (e) {

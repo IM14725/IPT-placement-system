@@ -71,6 +71,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "apps.core.context_processors.nav_user",
+                "apps.core.context_processors.tc_update_banner",
             ],
         },
     },

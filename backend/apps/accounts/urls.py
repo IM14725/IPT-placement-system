@@ -11,4 +11,6 @@ urlpatterns = [
     path("auth/reset-password/", views.reset_password, name="reset-password"),
     path("auth/logout/", views.user_logout, name="logout"),
     path("api/auth/my-token/", views.my_token, name="my-token"),
+    path("auth/notification-settings/", views.notification_settings, name="notification-settings"),
+    path("auth/delete-account/", views.request_account_deletion, name="delete-account"),
 ]

@@ -69,22 +69,35 @@
               {% endif %}
             </div>
           </div>
-          <div>
+          <div class="flex flex-col gap-2 items-end">
             {% if app.status == 'PENDING' and app.payment and not app.payment.is_paid %}
               <a href="{% url 'student-payment' app.payment.id %}" class="bg-primary text-on-primary font-metadata text-metadata px-xl py-3 rounded shadow-sm hover:shadow-md transition-all hover:bg-primary/90 flex items-center gap-2 w-full md:w-auto justify-center">
                 <span class="material-symbols-outlined text-[18px]">payments</span>
                 Pay TZS {{ app.payment.amount }}
               </a>
             {% elif app.payment and app.payment.is_paid %}
-              <div class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-lg">
+              <div class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-lg mb-2">
                 <span class="material-symbols-outlined text-[#10B981] text-[18px]">verified</span>
                 <span class="font-metadata text-metadata text-[#065F46]">{% trans "Paid" %} · {{ app.payment.reference_id }}</span>
               </div>
+              <span class="font-metadata text-[11px] text-on-surface-variant text-right block">Paid at: {{ app.payment.paid_at|date:"M d, H:i" }}</span>
+              {% if app.is_cancellable %}
+                <form id="cancel-form-{{ app.id }}" method="post" action="{% url 'student-cancel-application' app.id %}">
+                  {% csrf_token %}
+                  <button type="button" onclick="openCancelModal('cancel-form-{{ app.id }}')" class="text-error border border-error/30 bg-error-container/10 hover:bg-error-container/30 px-3 py-1.5 rounded text-metadata font-bold mt-1 transition-colors w-full">
+                    Cancel Application (within 24h)
+                  </button>
+                </form>
+              {% elif app.status == 'PAID' and not app.can_cancel %}
+                 <span class="text-[11px] text-error mt-1 italic">Cancellation used</span>
+              {% endif %}
             {% elif app.status == 'UNPAID' %}
               <a href="{% url 'student-apply' app.slot.id %}" class="bg-[#DC2626]/10 text-[#991B1B] font-metadata text-metadata px-xl py-3 rounded shadow-sm hover:shadow-md transition-all flex items-center gap-2 w-full md:w-auto justify-center">
                 <span class="material-symbols-outlined text-[18px]">restart_alt</span>
                 {% trans "Re-book Slot" %}
               </a>
+            {% elif app.status == 'CANCELLED' %}
+              <span class="text-[11px] text-error italic">Cancelled</span>
             {% endif %}
           </div>
         </div>
@@ -105,4 +118,59 @@
     </a>
   </div>
 {% endif %}
+
+<!-- Cancel Confirmation Modal -->
+<div id="cancelModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-opacity duration-200">
+  <div class="bg-surface-container-lowest rounded-2xl p-lg shadow-lg max-w-md w-full flex flex-col gap-md transform transition-all scale-95 opacity-0" id="cancelModalContent">
+    <div class="flex items-center gap-sm">
+      <div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-on-error-container">warning</span>
+      </div>
+      <h3 class="font-headline-md text-on-surface">{% trans "Confirm Cancellation" %}</h3>
+    </div>
+    <p class="font-body-md text-on-surface-variant leading-relaxed">
+      {% blocktrans %}
+      Are you sure you want to cancel this application? You can only cancel <strong>ONCE</strong> per payment. Your slot will be returned and you will have to choose a new slot.
+      {% endblocktrans %}
+    </p>
+    <div class="flex justify-end gap-sm mt-sm">
+      <button type="button" onclick="closeCancelModal()" class="px-md py-sm rounded-lg font-body-md font-bold text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+        {% trans "No, Keep it" %}
+      </button>
+      <button type="button" onclick="submitCancelForm()" class="px-md py-sm rounded-lg font-body-md font-bold bg-error text-on-error hover:bg-error/90 shadow-sm hover:shadow transition-colors">
+        {% trans "Yes, Cancel Application" %}
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let formToSubmit = null;
+  const modal = document.getElementById('cancelModal');
+  const modalContent = document.getElementById('cancelModalContent');
+
+  function openCancelModal(formId) {
+    formToSubmit = document.getElementById(formId);
+    modal.classList.remove('hidden');
+    // Force a reflow so the transition applies
+    void modal.offsetWidth;
+    modalContent.classList.remove('scale-95', 'opacity-0');
+    modalContent.classList.add('scale-100', 'opacity-100');
+  }
+
+  function closeCancelModal() {
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      formToSubmit = null;
+    }, 200);
+  }
+
+  function submitCancelForm() {
+    if (formToSubmit) {
+      formToSubmit.submit();
+    }
+  }
+</script>
 {% endblock %}

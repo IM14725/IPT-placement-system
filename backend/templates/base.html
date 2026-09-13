@@ -224,6 +224,31 @@
     </div>
   </nav>
 
+  {% if tc_update_banner %}
+  <div id="tc-banner" class="w-full bg-[#fff8e1] border-b border-[#f9a825] px-md py-sm flex items-center justify-between gap-md">
+    <div class="flex items-center gap-xs max-w-[1280px] mx-auto w-full">
+      <span class="material-symbols-outlined text-[#f57f17] text-[20px] shrink-0">campaign</span>
+      <p class="font-body-md text-body-md text-[#4a3900] flex-1">{{ tc_update_banner }}</p>
+      <a href="{% url 'legal-terms' %}" class="shrink-0 font-metadata text-metadata text-[#f57f17] font-semibold hover:underline uppercase tracking-wider">View Terms</a>
+      <button type="button" id="tc-banner-close" class="shrink-0 flex items-center justify-center w-8 h-8 rounded-full hover:bg-[#f9a825]/20 transition-colors" aria-label="Dismiss">
+        <span class="material-symbols-outlined text-[18px] text-[#4a3900]">close</span>
+      </button>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var key = 'tc_banner_dismissed_{{ tc_update_banner|slugify }}';
+      if(sessionStorage.getItem(key)){
+        document.getElementById('tc-banner').style.display='none';
+      }
+      document.getElementById('tc-banner-close').addEventListener('click', function(){
+        document.getElementById('tc-banner').style.display='none';
+        sessionStorage.setItem(key, '1');
+      });
+    })();
+  </script>
+  {% endif %}
+
   <main class="max-w-[1280px] mx-auto px-md pt-24 pb-md">
     {% if messages %}
       <div class="mb-md space-y-sm">
@@ -243,8 +268,18 @@
   </main>
 
   <footer class="w-full bg-surface-container py-lg mt-xl">
-    <div class="max-w-[1280px] mx-auto px-md text-center text-on-surface-variant text-metadata">
-      &copy; {% now "Y" %} IPT Marketplace. {% trans "All rights reserved. Designed by semauya." %}
+    <div class="max-w-[1280px] mx-auto px-md flex flex-col gap-sm text-on-surface-variant text-metadata">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-sm">
+        <span>&copy; {% now "Y" %} IPT Marketplace. {% trans "All rights reserved." %}</span>
+        <div class="flex items-center gap-md">
+          <a href="{% url 'legal-terms' %}" class="hover:text-primary transition-colors">{% trans "Terms &amp; Conditions" %}</a>
+          <span class="text-outline-variant">·</span>
+          <a href="{% url 'legal-privacy' %}" class="hover:text-primary transition-colors">{% trans "Privacy Policy" %}</a>
+        </div>
+      </div>
+      <div class="text-center mt-xs">
+        <span>{% trans "Designed by semauya." %}</span>
+      </div>
     </div>
   </footer>
 
@@ -261,6 +296,50 @@
       window.IPT.userRole = "{{ user.role }}";
     </script>
     <script src="{% static 'js/ws.js' %}"></script>
+
+    <!-- Inactivity Timer Modal -->
+    <div id="inactivity-modal" class="fixed top-4 left-4 z-[100] hidden bg-error-container text-on-error-container p-4 rounded-xl shadow-2xl max-w-xs border border-error/30 flex flex-col gap-2 transition-all">
+      <div class="flex items-center gap-2 font-semibold">
+        <span class="material-symbols-outlined text-[20px]">timer</span>
+        <span>Session Expiring</span>
+      </div>
+      <p class="text-sm">You have been inactive. You will be logged out in <span id="inactivity-countdown" class="font-bold text-error"></span> seconds to protect your account.</p>
+    </div>
+
+    <script>
+      (function() {
+        let idleTime = 0;
+        const MAX_IDLE_TIME = 120; // 2 minutes
+        const WARNING_TIME = 30; // Show warning 30 seconds before logout
+        const modal = document.getElementById('inactivity-modal');
+        const countdownEl = document.getElementById('inactivity-countdown');
+        let timer = null;
+
+        function resetTimer() {
+          idleTime = 0;
+          if (!modal.classList.contains('hidden')) {
+            modal.classList.add('hidden');
+          }
+        }
+
+        ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'].forEach(evt => {
+          document.addEventListener(evt, resetTimer, { passive: true });
+        });
+
+        timer = setInterval(function() {
+          idleTime++;
+          let timeRemaining = MAX_IDLE_TIME - idleTime;
+
+          if (timeRemaining <= WARNING_TIME && timeRemaining > 0) {
+            modal.classList.remove('hidden');
+            countdownEl.textContent = timeRemaining;
+          } else if (timeRemaining <= 0) {
+            clearInterval(timer);
+            window.location.href = "{% url 'logout' %}";
+          }
+        }, 1000);
+      })();
+    </script>
   {% endif %}
   <script>
     if ('serviceWorker' in navigator) {

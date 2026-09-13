@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto flex flex-col gap-lg pb-xl">
+  <div class="flex items-center gap-base text-body-md text-on-surface-variant">
+    <a class="hover:text-primary transition-colors" href="{% url 'platform-directory' %}">Directory</a>
+    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+    <a class="hover:text-primary transition-colors" href="{{ cancel_url }}">{% if profile_type == 'Company' %}{{ profile.name }}{% else %}{{ profile.user.full_name }}{% endif %}</a>
+    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+    <span>Edit</span>
+  </div>
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm p-lg">
+    <h1 class="font-display text-headline-lg text-on-surface tracking-tight mb-md">Edit {{ profile_type }}</h1>
+    <form method="post" enctype="multipart/form-data" class="flex flex-col gap-md">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="rounded-lg bg-error-container/30 border-l-2 border-error p-sm text-body-md text-on-error-container mb-md">{{ form.non_field_errors }}</div>
+      {% endif %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+        {% for field in form %}
+          <div class="flex flex-col gap-xs {% if field.name == 'description' %}md:col-span-2{% endif %}">
+            <label class="font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">
+                {% if field.name == 'student_id' %}badge
+                {% elif field.name == 'gender' %}person_outline
+                {% elif field.name == 'university' %}school
+                {% elif field.name == 'course' %}menu_book
+                {% elif field.name == 'academic_year' %}tag
+                {% elif field.name == 'education_level' %}workspace_premium
+                {% elif field.name == 'gpa' %}star
+                {% elif field.name == 'region' %}map
+                {% elif field.name == 'district' %}location_on
+                {% elif field.name == 'ward' %}my_location
+                {% elif field.name == 'skills' %}code
+                {% elif field.name == 'name' %}badge
+                {% elif field.name == 'industry' %}factory
+                {% elif field.name == 'description' %}description
+                {% elif field.name == 'street' %}home
+                {% elif field.name == 'profile_photo' %}person
+                {% elif field.name == 'id_card_photo' %}badge
+                {% else %}edit{% endif %}
+              </span></span>
+              {% if field.name == 'profile_photo' or field.name == 'id_card_photo' %}
+                <div class="ipt-file-wrap">
+                  {{ field }}
+                </div>
+              {% else %}
+                {{ field }}
+              {% endif %}
+            </div>
+            {% if field.errors %}
+              <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ field.errors.0 }}</p>
+            {% endif %}
+            {% if field.help_text %}
+              <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ field.help_text }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="flex items-center gap-md mt-lg pt-md border-t border-surface-variant">
+        <button type="submit" class="px-xl py-3 bg-primary text-on-primary rounded-lg font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">Save Changes</button>
+        <a href="{{ cancel_url }}" class="px-xl py-3 text-on-surface-variant font-medium hover:bg-surface-variant/50 rounded-lg transition-colors">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if regions_json %}
+<script>
+  (function(){
+    var regions = {{ regions_json|safe }};
+    var regionSelect = document.getElementById('id_region');
+    var districtSelect = document.getElementById('id_district');
+    var wardSelect = document.getElementById('id_ward');
+    
+    if (regionSelect && districtSelect) {
+      regionSelect.addEventListener('change', function() {
+        var regionId = this.value;
+        districtSelect.innerHTML = '<option value="" selected>---------</option>';
+        if (wardSelect) wardSelect.innerHTML = '<option value="" selected>---------</option>';
+        if (!regionId) return;
+        fetch('/api/locations/districts/?region_id=' + regionId)
+          .then(res => res.json())
+          .then(data => {
+            data.forEach(function(d) {
+              var opt = document.createElement('option');
+              opt.value = d.id;
+              opt.textContent = d.name;
+              districtSelect.appendChild(opt);
+            });
+          });
+      });
+    }
+    
+    if (districtSelect && wardSelect) {
+      districtSelect.addEventListener('change', function() {
+        var distId = this.value;
+        wardSelect.innerHTML = '<option value="" selected>---------</option>';
+        if (!distId) return;
+        fetch('/api/locations/wards/?district_id=' + distId)
+          .then(res => res.json())
+          .then(data => {
+            data.forEach(function(w) {
+              var opt = document.createElement('option');
+              opt.value = w.id;
+              opt.textContent = w.name;
+              wardSelect.appendChild(opt);
+            });
+          });
+      });
+    }
+  })();
+</script>
+{% endif %}
+{% endblock %}
+

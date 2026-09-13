@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Delete Account" %} — IPT Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto py-xl flex flex-col gap-lg">
+
+  {# ── Page header ── #}
+  <div class="flex flex-col gap-xs">
+    <div class="flex items-center gap-sm">
+      <span class="material-symbols-outlined text-error text-[28px]">delete_forever</span>
+      <h1 class="font-display-sm text-display-sm text-on-surface">{% trans "Delete My Account" %}</h1>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% trans "This action is permanent and cannot be undone. Please read carefully before proceeding." %}
+    </p>
+  </div>
+
+  {# ── Danger warning box ── #}
+  <div class="rounded-2xl bg-error-container border border-error/30 p-lg flex gap-sm items-start shadow-sm">
+    <span class="material-symbols-outlined text-error text-[22px] shrink-0 mt-0.5">warning</span>
+    <div class="flex flex-col gap-sm">
+      <p class="font-title-sm text-title-sm text-on-error-container">{% trans "Consequences of account deletion" %}</p>
+      <ul class="list-disc list-outside ml-5 space-y-xs font-body-md text-body-md text-on-error-container">
+        <li>{% trans "All fees paid are non-refundable and will not be returned." %}</li>
+        <li>{% trans "Any active internship applications will be immediately cancelled." %}</li>
+        <li>{% trans "Your account will be deactivated immediately upon confirmation." %}</li>
+        <li>{% trans "Personal data will be retained for up to 7 years as required by PDPA retention obligations and Tanzanian financial regulations." %}</li>
+        <li>{% trans "You will be logged out immediately and will not be able to log back in." %}</li>
+      </ul>
+    </div>
+  </div>
+
+  {# ── Confirmation form ── #}
+  <form method="post" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-lg">
+    {% csrf_token %}
+
+    <div class="flex flex-col gap-xs">
+      <label for="confirm_email" class="font-body-lg text-on-surface">
+        {% trans "To confirm, type your email address:" %}
+        <span class="font-semibold text-error">{{ user.email }}</span>
+      </label>
+      <input
+        type="email"
+        name="confirm_email"
+        id="confirm_email"
+        autocomplete="off"
+        placeholder="{{ user.email }}"
+        required
+        class="w-full rounded-xl border border-outline bg-surface px-md py-sm
+               font-body-md text-body-md text-on-surface placeholder-on-surface-variant/50
+               focus:outline-none focus:ring-2 focus:ring-error focus:border-error transition"
+      >
+      <p class="font-body-sm text-body-sm text-on-surface-variant">
+        {% trans "We need to verify your identity before deleting your account." %}
+      </p>
+    </div>
+
+    {# ── Action buttons ── #}
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-sm">
+      <button
+        type="submit"
+        class="inline-flex items-center justify-center gap-xs px-lg py-sm rounded-full
+               bg-error text-on-error font-metadata text-metadata uppercase tracking-wider
+               shadow hover:opacity-90 transition-opacity"
+      >
+        <span class="material-symbols-outlined text-[16px]">delete_forever</span>
+        {% trans "Permanently Delete My Account" %}
+      </button>
+
+      {# Cancel — back to their dashboard #}
+      {% if user.is_student %}
+        <a href="{% url 'student-dashboard' %}"
+      {% elif user.is_company %}
+        <a href="{% url 'company-dashboard' %}"
+      {% else %}
+        <a href="{% url 'home' %}"
+      {% endif %}
+         class="inline-flex items-center justify-center gap-xs px-lg py-sm rounded-full
+                border border-outline text-on-surface font-metadata text-metadata uppercase tracking-wider
+                hover:bg-surface-container transition-colors">
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        {% trans "Cancel" %}
+      </a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

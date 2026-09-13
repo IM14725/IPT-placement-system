@@ -78,10 +78,6 @@
               {% trans "View Application Letter" %}
             </a>
             {% endif %}
-            <a href="{% url 'company-applicant-documents' app.id %}" class="inline-flex items-center gap-xs font-body-md text-secondary hover:text-primary transition-colors font-medium">
-              <span class="material-symbols-outlined text-[18px]">description</span>
-              {% trans "View Documents" %}
-            </a>
             {% if app.is_accepted %}
                 <div class="mt-auto w-full">
                   <div class="flex items-start gap-xs p-2 bg-[#f0fdf4] rounded-md border border-[#bbf7d0]">
@@ -93,16 +89,28 @@
                   </div>
                 </div>
               {% else %}
-                <form method="post" action="{% url 'company-acceptance-sms' app.id %}" class="flex flex-col gap-2 pt-2 mt-auto">
-                  {% csrf_token %}
-                  <label class="font-metadata text-on-surface-variant">{% trans "Acceptance Note (Optional)" %}</label>
-                  <input type="text" name="message" placeholder="{% trans 'e.g. Report on Monday 8 AM' %}" class="w-full bg-surface-container-lowest font-body-md text-on-surface px-3 py-2 rounded-md outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-outline-variant">
-                  <button class="w-full bg-[#166534] hover:bg-[#14532d] text-white font-body-md font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-xs transition-colors mt-1 group-hover:shadow-md" type="submit">
-                    <span class="material-symbols-outlined text-[18px]">campaign</span>
-                    {% trans "Send Confirmation" %}
-                  </button>
-                  <p class="font-metadata text-on-surface-variant">One click automatically sends the student an SMS + email confirming acceptance and asking them to open their email for the acceptance letter.</p>
-                </form>
+                {% if app.is_cancellable %}
+                  <div class="mt-auto w-full pt-2">
+                    <div class="flex items-start gap-xs p-2 bg-[#fef3c7] rounded-md border border-[#fde047]">
+                      <span class="material-symbols-outlined text-[#a16207] text-[18px] mt-0.5">hourglass_empty</span>
+                      <div class="flex flex-col">
+                        <span class="font-metadata font-bold text-[#a16207]">Cooling-off Period</span>
+                        <span class="font-metadata text-[#854d0e]">Eligible for approval after 24h</span>
+                      </div>
+                    </div>
+                  </div>
+                {% else %}
+                  <form method="post" action="{% url 'company-acceptance-sms' app.id %}" class="flex flex-col gap-2 pt-2 mt-auto">
+                    {% csrf_token %}
+                    <label class="font-metadata text-on-surface-variant">{% trans "Acceptance Note (Optional)" %}</label>
+                    <input type="text" name="message" placeholder="{% trans 'e.g. Report on Monday 8 AM' %}" class="w-full bg-surface-container-lowest font-body-md text-on-surface px-3 py-2 rounded-md outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-outline-variant">
+                    <button class="w-full bg-[#166534] hover:bg-[#14532d] text-white font-body-md font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-xs transition-colors mt-1 group-hover:shadow-md" type="submit">
+                      <span class="material-symbols-outlined text-[18px]">campaign</span>
+                      {% trans "Send Confirmation" %}
+                    </button>
+                    <p class="font-metadata text-on-surface-variant text-[11px] leading-tight">One click automatically sends the student an SMS + email confirming acceptance and asking them to open their email for the acceptance letter.</p>
+                  </form>
+                {% endif %}
               {% endif %}
           </div>
         </div>

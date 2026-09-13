@@ -34,6 +34,61 @@ def django_admin_redirect(request):
     return redirect("login")
 
 
+# ── Public legal pages ────────────────────────────────────────────────────────
+
+def legal_terms(request):
+    """Terms & Conditions page — publicly accessible, no login required."""
+    return render(request, "legal/terms.html")
+
+
+def legal_privacy(request):
+    """Privacy Policy page — publicly accessible, no login required."""
+    return render(request, "legal/privacy.html")
+
+
+@login_required
+def legal_pdpa_request(request):
+    """PDPA rights request form — Features 4 & 5 (Privacy §6)."""
+    if request.method == "POST":
+        request_type = request.POST.get("request_type", "")
+        if request_type in ("portability", "access"):
+            # Immediate data export as JSON download
+            user = request.user
+            data = {
+                "id": str(user.id),
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "phone": user.phone,
+                "role": user.role,
+                "created_at": user.created_at.isoformat(),
+            }
+            response = JsonResponse(data)
+            response["Content-Disposition"] = "attachment; filename=ipt-my-data.json"
+            return response
+        else:
+            # Log the request and redirect back
+            details = request.POST.get("details", "")[:500]
+            AuditLog.objects.create(
+                actor=request.user,
+                actor_label=request.user.email,
+                action="PDPA_REQUEST",
+                module="accounts",
+                description=f"Request type: {request_type}. Details: {details}",
+                ip_address=request.META.get("REMOTE_ADDR"),
+            )
+            messages.success(
+                request,
+                "Your PDPA rights request has been submitted. "
+                "We will respond within 21 days as required by the PDPA.",
+            )
+            return redirect("legal-pdpa-request")
+    return render(request, "legal/pdpa_request.html")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+
+
 def _require_admin(request):
     return request.user.is_authenticated and (
         request.user.is_staff or request.user.is_platform_admin
@@ -315,6 +370,13 @@ def student_verification(request, pk):
                              f"Rejected student {student.user.email}: {reason}")
                 messages.success(request, "Student profile rejected.")
                 return redirect("platform-verifications")
+        elif decision == "deactivate":
+            student.user.is_active = False
+            student.user.save(update_fields=["is_active"])
+            _write_audit(request, "Account Deactivated", "Verification",
+                         f"Deactivated student account {student.user.email} (soft delete).")
+            messages.success(request, "Student account has been deactivated.")
+            return redirect("platform-directory")
     return render(
         request,
         "core/student_verification.html",
@@ -378,11 +440,80 @@ def company_verification(request, pk):
                              f"Rejected company {company.name}: {reason}")
                 messages.success(request, "Company profile rejected.")
                 return redirect("platform-verifications")
+        elif decision == "deactivate":
+            company.user.is_active = False
+            company.user.save(update_fields=["is_active"])
+            _write_audit(request, "Account Deactivated", "Verification",
+                         f"Deactivated company account {company.user.email} (soft delete).")
+            messages.success(request, "Company account has been deactivated.")
+            return redirect("platform-directory")
     return render(
         request,
         "core/company_verification.html",
         {"company": company, "docs": docs, "missing_docs": _missing_docs(company.user, "company")},
     )
+
+
+@login_required
+def platform_student_edit(request, pk):
+    from apps.students.models import StudentProfile
+    from apps.students.forms import StudentProfileForm
+    from apps.core.cache import get_regions
+    import json
+    from django.urls import reverse
+
+    if not _require_admin(request):
+        return render(request, "core/forbidden.html", status=403)
+    student = get_object_or_404(StudentProfile, pk=pk)
+    
+    if request.method == "POST":
+        form = StudentProfileForm(request.POST, request.FILES, instance=student)
+        if form.is_valid():
+            form.save()
+            _write_audit(request, "Student Profile Edited", "Admin Edit", f"Edited student {student.user.email}")
+            messages.success(request, "Student profile updated successfully.")
+            return redirect("platform-student-verification", pk=student.pk)
+    else:
+        form = StudentProfileForm(instance=student)
+        
+    return render(request, "core/admin_profile_edit.html", {
+        "form": form,
+        "profile": student,
+        "profile_type": "Student",
+        "cancel_url": reverse("platform-student-verification", args=[student.pk]),
+        "regions_json": json.dumps(get_regions()),
+    })
+
+
+@login_required
+def platform_company_edit(request, pk):
+    from apps.companies.models import CompanyProfile
+    from apps.companies.forms import CompanyProfileForm
+    from apps.core.cache import get_regions
+    import json
+    from django.urls import reverse
+
+    if not _require_admin(request):
+        return render(request, "core/forbidden.html", status=403)
+    company = get_object_or_404(CompanyProfile, pk=pk)
+    
+    if request.method == "POST":
+        form = CompanyProfileForm(request.POST, request.FILES, instance=company)
+        if form.is_valid():
+            form.save()
+            _write_audit(request, "Company Profile Edited", "Admin Edit", f"Edited company {company.user.email}")
+            messages.success(request, "Company profile updated successfully.")
+            return redirect("platform-company-verification", pk=company.pk)
+    else:
+        form = CompanyProfileForm(instance=company)
+        
+    return render(request, "core/admin_profile_edit.html", {
+        "form": form,
+        "profile": company,
+        "profile_type": "Company",
+        "cancel_url": reverse("platform-company-verification", args=[company.pk]),
+        "regions_json": json.dumps(get_regions()),
+    })
 
 
 @login_required
@@ -591,7 +722,7 @@ def directory(request):
     status = request.GET.get("status") or None
 
     if tab == "companies":
-        qs = CompanyProfile.objects.select_related("user", "region", "district", "ward").order_by("-created_at")
+        qs = CompanyProfile.objects.filter(user__is_active=True).select_related("user", "region", "district", "ward").order_by("-created_at")
         if region_id:
             qs = qs.filter(region_id=region_id)
         if district_id:
@@ -603,7 +734,7 @@ def directory(request):
         rows = qs
     else:
         tab = "students"
-        qs = StudentProfile.objects.select_related("user", "region", "district", "ward").order_by("-created_at")
+        qs = StudentProfile.objects.filter(user__is_active=True).select_related("user", "region", "district", "ward").order_by("-created_at")
         if region_id:
             qs = qs.filter(region_id=region_id)
         if district_id:
