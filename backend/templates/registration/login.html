@@ -58,7 +58,7 @@
         <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Log in to manage your IPT applications." %}</p>
       </div>
 
-      <form method="post" class="flex flex-col gap-md" novalidate data-loading-form>
+      <form method="post" class="flex flex-col gap-md" novalidate>
         {% csrf_token %}
         {% if form.non_field_errors %}
           <div class="rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-body-md text-on-error-container flex items-start gap-xs">
