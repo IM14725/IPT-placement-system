@@ -265,13 +265,17 @@ import json
 def check_auth_task(request, task_id):
     result = AsyncResult(task_id)
     if result.ready():
-        res = result.get()
-        if res.get('status') == 'success':
-            signer = Signer()
-            token = signer.sign(res['user_id'])
-            return JsonResponse({'status': 'SUCCESS', 'token': token})
-        else:
-            return JsonResponse({'status': 'ERROR', 'message': res.get('message', 'Failed')})
+        try:
+            res = result.get()
+            if isinstance(res, dict) and res.get('status') == 'success':
+                signer = Signer()
+                token = signer.sign(res['user_id'])
+                return JsonResponse({'status': 'SUCCESS', 'token': token})
+            else:
+                error_msg = res.get('message', 'Failed') if isinstance(res, dict) else str(res)
+                return JsonResponse({'status': 'ERROR', 'message': error_msg})
+        except Exception as e:
+            return JsonResponse({'status': 'ERROR', 'message': str(e)})
     return JsonResponse({'status': 'PENDING'})
 
 def finalize_auth(request):
