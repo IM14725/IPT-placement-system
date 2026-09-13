@@ -158,9 +158,7 @@ def ledger(request):
 def metrics(request):
     if not _require_admin(request):
         return render(request, "core/forbidden.html", status=403)
-    from apps.core.cache import cache_get_or_set
-
-    data = cache_get_or_set("admin:metrics", 60, producer=_compute_metrics)
+    data = _compute_metrics()
     return render(request, "core/metrics.html", {"data": data})
 
 
