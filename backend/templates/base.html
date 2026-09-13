@@ -267,17 +267,43 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="w-full bg-surface-container py-lg mt-xl">
-    <div class="max-w-[1280px] mx-auto px-md flex flex-col gap-sm text-on-surface-variant text-metadata">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-sm">
+  <footer class="w-full bg-surface-container py-xl mt-xl border-t border-outline-variant/30">
+    <div class="max-w-[1280px] mx-auto px-md flex flex-col gap-lg text-on-surface-variant text-metadata">
+      
+      <!-- Social & Contact Links -->
+      <div class="flex flex-col md:flex-row items-center justify-center gap-md sm:gap-xl">
+        <a href="https://www.instagram.com/semauya.tech?stkn=MXMydmZyNWJpM3NraQ==" target="_blank" rel="noopener noreferrer" class="hover:text-primary transition-colors flex items-center gap-xs">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+          <span class="font-medium tracking-wide">Instagram</span>
+        </a>
+        <a href="https://www.tiktok.com/@semauya.tech?_r=1&_t=ZS-99geiCqxwLk" target="_blank" rel="noopener noreferrer" class="hover:text-primary transition-colors flex items-center gap-xs">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path></svg>
+          <span class="font-medium tracking-wide">TikTok</span>
+        </a>
+        <a href="https://www.facebook.com/share/1Z9PivTbuM/" target="_blank" rel="noopener noreferrer" class="hover:text-primary transition-colors flex items-center gap-xs">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+          <span class="font-medium tracking-wide">Facebook</span>
+        </a>
+        <a href="https://wa.me/255756322833" target="_blank" rel="noopener noreferrer" class="hover:text-primary transition-colors flex items-center gap-xs">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          <span class="font-medium tracking-wide">WhatsApp</span>
+        </a>
+        <a href="mailto:semauyatech@gmail.com" class="hover:text-primary transition-colors flex items-center gap-xs">
+          <span class="material-symbols-outlined text-[18px]">mail</span>
+          <span class="font-medium tracking-wide">Email Us</span>
+        </a>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-sm pt-md border-t border-outline-variant/20">
         <span>&copy; {% now "Y" %} IPT Marketplace. {% trans "All rights reserved." %}</span>
         <div class="flex items-center gap-md">
           <a href="{% url 'legal-terms' %}" class="hover:text-primary transition-colors">{% trans "Terms &amp; Conditions" %}</a>
-          <span class="text-outline-variant">·</span>
+          <span class="text-outline-variant">&bull;</span>
           <a href="{% url 'legal-privacy' %}" class="hover:text-primary transition-colors">{% trans "Privacy Policy" %}</a>
         </div>
       </div>
-      <div class="text-center mt-xs">
+      
+      <div class="text-center">
         <span>{% trans "Designed by semauya." %}</span>
       </div>
     </div>
