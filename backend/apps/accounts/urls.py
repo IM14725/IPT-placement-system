@@ -13,4 +13,6 @@ urlpatterns = [
     path("api/auth/my-token/", views.my_token, name="my-token"),
     path("auth/notification-settings/", views.notification_settings, name="notification-settings"),
     path("auth/delete-account/", views.request_account_deletion, name="delete-account"),
+    path("auth/task-status/<str:task_id>/", views.check_auth_task, name="auth-task-status"),
+    path("auth/finalize/", views.finalize_auth, name="finalize-auth"),
 ]

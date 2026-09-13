@@ -83,20 +83,20 @@ def register(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data.get("email", "").strip().lower()
-            token = acquire_lock(f"register:{email}", ttl_ms=5000, blocking=True)
-            try:
-                if not form.is_valid():
-                    return render(request, "registration/register.html", {"form": form})
-                user = form.save()
-            except IntegrityError:
-                form.add_error("email", "An account with this email already exists.")
-            else:
-                login(request, user)
-                return redirect(_dashboard_url(user))
-            finally:
-                if token:
-                    release_lock(f"register:{email}", token)
+            from apps.accounts.tasks import process_registration_task
+            
+            # Make sure form_data is json serializable
+            form_data = {
+                "email": form.cleaned_data.get("email"),
+                "password1": form.cleaned_data.get("password1"),
+                "role": str(form.cleaned_data.get("role")),
+                "company_name": form.cleaned_data.get("company_name"),
+                "first_name": form.cleaned_data.get("first_name"),
+                "last_name": form.cleaned_data.get("last_name"),
+            }
+            
+            task = process_registration_task.delay(form_data)
+            return render(request, "registration/processing.html", {"task_id": task.id, "action": "register"})
     else:
         form = RegisterForm()
     return render(request, "registration/register.html", {"form": form})
@@ -124,15 +124,11 @@ def user_login(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
-            user = authenticate(
-                request,
-                username=form.cleaned_data["email"],
-                password=form.cleaned_data["password"],
-            )
-            if user is not None:
-                login(request, user)
-                return redirect(_dashboard_url(user))
-            form.add_error(None, "Invalid email or password.")
+            from apps.accounts.tasks import process_login_task
+            email = form.cleaned_data["email"]
+            password = form.cleaned_data["password"]
+            task = process_login_task.delay(email, password)
+            return render(request, "registration/processing.html", {"task_id": task.id, "action": "login"})
     else:
         form = LoginForm()
     return render(request, "registration/login.html", {"form": form})
@@ -261,3 +257,33 @@ def request_account_deletion(request):
             messages.error(request, "The email address you entered does not match your account email.")
             return redirect("delete-account")
     return render(request, "registration/delete_account.html")
+from celery.result import AsyncResult
+from django.core.signing import Signer
+import json
+
+def check_auth_task(request, task_id):
+    result = AsyncResult(task_id)
+    if result.ready():
+        res = result.get()
+        if res.get('status') == 'success':
+            signer = Signer()
+            token = signer.sign(res['user_id'])
+            return JsonResponse({'status': 'SUCCESS', 'token': token})
+        else:
+            return JsonResponse({'status': 'ERROR', 'message': res.get('message', 'Failed')})
+    return JsonResponse({'status': 'PENDING'})
+
+def finalize_auth(request):
+    if request.method == 'POST':
+        token = request.POST.get('token')
+        signer = Signer()
+        try:
+            user_id = signer.unsign(token)
+            user = User.objects.get(id=user_id)
+            login(request, user)
+            return redirect(_dashboard_url(user))
+        except Exception:
+            messages.error(request, 'Authentication failed. Please try again.')
+            return redirect('login')
+    return redirect('home')
+

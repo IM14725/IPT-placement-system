@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Processing..." %}{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-md mx-auto my-xl auth-card bg-surface-container-lowest rounded-2xl shadow-xl p-lg lg:p-xl flex flex-col items-center justify-center min-h-[400px]">
+  <div class="w-16 h-16 rounded-full bg-primary-container/20 flex items-center justify-center mb-md animate-pulse">
+    <span class="material-symbols-outlined text-primary text-[32px] animate-spin">refresh</span>
+  </div>
+  <h1 class="font-headline-md text-headline-md text-on-surface mb-xs">
+    {% if action == 'register' %}
+      {% trans "Setting up your account..." %}
+    {% else %}
+      {% trans "Signing you in..." %}
+    {% endif %}
+  </h1>
+  <p class="font-body-md text-body-md text-on-surface-variant text-center mb-lg">
+    {% trans "Please wait while we securely process your request. This might take a few moments during peak times." %}
+  </p>
+
+  <div id="error-message" class="hidden w-full rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-body-md text-on-error-container mb-md">
+  </div>
+  
+  <a id="back-button" href="{% if action == 'register' %}{% url 'register' %}{% else %}{% url 'login' %}{% endif %}" class="hidden w-full bg-surface-container text-on-surface font-body-md text-body-md font-semibold py-3 rounded-lg hover:bg-surface-container-high transition-colors text-center">
+    {% trans "Go Back" %}
+  </a>
+
+  <form id="finalize-form" action="{% url 'finalize-auth' %}" method="post" class="hidden">
+    {% csrf_token %}
+    <input type="hidden" name="token" id="auth-token" value="">
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const taskId = '{{ task_id }}';
+    const checkInterval = 2000;
+    
+    function checkStatus() {
+      fetch(`/auth/task-status/${taskId}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'SUCCESS') {
+            document.getElementById('auth-token').value = data.token;
+            document.getElementById('finalize-form').submit();
+          } else if (data.status === 'ERROR') {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.innerHTML = `<div class="flex items-start gap-xs"><span class="material-symbols-outlined text-[18px] mt-px">error</span><span>${data.message || 'An error occurred'}</span></div>`;
+            errorDiv.classList.remove('hidden');
+            document.getElementById('back-button').classList.remove('hidden');
+            
+            // Stop spinner
+            const spinner = document.querySelector('.animate-spin');
+            if(spinner) {
+               spinner.classList.remove('animate-spin');
+               spinner.textContent = 'error';
+            }
+          } else {
+            // PENDING or STARTED, check again
+            setTimeout(checkStatus, checkInterval);
+          }
+        })
+        .catch(error => {
+          console.error('Error checking task status:', error);
+          setTimeout(checkStatus, checkInterval);
+        });
+    }
+    
+    setTimeout(checkStatus, checkInterval);
+  });
+</script>
+{% endblock %}
