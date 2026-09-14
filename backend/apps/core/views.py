@@ -943,6 +943,61 @@ def admin_slots(request):
     from apps.slots.models import Slot
     from apps.core.pagination import paginate
     from urllib.parse import urlencode
+    from apps.locations.utils import get_regions
+    from apps.core.education import education_level_choices, academic_year_choices
+    from django.db.models import Q
+
+    if not _require_admin(request):
+        return render(request, "core/forbidden.html", status=403)
+
+    qs = request.GET.get("q", "").strip()
+    region_id = request.GET.get("region", "")
+    district_id = request.GET.get("district", "")
+    department = request.GET.get("department", "").strip()
+    education_level = request.GET.get("education_level", "")
+    academic_year = request.GET.get("academic_year", "")
+
+    slots = Slot.objects.all().select_related("company__user", "district__region")
+    
+    if qs:
+        slots = slots.filter(
+            Q(title__icontains=qs) | 
+            Q(company__name__icontains=qs) | 
+            Q(description__icontains=qs)
+        )
+    if region_id:
+        slots = slots.filter(district__region_id=region_id)
+    if district_id:
+        slots = slots.filter(district_id=district_id)
+    if department:
+        slots = slots.filter(department__icontains=department)
+    if education_level:
+        slots = slots.filter(education_level=education_level)
+    if academic_year:
+        slots = slots.filter(academic_year=academic_year)
+        
+    slots = slots.order_by("-created_at")
+
+    page_obj = paginate(slots, request.GET.get("page"), page_size=20)
+    
+    return render(
+        request, 
+        "core/admin_slots.html", 
+        {
+            "slots": page_obj, 
+            "page_obj": page_obj, 
+            "q": qs,
+            "region": region_id,
+            "district": district_id,
+            "department": department,
+            "education_level": education_level,
+            "academic_year": academic_year,
+            "regions": get_regions(),
+            "education_levels": education_level_choices(),
+            "academic_years": academic_year_choices(),
+            "querystring": urlencode({k: v for k, v in request.GET.items() if k != "page"}),
+        }
+    )
 
     if not _require_admin(request):
         return render(request, "core/forbidden.html", status=403)

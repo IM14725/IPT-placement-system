@@ -12,12 +12,61 @@
     </div>
   </div>
 
-  <form method="get" class="flex flex-col sm:flex-row items-center gap-sm">
-    <div class="ipt-field-box flex-1 w-full sm:w-auto">
-      <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">search</span></span>
-      <input type="text" name="q" value="{{ q }}" placeholder="Search by title, company, or description..." class="w-full bg-transparent border-none focus:ring-0 text-body-md text-on-surface h-10 px-0 outline-none">
+  <form method="get" id="filter-form" class="w-full bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none"></div>
+    <div class="flex flex-col lg:flex-row gap-sm items-end relative z-10 w-full">
+      <div class="w-full flex-1 flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Region" %}</label>
+        <div class="ipt-filter-select">
+          <select id="filter-region" name="region" class="w-full h-10 px-sm pr-8 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer">
+            <option value="">{% trans "All Regions" %}</option>
+            {% for r in regions %}<option value="{{ r.id }}" {% if region == r.id|stringformat:"s" %}selected{% endif %}>{{ r.name }}</option>{% endfor %}
+          </select>
+          <span class="ipt-filter-caret"><span class="material-symbols-outlined">expand_more</span></span>
+        </div>
+      </div>
+      <div class="w-full flex-1 flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "District" %}</label>
+        <div class="ipt-filter-select">
+          <select id="filter-district" name="district" class="w-full h-10 px-sm pr-8 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer" {% if not region %}disabled{% endif %}>
+            <option value="">{% trans "All Districts" %}</option>
+          </select>
+          <span class="ipt-filter-caret"><span class="material-symbols-outlined">expand_more</span></span>
+        </div>
+      </div>
+      <div class="w-full flex-1 flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Department / Course" %}</label>
+        <input id="filter-department" name="department" value="{{ department }}" type="text" placeholder="e.g. Computer Science" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow">
+      </div>
+      <div class="flex-1 min-w-[200px] flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Education Level (TCU)" %}</label>
+        <div class="ipt-filter-select">
+          <select id="filter-education-level" name="education_level" class="w-full h-10 px-sm pr-8 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer">
+            <option value="">{% trans "Any Qualification" %}</option>
+            {% for value, label in education_levels %}<option value="{{ value }}" {% if education_level == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+          <span class="ipt-filter-caret"><span class="material-symbols-outlined">expand_more</span></span>
+        </div>
+      </div>
+      <div class="flex-1 min-w-[200px] flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Academic Year</label>
+        <div class="ipt-filter-select">
+          <select id="filter-academic-year" name="academic_year" class="w-full h-10 px-sm pr-8 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer">
+            <option value="">Any Year</option>
+            {% for value, label in academic_years %}<option value="{{ value }}" {% if academic_year == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+          <span class="ipt-filter-caret"><span class="material-symbols-outlined">expand_more</span></span>
+        </div>
+      </div>
     </div>
-    <button type="submit" class="bg-primary text-on-primary hover:bg-primary-container px-md h-10 rounded-lg transition-colors shrink-0">Search</button>
+    <div class="flex flex-col sm:flex-row items-center gap-sm mt-xs relative z-10 w-full">
+      <div class="ipt-field-box flex-1 w-full sm:w-auto">
+        <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">search</span></span>
+        <input type="text" name="q" value="{{ q }}" placeholder="Search by title, company, or description..." class="w-full bg-transparent border-none focus:ring-0 text-body-md text-on-surface h-10 px-0 outline-none">
+      </div>
+      <button type="submit" class="bg-primary text-on-primary hover:bg-primary-container px-xl h-10 rounded-lg transition-colors shrink-0 font-bold">Search</button>
+      <a href="{% url 'platform-slots' %}" class="text-primary hover:underline px-md font-medium shrink-0">Clear</a>
+    </div>
   </form>
 
   {% if slots %}
@@ -74,4 +123,46 @@
     </div>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function() {
+    var region = document.getElementById("filter-region");
+    var district = document.getElementById("filter-district");
+    var currentDistrict = "{{ district }}";
+    
+    function loadDistricts() {
+      if (!region.value) {
+        district.disabled = true;
+        district.innerHTML = '<option value="">All Districts</option>';
+        return;
+      }
+      district.disabled = true;
+      district.innerHTML = '<option value="">Loading...</option>';
+      fetch("/api/locations/districts/?region=" + region.value)
+        .then(r => r.json())
+        .then(data => {
+          district.disabled = false;
+          district.innerHTML = '<option value="">All Districts</option>';
+          data.districts.forEach(d => {
+            var opt = document.createElement("option");
+            opt.value = d.id;
+            opt.text = d.name;
+            if (d.id === currentDistrict) opt.selected = true;
+            district.appendChild(opt);
+          });
+        })
+        .catch(() => {
+          district.disabled = true;
+          district.innerHTML = '<option value="">Error</option>';
+        });
+    }
+    
+    region.addEventListener("change", loadDistricts);
+    if (region.value) {
+      loadDistricts();
+    }
+  })();
+</script>
 {% endblock %}
