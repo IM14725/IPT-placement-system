@@ -943,7 +943,7 @@ def admin_slots(request):
     from apps.slots.models import Slot
     from apps.core.pagination import paginate
     from urllib.parse import urlencode
-    from apps.locations.utils import get_regions
+    from apps.core.cache import get_regions
     from apps.core.education import education_level_choices, academic_year_choices
     from django.db.models import Q
 
