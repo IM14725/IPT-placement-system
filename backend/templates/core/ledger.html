@@ -9,7 +9,7 @@
     </div>
   </section>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-md">
     <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm relative overflow-hidden flex items-center gap-md">
       <div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
       <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -30,9 +30,45 @@
         <span class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ paid_count }}</span>
       </div>
     </div>
+    <a href="?status=unpaid" class="bg-surface-container-lowest rounded-xl p-lg shadow-sm relative overflow-hidden flex items-center gap-md hover:bg-surface-container-low transition-colors block cursor-pointer">
+      <div class="absolute -right-10 -top-10 w-32 h-32 bg-error/10 rounded-full blur-2xl"></div>
+      <div class="w-12 h-12 rounded-full bg-error/10 text-error flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">cancel</span>
+      </div>
+      <div class="flex flex-col relative z-10">
+        <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Unpaid/Cancelled</span>
+        <span class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ unpaid_cancelled_count }}</span>
+      </div>
+    </a>
   </div>
 
-  {% if payments %}
+  <form method="get" class="bg-surface-container-lowest p-md rounded-xl shadow-sm flex flex-wrap gap-md items-end">
+    <div class="flex-1 min-w-[200px]">
+      <label class="block font-metadata text-on-surface-variant mb-1">Search</label>
+      <input type="text" name="q" value="{{ q }}" placeholder="Reference, student, company, amount..." class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+    </div>
+    <div>
+      <label class="block font-metadata text-on-surface-variant mb-1">Status</label>
+      <select name="status" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+        <option value="">All</option>
+        <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Paid</option>
+        <option value="unpaid" {% if status_filter == 'unpaid' %}selected{% endif %}>Unpaid</option>
+      </select>
+    </div>
+    <div>
+      <label class="block font-metadata text-on-surface-variant mb-1">From Date</label>
+      <input type="date" name="start_date" value="{{ start_date|default:'' }}" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+    </div>
+    <div>
+      <label class="block font-metadata text-on-surface-variant mb-1">To Date</label>
+      <input type="date" name="end_date" value="{{ end_date|default:'' }}" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+    </div>
+    <div>
+      <button type="submit" class="bg-primary text-on-primary px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors h-[42px] flex items-center justify-center">Filter</button>
+    </div>
+  </form>
+
+  {% if payments or q or status_filter or start_date or end_date %}
     <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
       <div class="px-lg py-md bg-surface flex items-center justify-between border-b border-surface-container">
         <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-sm">
@@ -49,8 +85,9 @@
               <th class="px-lg py-3 font-semibold">Student</th>
               <th class="px-lg py-3 font-semibold">Slot</th>
               <th class="px-lg py-3 font-semibold">Company</th>
+              <th class="px-lg py-3 font-semibold">Status</th>
               <th class="px-lg py-3 font-semibold text-right">Amount</th>
-              <th class="px-lg py-3 font-semibold">Paid At</th>
+              <th class="px-lg py-3 font-semibold">Date</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-surface-container">
@@ -60,8 +97,27 @@
                 <td class="px-lg py-md font-medium text-on-surface">{{ p.student.user.email }}</td>
                 <td class="px-lg py-md text-on-surface">{{ p.application.slot.title }}</td>
                 <td class="px-lg py-md text-on-surface-variant">{{ p.application.slot.company.name }}</td>
+                <td class="px-lg py-md text-on-surface">
+                  {% if p.application.status == 'CANCELLED' %}
+                    <span class="inline-flex items-center gap-1 text-error bg-error/10 px-2 py-0.5 rounded-full text-xs font-medium">
+                      <span class="material-symbols-outlined text-[14px]">cancel</span> Cancelled
+                    </span>
+                  {% elif p.status == 'PAID' %}
+                    <span class="inline-flex items-center gap-1 text-primary bg-primary/10 px-2 py-0.5 rounded-full text-xs font-medium">
+                      <span class="material-symbols-outlined text-[14px]">check_circle</span> Paid
+                    </span>
+                  {% elif p.status == 'PENDING' %}
+                    <span class="inline-flex items-center gap-1 text-tertiary bg-tertiary/10 px-2 py-0.5 rounded-full text-xs font-medium">
+                      <span class="material-symbols-outlined text-[14px]">pending</span> Pending
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center gap-1 text-error bg-error/10 px-2 py-0.5 rounded-full text-xs font-medium">
+                      <span class="material-symbols-outlined text-[14px]">error</span> Failed
+                    </span>
+                  {% endif %}
+                </td>
                 <td class="px-lg py-md text-right font-semibold text-on-surface">TZS {{ p.amount }}</td>
-                <td class="px-lg py-md text-on-surface-variant">{{ p.paid_at|date:"M j, Y H:i" }}</td>
+                <td class="px-lg py-md text-on-surface-variant">{{ p.created_at|date:"M j, Y H:i" }}</td>
               </tr>
             {% endfor %}
           </tbody>

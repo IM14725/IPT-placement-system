@@ -123,16 +123,55 @@ def _get_setting(key, default=None):
 def ledger(request):
     if not _require_admin(request):
         return render(request, "core/forbidden.html", status=403)
+    import datetime
     from apps.payments.models import Payment, PaymentStatus
+    from apps.applications.models import Application, ApplicationStatus
     from apps.core.cache import cache_get_or_set
     from apps.core.pagination import paginate
     from urllib.parse import urlencode
+    from django.db.models import Q
 
-    payments = (
-        Payment.objects.filter(status=PaymentStatus.PAID)
-        .select_related("student__user", "application__slot__company")
-        .order_by("-paid_at")
-    )
+    payments = Payment.objects.select_related("student__user", "application__slot__company")
+
+    q = request.GET.get("q", "").strip()
+    status_filter = request.GET.get("status")
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    if q:
+        payments = payments.filter(
+            Q(reference_id__icontains=q)
+            | Q(student__user__email__icontains=q)
+            | Q(student__user__first_name__icontains=q)
+            | Q(student__user__last_name__icontains=q)
+            | Q(application__slot__company__name__icontains=q)
+            | Q(amount__icontains=q)
+        )
+
+    if status_filter == "paid":
+        payments = payments.filter(status=PaymentStatus.PAID, application__status=ApplicationStatus.PAID)
+    elif status_filter == "unpaid":
+        payments = payments.filter(
+            Q(status__in=[PaymentStatus.PENDING, PaymentStatus.FAILED]) | 
+            Q(application__status__in=[ApplicationStatus.UNPAID, ApplicationStatus.CANCELLED])
+        )
+
+    if start_date:
+        try:
+            start_date_parsed = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
+            payments = payments.filter(created_at__gte=start_date_parsed)
+        except ValueError:
+            pass
+            
+    if end_date:
+        try:
+            end_date_parsed = datetime.datetime.strptime(end_date, "%Y-%m-%d").date()
+            payments = payments.filter(created_at__lt=end_date_parsed + datetime.timedelta(days=1))
+        except ValueError:
+            pass
+
+    payments = payments.order_by("-created_at")
+
     totals = cache_get_or_set(
         "admin:ledger-totals",
         30,
@@ -140,6 +179,13 @@ def ledger(request):
             total_fees=Sum("amount"), paid_count=Count("id")
         ),
     )
+    
+    unpaid_cancelled_count = cache_get_or_set(
+        "admin:ledger-unpaid-cancelled-count",
+        30,
+        producer=lambda: Application.objects.filter(status__in=[ApplicationStatus.UNPAID, ApplicationStatus.CANCELLED]).count()
+    )
+
     page_obj = paginate(payments, request.GET.get("page"), page_size=50)
     return render(
         request,
@@ -150,6 +196,11 @@ def ledger(request):
             "querystring": urlencode({k: v for k, v in request.GET.items() if k != "page"}),
             "total_fees": totals["total_fees"] or 0,
             "paid_count": totals["paid_count"] or 0,
+            "unpaid_cancelled_count": unpaid_cancelled_count,
+            "q": q,
+            "status_filter": status_filter,
+            "start_date": start_date,
+            "end_date": end_date,
         },
     )
 

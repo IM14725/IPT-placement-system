@@ -59,6 +59,14 @@ class InitiateSTKPushView(APIView):
             # Mark failed internally if gateway rejects push instantly
             payment.status = PaymentStatus.FAILED
             payment.save(update_fields=['status', 'updated_at'])
+            
+            # Also update application and free up slot
+            app = payment.application
+            from apps.applications.models import ApplicationStatus
+            app.status = ApplicationStatus.UNPAID
+            app.save(update_fields=['status', 'updated_at'])
+            app.slot.refresh_status()
+            
             return Response({
                 "error": "Selcom gateway could not initiate push.",
                 "details": selcom_response.get('message')
@@ -114,6 +122,13 @@ class PaymentWebhookView(APIView):
             else:
                 payment.status = PaymentStatus.FAILED
                 payment.save(update_fields=['status', 'updated_at'])
+                
+                # Update application and free up slot
+                app = payment.application
+                from apps.applications.models import ApplicationStatus
+                app.status = ApplicationStatus.UNPAID
+                app.save(update_fields=['status', 'updated_at'])
+                app.slot.refresh_status()
                 
             return Response({"result": "SUCCESS", "message": "Acknowledged"}, status=status.HTTP_200_OK)
             
