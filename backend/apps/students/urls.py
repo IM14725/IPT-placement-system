@@ -10,6 +10,7 @@ urlpatterns = [
     path("applications/", views.applications, name="student-applications"),
     path("apply/<uuid:slot_id>/", views.apply, name="student-apply"),
     path("applications/<uuid:app_id>/cancel/", views.cancel_application, name="student-cancel-application"),
+    path("applications/<uuid:app_id>/letter/", views.view_application_letter, name="student-view-application-letter"),
     path("payments/<uuid:payment_id>/", views.payment, name="student-payment"),
     path("documents/<uuid:doc_id>/view/", views.view_document, name="document-view"),
 ]

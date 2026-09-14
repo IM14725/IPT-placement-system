@@ -62,10 +62,10 @@
                 {% else %}{% if app.payment_deadline %}{% blocktrans with deadline=app.payment_deadline|date:"M d, H:i" %}Pay by {{ deadline }} to keep your seat{% endblocktrans %}{% else %}{% trans "Pay fee to proceed to review" %}{% endif %}{% endif %}
               </span>
               {% if app.application_letter %}
-                <span class="font-body-md font-body-md text-[12px] text-[#6d28d9] flex items-center gap-1">
+                <a href="{% url 'student-view-application-letter' app.id %}" target="_blank" rel="noopener noreferrer" class="font-body-md font-body-md text-[12px] text-[#6d28d9] flex items-center gap-1 hover:underline mt-1 w-fit">
                   <span class="material-symbols-outlined text-[14px]">note</span>
-                  {% trans "Application letter attached" %}
-                </span>
+                  {% trans "View application letter" %}
+                </a>
               {% endif %}
             </div>
           </div>

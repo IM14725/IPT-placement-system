@@ -328,3 +328,39 @@ def cancel_application(request, app_id):
         messages.success(request, "Application cancelled successfully. Your slot was returned and you now have a credit to apply for a new slot without paying.")
         
     return redirect("student-applications")
+@login_required
+def view_application_letter(request, app_id):
+    if not request.user.is_student:
+        return HttpResponseForbidden("Student account required.")
+    app = get_object_or_404(
+        Application, id=app_id, student__user=request.user
+    )
+    if not app.application_letter:
+        return HttpResponseForbidden("No application letter uploaded.")
+    if app.letter_sha256:
+        app.application_letter.open("rb")
+        try:
+            from apps.core.immutability import sha256_bytes
+            actual = sha256_bytes(app.application_letter.read())
+        finally:
+            app.application_letter.close()
+        if actual != app.letter_sha256:
+            return HttpResponseGone(
+                "This application letter failed its integrity check and is unavailable."
+            )
+    filename = app.letter_original_name or "application_letter.pdf"
+    
+    from pathlib import Path
+    ext = Path(filename).suffix.lower()
+    mimes = {
+        ".pdf": "application/pdf",
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+    }
+    
+    return FileResponse(
+        app.application_letter.open("rb"),
+        content_type=mimes.get(ext) or "application/octet-stream",
+        filename=filename,
+    )
