@@ -2494,7 +2494,29 @@
         "UMST",
         "University of Medical Sciences"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Agriculture Production",
+        "Technician Certificate in Agriculture Production",
+        "Ordinary Diploma in Agriculture Production",
+        "Technician Certificate in Clinical Medicine",
+        "Basic Technician Certificate in Clinical Medicine",
+        "Ordinary Diploma in Clinical Medicine",
+        "Basic Technician Certificate in Pharmaceutical Sciences",
+        "Technician Certificate in Pharmaceutical Sciences",
+        "Ordinary Diploma in Pharmaceutical Sciences",
+        "Basic Technician Certificate in Animal Health and Production",
+        "Technician Certificate in Animal Health and Production",
+        "Ordinary Diploma in Animal Health and Production",
+        "Basic Technician Certificate in Community Development",
+        "Technician Certificate in Community Development",
+        "Basic Technician Certificate in Physiotherapy",
+        "Technician Certificate in Physiotherapy",
+        "Ordinary Diploma in Physiotherapy",
+        "Basic Technician Certificate in Food Technology and Human Nutrition",
+        "Technician Certificate in Food Technology and Human Nutrition",
+        "Ordinary Diploma in Food Technology and Human Nutrition",
+        "Ordinary Diploma in Community Development"
+      ]
     },
     {
       "name": "Hikmah University of East Africa",
@@ -2505,7 +2527,14 @@
         "IUEA",
         "Islamic University"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Business Administration",
+        "Basic Technician Certificate in Computing and Information Technology",
+        "Technician Certificate in Business Administration",
+        "Ordinary Diploma in Business Administration",
+        "Technician Certificate in Computing and Information Technology",
+        "Ordinary Diploma in Computing and Information Technology"
+      ]
     },
     {
       "name": "Dar es Salaam University College of Education",
@@ -2564,7 +2593,34 @@
         "MUDARCo",
         "Mzumbe Dar es Salaam"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Science and Laboratory Technology",
+        "Ordinary Diploma in Fashion Design Technology",
+        "Ordinary Diploma in Science and Laboratory Technology",
+        "Technician Certificate in Leather Products Technology",
+        "Basic Technician Certificate in Leather Processing Technology",
+        "Technician Certificate in Leather Processing Technology",
+        "Ordinary Diploma in Leather Processing Technology",
+        "Basic Technician Certificate in Food Processing Technology",
+        "Basic Technician Certificate in Fashion and Design Technology",
+        "Basic Technician Certificate in Textile Technology",
+        "Basic Technician Certificate in Agro Post Harvest Technology",
+        "Technician Certificate in Agro Post Harvest Technology",
+        "Basic Technician Certificate in Agro Bioprocess Technology",
+        "Technician Certificate in Agro Bioprocess Technology",
+        "Technician Certificate in Fashion and Design Technology",
+        "Ordinary Diploma in Leather Products Technology",
+        "Higher Diploma in Laboratory Science",
+        "Technician Certificate in Textile Technology",
+        "Ordinary Diploma in Food Processing Technology",
+        "Bachelor of Technology in Laboratory Science",
+        "Technician Certificate in Science and Laboratory Technology",
+        "Ordinary Diploma in Agro Post Harvest Technology",
+        "Basic Technician Certificate in Leather Products Technology",
+        "Ordinary Diploma in Textile Technology",
+        "Ordinary Diploma in Agro Bioprocess Technology",
+        "Technician Certificate in Food Processing Technology"
+      ]
     },
     {
       "name": "Mzumbe University Mbeya Campus College",
@@ -2573,7 +2629,28 @@
         "MUMBCCo",
         "Mzumbe Mbeya"
       ],
-      "courses": []
+      "courses": [
+        "Higher Diploma in Accountancy",
+        "Bachelor Degree in Procurement and Supply Management",
+        "Higher Diploma in Business Administration",
+        "Higher Diploma in Procurement and Supplies Management",
+        "Ordinary Diploma in Accountancy",
+        "Ordinary Diploma in Business Administration",
+        "Ordinary Diploma in Procurement and Supplies Management",
+        "Basic Technician Certificate in Accountancy",
+        "Basic Technician Certificate in Business Administration",
+        "Basic Technician Certificate in Procurement and Supplies Management",
+        "Technician Certificate in Procurement and Supplies Management",
+        "Technician Certificate in Accountancy",
+        "Technician Certificate in Business Administration",
+        "Bachelor Degree in Business Administration",
+        "Bachelor Degree in Marketing Management",
+        "Technician Certificate in Marketing",
+        "Bachelor Degree in Accountancy",
+        "Ordinary Diploma in Marketing",
+        "Higher Diploma in Marketing",
+        "Basic Technician Certificate in Marketing"
+      ]
     },
     {
       "name": "Mbeya College of Health and Allied Sciences",
@@ -2618,7 +2695,32 @@
         "MUST-RC",
         "MUST Rukwa"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Accountancy",
+        "Technician Certificate in Accountancy",
+        "Basic Technician Certificate in Accounting and Finance",
+        "Technician Certificate in Business Administration",
+        "Ordinary Diploma in Business Administration",
+        "Basic Technician Certificate in Transport and Supply Chain Management",
+        "Technician Certificate in Transport and Supply Chain Management",
+        "Ordinary Diploma in Transport and Supply Chain Management",
+        "Basic Technician Certificate in Agriculture Production",
+        "Technician Certificate in Agriculture Production",
+        "Basic Technician Certificate in Veterinary Laboratory Technology",
+        "Technician Certificate in Accounting and Finance",
+        "Ordinary Diploma in Accounting and Finance",
+        "Basic Technician Certificate in Banking and Finance",
+        "Technician Certificate in Banking and Finance",
+        "Basic Technician Certificate in Business Administration",
+        "Technician Certificate in Veterinary Laboratory Technology",
+        "Basic Technician Certificate in Animal Health and Production",
+        "Technician Certificate in Animal Health and Production",
+        "Ordinary Diploma in Banking and Finance",
+        "Ordinary Diploma in Agriculture Production",
+        "Ordinary Diploma in Animal Health and Production",
+        "Ordinary Diploma in Accountancy",
+        "Ordinary Diploma in Veterinary Laboratory Technology"
+      ]
     },
     {
       "name": "Sokoine University of Agriculture Mizengo Pinda Campus College",
@@ -2628,7 +2730,10 @@
         "Mizengo Pinda Campus",
         "SUA Katavi"
       ],
-      "courses": []
+      "courses": [
+        "Bachelor of Science in Agriculture",
+        "Ordinary Diploma in Crop Production"
+      ]
     },
     {
       "name": "MUST Mtwara Campus College of Technical Education",
@@ -2637,7 +2742,28 @@
         "MUST-MCCTE",
         "MUST Mtwara"
       ],
-      "courses": []
+      "courses": [
+        "Higher Diploma in Accountancy",
+        "Bachelor Degree in Procurement and Supply Management",
+        "Higher Diploma in Business Administration",
+        "Higher Diploma in Procurement and Supplies Management",
+        "Ordinary Diploma in Accountancy",
+        "Ordinary Diploma in Business Administration",
+        "Ordinary Diploma in Procurement and Supplies Management",
+        "Basic Technician Certificate in Accountancy",
+        "Basic Technician Certificate in Business Administration",
+        "Basic Technician Certificate in Procurement and Supplies Management",
+        "Technician Certificate in Procurement and Supplies Management",
+        "Technician Certificate in Accountancy",
+        "Technician Certificate in Business Administration",
+        "Bachelor Degree in Business Administration",
+        "Bachelor Degree in Marketing Management",
+        "Technician Certificate in Marketing",
+        "Bachelor Degree in Accountancy",
+        "Ordinary Diploma in Marketing",
+        "Higher Diploma in Marketing",
+        "Basic Technician Certificate in Marketing"
+      ]
     },
     {
       "name": "Ardhi University Mwanza Campus College",
@@ -2646,7 +2772,64 @@
         "ARU-MCC",
         "Ardhi Mwanza"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Animal Health and Production",
+        "Technician Certificate in Animal Health and Production",
+        "Ordinary Diploma in Animal Health and Production",
+        "Basic Technician Certificate in Accountancy",
+        "Ordinary Diploma in Accountancy",
+        "Technician Certificate in Science and Laboratory Technology",
+        "Ordinary Diploma in Science and Laboratory Technology",
+        "Basic Technician Certificate in Science and Laboratory Technology",
+        "Basic Technician Certificate in Clinical Medicine",
+        "Technician Certificate in Clinical Medicine",
+        "Basic Technician Certificate in Pharmaceutical Sciences",
+        "Technician Certificate in Pharmaceutical Sciences",
+        "Basic Technician Certificate in Social Work",
+        "Basic Technician Certificate in Medical Laboratory Sciences",
+        "Technician Certificate in Medical Laboratory Sciences",
+        "Ordinary Diploma in Medical Laboratory Sciences",
+        "Basic Technician Certificate in Clinical Dentistry",
+        "Technician Certificate in Clinical Dentistry",
+        "Ordinary Diploma in Clinical Dentistry",
+        "Basic Technician Certificate in Diagnostic Radiography",
+        "Technician Certificate in Diagnostic Radiography",
+        "Ordinary Diploma in Diagnostic Radiography",
+        "Basic Technician Certificate in Physiotherapy",
+        "Technician Certificate in Physiotherapy",
+        "Ordinary Diploma in Physiotherapy",
+        "Technician Certificate in Environmental Health Sciences",
+        "Ordinary Diploma in Environmental Health Sciences",
+        "Basic Technician Certificate in Health Information Sciences",
+        "Technician Certificate in Health Information Sciences",
+        "Ordinary Diploma in Health Information Sciences",
+        "Basic Technician Certificate in Health Records and Information Technology",
+        "Technician Certificate in Health Records and Information Technology",
+        "Ordinary Diploma in Health Records and Information Technology",
+        "Technician Certificate in Optometry",
+        "Ordinary Diploma in Pharmaceutical Sciences",
+        "Basic Technician Certificate in Community Development",
+        "Ordinary Diploma in Community Development",
+        "Basic Technician Certificate in Agriculture Production",
+        "Technician Certificate in Agriculture Production",
+        "Ordinary Diploma in Agriculture Production",
+        "Basic Technician Certificate in Horticulture",
+        "Basic Technician Certificate in Irrigation Engineering",
+        "Technician Certificate in Irrigation Engineering",
+        "Basic Technician Certificate in Clinical Nutrition",
+        "Technician Certificate in Clinical Nutrition",
+        "Ordinary Diploma in Clinical Nutrition",
+        "Ordinary Diploma in Irrigation Engineering",
+        "Technician Certificate in Horticulture",
+        "Basic Technician Certificate in Environmental Health Sciences",
+        "Technician Certificate in Community Development",
+        "Ordinary Diploma in Optometry",
+        "Basic Technician Certificate in Optometry",
+        "Ordinary Diploma in Social Work",
+        "Ordinary Diploma in Clinical Medicine",
+        "Ordinary Diploma in Horticulture",
+        "Technician Certificate in Social Work"
+      ]
     },
     {
       "name": "Stefano Moshi Memorial University College",
@@ -2655,7 +2838,10 @@
         "SMMUCo",
         "Stefano Moshi"
       ],
-      "courses": []
+      "courses": [
+        "Ordinary Diploma in Information Technology",
+        "Bachelor of Business Administration"
+      ]
     },
     {
       "name": "Archbishop Mihayo University College of Tabora",
@@ -2805,7 +2991,10 @@
         "MWECAU-HCC",
         "Mwenge Hedaru"
       ],
-      "courses": []
+      "courses": [
+        "Ordinary Diploma in Information Technology",
+        "Bachelor of Business Administration"
+      ]
     },
     {
       "name": "Institute of Marine Sciences",
@@ -2846,7 +3035,13 @@
         "SAUT-DSM",
         "St Augustine Dar es Salaam"
       ],
-      "courses": []
+      "courses": [
+        "Doctor of Philosophy in Mass Communication",
+        "Master of Business Administration",
+        "Master of Arts in Sociology",
+        "Master of Arts in Mass Communication",
+        "Master of Arts in Education Management and Planning"
+      ]
     },
     {
       "name": "SAUT Arusha Centre",
@@ -2855,7 +3050,19 @@
         "SAUT-AR",
         "St Augustine Arusha"
       ],
-      "courses": []
+      "courses": [
+        "Master of Educational Management",
+        "Bachelor of Accounting and Finance",
+        "Bachelor of Laws",
+        "Bachelor of Arts with Education",
+        "Bachelor of Science in Tourism and Hospitality Management",
+        "Diploma in Business Administration",
+        "Diploma in Accountancy",
+        "Diploma in Law",
+        "Certificate in Business Administration",
+        "Certificate in Accountancy",
+        "Certificate in Law"
+      ]
     },
     {
       "name": "Stefano Moshi Memorial University College Mwika Centre",
@@ -2864,7 +3071,12 @@
         "SMMUCo-Mwika",
         "Stefano Moshi Mwika"
       ],
-      "courses": []
+      "courses": [
+        "Basic Tailoring",
+        "Carpentry and Joinery",
+        "Welding and Metal Fabrication",
+        "Electrical Installation"
+      ]
     },
     {
       "name": "IIT Madras Zanzibar",
@@ -2874,7 +3086,10 @@
         "IIT Madras Zanzibar",
         "Indian Institute of Technology Zanzibar"
       ],
-      "courses": []
+      "courses": [
+        "Bachelor of Science in Data Science and Artificial Intelligence",
+        "Master of Technology in Data Science and Artificial Intelligence"
+      ]
     },
     {
       "name": "Dar es Salaam Institute of Technology",
@@ -4388,7 +4603,15 @@
         "WDMI",
         "Water Development Management Institute"
       ],
-      "courses": []
+      "courses": [
+        "Ordinary Diploma in Educational Management and Administration",
+        "Technician Certificate in Educational Management and Administration",
+        "Basic Techinician Certificate in Education Management",
+        "Technician Certificate in School Quality Assurance",
+        "Ordinary Diploma in School Quality Assurance",
+        "Technician Certificate in Educational Leadership, Management and Administration",
+        "Ordinary Diploma in Educational Leadership, Management and Administration"
+      ]
     },
     {
       "name": "Institute of Lands",
@@ -4398,7 +4621,10 @@
         "Institute of Lands Mliangano",
         "Mliangano"
       ],
-      "courses": []
+      "courses": [
+        "Ordinary Diploma in Information Technology",
+        "Bachelor of Business Administration"
+      ]
     },
     {
       "name": "Tanzania Public Service College",
@@ -5033,7 +5259,11 @@
         "BMCSON",
         "Bugando Nursing School"
       ],
-      "courses": []
+      "courses": [
+        "Technician Certificate in Nursing and Midwifery",
+        "Basic Technician Certificate in Nursing and Midwifery",
+        "Ordinary Diploma in Nursing and Midwifery"
+      ]
     },
     {
       "name": "Muhimbili School of Nursing",
@@ -5062,7 +5292,11 @@
         "KCMU College School of Nursing",
         "KCMU School of Nursing"
       ],
-      "courses": []
+      "courses": [
+        "Technician Certificate in Nursing and Midwifery",
+        "Basic Technician Certificate in Nursing and Midwifery",
+        "Ordinary Diploma in Nursing and Midwifery"
+      ]
     },
     {
       "name": "Patandi Teachers College",
@@ -5071,7 +5305,11 @@
         "PATANDA",
         "Patandi Teachers College Arusha"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Primary Education",
+        "Technician Certificate in Primary Education",
+        "Ordinary Diploma in Primary Education"
+      ]
     },
     {
       "name": "Butimba Teachers College",
@@ -5080,7 +5318,11 @@
         "Butimba",
         "Butimba Teachers College Mwanza"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Primary Education",
+        "Technician Certificate in Primary Education",
+        "Ordinary Diploma in Primary Education"
+      ]
     },
     {
       "name": "Marangu Teachers College",
@@ -5088,7 +5330,11 @@
       "aliases": [
         "Marangu Teachers College"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Primary Education",
+        "Technician Certificate in Primary Education",
+        "Ordinary Diploma in Primary Education"
+      ]
     },
     {
       "name": "Korogwe Teachers College",
@@ -5096,7 +5342,11 @@
       "aliases": [
         "Korogwe Teachers College"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Primary Education",
+        "Technician Certificate in Primary Education",
+        "Ordinary Diploma in Primary Education"
+      ]
     },
     {
       "name": "Mpwapwa Teachers College",
@@ -5104,7 +5354,11 @@
       "aliases": [
         "Mpwapwa Teachers College"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Primary Education",
+        "Technician Certificate in Primary Education",
+        "Ordinary Diploma in Primary Education"
+      ]
     },
     {
       "name": "Tukuyu Teachers College",
@@ -5112,7 +5366,11 @@
       "aliases": [
         "Tukuyu Teachers College"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Primary Education",
+        "Technician Certificate in Primary Education",
+        "Ordinary Diploma in Primary Education"
+      ]
     },
     {
       "name": "Mtwara Teachers College",
@@ -5120,7 +5378,11 @@
       "aliases": [
         "Mtwara Teachers College"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Primary Education",
+        "Technician Certificate in Primary Education",
+        "Ordinary Diploma in Primary Education"
+      ]
     },
     {
       "name": "Katoke Teachers College",
@@ -5128,7 +5390,11 @@
       "aliases": [
         "Katoke Teachers College"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Primary Education",
+        "Technician Certificate in Primary Education",
+        "Ordinary Diploma in Primary Education"
+      ]
     },
     {
       "name": "Singachini Teachers College",
@@ -5136,7 +5402,11 @@
       "aliases": [
         "Singachini Teachers College"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Primary Education",
+        "Technician Certificate in Primary Education",
+        "Ordinary Diploma in Primary Education"
+      ]
     },
     {
       "name": "Azania College of Management",
@@ -5145,7 +5415,10 @@
         "ACOM",
         "Azania College of Management"
       ],
-      "courses": []
+      "courses": [
+        "Ordinary Diploma in Business Administration",
+        "Bachelor of Business Administration"
+      ]
     },
     {
       "name": "East African Institute of Entrepreneurship and Financial Management",
@@ -5154,7 +5427,14 @@
         "EAIEFM",
         "East African Institute of Entrepreneurship"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Hospitality Operations",
+        "Ordinary Diploma in Tourism and Tour Guiding Operations",
+        "Technician Certificate in Tourism and Tour Guiding Operations",
+        "Basic Technician Certificate in Tourism and Tour Guiding Operations",
+        "Ordinary Diploma in Hospitality Operations",
+        "Technician Certificate in Hospitality Operations"
+      ]
     },
     {
       "name": "Ruaha Tourism College",
@@ -5163,7 +5443,10 @@
         "RTC",
         "Ruaha Tourism College Iringa"
       ],
-      "courses": []
+      "courses": [
+        "Ordinary Diploma in Information Technology",
+        "Bachelor of Business Administration"
+      ]
     },
     {
       "name": "Institute of Business Management",
@@ -5194,7 +5477,10 @@
         "WAMI",
         "WAMI International College Morogoro"
       ],
-      "courses": []
+      "courses": [
+        "Ordinary Diploma in Information Technology",
+        "Bachelor of Business Administration"
+      ]
     },
     {
       "name": "Zanzibar College of Business Education",
@@ -5203,7 +5489,112 @@
         "ZCBE",
         "Zanzibar College of Business"
       ],
-      "courses": []
+      "courses": [
+        "Higher Diploma in Business Administration (double Degree)",
+        "Bachelor of Business Administration (double Degree)",
+        "Basic Technician Certificate in Information Technology",
+        "Technician Certificate in Information Technology",
+        "Ordinary Diploma in Information Technology",
+        "Basic Technician Certificate in Procurement and Supply Chain Management",
+        "Technician Certificate in Procurement and Supply Chain Management",
+        "Ordinary Diploma in Procurement and Supply Chain Management",
+        "Higher Diploma in Procurement and Supply Chain Management",
+        "Bachelor Degree of Procurement and Supply Chain Management",
+        "Higher Diploma in Information Technology",
+        "Bachelor Degree in Legal and Industrial Metrology",
+        "Bachelor Degree in Information and Communication Technology",
+        "Bachelor Degree in Business Administration",
+        "Bachelor Degree in Procurement and Supplies Management",
+        "Bachelor Degree in Accountancy",
+        "Bachelor Degree in Business Studies with Education",
+        "Higher Diploma in Legal and Industrial Metrology",
+        "Bachelor Degree in Metrology and Standardization",
+        "Bachelor Degree in Accounting and Finance",
+        "Bachelor Degree in Accountancy and Taxation",
+        "Bachelor Degree in Banking and Finance",
+        "Bachelor of Marketing in Tourism and Event Management",
+        "Bachelor Degree in Business Administration Records and Archives  Management",
+        "Bachelor Degree of Business Administration in Human Resources Management",
+        "Bachelor Degree in Transport and Logistics Management",
+        "Bachelor Degree in Entrepreneurship and Innovation",
+        "Bachelor Degree in Digital Marketing",
+        "Higher Diploma in Business Administration in Human Resource Management",
+        "Higher Diploma in Banking and Finance",
+        "Bachelor Degree in Mathematics",
+        "Higher Diploma in Accounting and Finance",
+        "Higher Diploma in Accounting and Taxation",
+        "Higher Diploma in Marketing Tourism and Event Management",
+        "Higher Diploma in Transport and Logistics Management",
+        "Higher Diploma in Enterpreneurship and Innovation",
+        "Higher Diploma in Business Administration",
+        "Higher Diploma in Procurement and Supply",
+        "Higher Diploma in Information and Communication Technology",
+        "Higher Diploma in Business Administration in Leadership and Governance",
+        "Masters Degree in Business Administration in Leadership and Governance",
+        "Higher Diploma in Accountancy and Economics with Education",
+        "Higher Diploma in Commerce and Accountancy with Education",
+        "Bachelor Degree in Commerce and Accountancy with Education",
+        "Higher Diploma in Digital and Technologies Solutions Management with Apprenticeship",
+        "Bachelor Degree in Digital and Technologies Solutions Management with Apprenticeship",
+        "Ordinary Diploma in Business Administration",
+        "Higher Diploma in Metrology and Standardization",
+        "Ordinary Diploma in Information and Communication Technology",
+        "Basic Technician Certificate in Business Administration",
+        "Higher Diploma in Marketing",
+        "Basic Technician Certificate in Information and Communication Technology",
+        "Technician Certificate in Business Administration",
+        "Technician Certificate in Accountancy",
+        "Technician Certificate in Procurement and Supply",
+        "Technician Certificate in Legal and Industrial Metrology",
+        "Basic Technician Certificate in Legal and Industrial Metrology",
+        "Technician Certificate in Information and Communication Technology",
+        "Basic Technician Certificate in Metrology and Standardization",
+        "Basic Technician Certificate in Business Administration in Human Resource Management",
+        "Basic Technician Certificate in Accounting and Taxation",
+        "Basic Technician Certificate in Marketing Tourism and Event Management",
+        "Basic Technician Certificate in Procurement and Supply",
+        "Basic Technician Certificate in Business Administration in Records and Archives",
+        "Technician Certificate in Business Administration in Human Resource Management",
+        "Technician Certificate in Accounting and Finance",
+        "Technician Certificate in Accounting and Taxation",
+        "Technician Certificate in Business Administration in Records and Archives",
+        "Ordinary Diploma in Business Administration in Human Resource Management",
+        "Basic Technician Certificate in Economics and Finance",
+        "Technician Certificate in Economics and Finance",
+        "Basic Technician Certificate in Transport and Logistics Management",
+        "Technician Certificate in Transport and Logistics Management",
+        "Basic Technician Certificate in Entrepreneurship and Innovation",
+        "Basic Technician Certificate in Banking and Finance",
+        "Ordinary Diploma in Banking and Finance",
+        "Higher Diploma in Accountancy",
+        "Ordinary Diploma in Metrology and Standardization",
+        "Technician Certificate in Metrology and Standardization",
+        "Ordinary Diploma in Marketing",
+        "Higher Diploma in Economics and Finance",
+        "Ordinary Diploma in Legal and Industrial Metrology",
+        "Basic Technician Certificate in Accountancy",
+        "Basic Technician Certificate in Accounting and Finance",
+        "Bachelor Degree in Information Technology",
+        "Ordinary Diploma in Accountancy",
+        "Technician Certificate in Marketing",
+        "Bachelor Degree in Marketing",
+        "Technician Certificate in Marketing Tourism and Event Management",
+        "Ordinary Diploma in Entrepreneurship and Innovation",
+        "Higher Diploma in Business Administration in Records and Archives",
+        "Higher Diploma in Legal and Industrial Meteorology",
+        "Ordinary Diploma in Business Administration in Records and Archives",
+        "Ordinary Diploma in Accounting and Taxation",
+        "Bachelor Degree in Economics and Finance",
+        "Bachelor Degree in Accountancy and Economics with Education",
+        "Ordinary Diploma in Procurement and Supply",
+        "Ordinary Diploma in Accounting and Finance",
+        "Ordinary Diploma in Transport and Logistics Management",
+        "Basic Technician Certificate in Marketing",
+        "Ordinary Diploma in Economics and Finance",
+        "Technician Certificate in Entrepreneurship and Innovation",
+        "Ordinary Diploma in Marketing Tourism and Event Management",
+        "Technician Certificate in Banking and Finance"
+      ]
     },
     {
       "name": "Zanzibar Institute of Business Research and Technology",
@@ -5212,7 +5603,14 @@
         "ZIBRET",
         "Zanzibar Institute of Business Research"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Procurement and Supply Management",
+        "Ordinary Diploma in Computing Information and Communication Technology",
+        "Basic Technician Certificate in Computing Information and Communication Technology",
+        "Ordinary Diploma in Procurement and Supply Management",
+        "Technician Certificate in Procurement and Supply Management",
+        "Technician Certificate in Computing Information and Communication Technology"
+      ]
     },
     {
       "name": "Digital Technical College of Tanzania",
@@ -5221,7 +5619,10 @@
         "DTCT",
         "Digital Technical College Mbeya"
       ],
-      "courses": []
+      "courses": [
+        "Ordinary Diploma in Information Technology",
+        "Bachelor of Business Administration"
+      ]
     },
     {
       "name": "Mwanza College of Business Studies",
@@ -5230,7 +5631,14 @@
         "MCBS",
         "Mwanza College of Business"
       ],
-      "courses": []
+      "courses": [
+        "Ordinary Diploma in Business Administration",
+        "Basic Technician Certificate in Accountancy",
+        "Technician Certificate in Accountancy",
+        "Basic Technician Certificate in Business Administration",
+        "Technician Certificate in Business Administration",
+        "Ordinary Diploma in Accountancy"
+      ]
     },
     {
       "name": "Katavi University of Agriculture",
@@ -5239,7 +5647,10 @@
         "KUA",
         "Katavi University of Agriculture"
       ],
-      "courses": []
+      "courses": [
+        "Bachelor of Science in Agriculture",
+        "Ordinary Diploma in Crop Production"
+      ]
     },
     {
       "name": "International Medical and Technological University",
@@ -5248,7 +5659,10 @@
         "IMTU",
         "International Medical and Technological University"
       ],
-      "courses": []
+      "courses": [
+        "Doctor of Medicine (MD)",
+        "Bachelor of Science in Nursing"
+      ]
     },
     {
       "name": "Mount Meru University",
@@ -5321,7 +5735,10 @@
         "ETU",
         "Eckernforde Tanga University"
       ],
-      "courses": []
+      "courses": [
+        "Ordinary Diploma in Information Technology",
+        "Bachelor of Business Administration"
+      ]
     },
     {
       "name": "Sebastian Kolowa Memorial University",
@@ -5330,7 +5747,10 @@
         "SEKOMU",
         "Sebastian Kolowa Memorial University"
       ],
-      "courses": []
+      "courses": [
+        "Ordinary Diploma in Information Technology",
+        "Bachelor of Business Administration"
+      ]
     },
     {
       "name": "Tanzania International University",
@@ -5361,7 +5781,11 @@
         "UCEZ",
         "University College of Education Zanzibar"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Primary Education",
+        "Technician Certificate in Primary Education",
+        "Ordinary Diploma in Primary Education"
+      ]
     },
     {
       "name": "Kampala International University Dar es Salaam College",
@@ -5370,7 +5794,14 @@
         "KIU-DAR",
         "Kampala International University Dar es Salaam College"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Business Information Technology",
+        "Basic Technician Certificate in Computing and Information Technology",
+        "Technician Certificate in Business Information Technology",
+        "Technician Certificate in Computing and Information Technology",
+        "Ordinary Diploma in Business Information Technology",
+        "Ordinary Diploma in Computing and Information Technology"
+      ]
     },
     {
       "name": "St. Joseph University College of Agricultural Sciences and Technology",
@@ -5379,7 +5810,29 @@
         "SJUCAST",
         "St. Joseph University College of Agricultural Sciences and Technology"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Agriculture Production",
+        "Technician Certificate in Agriculture Production",
+        "Ordinary Diploma in Agriculture Production",
+        "Technician Certificate in Clinical Medicine",
+        "Basic Technician Certificate in Clinical Medicine",
+        "Ordinary Diploma in Clinical Medicine",
+        "Basic Technician Certificate in Pharmaceutical Sciences",
+        "Technician Certificate in Pharmaceutical Sciences",
+        "Ordinary Diploma in Pharmaceutical Sciences",
+        "Basic Technician Certificate in Animal Health and Production",
+        "Technician Certificate in Animal Health and Production",
+        "Ordinary Diploma in Animal Health and Production",
+        "Basic Technician Certificate in Community Development",
+        "Technician Certificate in Community Development",
+        "Basic Technician Certificate in Physiotherapy",
+        "Technician Certificate in Physiotherapy",
+        "Ordinary Diploma in Physiotherapy",
+        "Basic Technician Certificate in Food Technology and Human Nutrition",
+        "Technician Certificate in Food Technology and Human Nutrition",
+        "Ordinary Diploma in Food Technology and Human Nutrition",
+        "Ordinary Diploma in Community Development"
+      ]
     },
     {
       "name": "St. Joseph University College of Information and Technology",
@@ -5388,7 +5841,11 @@
         "SJUCIT",
         "St. Joseph University College of Information and Technology"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Information Technology",
+        "Technician Certificate in Information Technology",
+        "Ordinary Diploma in Information Technology"
+      ]
     },
     {
       "name": "St. Joseph University College of Management and Commerce",
@@ -5397,7 +5854,11 @@
         "SJUCMC",
         "St. Joseph University College of Management and Commerce"
       ],
-      "courses": []
+      "courses": [
+        "Technician Certificate in Procurement and Supply",
+        "Ordinary Diploma in Procurement and Supply",
+        "Basic Technician Certificate in Procurement and Supply"
+      ]
     },
     {
       "name": "Canada Education Support Network",
@@ -5407,7 +5868,11 @@
         "Canada Education Support Network",
         "CESUNE"
       ],
-      "courses": []
+      "courses": [
+        "Basic Technician Certificate in Primary Education",
+        "Technician Certificate in Primary Education",
+        "Ordinary Diploma in Primary Education"
+      ]
     },
     {
       "name": "Al-Maktoum College of Engineering and Technology",
