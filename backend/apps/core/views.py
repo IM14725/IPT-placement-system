@@ -920,3 +920,39 @@ def integrity(request):
             "ledger_total": IntegrityRecord.objects.count(),
         },
     )
+
+@login_required
+def admin_slots(request):
+    """Admin view for browsing slots without applying."""
+    from apps.slots.models import Slot
+    from apps.core.pagination import paginate
+    from urllib.parse import urlencode
+
+    if not _require_admin(request):
+        return render(request, "core/forbidden.html", status=403)
+
+    qs = request.GET.get("q", "").strip()
+    slots = Slot.objects.all().select_related("company__user", "district__region")
+    
+    if qs:
+        from django.db.models import Q
+        slots = slots.filter(
+            Q(title__icontains=qs) | 
+            Q(company__name__icontains=qs) | 
+            Q(description__icontains=qs)
+        )
+        
+    slots = slots.order_by("-created_at")
+
+    page_obj = paginate(slots, request.GET.get("page"), page_size=20)
+    
+    return render(
+        request, 
+        "core/admin_slots.html", 
+        {
+            "slots": page_obj, 
+            "page_obj": page_obj, 
+            "q": qs,
+            "querystring": urlencode({k: v for k, v in request.GET.items() if k != "page"}),
+        }
+    )

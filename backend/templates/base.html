@@ -199,6 +199,7 @@
           {% else %}
             <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-verifications' 'platform-student-verification' 'platform-company-verification' %}" href="{% url 'platform-verifications' %}">{% trans "Queue" %}</a>
             <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-directory' %}" href="{% url 'platform-directory' %}">{% trans "Directory" %}</a>
+            <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-slots' %}" href="{% url 'platform-slots' %}">{% trans "Slots" %}</a>
             <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-ledger' %}" href="{% url 'platform-ledger' %}">{% trans "Ledger" %}</a>
             <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-metrics' %}" href="{% url 'platform-metrics' %}">{% trans "Metrics" %}</a>
             <a class="nav-link text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors {% is_active request 'platform-templates' %}" href="{% url 'platform-templates' %}">{% trans "Templates" %}</a>

@@ -9,6 +9,7 @@ urlpatterns = [
     # Phase 5 — Admin console
     path("verifications/", views.verification_queue, name="platform-verifications"),
     path("directory/", views.directory, name="platform-directory"),
+    path("slots/", views.admin_slots, name="platform-slots"),
     path(
         "verifications/students/<uuid:pk>/",
         views.student_verification,
