@@ -1071,6 +1071,22 @@
         "AMCET",
         "Al-Maktoum College of Engineering and Technology"
       ]
+    },
+    {
+      "name": "Mwalimu Nyerere University of Agriculture and Technology",
+      "abbreviation": "MNUAT",
+      "aliases": [
+        "MNUAT",
+        "Mwalimu Nyerere University of Agriculture and Technology"
+      ]
+    },
+    {
+      "name": "KCMC University",
+      "abbreviation": "KCMCU",
+      "aliases": [
+        "KCMCU",
+        "KCMC University"
+      ]
     }
   ]
 }
