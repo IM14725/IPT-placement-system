@@ -7,7 +7,9 @@
       <h1 class="font-display text-display text-on-surface tracking-tight">Platform Metrics</h1>
       <p class="font-body-md text-on-surface-variant">A live overview of marketplace activity.</p>
     </div>
+
   </section>
+
 
   <div class="grid grid-cols-2 md:grid-cols-4 gap-md">
     <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
@@ -108,12 +110,43 @@
         </div>
       </div>
     </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-md mt-md">
+      <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
+        <div class="flex items-center gap-sm mb-sm">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">map</span>
+          <h3 class="font-body-md font-semibold text-on-surface">Applied Slots by Region</h3>
+        </div>
+        <div class="relative h-64">
+          <canvas id="region-chart" aria-label="Applied slots by region" role="img"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-sm gap-2">
+          <div class="flex items-center gap-sm shrink-0">
+            <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">location_on</span>
+            <h3 class="font-body-md font-semibold text-on-surface">Applied Slots by District</h3>
+          </div>
+          <select id="district-region-filter" class="w-[150px] bg-surface-container-low rounded-lg px-2 py-1 text-sm outline-none">
+            <option value="">All Regions</option>
+          </select>
+        </div>
+        <div class="relative h-64 flex-1">
+          <canvas id="district-chart" aria-label="Applied slots by district" role="img"></canvas>
+        </div>
+      </div>
+    </div>
   </section>
+
 </div>
+
 
 {{ data.revenue_series|json_script:"revenue-data" }}
 {{ data.login_series|json_script:"login-data" }}
 {{ data.search_series|json_script:"search-data" }}
+{{ data.applied_by_region|json_script:"region-data" }}
+{{ data.applied_by_district|json_script:"district-data" }}
 {% endblock %}
 
 {% block scripts %}
@@ -137,7 +170,75 @@
 
     var revenue = readSeries("revenue-data");
     var login = readSeries("login-data");
+    
     var search = readSeries("search-data");
+    var appliedRegion = readSeries("region-data");
+    var appliedDistrict = readSeries("district-data");
+
+    if (appliedRegion.length) {
+      new Chart(document.getElementById("region-chart"), {
+        type: "bar",
+        data: {
+          labels: appliedRegion.map(function(item) { return item.name; }),
+          datasets: [{
+            label: "Applied Slots",
+            data: appliedRegion.map(function(item) { return item.count; }),
+            backgroundColor: "rgba(53, 37, 205, 0.75)",
+            hoverBackgroundColor: "#3525cd",
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+    }
+
+    if (appliedDistrict.length) {
+      var districtChartEl = document.getElementById("district-chart");
+      var districtFilter = document.getElementById("district-region-filter");
+      
+      // Populate filter
+      appliedRegion.forEach(function(r) {
+        var opt = document.createElement("option");
+        opt.value = r.id;
+        opt.textContent = r.name;
+        districtFilter.appendChild(opt);
+      });
+
+      var distChart = new Chart(districtChartEl, {
+        type: "bar",
+        data: {
+          labels: appliedDistrict.map(function(item) { return item.name; }),
+          datasets: [{
+            label: "Applied Slots",
+            data: appliedDistrict.map(function(item) { return item.count; }),
+            backgroundColor: "rgba(96, 99, 238, 0.75)",
+            hoverBackgroundColor: "#6063ee",
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+
+      districtFilter.addEventListener("change", function() {
+        var regionId = this.value;
+        var filteredData = appliedDistrict.filter(function(d) {
+          return !regionId || d.region_id === regionId;
+        });
+        
+        distChart.data.labels = filteredData.map(function(item) { return item.name; });
+        distChart.data.datasets[0].data = filteredData.map(function(item) { return item.count; });
+        distChart.update();
+      });
+    }
+
 
     if (revenue.length) {
       new Chart(document.getElementById("revenue-chart"), {

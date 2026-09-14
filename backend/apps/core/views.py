@@ -264,7 +264,23 @@ def _compute_metrics():
     # Slot-search trend: Redis per-day counter (started now; 0 for earlier days).
     search_series = daily_series("searches", days=days)
 
+    
+    # Applied slots by region and district
+    applied_by_region_raw = Application.objects.values('slot__district__region__id', 'slot__district__region__name').annotate(count=Count('id')).order_by('-count')
+    applied_by_region = [
+        {'id': str(r['slot__district__region__id']), 'name': r['slot__district__region__name'] or 'Unknown', 'count': r['count']}
+        for r in applied_by_region_raw
+    ]
+
+    applied_by_district_raw = Application.objects.values('slot__district__id', 'slot__district__name', 'slot__district__region__id').annotate(count=Count('id')).order_by('-count')
+    applied_by_district = [
+        {'id': str(r['slot__district__id']), 'name': r['slot__district__name'] or 'Unknown', 'region_id': str(r['slot__district__region__id']), 'count': r['count']}
+        for r in applied_by_district_raw
+    ]
+
     return {
+        "applied_by_region": applied_by_region,
+        "applied_by_district": applied_by_district,
         "users": User.objects.count(),
         "students": StudentProfile.objects.count(),
         "students_verified": StudentProfile.objects.filter(
