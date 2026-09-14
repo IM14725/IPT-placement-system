@@ -85,10 +85,8 @@ class SlotForm(forms.ModelForm):
         fields = (
             "title",
             "description",
-            "industry",
             "role_type",
             "district",
-            "street",
             "department",
             "education_level",
             "academic_year",
@@ -100,10 +98,8 @@ class SlotForm(forms.ModelForm):
         widgets = {
             "title": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "description": forms.Textarea(attrs={"class": FIELD_CLASS, "rows": 3}),
-            "industry": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "role_type": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "district": forms.Select(attrs={"class": "ipt-select", "id": "id_district"}),
-            "street": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "department": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "education_level": forms.Select(attrs={"class": "ipt-select"}),
             "academic_year": forms.Select(attrs={"class": "ipt-select"}),
