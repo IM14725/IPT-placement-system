@@ -62,11 +62,9 @@
                 </div>
               </div>
               {% if app.payment %}
-                <div class="mt-sm inline-flex items-center gap-xs bg-surface-container px-sm py-1.5 rounded-lg w-fit">
+                <div class="mt-sm inline-flex items-center gap-xs bg-[#e8f5e9]/50 border border-[#c8e6c9] px-sm py-1.5 rounded-lg w-fit">
                   <span class="material-symbols-outlined text-[16px] text-[#15803d]">check_circle</span>
-                  <span class="font-metadata text-on-surface">Paid TZS {{ app.payment.amount }}</span>
-                  <span class="mx-1 text-outline-variant">|</span>
-                  <span class="font-metadata text-outline font-mono">{{ app.payment.reference_id }}</span>
+                  <span class="font-metadata font-medium text-[#15803d]">Paid</span>
                 </div>
               {% endif %}
             </div>

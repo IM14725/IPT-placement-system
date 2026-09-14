@@ -76,11 +76,13 @@
                 Pay TZS {{ app.payment.amount }}
               </a>
             {% elif app.payment and app.payment.is_paid %}
-              <div class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-lg mb-2">
-                <span class="material-symbols-outlined text-[#10B981] text-[18px]">verified</span>
-                <span class="font-metadata text-metadata text-[#065F46]">{% trans "Paid" %} · {{ app.payment.reference_id }}</span>
+              <div class="mt-sm flex flex-col items-end w-full md:w-auto">
+                <div class="inline-flex items-center gap-xs bg-[#ecfdf5] border border-[#a7f3d0] px-sm py-1.5 rounded-lg w-full md:w-auto justify-center">
+                  <span class="material-symbols-outlined text-[16px] text-[#065F46]">check_circle</span>
+                  <span class="font-metadata font-medium text-[#065F46]">{% trans "Paid" %}</span>
+                </div>
+                <span class="font-metadata text-[11px] text-on-surface-variant text-right block mt-1">Paid at: {{ app.payment.paid_at|date:"M d, H:i" }}</span>
               </div>
-              <span class="font-metadata text-[11px] text-on-surface-variant text-right block">Paid at: {{ app.payment.paid_at|date:"M d, H:i" }}</span>
               {% if app.is_cancellable %}
                 <form id="cancel-form-{{ app.id }}" method="post" action="{% url 'student-cancel-application' app.id %}">
                   {% csrf_token %}

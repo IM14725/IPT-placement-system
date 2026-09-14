@@ -88,8 +88,14 @@
                   </td>
                   <td class="py-sm px-md text-right">
                     {% if app.payment %}
-                      {% if app.payment.is_paid %}<span class="text-[#1b5e20] font-medium">TZS {{ app.payment.amount }}</span>
-                      {% else %}<a href="{% url 'student-payment' app.payment.id %}" class="text-primary font-semibold hover:underline">{% trans "Pay Now" %}</a>{% endif %}
+                      {% if app.payment.is_paid %}
+                        <div class="inline-flex items-center justify-end gap-xs">
+                          <span class="material-symbols-outlined text-[16px] text-[#1b5e20]">check_circle</span>
+                          <span class="text-[#1b5e20] font-medium">{% trans "Paid" %}</span>
+                        </div>
+                      {% else %}
+                        <a href="{% url 'student-payment' app.payment.id %}" class="text-primary font-semibold hover:underline">{% trans "Pay Now" %}</a>
+                      {% endif %}
                     {% else %}<span class="text-on-surface-variant">-</span>{% endif %}
                   </td>
                 </tr>
