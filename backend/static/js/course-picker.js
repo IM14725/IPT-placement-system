@@ -3,7 +3,7 @@
 
   var institutions = (window.IPT && window.IPT.institutions) || [];
 
-  function initPicker(input) {
+  function initCoursePicker(input, uniInputId) {
     if (!input || !institutions.length) return;
     input.setAttribute("autocomplete", "off");
 
@@ -41,7 +41,7 @@
     wrapper.appendChild(dropdown);
 
     var noMatch = document.createElement("li");
-    noMatch.textContent = "No matching institution found";
+    noMatch.textContent = "No matching course found (select university first)";
     noMatch.style.padding = "10px 12px";
     noMatch.style.color = "#64748b";
     noMatch.style.fontSize = "14px";
@@ -49,41 +49,57 @@
 
     var activeIndex = -1;
     var items = [];
-    var currentInstitutions = [];
+    var currentCourses = [];
 
     function normalize(s) {
       return (s || "").toLowerCase().replace(/\s+/g, " ").trim();
     }
 
-    function matches(inst, q) {
-      var qn = normalize(q);
-      if (!qn) return true;
-      return [inst.name, inst.abbreviation].concat(inst.aliases || []).some(function (h) {
-        return normalize(h).indexOf(qn) !== -1;
-      });
-    }
-
     function renderList() {
-      var q = input.value;
-      currentInstitutions = q
-        ? institutions.filter(function (i) {
-            return matches(i, q);
+      var uniInput = document.getElementById(uniInputId);
+      var uniName = uniInput ? uniInput.value : "";
+      
+      var uni = institutions.find(function(i) {
+         return i.name === uniName || (i.abbreviation && i.abbreviation === uniName);
+      });
+      if (!uni && uniName) {
+         var qn = normalize(uniName);
+         uni = institutions.find(function(i) {
+             return normalize(i.name).indexOf(qn) !== -1 || (i.abbreviation && normalize(i.abbreviation).indexOf(qn) !== -1);
+         });
+      }
+
+      var availableCourses = uni && uni.courses ? uni.courses : [];
+      
+      var q = normalize(input.value);
+      currentCourses = q
+        ? availableCourses.filter(function (c) {
+            return normalize(c).indexOf(q) !== -1;
           })
-        : institutions.slice();
+        : availableCourses.slice();
+
       dropdown.innerHTML = "";
       items = [];
       activeIndex = -1;
 
-      if (!currentInstitutions.length) {
+      if (!currentCourses.length) {
+        if (!uniName) {
+            noMatch.textContent = "Please select a university first";
+        } else if (!availableCourses.length) {
+            noMatch.textContent = "No courses found for selected university";
+        } else {
+            noMatch.textContent = "No matching course found";
+        }
         dropdown.appendChild(noMatch);
         noMatch.style.display = "block";
         dropdown.style.display = "block";
         return;
       }
+      
       noMatch.style.display = "none";
-      currentInstitutions.forEach(function (inst) {
+      currentCourses.forEach(function (course) {
         var li = document.createElement("li");
-        li.textContent = inst.name + (inst.abbreviation ? " (" + inst.abbreviation + ")" : "");
+        li.textContent = course;
         li.style.padding = "9px 12px";
         li.style.borderRadius = "8px";
         li.style.cursor = "pointer";
@@ -92,7 +108,7 @@
         li.setAttribute("role", "option");
         li.addEventListener("mousedown", function (e) {
           e.preventDefault();
-          select(inst.name);
+          select(course);
         });
         li.addEventListener("mouseenter", function () {
           setActive(items.indexOf(li));
@@ -136,14 +152,14 @@
       if (dropdown.style.display !== "block") return;
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setActive(Math.min(activeIndex + 1, currentInstitutions.length - 1));
+        setActive(Math.min(activeIndex + 1, currentCourses.length - 1));
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         setActive(Math.max(activeIndex - 1, 0));
       } else if (e.key === "Enter") {
-        if (activeIndex >= 0 && currentInstitutions[activeIndex]) {
+        if (activeIndex >= 0 && currentCourses[activeIndex]) {
           e.preventDefault();
-          select(currentInstitutions[activeIndex].name);
+          select(currentCourses[activeIndex]);
         }
       } else if (e.key === "Escape") {
         close();
@@ -154,6 +170,6 @@
     });
   }
 
-  initPicker(document.getElementById("id_university"));
-  initPicker(document.getElementById("dir-university"));
+  initCoursePicker(document.getElementById("id_course"), "id_university");
+  initCoursePicker(document.getElementById("dir-course"), "dir-university");
 })();
