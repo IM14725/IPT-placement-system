@@ -318,10 +318,12 @@ def _compute_metrics():
 def _verification_context():
     from apps.companies.models import CompanyProfile
     from apps.students.models import StudentProfile, VerificationStatus
+    from apps.accounts.models import User, UserRole
+    from django.utils import timezone
 
+    # Students who have registered but have not updated their profiles
     students = (
-        StudentProfile.objects.filter(verification_status=VerificationStatus.PENDING)
-        .select_related("user", "region")
+        User.objects.filter(role=UserRole.STUDENT, student_profile__isnull=True)
         .order_by("-created_at")
     )
     companies = (
@@ -347,7 +349,6 @@ def _verification_context():
         "student_pending": students.count(),
         "company_pending": companies.count(),
     }
-
 
 @login_required
 def verification_queue(request):
