@@ -49,4 +49,4 @@ def test_throttled_dispatch_dispatches_when_budget_allows():
     ) as dispatch:
         result = throttled_dispatch(msg)
         assert result is msg
-        dispatch.assert_called_once_with(msg)
+        dispatch.assert_called_once_with(msg, attachments=None)

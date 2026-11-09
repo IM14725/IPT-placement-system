@@ -8,7 +8,7 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = (
         "reference_id",
         "student",
-        "company",
+        "organization",
         "amount",
         "currency",
         "method",
@@ -21,7 +21,7 @@ class PaymentAdmin(admin.ModelAdmin):
     search_fields = ("reference_id", "gateway_txn_id", "student__user__email")
     readonly_fields = ("reference_id", "created_at", "updated_at", "paid_at", "callback_payload")
 
-    def company(self, obj):
-        return obj.application.slot.company.name
+    def organization(self, obj):
+        return obj.application.slot.organization.name
 
-    company.short_description = "Company"
+    organization.short_description = "Organization"

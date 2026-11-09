@@ -1,13 +1,15 @@
 import uuid
+from pathlib import Path
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .validators import validate_upload
+from .validators import SAFE_MIMES, validate_upload
 
 
 def document_upload_path(instance, filename):
-    return f"documents/{instance.owner_id}/{instance.doc_type}/{filename}"
+    safe_name = Path(filename or "document").name
+    return f"documents/{instance.owner_id}/{instance.doc_type}/{safe_name}"
 
 
 class Document(models.Model):
@@ -49,8 +51,12 @@ class Document(models.Model):
         if self.file:
             self.sha256 = validate_upload(self.file)
             self.size_bytes = self.file.size
-            wrapped = getattr(self.file, "file", None)
-            self.mime_type = getattr(wrapped, "content_type", "") or ""
+            ext = (self.original_name or self.file.name).rsplit(".", 1)[-1].lower() if "." in (self.original_name or self.file.name) else ""
+            self.mime_type = (
+                getattr(self.file, "_detected_mime", None)
+                or getattr(getattr(self.file, "file", None), "_detected_mime", None)
+                or SAFE_MIMES.get(ext, "application/octet-stream")
+            )
 
     def save(self, *args, **kwargs):
         self.clean()

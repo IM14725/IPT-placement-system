@@ -107,9 +107,9 @@ def invalidate_slot(sender, instance, **kwargs):
     _bump_slot_version()
 
 
-@receiver(post_save, sender="companies.CompanyProfile", dispatch_uid="invalidate_company_save")
-@receiver(post_delete, sender="companies.CompanyProfile", dispatch_uid="invalidate_company_delete")
-def invalidate_company(sender, instance, **kwargs):
+@receiver(post_save, sender="companies.Organization", dispatch_uid="invalidate_organization_save")
+@receiver(post_delete, sender="companies.Organization", dispatch_uid="invalidate_organization_delete")
+def invalidate_organization(sender, instance, **kwargs):
     _bump_slot_version()
 
 

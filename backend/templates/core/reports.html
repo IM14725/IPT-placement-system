@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Trust &amp; Safety</span>
+    <h1 class="font-display text-display text-on-surface">Reports &amp; Complaints</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-2">
+      Complaints filed by students and organizations. Each status change is recorded in the audit log.
+    </p>
+  </div>
+
+  <div class="flex flex-wrap gap-sm">
+    {% for value, label, count in tabs %}
+      <a href="?status={{ value }}" class="px-md py-1.5 rounded-full text-metadata font-metadata transition-colors {% if status == value %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %}">
+        {{ label }} <span class="opacity-70">({{ count }})</span>
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="flex flex-col gap-md">
+    {% for r in rows %}
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-sm">
+        <div class="flex flex-wrap items-start justify-between gap-sm">
+          <div>
+            <p class="font-headline-md text-headline-md text-on-surface">{{ r.subject }}</p>
+            <p class="text-metadata font-metadata text-on-surface-variant">
+              {{ r.get_category_display }} · from {{ r.reporter.email|default:"deleted user" }} · {{ r.created_at|date:"j M Y, H:i" }}
+              {% if r.organization %}· about <a class="text-primary hover:underline" href="{% url 'platform-organization-verification' r.organization.id %}">{{ r.organization.name }}</a>{% endif %}
+            </p>
+          </div>
+          <span class="px-sm py-1 rounded-full bg-surface-container text-metadata font-metadata">{{ r.get_status_display }}</span>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface whitespace-pre-line">{{ r.description }}</p>
+        <form method="post" class="flex flex-col md:flex-row gap-sm md:items-end border-t border-surface-container pt-sm">
+          {% csrf_token %}
+          <input type="hidden" name="id" value="{{ r.id }}">
+          <textarea name="admin_notes" rows="2" placeholder="Internal notes" class="flex-1 px-sm py-2 bg-surface-container-lowest rounded-lg border border-outline-variant font-body-md text-body-md outline-none focus:ring-2 focus:ring-primary">{{ r.admin_notes }}</textarea>
+          <select name="status" class="px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md text-body-md">
+            {% for value, label, count in tabs %}<option value="{{ value }}" {% if r.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+          <button class="px-md py-2 bg-primary text-on-primary rounded-full font-body-md" type="submit">Save</button>
+        </form>
+        {% if r.handled_by %}<p class="text-metadata font-metadata text-on-surface-variant">Last handled by {{ r.handled_by.email }} on {{ r.handled_at|date:"j M Y, H:i" }}</p>{% endif %}
+      </div>
+    {% empty %}
+      <div class="bg-surface-container-lowest rounded-xl p-xl text-center text-on-surface-variant">No reports in this state.</div>
+    {% endfor %}
+  </div>
+  {% include "includes/pagination.html" %}
+</div>
+{% endblock %}

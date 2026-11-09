@@ -1,6 +1,8 @@
 # IPT Matching Marketplace — Plan
 
-An independent, two-sided marketplace connecting Tanzanian university students with private companies for **Industrial Practical Training (IPT)**. Runs autonomously (no university integrations). Students pay an application fee via Mobile Money before an application is unlocked and submitted to a company.
+An independent, two-sided marketplace connecting Tanzanian university students with **organizations** (companies and institutions) for **Industrial Practical Training (IPT)**. Runs autonomously (no university integrations): students register on their own and universities are only an optional affiliation record. Students pay an application fee via Mobile Money before an application is unlocked and submitted to an organization.
+
+> **Terminology (read this first).** The code, URLs and UI now say **Organization**, not Company. Older dated entries in section 12 predate the rename and still say `CompanyProfile` / `company-*` / `/company/`; the mapping is in the "Rename glossary" at the top of section 12. The `apps/companies/` package, the `companies` app label and `Application.company_message` kept their old names on purpose.
 
 ---
 
@@ -31,10 +33,11 @@ IPT-system/
 │   ├── manage.py
 │   ├── config/                       # settings (base/dev/prod), urls, asgi/wsgi
 │   ├── apps/
-│   │   ├── core/                     # permissions, mixins, celery app, audit
-│   │   ├── accounts/                 # User + roles, RBAC
-│   │   ├── students/                 # StudentProfile + verification
-│   │   ├── companies/                # CompanyProfile + verification
+│   │   ├── core/                     # celery app, redis/cache/rate-limit, audit + integrity ledger, admin console,
+│   │   │                             #   views_governance.py (universities, suspend/reactivate, reports)
+│   │   ├── accounts/                 # User + roles (STUDENT/ORGANIZATION/ADMIN/SUPER_ADMIN), AdminRole matrix
+│   │   ├── students/                 # StudentProfile, University records + suggestions, verification
+│   │   ├── companies/                # Organization (+ members, sessions, RBAC) - package name kept, see terminology note
 │   │   ├── documents/                # document vault (<2MB validation)
 │   │   ├── locations/                # Region / District reference data
 │   │   ├── slots/                    # IPT slot CRUD + capacity
@@ -52,8 +55,12 @@ IPT-system/
 ## 3. Security & Authorization Protocol
 
 - **Students**: upload scanned Student ID + official Semester Results Matrix → account stays `PENDING_VERIFICATION` until Platform Admin approves.
-- **Companies**: upload BRELA certificate, TIN certificate, Business License → cannot post slots or view applicants until profile is `APPROVED`.
-- Role-based access control via Django groups/permissions + DRF permission classes.
+- **Organizations**: upload BRELA certificate, TIN certificate, Business License → cannot post slots or view applicants until profile is `APPROVED`.
+- **Platform roles**: `ADMIN` (capability matrix from `AdminRole`: modules `user_management`, `slot_verification`, `financial_ledger`, `system_metrics` x `view/create/edit/delete`) and `SUPER_ADMIN` (everything; roles/settings/templates pages are super-admin only). Console gate is `core.views._require_admin`.
+- **Organization RBAC** (`apps/companies/permissions.py`, enforced by `@org_permission_required(...)` on every organization view, never only in templates): `OWNER` ⊃ `MANAGER` ⊃ `RECRUITER`. Recruiter: view org, view/manage slots, view applicants. Manager adds edit profile, manage documents, accept applicants. Owner adds manage members. `UNIVERSITY_COORDINATOR` / `UNIVERSITY_SUPERVISOR` exist but are read-only placeholders until university workspaces are built. All queries are scoped by `slot__organization=` / `organization=` so one organization can never read another's applicants or documents.
+- **Multi-account organizations**: an organization has up to **5 active members** (`OrganizationMember`, `MAX_ORGANIZATION_ACCOUNTS`) and up to **5 concurrent logins** (`OrganizationSession`, `MAX_ORGANIZATION_CONCURRENT_LOGINS`; tracked from `user_logged_in/out` signals in `companies/apps.py`; a 6th login is refused until a session ends or expires). Owners/managers add and remove staff from the organization profile page.
+- **Suspension**: platform admins can suspend/reactivate a student or a whole organization (sets `is_active=False` + `suspended_at`); suspended organizations are hidden from search and take no new applications. Every admin action is written to the hash-chained audit log.
+- DRF permission classes: `IsStudent / IsOrganization / IsPlatformAdmin / IsPlatformSuperAdmin / IsVerifiedStudent / IsApprovedOrganization / IsOrganizationOwner`.
 - Cross-service auth: DRF `TokenAuthentication` (token in shared `authtoken_token` table) — FastAPI validates the same token on WS connect and API calls.
 - Webhook security: HMAC-SHA256 signature + idempotency by `gateway_txn_id` + replay rejection.
 - Upload validation: **< 2 MB** for all documents and images, magic-byte MIME check, extension allowlist, SHA-256 checksum.
@@ -61,12 +68,17 @@ IPT-system/
 
 ## 4. Database Schema (PostgreSQL)
 
-- **accounts_user** — `role` (STUDENT/COMPANY/ADMIN), `email` unique (USERNAME_FIELD), `phone`, `email_verified`, `phone_verified`.
-- **students_studentprofile** — university, course, current_year, gpa, skills (JSON), region/district FKs, `verification_status` (PENDING/APPROVED/REJECTED), rejection_reason.
-- **companies_companyprofile** — name, industry, description, street, region/district FKs, `verification_status`, rejection_reason.
+- **accounts_user** — `role` (STUDENT/ORGANIZATION/ADMIN/SUPER_ADMIN), `admin_role` FK (capability matrix), `email` unique (USERNAME_FIELD), `phone`, `email_verified`, `phone_verified`, `suspended_at` + `suspension_reason`, `deletion_requested_at`, `promo_sms_optout`. Organization users have no first/last name (`full_name` falls back to the organization name).
+- **accounts_adminrole** — name, permissions (module x capability JSON), is_system.
+- **students_university** — name (unique, case-insensitive), abbreviation, institution_type (UNIVERSITY/COLLEGE/INSTITUTE), region FK, website, `verification_status` (APPROVED = selectable by everyone; PENDING = a student's "not listed" suggestion; REJECTED), `suggested_by` FK. Seeded (131) from `data/tanzania_institutions.json` by migration `students.0005` and `manage.py seed_universities`.
+- **students_studentprofile** — `university` FK (nullable, optional), `graduation_year`, `student_id` (registration number), course, `academic_year`, `education_level` (TCU 4-10), gpa, skills (JSON), gender, photos, region/district/ward FKs, `reapplication_credit`, `verification_status` (PENDING/APPROVED/REJECTED), rejection_reason.
+- **companies_organization** (model `Organization`) — optional one-to-one `user` (the creating owner), name (unique), `organization_type` (COMPANY/UNIVERSITY/INSTITUTION; only COMPANY can be registered today), industry, description, email, phone, address/street, region/district/ward FKs, `verification_status`, rejection_reason, `suspended_at` + `suspension_reason`.
+- **companies_organizationmember** — organization FK, user FK, `role` (OWNER/MANAGER/RECRUITER/UNIVERSITY_COORDINATOR/UNIVERSITY_SUPERVISOR), `membership_status` (ACTIVE/INVITED/SUSPENDED), `UNIQUE(organization, user)`, max 5 ACTIVE per organization.
+- **companies_organizationsession** — organization FK, user FK, `session_key` (unique); drives the 5-concurrent-logins cap.
+- **core_report** — reporter FK, optional organization FK, category (FRAUD/MISLEADING/PAYMENT/ABUSE/OTHER), subject, description, status (OPEN/IN_REVIEW/RESOLVED/DISMISSED), admin_notes, handled_by/handled_at.
 - **documents_document** — owner, `doc_type` (STUDENT_ID, RESULTS_MATRIX, CV, INTRO_LETTER, BRELA_CERT, TIN_CERT, BUSINESS_LICENSE), file, mime_type, size, sha256.
 - **locations_region / locations_district** — seeded reference data (31 regions, ~184 districts).
-- **slots_slot** — company FK (APPROVED only), title, industry, role_type, district FK, street, department/course, level/year, capacity, stipend, skills_required (JSON), status `OPEN | FULL | PAUSED | CLOSED`, derived `available_count`.
+- **slots_slot** — `organization` FK (APPROVED, not suspended), title, industry, role_type, district FK, street, department/course, `academic_year`, `education_level`, **`application_deadline` (optional)**, capacity, stipend, skills_required (JSON), status `OPEN | FULL | PAUSED | CLOSED`, derived `available_count`, `deadline_passed`.
 - **payments_payment** — reference_id (unique), student FK, application FK, amount (TZS), method (M_PESA/TIGO_PESA/AIRTEL_MONEY), gateway (MOCK/SELCOM/PESAPAL), gateway_txn_id, callback_payload (JSON), status (PENDING/PAID/FAILED), `is_paid`, paid_at, receipt_pdf.
 - **applications_application** — student FK, slot FK, payment FK (nullable 1:1), status `PENDING → PAID → UNPAID` (payment-status model), `payment_deadline` (created + 3h), `is_accepted` (bool, company acceptance/SMS flag), `UNIQUE(student, slot)`.
 
@@ -89,7 +101,7 @@ IPT-system/
 
 ## 7. Student Filters (live reduction)
 
-Marketplace fetches `/slots/api/search/?region=&district=&department=&level=` on every dropdown change (cascading region→district loads from the locations API). List re-renders server-filtered; selections persist.
+Marketplace fetches `/api/slots/search/?region=&district=&department=&academic_year=&education_level=&organization=` on every filter change (cascading region→district loads from the locations API; `department` is the academic-discipline search and `organization` is a name search). Results are cached in Redis under a versioned key that includes every parameter. Each card shows capacity, stipend and the application deadline; once the deadline passes it reads "Applications closed" and applying is refused server-side.
 
 ## 8. Celery + Redis Task Inventory
 
@@ -124,6 +136,19 @@ Marketplace fetches `/slots/api/search/?region=&district=&department=&level=` on
 - Redis: Docker Desktop + `redis:7-alpine` on `localhost:6379`.
 
 ## 12. Build Status (updated)
+
+**Rename glossary** (older entries below use the old names):
+
+| Old name (entries before 2026-11-07) | Current name |
+|---|---|
+| `CompanyProfile`, table `companies_companyprofile` | `Organization`, table `companies_organization` |
+| `Slot.company` / column `company_id` | `Slot.organization` / `organization_id` |
+| `UserRole.COMPANY` (stored `COMPANY`) | `UserRole.ORGANIZATION` (stored `ORGANIZATION`) |
+| `User.is_company`, `User.company_profile` | `User.is_organization`, `User.owned_organization` |
+| URL names `company-*`, paths `/company/...` | `organization-*`, `/organization/...` |
+| `templates/company/`, `core/company_verification.html` | `templates/organization/`, `core/organization_verification.html` |
+| `IsCompany`, `IsApprovedCompany`, `IsCompanyOwner` | `IsOrganization`, `IsApprovedOrganization`, `IsOrganizationOwner` |
+| *(kept)* `apps.companies`, `Application.company_message`, `OrganizationType.COMPANY` | unchanged on purpose |
 
 ### Phase 1 — Database & Auth — DONE
 - Monorepo scaffold; venv `backend/.venv` (Python 3.14, Django 6.1, DRF 3.18, psycopg3, celery 5.6, fastapi 0.141).
@@ -326,6 +351,38 @@ Marketplace fetches `/slots/api/search/?region=&district=&department=&level=` on
 - **Scope note**: admin console interior pages (directory, ledger, metrics, etc.) still show English inside the page body - nav chrome is translated; wrap those templates in a follow-up pass.
 - **Tests**: 50 pytest passing. **Verified live** (2026-08-22, Django restarted :8000): anonymous home + login + authenticated student marketplace all render Kiswahili under the sw cookie (Mkoa/Mikoa Yote/Kiwango chochote/Omba Sasa/Nafasi Imejaa); `/i18n/setlang/` POST round-trip sets the cookie and re-renders in Swahili; English default unchanged.
 
+### Phase 1 of the independent-marketplace spec (organizations rename, universities, deadlines, governance) - DONE
+- **Company -> Organization rename (code, URLs, DB)**: model `CompanyProfile` -> `Organization` (table `companies_organization`), `Slot.company` -> `Slot.organization` (column `organization_id`), `UserRole.COMPANY` -> `UserRole.ORGANIZATION` (stored value migrated `COMPANY` -> `ORGANIZATION`), `User.is_company` -> `is_organization`, `User.company_profile` -> `owned_organization`, URL names/paths `company-*` / `/company/` -> `organization-*` / `/organization/`, templates `templates/company/` -> `templates/organization/`. Migrations are hand-written (`companies.0003`, `slots.0003`, `accounts.0005`) because the autodetector cannot see an FK-target rename; do not regenerate them.
+- **Deliberately NOT renamed**: the `apps.companies` package/app label (tables, migrations and contenttypes depend on it), `Application.company_message` (column on the write-protected applications table and part of the sealed integrity payload), and `OrganizationType.COMPANY` (a real organization type). The realtime service SQL was updated to the new table/column names - **restart `realtime` after migrating**.
+- **Universities**: new `students.University` (name unique case-insensitively, abbreviation, institution_type, region, website, verification_status, suggested_by). `StudentProfile.university` is now an optional FK (was required free text) plus `graduation_year`. Migration `students.0005_university` seeds the approved list from `data/tanzania_institutions.json` and converts each existing free-text value: matches a known name/abbreviation/alias -> that record, anything else -> a PENDING record suggested by that student. Student profile page: dropdown + "My university is not listed" -> `apps/students/universities.py` creates/reuses a PENDING record (max 3 pending per student; duplicates and rejected names are refused). Admins review at `/platform/universities/` (approve / reject (unlinks students) / merge into an approved record / add), all audit-logged. Affiliation grants no access to anything.
+- **Phone**: still optional at registration; required (Tanzanian format) on the student's own profile page and saved to `User.phone`. The admin edit page passes `require_phone=False`.
+- **Application deadline**: `Slot.application_deadline` (optional). `create_application` refuses new or re-booked reservations after it (a student already holding a PENDING/PAID seat can still pay). Shown on marketplace cards and the apply page; shown as "Applications closed" once passed.
+- **Marketplace filters**: new `organization` name search (in the cache signature too); "Department / Course" relabelled "Academic Discipline".
+- **Governance**: `/platform/account-status/` suspends/reactivates a student or a whole organization (reason required, audit-logged; sets `is_active=False` + `suspended_at`; accounts that requested deletion stay inactive on reactivate). Suspended organizations vanish from search and cannot take new applications. Directory has an Active/Suspended toggle. New `core.Report` + `/report/` (any signed-in user) and `/platform/reports/` (admin triage with status + notes, audit-logged). Both admin pages use the `user_management` permission module.
+- **Also fixed**: directory "year" filter used the removed `current_year` field (now `academic_year`).
+- **Tests**: `apps/students/test_universities.py`, `apps/slots/test_deadline_and_search.py`, `apps/core/test_governance.py`. Run `pytest apps` (the stray `backend/test_seed.py` is a script, not a test, and breaks collection of a bare `pytest`). Note the test database already contains the 131 seeded universities (the migration creates them), so tests must `get_or_create` rather than `create` well-known names. **99 passing** after this work.
+- **Rollout notes (2026-11-08)**: dev database backed up with `pg_dump` before migrating; `accounts.0005/0006`, `companies.0003/0004`, `core.0004`, `slots.0003/0004`, `students.0005` applied; `realtime` and the Celery worker restarted (they held pre-rename SQL/models). Verified on the dev DB: 2 organizations, 4 slots, roles migrated, the one existing student linked to an approved university, all templates compile and every `{% url %}` / `reverse()` name resolves.
+
+### Organization workspaces, RBAC and name-free registration - DONE (2026-11-07)
+- **Organization model**: `Organization` is the unified organizations table (company / institution / university types), with an optional owner `user`, contact fields (`email`, `phone`, `address` kept in sync with `street`) and `verification_status`. `OrganizationMember` links users to organizations; creating an organization with an owner auto-creates the OWNER membership.
+- **Multi-account + session cap**: up to 5 ACTIVE members and 5 concurrent logins per organization (see section 3). Helpers in `companies/services.py`: `add_organization_member`, `can_organization_login`, `register_organization_session`, `remove_organization_session`, `cleanup_expired_organization_sessions`; enforced in `process_login_task` and `finalize_auth`, tracked from login/logout signals. Team add/remove UI is on `templates/organization/profile.html` (owner only).
+- **RBAC**: permission constants and `@org_permission_required` in `companies/permissions.py` (matrix in section 3); covered by `companies/test_rbac.py`.
+- **Registration**: choosing "Organization" hides first/last name and asks only for the organization name (+ email, password, optional phone); `process_registration_task` creates the user and organization in one transaction and rejects a duplicate organization name. Students still give first + last name.
+- **Platform admin side**: `SUPER_ADMIN` role + `AdminRole` capability matrix (migration `accounts.0004`), role-management page, audit log.
+
+### Login/registration run as Celery tasks; dev runs them eagerly - DONE (2026-11-07)
+- `POST /auth/login/` and `/auth/register/` enqueue `process_login_task` / `process_registration_task` and the page polls `/auth/task-status/<id>/`; on success a signed token is posted to `/auth/finalize/` which calls `login()`.
+- **Symptom**: with no Celery worker running, the poll never completes and the log fills with `task-status ... 200 21` (status stays `PENDING`). **Fix**: `config/settings/dev.py` sets `CELERY_TASK_ALWAYS_EAGER = True` and `CELERY_TASK_STORE_EAGER_RESULT = True`, so in dev the task runs inside the request and its result is still readable by the poll (needs Redis for the result store). Production (`prod.py`) still needs a real worker. Verified live: a wrong-password login returns `ERROR` on the first poll.
+- Side effect: in dev every Celery task (email, SMS, PDF, fan-out) also runs inside the web request.
+- Beware stale processes: several old `runserver` / `celery` / `uvicorn` processes can bind the same port on Windows and keep serving old code (this caused "my changes don't show"). Check `Get-NetTCPConnection -LocalPort 8000,8001` before assuming a code bug. Starting a second uvicorn fails with `[Errno 10048]` because the first is already serving.
+
+### Sidebar navigation for all signed-in users - DONE (2026-11-09)
+- The long top menu (12 links for admins) is replaced by a **slide-out drawer** in `templates/base.html` for every authenticated role. Top bar: logo + "IPT Marketplace" at the **left**; language picker, profile chip and the **menu toggle at the far right**. The drawer opens from the **left edge** beneath the top bar (so logo/name stay visible), over a dimmed backdrop; it closes via the toggle, a backdrop click or Esc, and starts closed (`inert` while closed, `aria-expanded` on the toggle, reduced-motion respected).
+- Contents by role: student (Dashboard, Find a Slot, My Applications, Profile); organization (Dashboard, Slots, Organization profile); admin, grouped under headings: **Review** (Queue, Directory, Slots, Universities, Reports), **Finance & insight** (Ledger, Metrics), **System** (Templates, Audit, Roles, Integrity, Settings). The current page's link is highlighted via the `is_active` tag (`.side-link.active`).
+- **Logout** is its own red-outlined button pinned at the bottom of the drawer, outside the scrolling link list. Anonymous visitors get no drawer; Login/Register stay in the top bar.
+- Styles live in the `<style>` block of `base.html` (`.side-link`, `.side-heading`); the old `.nav-link` rule is kept for any page that still uses it. Footer gained a "Report a problem" link for signed-in non-admins.
+- Verified by rendering `home.html` for anonymous / student / organization / admin: drawer present with the right links and active highlight, Logout outside the link list. **Not yet checked visually in a browser.**
+
 ## 13. Run Instructions (dev)
 
 ```powershell
@@ -342,9 +399,11 @@ docker run -d --name ipt-redis -p 6379:6379 --restart unless-stopped redis:7-alp
 # 3) Everything at once
 scripts\dev.ps1
 
-# 4) Tests
-$env:DJANGO_ENV='dev'
-backend\.venv\Scripts\python -m pytest backend\
+# 4) Tests (run from backend\; target apps\ - a bare `pytest` also collects the seed script backend\test_seed.py and aborts)
+cd backend
+.venv\Scripts\python -m pytest apps            # add --reuse-db to skip rebuilding the test DB
 ```
 
-URLs: Django `http://127.0.0.1:8000` · admin `http://127.0.0.1:8000/admin/` · FastAPI `http://127.0.0.1:8001` · health `http://127.0.0.1:8001/health`.
+After pulling schema changes: `python manage.py migrate` (from `backend\`), then **restart `realtime` and the Celery worker** - they read the same tables with their own copies of the SQL/models. The migration that seeds universities needs `data\tanzania_institutions.json`; `python manage.py seed_universities` re-creates any that are missing. Django start-up on this machine takes a minute or more, so allow time before concluding something hung. There is no git repository here: take a `pg_dump` (and copy the source) before large changes.
+
+URLs: Django `http://127.0.0.1:8000` · admin `http://127.0.0.1:8000/admin/` · FastAPI `http://127.0.0.1:8001` · health `http://127.0.0.1:8001/health`. New console pages: `/platform/universities/`, `/platform/reports/`, `/platform/account-status/` (POST); user-facing: `/report/`.

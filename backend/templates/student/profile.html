@@ -5,7 +5,7 @@
 <div class="w-full flex flex-col gap-lg">
   <div class="flex flex-col gap-xs">
     <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Student Profile" %}</h1>
-    <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Manage your academic details and how companies see you." %}</p>
+    <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Manage your academic details and how organizations see you." %}</p>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg w-full items-start">
@@ -78,12 +78,31 @@
           {% endwith %}
           <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
             {% for field in form %}
-              {% if field.name != 'profile_photo' and field.name != 'id_card_photo' %}
-              <div class="flex flex-col gap-xs">
+              {% if field.name == 'university_not_listed' %}
+              <div class="flex flex-col gap-xs md:col-span-2" id="university-not-listed-row">
+                <label class="flex items-center gap-sm font-body-md text-body-md text-on-surface cursor-pointer">
+                  {{ field }}
+                  <span>{{ field.label }}</span>
+                </label>
+                <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Tick this if you cannot find your university above. Platform admins will review and add it." %}</p>
+              </div>
+              {% elif field.name == 'university_suggestion' %}
+              <div class="flex flex-col gap-xs md:col-span-2" id="university-suggestion-row" {% if not form.university_not_listed.value %}hidden{% endif %}>
                 <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
                 <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
+                  <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">add_business</span></span>
+                  {{ field }}
+                </div>
+                {% if field.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ field.errors.0 }}</p>{% endif %}
+              </div>
+              {% elif field.name != 'profile_photo' and field.name != 'id_card_photo' %}
+              <div class="flex flex-col gap-xs">
+                <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
                   <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">
-                    {% if field.name == 'student_id' %}badge
+                    {% if field.name == 'phone' %}call
+                    {% elif field.name == 'graduation_year' %}event
+                    {% elif field.name == 'student_id' %}badge
                     {% elif field.name == 'gender' %}person_outline
                     {% elif field.name == 'university' %}school
                     {% elif field.name == 'course' %}menu_book
@@ -173,6 +192,20 @@
   window.IPT.profileRegion = "{{ profile.region_id|default:'' }}";
   window.IPT.profileDistrict = "{{ profile.district_id|default:'' }}";
   window.IPT.profileWard = "{{ profile.ward_id|default:'' }}";
+</script>
+<script>
+  (function () {
+    var box = document.getElementById("id_university_not_listed");
+    var row = document.getElementById("university-suggestion-row");
+    var select = document.getElementById("id_university");
+    if (!box || !row) return;
+    function sync() {
+      row.hidden = !box.checked;
+      if (select) select.disabled = box.checked;
+    }
+    box.addEventListener("change", sync);
+    sync();
+  })();
 </script>
 <script src="/static/js/institution-picker.js"></script>
 <script src="/static/js/course-picker.js"></script>

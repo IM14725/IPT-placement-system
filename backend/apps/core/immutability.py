@@ -48,14 +48,14 @@ def seal(record_model, *, record_type, record_id, fields):
     """
     payload = json.loads(json.dumps(fields, default=_to_str))
     prev = (
-        record_model.objects.order_by("-id")
+        record_model.objects.order_by("-created_at", "-id")
         .values_list("record_hash", flat=True)
         .first()
         or ""
     )
     last_for_record = (
         record_model.objects.filter(record_type=record_type, record_id=record_id)
-        .order_by("-id")
+        .order_by("-created_at", "-id")
         .first()
     )
     if last_for_record is not None:
@@ -83,9 +83,8 @@ def verify_chain(record_model):
     """Walk the ledger verifying internal links. Returns a list of issues."""
     issues = []
     prev = ""
-    for row in record_model.objects.order_by("id"):
-        if row.prev_hash != prev:
-            issues.append(
+    for row in record_model.objects.order_by("created_at", "id"):
+        if row.prev_hash != prev:            issues.append(
                 f"Chain break before #{row.id} ({row.record_type}#{row.record_id}): "
                 f"expected prev {prev[:12]}… got {row.prev_hash[:12]}…"
             )

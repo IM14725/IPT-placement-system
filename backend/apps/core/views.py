@@ -89,10 +89,25 @@ def legal_pdpa_request(request):
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-def _require_admin(request):
-    return request.user.is_authenticated and (
-        request.user.is_staff or request.user.is_platform_admin
-    )
+def _require_admin(request, module=None, cap=None, super_only=False):
+    """Platform console gate.
+
+    Super Admins pass everything. Platform Admins need ``module``/``cap`` granted by
+    their AdminRole (``cap`` defaults to view for reads, edit for writes). ``super_only``
+    pages (roles, settings, templates) reject Platform Admins outright.
+    """
+    user = request.user
+    if not user.is_authenticated:
+        return False
+    if user.is_super_admin:
+        return True
+    if super_only or not user.is_platform_admin:
+        return False
+    if module is None:
+        return False
+    if cap is None:
+        cap = "view" if request.method in ("GET", "HEAD", "OPTIONS") else "edit"
+    return user.has_admin_permission(module, cap)
 
 
 def _write_audit(request, action, module, description, *, actor=None, is_system=False):
@@ -121,7 +136,7 @@ def _get_setting(key, default=None):
 
 @login_required
 def ledger(request):
-    if not _require_admin(request):
+    if not _require_admin(request, module="financial_ledger"):
         return render(request, "core/forbidden.html", status=403)
     import datetime
     from apps.payments.models import Payment, PaymentStatus
@@ -131,7 +146,7 @@ def ledger(request):
     from urllib.parse import urlencode
     from django.db.models import Q
 
-    payments = Payment.objects.select_related("student__user", "application__slot__company")
+    payments = Payment.objects.select_related("student__user", "application__slot__organization")
 
     q = request.GET.get("q", "").strip()
     status_filter = request.GET.get("status")
@@ -144,7 +159,7 @@ def ledger(request):
             | Q(student__user__email__icontains=q)
             | Q(student__user__first_name__icontains=q)
             | Q(student__user__last_name__icontains=q)
-            | Q(application__slot__company__name__icontains=q)
+            | Q(application__slot__organization__name__icontains=q)
             | Q(amount__icontains=q)
         )
 
@@ -207,7 +222,7 @@ def ledger(request):
 
 @login_required
 def metrics(request):
-    if not _require_admin(request):
+    if not _require_admin(request, module="system_metrics"):
         return render(request, "core/forbidden.html", status=403)
     data = _compute_metrics()
     return render(request, "core/metrics.html", {"data": data})
@@ -218,7 +233,7 @@ def _compute_metrics():
 
     from apps.accounts.models import User
     from apps.applications.models import Application, ApplicationStatus
-    from apps.companies.models import CompanyProfile
+    from apps.companies.models import Organization
     from apps.payments.models import Payment, PaymentStatus
     from apps.slots.models import Slot, SlotStatus
     from apps.students.models import StudentProfile, VerificationStatus
@@ -286,8 +301,8 @@ def _compute_metrics():
         "students_verified": StudentProfile.objects.filter(
             verification_status=VerificationStatus.APPROVED
         ).count(),
-        "companies": CompanyProfile.objects.count(),
-        "companies_approved": CompanyProfile.objects.filter(
+        "organizations": Organization.objects.count(),
+        "organizations_approved": Organization.objects.filter(
             verification_status=VerificationStatus.APPROVED
         ).count(),
         "slots": Slot.objects.count(),
@@ -316,7 +331,7 @@ def _compute_metrics():
 # ---------------------------------------------------------------------------
 
 def _verification_context():
-    from apps.companies.models import CompanyProfile
+    from apps.companies.models import Organization
     from apps.students.models import StudentProfile, VerificationStatus
     from apps.accounts.models import User, UserRole
     from django.utils import timezone
@@ -326,33 +341,34 @@ def _verification_context():
         User.objects.filter(role=UserRole.STUDENT, student_profile__isnull=True)
         .order_by("-created_at")
     )
-    companies = (
-        CompanyProfile.objects.filter(verification_status=VerificationStatus.PENDING)
+    organizations = (
+        Organization.objects.filter(verification_status=VerificationStatus.PENDING)
+        .exclude(industry="")  # registered-but-unfilled stubs are not reviewable yet
         .select_related("user", "region")
         .order_by("-created_at")
     )
-    total_pending = students.count() + companies.count()
+    total_pending = students.count() + organizations.count()
     today = timezone.localdate()
     verified_today = (
         StudentProfile.objects.filter(
             verification_status=VerificationStatus.APPROVED, reviewed_at__date=today
         ).count()
-        + CompanyProfile.objects.filter(
+        + Organization.objects.filter(
             verification_status=VerificationStatus.APPROVED, reviewed_at__date=today
         ).count()
     )
     return {
         "students": students,
-        "companies": companies,
+        "organizations": organizations,
         "total_pending": total_pending,
         "verified_today": verified_today,
         "student_pending": students.count(),
-        "company_pending": companies.count(),
+        "organization_pending": organizations.count(),
     }
 
 @login_required
 def verification_queue(request):
-    if not _require_admin(request):
+    if not _require_admin(request, module="user_management"):
         return render(request, "core/forbidden.html", status=403)
     return render(request, "core/verification_queue.html", _verification_context())
 
@@ -371,13 +387,19 @@ def _required_docs(profile_kind):
     ]
 
 
-def _missing_docs(owner_user, profile_kind):
+def _missing_docs(owner_user, profile_kind, organization=None):
     from apps.documents.models import Document
 
-    have = set(
-        Document.objects.filter(owner=owner_user, doc_type__in=_required_docs(profile_kind))
-        .values_list("doc_type", flat=True)
-    )
+    if organization is not None:
+        qs = Document.objects.filter(
+            owner_id__in=organization.member_user_ids(),
+            doc_type__in=_required_docs(profile_kind),
+        )
+    else:
+        qs = Document.objects.filter(
+            owner=owner_user, doc_type__in=_required_docs(profile_kind)
+        )
+    have = set(qs.values_list("doc_type", flat=True))
     return [d for d in _required_docs(profile_kind) if d not in have]
 
 
@@ -386,7 +408,7 @@ def student_verification(request, pk):
     from apps.documents.models import Document
     from apps.students.models import StudentProfile, VerificationStatus
 
-    if not _require_admin(request):
+    if not _require_admin(request, module="user_management"):
         return render(request, "core/forbidden.html", status=403)
     student = get_object_or_404(StudentProfile, pk=pk)
     docs = Document.objects.filter(owner=student.user).select_related("owner")
@@ -451,28 +473,29 @@ def student_verification(request, pk):
 
 
 @login_required
-def company_verification(request, pk):
-    from apps.companies.models import CompanyProfile
+def organization_verification(request, pk):
+    from apps.accounts.models import User
+    from apps.companies.models import Organization
     from apps.documents.models import Document
     from apps.students.models import VerificationStatus
 
-    if not _require_admin(request):
+    if not _require_admin(request, module="user_management"):
         return render(request, "core/forbidden.html", status=403)
-    company = get_object_or_404(CompanyProfile, pk=pk)
-    docs = Document.objects.filter(owner=company.user).select_related("owner")
+    organization = get_object_or_404(Organization, pk=pk)
+    docs = Document.objects.filter(owner_id__in=organization.member_user_ids()).select_related("owner")
     if request.method == "POST":
         decision = request.POST.get("decision")
         reason = request.POST.get("reason", "").strip()
         if decision == "approve":
-            missing = _missing_docs(company.user, "company")
+            missing = _missing_docs(organization.user, "organization", organization=organization)
             if missing:
                 messages.error(request, "Missing required documents — cannot approve.")
             else:
-                company.verification_status = VerificationStatus.APPROVED
-                company.rejection_reason = ""
-                company.reviewed_by = request.user
-                company.reviewed_at = timezone.now()
-                company.save(
+                organization.verification_status = VerificationStatus.APPROVED
+                organization.rejection_reason = ""
+                organization.reviewed_by = request.user
+                organization.reviewed_at = timezone.now()
+                organization.save(
                     update_fields=[
                         "verification_status",
                         "rejection_reason",
@@ -481,19 +504,19 @@ def company_verification(request, pk):
                         "updated_at",
                     ]
                 )
-                _write_audit(request, "Company Approved", "Verification",
-                             f"Approved company {company.name} ({company.industry}).")
-                messages.success(request, "Company profile approved.")
+                _write_audit(request, "Organization Approved", "Verification",
+                             f"Approved organization {organization.name} ({organization.industry}).")
+                messages.success(request, "Organization profile approved.")
                 return redirect("platform-verifications")
         elif decision == "reject":
             if not reason:
                 messages.error(request, "A rejection reason is required.")
             else:
-                company.verification_status = VerificationStatus.REJECTED
-                company.rejection_reason = reason
-                company.reviewed_by = request.user
-                company.reviewed_at = timezone.now()
-                company.save(
+                organization.verification_status = VerificationStatus.REJECTED
+                organization.rejection_reason = reason
+                organization.reviewed_by = request.user
+                organization.reviewed_at = timezone.now()
+                organization.save(
                     update_fields=[
                         "verification_status",
                         "rejection_reason",
@@ -502,21 +525,20 @@ def company_verification(request, pk):
                         "updated_at",
                     ]
                 )
-                _write_audit(request, "Company Rejected", "Verification",
-                             f"Rejected company {company.name}: {reason}")
-                messages.success(request, "Company profile rejected.")
+                _write_audit(request, "Organization Rejected", "Verification",
+                             f"Rejected organization {organization.name}: {reason}")
+                messages.success(request, "Organization profile rejected.")
                 return redirect("platform-verifications")
         elif decision == "deactivate":
-            company.user.is_active = False
-            company.user.save(update_fields=["is_active"])
+            User.objects.filter(id__in=organization.member_user_ids()).update(is_active=False)
             _write_audit(request, "Account Deactivated", "Verification",
-                         f"Deactivated company account {company.user.email} (soft delete).")
-            messages.success(request, "Company account has been deactivated.")
+                         f"Deactivated organization account {organization.name} (soft delete).")
+            messages.success(request, "Organization account has been deactivated.")
             return redirect("platform-directory")
     return render(
         request,
-        "core/company_verification.html",
-        {"company": company, "docs": docs, "missing_docs": _missing_docs(company.user, "company")},
+        "core/organization_verification.html",
+        {"organization": organization, "docs": docs, "missing_docs": _missing_docs(organization.user, "organization", organization=organization)},
     )
 
 
@@ -528,19 +550,21 @@ def platform_student_edit(request, pk):
     import json
     from django.urls import reverse
 
-    if not _require_admin(request):
+    if not _require_admin(request, module="user_management", cap="edit"):
         return render(request, "core/forbidden.html", status=403)
     student = get_object_or_404(StudentProfile, pk=pk)
     
     if request.method == "POST":
-        form = StudentProfileForm(request.POST, request.FILES, instance=student)
+        form = StudentProfileForm(
+            request.POST, request.FILES, instance=student, user=student.user, require_phone=False
+        )
         if form.is_valid():
             form.save()
             _write_audit(request, "Student Profile Edited", "Admin Edit", f"Edited student {student.user.email}")
             messages.success(request, "Student profile updated successfully.")
             return redirect("platform-student-verification", pk=student.pk)
     else:
-        form = StudentProfileForm(instance=student)
+        form = StudentProfileForm(instance=student, user=student.user, require_phone=False)
         
     return render(request, "core/admin_profile_edit.html", {
         "form": form,
@@ -552,32 +576,32 @@ def platform_student_edit(request, pk):
 
 
 @login_required
-def platform_company_edit(request, pk):
-    from apps.companies.models import CompanyProfile
-    from apps.companies.forms import CompanyProfileForm
+def platform_organization_edit(request, pk):
+    from apps.companies.models import Organization
+    from apps.companies.forms import OrganizationProfileForm
     from apps.core.cache import get_regions
     import json
     from django.urls import reverse
 
-    if not _require_admin(request):
+    if not _require_admin(request, module="user_management", cap="edit"):
         return render(request, "core/forbidden.html", status=403)
-    company = get_object_or_404(CompanyProfile, pk=pk)
+    organization = get_object_or_404(Organization, pk=pk)
     
     if request.method == "POST":
-        form = CompanyProfileForm(request.POST, request.FILES, instance=company)
+        form = OrganizationProfileForm(request.POST, request.FILES, instance=organization)
         if form.is_valid():
             form.save()
-            _write_audit(request, "Company Profile Edited", "Admin Edit", f"Edited company {company.user.email}")
-            messages.success(request, "Company profile updated successfully.")
-            return redirect("platform-company-verification", pk=company.pk)
+            _write_audit(request, "Organization Profile Edited", "Admin Edit", f"Edited organization {organization.name}")
+            messages.success(request, "Organization profile updated successfully.")
+            return redirect("platform-organization-verification", pk=organization.pk)
     else:
-        form = CompanyProfileForm(instance=company)
+        form = OrganizationProfileForm(instance=organization)
         
     return render(request, "core/admin_profile_edit.html", {
         "form": form,
-        "profile": company,
-        "profile_type": "Company",
-        "cancel_url": reverse("platform-company-verification", args=[company.pk]),
+        "profile": organization,
+        "profile_type": "Organization",
+        "cancel_url": reverse("platform-organization-verification", args=[organization.pk]),
         "regions_json": json.dumps(get_regions()),
     })
 
@@ -586,7 +610,7 @@ def platform_company_edit(request, pk):
 def notification_templates(request):
     from apps.notifications.models import NotificationTemplate
 
-    if not _require_admin(request):
+    if not _require_admin(request, super_only=True):
         return render(request, "core/forbidden.html", status=403)
     templates = NotificationTemplate.objects.all().order_by("key")
     selected = None
@@ -631,7 +655,7 @@ def notification_templates(request):
 
 @login_required
 def audit_logs(request):
-    if not _require_admin(request):
+    if not _require_admin(request, module="system_metrics"):
         return render(request, "core/forbidden.html", status=403)
     q = request.GET.get("q", "").strip()
     module = request.GET.get("module", "")
@@ -672,7 +696,7 @@ def audit_logs(request):
 def role_management(request):
     from apps.accounts.models import AdminRole
 
-    if not _require_admin(request):
+    if not _require_admin(request, super_only=True):
         return render(request, "core/forbidden.html", status=403)
     roles = AdminRole.objects.all().order_by("name")
     role_id = request.GET.get("role") or request.POST.get("role_id")
@@ -724,7 +748,7 @@ def role_management(request):
 
 @login_required
 def admin_settings(request):
-    if not _require_admin(request):
+    if not _require_admin(request, super_only=True):
         return render(request, "core/forbidden.html", status=403)
     if request.method == "POST":
         updates = {
@@ -768,12 +792,13 @@ def admin_settings(request):
 
 @login_required
 def directory(request):
-    """Admin directory of all students and companies with filters."""
-    from apps.companies.models import CompanyProfile
+    """Admin directory of all students and organizations with filters."""
+    from apps.companies.models import Organization
     from apps.locations.models import District, Region, Ward
+    from django.db.models import Q
     from apps.students.models import StudentProfile, VerificationStatus
 
-    if not _require_admin(request):
+    if not _require_admin(request, module="user_management"):
         return render(request, "core/forbidden.html", status=403)
 
     tab = request.GET.get("tab", "students")
@@ -786,9 +811,20 @@ def directory(request):
     education_level = request.GET.get("education_level") or None
     academic_year = request.GET.get("academic_year") or None
     status = request.GET.get("status") or None
+    account = "suspended" if request.GET.get("account") == "suspended" else ""
 
-    if tab == "companies":
-        qs = CompanyProfile.objects.filter(user__is_active=True).select_related("user", "region", "district", "ward").order_by("-created_at")
+    if tab == "organizations":
+        if account:
+            qs = Organization.objects.filter(suspended_at__isnull=False)
+        else:
+            qs = Organization.objects.filter(
+                Q(user__is_active=True) | Q(members__user__is_active=True)
+            )
+        qs = (
+            qs.distinct()
+            .select_related("user", "region", "district", "ward")
+            .order_by("-created_at")
+        )
         if region_id:
             qs = qs.filter(region_id=region_id)
         if district_id:
@@ -800,7 +836,11 @@ def directory(request):
         rows = qs
     else:
         tab = "students"
-        qs = StudentProfile.objects.filter(user__is_active=True).select_related("user", "region", "district", "ward").order_by("-created_at")
+        qs = (
+            StudentProfile.objects.filter(user__suspended_at__isnull=False)
+            if account
+            else StudentProfile.objects.filter(user__is_active=True)
+        ).select_related("user", "university", "region", "district", "ward").order_by("-created_at")
         if region_id:
             qs = qs.filter(region_id=region_id)
         if district_id:
@@ -808,11 +848,14 @@ def directory(request):
         if ward_id:
             qs = qs.filter(ward_id=ward_id)
         if university:
-            qs = qs.filter(university__icontains=university)
+            qs = qs.filter(
+                Q(university__name__icontains=university)
+                | Q(university__abbreviation__icontains=university)
+            )
         if course:
             qs = qs.filter(course__icontains=course)
         if year:
-            qs = qs.filter(current_year=year)
+            qs = qs.filter(academic_year=year)
         if education_level:
             qs = qs.filter(education_level=education_level)
             if education_level == "7" and academic_year:
@@ -868,6 +911,7 @@ def directory(request):
                 "education_level": education_level or "",
                 "academic_year": academic_year or "",
                 "status": status or "",
+                "account": account,
             },
         },
     )
@@ -876,7 +920,7 @@ def directory(request):
 @login_required
 def integrity(request):
     """Enterprise integrity dashboard — verifies the immutable ledger chain."""
-    if not _require_admin(request):
+    if not _require_admin(request, module="system_metrics"):
         return render(request, "core/forbidden.html", status=403)
 
     from apps.applications.models import Application
@@ -900,8 +944,7 @@ def integrity(request):
         ("Documents", "DOCUMENT", Document, _document_fields),
     ):
         ledger = list(
-            IntegrityRecord.objects.filter(record_type=rtype).order_by("id")
-        )
+            IntegrityRecord.objects.filter(record_type=rtype).order_by("created_at", "id")        )
         latest_by_record = {}
         for rec in ledger:
             latest_by_record[rec.record_id] = rec
@@ -948,7 +991,7 @@ def admin_slots(request):
     from apps.core.education import education_level_choices, academic_year_choices
     from django.db.models import Q
 
-    if not _require_admin(request):
+    if not _require_admin(request, module="slot_verification"):
         return render(request, "core/forbidden.html", status=403)
 
     qs = request.GET.get("q", "").strip()
@@ -958,12 +1001,12 @@ def admin_slots(request):
     education_level = request.GET.get("education_level", "")
     academic_year = request.GET.get("academic_year", "")
 
-    slots = Slot.objects.all().select_related("company__user", "district__region")
+    slots = Slot.objects.all().select_related("organization__user", "district__region")
     
     if qs:
         slots = slots.filter(
             Q(title__icontains=qs) | 
-            Q(company__name__icontains=qs) | 
+            Q(organization__name__icontains=qs) | 
             Q(description__icontains=qs)
         )
     if region_id:
@@ -1000,17 +1043,17 @@ def admin_slots(request):
         }
     )
 
-    if not _require_admin(request):
+    if not _require_admin(request, module="slot_verification"):
         return render(request, "core/forbidden.html", status=403)
 
     qs = request.GET.get("q", "").strip()
-    slots = Slot.objects.all().select_related("company__user", "district__region")
+    slots = Slot.objects.all().select_related("organization__user", "district__region")
     
     if qs:
         from django.db.models import Q
         slots = slots.filter(
             Q(title__icontains=qs) | 
-            Q(company__name__icontains=qs) | 
+            Q(organization__name__icontains=qs) | 
             Q(description__icontains=qs)
         )
         

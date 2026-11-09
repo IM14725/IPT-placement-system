@@ -5,7 +5,7 @@
   <div class="flex items-center gap-base text-body-md text-on-surface-variant">
     <a class="hover:text-primary transition-colors" href="{% url 'platform-directory' %}">Directory</a>
     <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-    <a class="hover:text-primary transition-colors" href="{{ cancel_url }}">{% if profile_type == 'Company' %}{{ profile.name }}{% else %}{{ profile.user.full_name }}{% endif %}</a>
+    <a class="hover:text-primary transition-colors" href="{{ cancel_url }}">{% if profile_type == 'Organization' or profile_type == 'Organization' %}{{ profile.name }}{% else %}{{ profile.user.full_name }}{% endif %}</a>
     <span class="material-symbols-outlined text-[16px]">chevron_right</span>
     <span>Edit</span>
   </div>
@@ -34,9 +34,13 @@
                 {% elif field.name == 'ward' %}my_location
                 {% elif field.name == 'skills' %}code
                 {% elif field.name == 'name' %}badge
+                {% elif field.name == 'organization_type' %}apartment
+                {% elif field.name == 'email' %}mail
+                {% elif field.name == 'phone' %}call
                 {% elif field.name == 'industry' %}factory
                 {% elif field.name == 'description' %}description
                 {% elif field.name == 'street' %}home
+                {% elif field.name == 'address' %}home
                 {% elif field.name == 'profile_photo' %}person
                 {% elif field.name == 'id_card_photo' %}badge
                 {% else %}edit{% endif %}

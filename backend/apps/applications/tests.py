@@ -8,14 +8,15 @@ from apps.applications.services import (
     accept_application,
     create_application,
     finalize_verified_payment,
-    get_company_visible_applications,
+    get_organization_visible_applications,
 )
 from apps.applications.tasks import expire_unpaid
-from apps.companies.models import CompanyProfile
+from apps.companies.models import Organization
+from apps.documents.models import Document
 from apps.locations.models import District, Region
 from apps.payments.models import Payment, PaymentMethod, PaymentStatus
 from apps.slots.models import Slot
-from apps.students.models import StudentProfile, VerificationStatus
+from apps.students.models import StudentProfile, University, VerificationStatus
 
 
 @pytest.fixture
@@ -29,16 +30,16 @@ def district(region):
 
 
 @pytest.fixture
-def company_user():
+def organization_user():
     return User.objects.create_user(
-        email="company@x.tz", password="Secret123!", role=UserRole.COMPANY
+        email="organization@x.tz", password="Secret123!", role=UserRole.ORGANIZATION
     )
 
 
 @pytest.fixture
-def company(company_user):
-    return CompanyProfile.objects.create(
-        user=company_user,
+def organization(organization_user):
+    return Organization.objects.create(
+        user=organization_user,
         name="TechCorp Ltd",
         industry="Technology",
         verification_status=VerificationStatus.APPROVED,
@@ -46,9 +47,9 @@ def company(company_user):
 
 
 @pytest.fixture
-def slot(company, district):
+def slot(organization, district):
     return Slot.objects.create(
-        company=company,
+        organization=organization,
         title="Software Engineering Intern",
         industry="Technology",
         role_type="Internship",
@@ -61,9 +62,9 @@ def make_student(email):
     user = User.objects.create_user(email=email, password="Secret123!", role=UserRole.STUDENT)
     return StudentProfile.objects.create(
         user=user,
-        university="University of Dar es Salaam",
+        university=University.objects.get_or_create(name="University of Dar es Salaam")[0],
         course="Computer Science",
-        current_year=3,
+        academic_year=3,
         verification_status=VerificationStatus.APPROVED,
         district=None,
         region=None,
@@ -80,10 +81,10 @@ def test_create_application_starts_pending(slot):
 
 
 @pytest.mark.django_db
-def test_unpaid_application_invisible_to_company(slot):
+def test_unpaid_application_invisible_to_organization(slot):
     student = make_student("s2@x.tz")
     create_application(student, slot)
-    visible = get_company_visible_applications(slot)
+    visible = get_organization_visible_applications(slot)
     assert visible.count() == 0
 
 
@@ -113,7 +114,7 @@ def test_finalize_verified_payment_marks_paid(slot):
     assert payment.is_paid
     assert payment.status == PaymentStatus.PAID
     assert app.status == ApplicationStatus.PAID
-    assert not app.is_accepted  # acceptance waits for company confirmation
+    assert not app.is_accepted  # acceptance waits for organization confirmation
 
     # Slot now full
     slot.refresh_from_db()
@@ -151,12 +152,12 @@ def test_full_slot_rejects_new_application(slot):
 
 
 @pytest.mark.django_db
-def test_paid_application_visible_to_company(slot):
+def test_paid_application_visible_to_organization(slot):
     student = make_student("d@x.tz")
     app = create_application(student, slot)
     Payment.objects.create(student=student, application=app, amount=15000, method=PaymentMethod.M_PESA)
     finalize_verified_payment(app.payment)
-    assert get_company_visible_applications(slot).count() == 1
+    assert get_organization_visible_applications(slot).count() == 1
 
 
 @pytest.mark.django_db
@@ -227,7 +228,7 @@ def test_acceptance_email_queues_confirmation(slot):
 
 
 @pytest.mark.django_db
-def test_company_letter_preview_served_inline(slot, client, django_user_model):
+def test_organization_letter_preview_served_inline(slot, client, django_user_model):
     from django.core.files.uploadedfile import SimpleUploadedFile
 
     student = make_student("i@x.tz")
@@ -242,8 +243,14 @@ def test_company_letter_preview_served_inline(slot, client, django_user_model):
     app.letter_original_name = "intro_letter.pdf"
     app.save(update_fields=["application_letter", "letter_original_name", "updated_at"])
 
-    client.force_login(slot.company.user)
-    resp = client.get(f"/company/applicants/{app.id}/letter/")
+    for dt in (Document.DocType.BRELA_CERT, Document.DocType.TIN_CERT, Document.DocType.BUSINESS_LICENSE):
+        Document.objects.create(
+            owner=slot.organization.user, doc_type=dt,
+            file=SimpleUploadedFile("x.pdf", b"%PDF", content_type="application/pdf"),
+            original_name="x.pdf", is_verified=True,
+        )
+    client.force_login(slot.organization.user)
+    resp = client.get(f"/organization/applicants/{app.id}/letter/")
     assert resp.status_code == 200
     assert resp["Content-Type"] == "application/pdf"
     assert resp["Content-Disposition"].startswith("inline")

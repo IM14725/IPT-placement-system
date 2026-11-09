@@ -1,0 +1,31 @@
+{# Suspend / reactivate control. Expects: kind, obj_id, suspended_at, reason, next_url #}
+<div class="flex flex-col gap-xs border-t border-outline-variant pt-sm">
+  {% if suspended_at %}
+    <p class="font-metadata text-metadata text-error flex items-start gap-xs">
+      <span class="material-symbols-outlined text-[16px]">block</span>
+      <span>Suspended {{ suspended_at|date:"j M Y, H:i" }}{% if reason %} — {{ reason }}{% endif %}</span>
+    </p>
+    <form method="post" action="{% url 'platform-account-status' %}">
+      {% csrf_token %}
+      <input type="hidden" name="kind" value="{{ kind }}">
+      <input type="hidden" name="id" value="{{ obj_id }}">
+      <input type="hidden" name="next" value="{{ next_url }}">
+      <button class="w-full py-3 px-md bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-body-md font-medium transition-all flex items-center justify-center gap-xs" name="action" value="reactivate" type="submit">
+        <span class="material-symbols-outlined text-[20px]">lock_open</span>
+        Reactivate Account
+      </button>
+    </form>
+  {% else %}
+    <form method="post" action="{% url 'platform-account-status' %}" class="flex flex-col gap-xs" onsubmit="return confirm('Suspend this account? They will be signed out and unable to log in until reactivated.');">
+      {% csrf_token %}
+      <input type="hidden" name="kind" value="{{ kind }}">
+      <input type="hidden" name="id" value="{{ obj_id }}">
+      <input type="hidden" name="next" value="{{ next_url }}">
+      <input name="reason" required maxlength="500" placeholder="Reason for suspension (recorded in the audit log)" class="w-full px-sm py-2 bg-surface-container-lowest rounded-lg border border-outline-variant font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 outline-none focus:ring-2 focus:ring-primary">
+      <button class="w-full py-3 px-md bg-[#fff4e5] hover:bg-[#ffe9cc] text-[#a16207] rounded-lg text-body-md font-medium transition-all flex items-center justify-center gap-xs" name="action" value="suspend" type="submit">
+        <span class="material-symbols-outlined text-[20px]">block</span>
+        Suspend Account
+      </button>
+    </form>
+  {% endif %}
+</div>

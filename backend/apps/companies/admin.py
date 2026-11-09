@@ -2,13 +2,13 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from apps.companies.models import CompanyProfile
+from apps.companies.models import Organization
 from apps.documents.models import Document
 from apps.core.admin_mixins import VerificationAdminMixin
 
 
-@admin.register(CompanyProfile)
-class CompanyProfileAdmin(VerificationAdminMixin, admin.ModelAdmin):
+@admin.register(Organization)
+class OrganizationAdmin(VerificationAdminMixin, admin.ModelAdmin):
     REQUIRED_DOC_TYPES = (
         Document.DocType.BRELA_CERT,
         Document.DocType.TIN_CERT,

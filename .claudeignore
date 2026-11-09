@@ -1,0 +1,24 @@
+node_modules/
+dist/
+build/
+.git/
+*.log
+package-lock.json
+.venv/
+.env/
+
+**/__pycache__/**
+*.pyc
+*.pyo
+*.pyd
+
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+static/root/
+
+**/migrations/[0-9]*.py
+ .coverage
+ htmlcov/
+ .env

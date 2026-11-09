@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.core import views
+from apps.core import views, views_governance
 
 urlpatterns = [
     path("", views.health, name="health"),
@@ -10,6 +10,9 @@ urlpatterns = [
     path("verifications/", views.verification_queue, name="platform-verifications"),
     path("directory/", views.directory, name="platform-directory"),
     path("slots/", views.admin_slots, name="platform-slots"),
+    path("universities/", views_governance.universities, name="platform-universities"),
+    path("account-status/", views_governance.account_status, name="platform-account-status"),
+    path("reports/", views_governance.reports, name="platform-reports"),
     path(
         "verifications/students/<uuid:pk>/",
         views.student_verification,
@@ -21,14 +24,14 @@ urlpatterns = [
         name="platform-student-edit",
     ),
     path(
-        "verifications/companies/<uuid:pk>/",
-        views.company_verification,
-        name="platform-company-verification",
+        "verifications/organizations/<uuid:pk>/",
+        views.organization_verification,
+        name="platform-organization-verification",
     ),
     path(
-        "verifications/companies/<uuid:pk>/edit/",
-        views.platform_company_edit,
-        name="platform-company-edit",
+        "verifications/organizations/<uuid:pk>/edit/",
+        views.platform_organization_edit,
+        name="platform-organization-edit",
     ),
     path("templates/", views.notification_templates, name="platform-templates"),
     path("audit-logs/", views.audit_logs, name="platform-audit-logs"),

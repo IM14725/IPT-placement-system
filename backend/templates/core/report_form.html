@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Report a problem{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <h1 class="font-display text-display text-on-surface">Report a problem</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      Tell the platform team about a misleading opportunity, a payment issue, abuse or anything else that looks wrong. We review every report.
+    </p>
+  </div>
+  <form method="post" class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="flex flex-col gap-xs">
+        <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<p class="text-error font-metadata text-metadata">{{ field.errors.0 }}</p>{% endif %}
+      </div>
+    {% endfor %}
+    <div class="flex justify-end">
+      <button class="bg-primary text-on-primary rounded-full px-xl py-3 font-body-lg" type="submit">Send report</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

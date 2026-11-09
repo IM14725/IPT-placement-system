@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from apps.core.models import AuditLog, LedgerSnapshot, PlatformSetting
+from apps.core.models import AuditLog, LedgerSnapshot, PlatformSetting, Report
+
+
+@admin.register(Report)
+class ReportAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "category", "subject", "status", "reporter", "organization")
+    list_filter = ("status", "category")
+    search_fields = ("subject", "description", "reporter__email")
 
 
 @admin.register(LedgerSnapshot)

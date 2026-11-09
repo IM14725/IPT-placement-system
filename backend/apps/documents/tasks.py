@@ -72,12 +72,13 @@ def _deep_scan(path, declared_ext, declared_sha256):
     kind = filetype.guess(head)
     guessed_ext = kind.extension if kind else None
     ext = declared_ext.lower()
-    if guessed_ext:
-        if guessed_ext in {"jpg", "jpeg"}:
-            if ext not in {"jpg", "jpeg"}:
-                return False, "File content does not match its declared type"
-        elif guessed_ext != ext:
+    if not guessed_ext:
+        return False, "File signature could not be verified"
+    if guessed_ext in {"jpg", "jpeg"}:
+        if ext not in {"jpg", "jpeg"}:
             return False, "File content does not match its declared type"
+    elif guessed_ext != ext:
+        return False, "File content does not match its declared type"
 
     try:
         _validate_image(head, ext)

@@ -67,10 +67,10 @@
             <div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs">
         <div class="flex items-center gap-xs">
           <span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings:'FILL' 1;">business_center</span>
-          <h3 class="font-body-md font-semibold text-on-surface">{% trans "Companies" %}</h3>
+          <h3 class="font-body-md font-semibold text-on-surface">{% trans "Organizations" %}</h3>
         </div>
         <ul class="list-disc list-inside space-y-0.5 font-body-md text-body-md text-on-surface-variant">
-          <li>{% trans "Company name, industry, description, registered address." %}</li>
+          <li>{% trans "Organization name, industry, description, registered address." %}</li>
           <li>{% trans "Contact email and phone number of the account holder." %}</li>
           <li>{% trans "BRELA certificate, TIN, and business licence (uploaded documents)." %}</li>
           <li>{% trans "Slot listings, applicant review actions, and acceptance records." %}</li>
@@ -117,7 +117,7 @@
             <td class="px-md py-sm">{% trans "Contractual necessity; Consent" %}</td>
           </tr>
           <tr class="border-b border-outline-variant/50 hover:bg-surface-container/50">
-            <td class="px-md py-sm">{% trans "Sharing profile with companies for placement review" %}</td>
+            <td class="px-md py-sm">{% trans "Sharing profile with organizations for placement review" %}</td>
             <td class="px-md py-sm">{% trans "Consent (given at registration)" %}</td>
           </tr>
           <tr class="border-b border-outline-variant/50 hover:bg-surface-container/50">
@@ -155,7 +155,7 @@
           By registering, you consent to your data being shared with prospective employers and
           educational institutions <strong>strictly for placement facilitation purposes</strong>.
           This includes sharing your verified academic profile, uploaded documents, and contact
-          details with companies that you apply to.
+          details with organizations that you apply to.
         {% endblocktrans %}
       </p>
     </div>
@@ -173,9 +173,9 @@
       <p class="font-body-md text-body-md text-on-surface-variant">
         {% blocktrans %}
           <strong>Students</strong> must update their academic information (course, year of study,
-          GPA, and institution) immediately upon any change.  <strong>Companies</strong> must keep
+          GPA, and institution) immediately upon any change.  <strong>Organizations</strong> must keep
           their registration details, contact information, and slot listings current and accurate.
-          Profile information provided on the Platform may be relied upon by institutions, companies,
+          Profile information provided on the Platform may be relied upon by institutions, organizations,
           and administrators to make binding placement decisions.  Providing false or misleading
           information constitutes a violation of these Terms and the PDPA.
         {% endblocktrans %}
@@ -233,8 +233,8 @@
     </p>
     <ul class="list-disc list-outside ml-5 space-y-sm font-body-md text-body-md text-on-surface-variant">
       <li>
-        <strong>{% trans "Companies you apply to:" %}</strong>
-        {% blocktrans %}Your verified student profile and documents are visible to companies
+        <strong>{% trans "Organizations you apply to:" %}</strong>
+        {% blocktrans %}Your verified student profile and documents are visible to organizations
         whose slots you have applied for, strictly for placement review.{% endblocktrans %}
       </li>
       <li>

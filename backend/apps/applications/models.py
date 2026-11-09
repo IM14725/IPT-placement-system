@@ -1,3 +1,4 @@
+from pathlib import Path
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -6,7 +7,8 @@ from apps.documents.validators import validate_upload
 
 
 def application_letter_upload_path(instance, filename):
-    return f"application_letters/{instance.student_id}/{filename}"
+    safe_name = Path(filename or "letter.pdf").name
+    return f"application_letters/{instance.student_id}/{safe_name}"
 
 
 class ApplicationStatus(models.TextChoices):

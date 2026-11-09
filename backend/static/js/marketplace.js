@@ -9,6 +9,7 @@
   var region = document.getElementById("filter-region");
   var district = document.getElementById("filter-district");
   var department = document.getElementById("filter-department");
+  var organization = document.getElementById("filter-organization");
   var educationLevel = document.getElementById("filter-education-level");
   var academicYear = document.getElementById("filter-academic-year");
   var results = document.getElementById("slot-results");
@@ -31,6 +32,7 @@
     if (region.value) params.set("region", region.value);
     if (district.value) params.set("district", district.value);
     if (department.value.trim()) params.set("department", department.value.trim());
+    if (organization && organization.value.trim()) params.set("organization", organization.value.trim());
     if (educationLevel.value) params.set("education_level", educationLevel.value);
     if (academicYear.value) params.set("academic_year", academicYear.value);
     return params;
@@ -93,9 +95,17 @@
     }
   }
 
+  function formatDeadline(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleString(undefined, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+
   function card(s) {
     var apply = "";
-    if (s.available_count > 0) {
+    if (s.deadline_passed) {
+      apply = '<span class="inline-block bg-surface-container-high text-on-surface-variant font-label-caps text-label-caps uppercase px-sm py-2 rounded-lg">' + esc(t("deadlinePassed", "Applications closed")) + "</span>";
+    } else if (s.available_count > 0) {
       if (window.IPT.canApply) {
         apply =
           '<a href="/student/apply/' + s.id + '/" class="w-full h-11 bg-primary/10 text-primary group-hover:bg-primary group-hover:text-on-primary rounded-xl font-label-caps text-label-caps uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2">' +
@@ -123,7 +133,7 @@
       '<div class="flex flex-col gap-md relative z-10">' +
       '<div class="flex items-start justify-between gap-sm">' +
       '<div class="flex flex-col gap-xs">' +
-      '<span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">' + esc(s.company_name) + "</span>" +
+      '<span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">' + esc(s.organization_name) + "</span>" +
       '<span class="font-metadata text-metadata text-secondary font-semibold">' + esc(s.industry) + "</span>" +
       "</div>" +
       '<span class="px-sm py-1 rounded-full ' + (s.available_count > 0 ? "bg-[#e8f5e9] text-[#1b5e20]" : "bg-error/10 text-error") + ' font-label-caps text-label-caps flex items-center gap-1 whitespace-nowrap">' +
@@ -146,6 +156,11 @@
       '<span class="material-symbols-outlined text-[#1b5e20] text-[18px]">payments</span>' +
       stipend +
       "</div>" +
+      (s.application_deadline
+        ? '<div class="col-span-2 flex items-center gap-xs"><span class="material-symbols-outlined ' + (s.deadline_passed ? "text-error" : "text-outline") + ' text-[18px]">event</span>' +
+          '<span class="font-metadata text-metadata ' + (s.deadline_passed ? "text-error" : "text-on-surface-variant") + '">' +
+          esc(t("deadline", "Apply by")) + " " + esc(formatDeadline(s.application_deadline)) + "</span></div>"
+        : "") +
       "</div>" +
       (skills ? '<div class="flex flex-wrap gap-xs mt-sm">' + skills + "</div>" : "") +
       "</div>" +
@@ -185,6 +200,9 @@
   });
   district.addEventListener("change", load);
   department.addEventListener("input", function () { clearTimeout(window.__iptDebounce); window.__iptDebounce = setTimeout(load, 350); });
+  if (organization) {
+    organization.addEventListener("input", function () { clearTimeout(window.__iptDebounce); window.__iptDebounce = setTimeout(load, 350); });
+  }
   educationLevel.addEventListener("change", load);
   academicYear.addEventListener("change", load);
 

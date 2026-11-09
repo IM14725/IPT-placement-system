@@ -49,13 +49,13 @@
           <span class="material-symbols-outlined text-secondary text-[32px]">person_add</span>
         </div>
         <h1 class="font-headline-lg text-headline-lg text-on-surface">{% trans "Create your account" %}</h1>
-        <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Join the marketplace as a student or company." %}</p>
+        <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Join the marketplace as a student or organization." %}</p>
       </div>
 
       <div class="hidden lg:flex flex-col gap-xs">
         <span class="font-label-caps text-label-caps text-secondary uppercase tracking-widest">{% trans "Register" %}</span>
         <h1 class="font-headline-lg text-headline-lg text-on-surface">{% trans "Create your account" %}</h1>
-        <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Join the marketplace as a student or company." %}</p>
+        <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Join the marketplace as a student or organization." %}</p>
       </div>
 
        <form method="post" class="flex flex-col gap-md" novalidate data-loading-form>
@@ -96,7 +96,7 @@
           {% endif %}
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-md" data-student-name>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-md" data-person-name>
           <div class="flex flex-col gap-xs">
             <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.first_name.id_for_label }}">{% trans "First name" %}</label>
             <div class="ipt-field-box {% if form.first_name.errors %}is-error{% endif %}">
@@ -119,15 +119,15 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-xs" data-company-name style="display:none">
-            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.company_name.id_for_label }}">{% trans "Company name" %}</label>
-          <div class="ipt-field-box {% if form.company_name.errors %}is-error{% endif %}">
+        <div class="flex flex-col gap-xs" data-organization-name style="display:none">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.organization_name.id_for_label }}">{% trans "Organization name" %}</label>
+          <div class="ipt-field-box {% if form.organization_name.errors %}is-error{% endif %}">
             <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">apartment</span></span>
-            {{ form.company_name }}
+            {{ form.organization_name }}
           </div>
-          <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Use the registered trading name of your company." %}</p>
-          {% if form.company_name.errors %}
-            <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.company_name.errors.0 }}</p>
+          <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Use the registered name of your organization." %}</p>
+          {% if form.organization_name.errors %}
+            <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.organization_name.errors.0 }}</p>
           {% endif %}
         </div>
 
@@ -239,14 +239,21 @@
     input.type = show ? "text" : "password";
     icon.textContent = show ? "visibility_off" : "visibility";
   }
-  const studentNameEl = document.querySelector('[data-student-name]');
-  const companyNameEl = document.querySelector('[data-company-name]');
+  const personNameEl = document.querySelector('[data-person-name]');
+  const organizationNameEl = document.querySelector('[data-organization-name]');
   const phoneSuffix = document.querySelector('[data-phone-suffix]');
   function syncNameFields() {
-    const company = document.querySelector('input[name="role"]:checked')?.value === 'COMPANY';
-    studentNameEl.style.display = company ? 'none' : '';
-    companyNameEl.style.display = company ? '' : 'none';
-    phoneSuffix.textContent = company ? '(company line)' : '';
+    const isOrg = document.querySelector('input[name="role"]:checked')?.value === 'ORGANIZATION';
+    if (personNameEl) {
+      personNameEl.style.display = isOrg ? 'none' : '';
+      if (isOrg) {
+        personNameEl.querySelectorAll('input').forEach(inp => { inp.value = ''; });
+      }
+    }
+    if (organizationNameEl) {
+      organizationNameEl.style.display = isOrg ? '' : 'none';
+    }
+    phoneSuffix.textContent = isOrg ? '(organization line)' : '';
   }
   document.querySelectorAll('input[name="role"]').forEach(r => r.addEventListener('change', syncNameFields));
   syncNameFields();

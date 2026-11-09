@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Universities{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Platform Records</span>
+    <h1 class="font-display text-display text-on-surface">Universities</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-2">
+      The central list students choose their affiliation from. Review suggestions from students whose university was not listed, add missing institutions, or merge duplicates.
+    </p>
+  </div>
+
+  <div class="flex flex-wrap gap-sm">
+    {% for value, label, count in tabs %}
+      <a href="?status={{ value }}" class="px-md py-1.5 rounded-full text-metadata font-metadata transition-colors {% if status == value %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %}">
+        {{ label }} <span class="opacity-70">({{ count }})</span>
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-lg">
+    <div class="xl:col-span-2 bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+      <form method="get" class="p-md bg-surface-container-low border-b border-surface-container-highest flex gap-sm">
+        <input type="hidden" name="status" value="{{ status }}">
+        <input name="q" value="{{ q }}" placeholder="Search by name or abbreviation" class="flex-1 px-sm py-2 bg-surface-container-lowest rounded-lg border border-outline-variant font-body-md text-body-md outline-none focus:ring-2 focus:ring-primary">
+        <button class="px-md py-2 bg-surface-container hover:bg-surface-container-high rounded-full font-metadata text-metadata" type="submit">Search</button>
+      </form>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left min-w-[640px]">
+          <thead>
+            <tr class="text-metadata font-label-caps text-on-surface-variant border-b border-surface-variant">
+              <th class="py-sm px-md font-medium">University</th>
+              <th class="py-sm px-md font-medium">Suggested by</th>
+              <th class="py-sm px-md font-medium">Students</th>
+              <th class="py-sm px-md font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="font-body-md text-body-md text-on-surface">
+            {% for uni in rows %}
+              <tr class="border-b border-surface-variant align-top">
+                <td class="py-sm px-md">
+                  <p class="font-semibold">{{ uni.name }}</p>
+                  <p class="text-metadata font-metadata text-on-surface-variant">{{ uni.abbreviation|default:"—" }} · {{ uni.get_institution_type_display }}</p>
+                </td>
+                <td class="py-sm px-md text-on-surface-variant">{{ uni.suggested_by.email|default:"—" }}</td>
+                <td class="py-sm px-md">{{ uni.student_count }}</td>
+                <td class="py-sm px-md">
+                  <div class="flex flex-wrap gap-xs items-center">
+                    {% if uni.verification_status != 'APPROVED' %}
+                      <form method="post">{% csrf_token %}
+                        <input type="hidden" name="id" value="{{ uni.id }}">
+                        <button name="action" value="approve" class="px-sm py-1 rounded-full bg-[#e8f5e9] text-[#1b5e20] font-metadata text-metadata" type="submit">Approve</button>
+                      </form>
+                    {% endif %}
+                    {% if uni.verification_status != 'REJECTED' %}
+                      <form method="post" onsubmit="return confirm('Reject this university? Students linked to it will be unlinked.');">{% csrf_token %}
+                        <input type="hidden" name="id" value="{{ uni.id }}">
+                        <button name="action" value="reject" class="px-sm py-1 rounded-full bg-error/10 text-error font-metadata text-metadata" type="submit">Reject</button>
+                      </form>
+                    {% endif %}
+                    {% if uni.verification_status == 'PENDING' %}
+                      <form method="post" class="flex items-center gap-xs" onsubmit="return confirm('Merge into the selected university? This record will be deleted.');">{% csrf_token %}
+                        <input type="hidden" name="id" value="{{ uni.id }}">
+                        <select name="target" required class="px-xs py-1 rounded-lg border border-outline-variant bg-surface-container-lowest text-metadata font-metadata max-w-[11rem]">
+                          <option value="">Merge into…</option>
+                          {% for a in approved %}<option value="{{ a.id }}">{{ a.name }}</option>{% endfor %}
+                        </select>
+                        <button name="action" value="merge" class="px-sm py-1 rounded-full bg-surface-container font-metadata text-metadata" type="submit">Merge</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="py-xl text-center text-on-surface-variant">No universities here.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "includes/pagination.html" %}
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-sm h-fit">
+      <h2 class="font-headline-md text-headline-md text-on-surface">Add a university</h2>
+      <form method="post" class="flex flex-col gap-sm">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create">
+        {% for field in form %}
+          <div class="flex flex-col gap-xs">
+            <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<p class="text-error font-metadata text-metadata">{{ field.errors.0 }}</p>{% endif %}
+          </div>
+        {% endfor %}
+        <button class="mt-xs bg-primary text-on-primary rounded-full px-md py-2 font-body-md" type="submit">Add university</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

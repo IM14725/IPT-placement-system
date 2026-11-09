@@ -4,7 +4,7 @@
 <div class="flex flex-col gap-lg">
   <div class="flex items-center justify-between mb-xl pb-md relative before:absolute before:bottom-0 before:left-0 before:w-full before:h-px before:bg-gradient-to-r before:from-outline-variant/30 before:via-outline-variant/10 before:to-transparent">
     <div>
-      <a href="{% url 'company-applicants' application.slot.id %}" class="text-body-md font-body-md text-primary hover:text-primary-container transition-colors flex items-center gap-base uppercase tracking-wider group/back">
+      <a href="{% url 'organization-applicants' application.slot.id %}" class="text-body-md font-body-md text-primary hover:text-primary-container transition-colors flex items-center gap-base uppercase tracking-wider group/back">
         <span class="material-symbols-outlined text-[16px] group-hover/back:-translate-x-1 transition-transform">arrow_back</span>
         Back to Applicants
       </a>
@@ -12,7 +12,7 @@
       <div class="flex items-center gap-sm text-body-md font-body-md text-on-surface-variant flex-wrap">
         <span class="font-semibold text-on-surface">{{ application.student.user.full_name }}</span>
         <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
-        <span>{{ application.student.university }}</span>
+        <span>{{ application.student.university|default:"—" }}</span>
         <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
         <span class="text-primary bg-primary/10 px-2 py-1 rounded-full text-label-caps font-label-caps">{{ application.slot.title }}</span>
       </div>

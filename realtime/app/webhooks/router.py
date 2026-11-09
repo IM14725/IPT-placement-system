@@ -1,5 +1,6 @@
 import json
 from datetime import datetime, timezone
+from decimal import Decimal, InvalidOperation
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel, Field
@@ -7,14 +8,22 @@ from sqlalchemy import text
 
 from app.core.cache import bump_slot_version
 from app.core.celery_client import enqueue
+from app.core.config import settings
 from app.core.db import SessionLocal
 from app.core.rate_limit import enforce as enforce_rate_limit
 from app.core.redis import acquire_lock, publish_notification, release_lock
-from app.core.security import canonical, verify
+from app.core.security import canonical, sign_mock, verify, verify_mock
 
 router = APIRouter()
 
 PAYMENT_LOCK_PREFIX = "ipt:lock:pay:"
+
+
+def _amounts_equal(a: str | Decimal | None, b: str | Decimal | None) -> bool:
+    try:
+        return Decimal(str(a or "").strip()) == Decimal(str(b or "").strip())
+    except (InvalidOperation, TypeError, ValueError):
+        return False
 
 
 class CallbackBody(BaseModel):
@@ -80,10 +89,10 @@ async def _process_payment_locked(reference_id, status, gateway_txn_id, amount_s
                         "a.student_id, a.status AS app_status, a.is_accepted, "
                         "a.company_message, a.student_message, a.payment_deadline, "
                         "a.letter_original_name, a.letter_sha256, "
-                        "c.name AS company_name "
+                        "c.name AS organization_name "
                         "FROM applications_application a "
                         "JOIN slots_slot s ON s.id = a.slot_id "
-                        "JOIN companies_companyprofile c ON c.id = s.company_id "
+                        "JOIN organizations_organization c ON c.id = s.organization_id "
                         "WHERE a.id = :aid"
                     ),
                     {"aid": pay.application_id},
@@ -104,6 +113,12 @@ async def _process_payment_locked(reference_id, status, gateway_txn_id, amount_s
                 )
                 return {"status": "failed", "reference_id": reference_id}
 
+            if not _amounts_equal(amount_str, pay.amount):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Callback amount does not match the recorded payment amount",
+                )
+
             await session.execute(
                 text(
                     "UPDATE payments_payment SET status='PAID', is_paid=TRUE, "
@@ -118,7 +133,7 @@ async def _process_payment_locked(reference_id, status, gateway_txn_id, amount_s
                 },
             )
 
-            # PENDING -> PAID (no auto-accept; the company confirms after
+            # PENDING -> PAID (no auto-accept; the organization confirms after
             # reviewing the student's application letter).
             # DB triggers enforce paid-visibility and slot capacity atomically.
             await session.execute(
@@ -168,8 +183,8 @@ async def _process_payment_locked(reference_id, status, gateway_txn_id, amount_s
             )
 
             student_body = (
-                f"Your application for '{app_row.slot_title}' at {app_row.company_name} "
-                f"has been submitted. Payment verified ({reference_id}). The company "
+                f"Your application for '{app_row.slot_title}' at {app_row.organization_name} "
+                f"has been submitted. Payment verified ({reference_id}). The organization "
                 f"will review your application letter."
             )
             student_notif = (
@@ -185,22 +200,22 @@ async def _process_payment_locked(reference_id, status, gateway_txn_id, amount_s
                 )
             ).scalar()
 
-            company_user = (
+            organization_user = (
                 await session.execute(
                     text(
-                        "SELECT c.user_id FROM companies_companyprofile c "
-                        "WHERE c.id = (SELECT company_id FROM slots_slot WHERE id = :sid)"
+                        "SELECT c.user_id FROM organizations_organization c "
+                        "WHERE c.id = (SELECT organization_id FROM slots_slot WHERE id = :sid)"
                     ),
                     {"sid": app_row.slot_id},
                 )
             ).scalar()
 
-            company_notif = None
-            if company_user:
-                company_body = (
+            organization_notif = None
+            if organization_user:
+                organization_body = (
                     f"New paid applicant (#{pay.application_id}) for '{app_row.slot_title}'."
                 )
-                company_notif = (
+                organization_notif = (
                     await session.execute(
                         text(
                             "INSERT INTO notifications_notification "
@@ -209,7 +224,7 @@ async def _process_payment_locked(reference_id, status, gateway_txn_id, amount_s
                             "VALUES (:uid, NULL, 'APPLICATION', 'New Applicant', "
                             ":body, '', FALSE, :n, :n) RETURNING id"
                         ),
-                        {"uid": company_user, "body": company_body, "n": now},
+                        {"uid": organization_user, "body": organization_body, "n": now},
                     )
                 ).scalar()
 
@@ -223,11 +238,11 @@ async def _process_payment_locked(reference_id, status, gateway_txn_id, amount_s
             "body": student_body,
         }
     )
-    if company_user and company_notif:
+    if organization_user and organization_notif:
         await publish_notification(
             {
-                "user_id": company_user,
-                "notification_id": company_notif,
+                "user_id": organization_user,
+                "notification_id": organization_notif,
                 "type": "APPLICATION",
                 "title": "New Applicant",
                 "body": f"New paid applicant (#{pay.application_id}) for '{app_row.slot_title}'.",
@@ -238,8 +253,8 @@ async def _process_payment_locked(reference_id, status, gateway_txn_id, amount_s
     enqueue("payments.receipt_email", pay.id)
     enqueue("applications.submitted_sms", pay.application_id)
     enqueue("notifications.fanout", [student_notif])
-    if company_notif:
-        enqueue("notifications.fanout", [company_notif])
+    if organization_notif:
+        enqueue("notifications.fanout", [organization_notif])
     enqueue("slots.refresh_status", app_row.slot_id)
 
     # Slot bookings changed -> invalidate the cached slot listings (Django keys
@@ -257,7 +272,8 @@ async def _process_payment_locked(reference_id, status, gateway_txn_id, amount_s
 @router.post("/api/v1/payments/mock/initiate")
 async def mock_initiate(body: MockInitiateBody, request: Request):
     """Dev-only: stand in for a real mobile-money gateway request."""
-    from app.core.security import sign
+    if not settings.enable_mock_gateway:
+        raise HTTPException(status_code=404, detail="Not found")
 
     await enforce_rate_limit(request, "mock-initiate", capacity=30, refill_per_second=1.0)
 
@@ -273,13 +289,15 @@ async def mock_initiate(body: MockInitiateBody, request: Request):
         ).first()
     if pay is None:
         raise HTTPException(status_code=404, detail="Payment not found")
+    if not _amounts_equal(body.amount, pay.amount):
+        raise HTTPException(status_code=400, detail="Amount does not match recorded payment")
     gateway_txn_id = f"MOCK-{body.reference_id}"
-    payload_str = canonical(body.reference_id, "PAID", gateway_txn_id, body.amount)
+    payload_str = canonical(body.reference_id, "PAID", gateway_txn_id, str(pay.amount))
     return {
         "gateway": "MOCK",
         "gateway_txn_id": gateway_txn_id,
         "mock_callback_url": "/api/v1/payments/mock/callback",
-        "signature": sign(payload_str),
+        "signature": sign_mock(payload_str),
     }
 
 
@@ -289,7 +307,15 @@ async def mock_callback(
     request: Request,
     x_gateway_signature: str | None = Header(default=None, alias="X-Gateway-Signature"),
 ):
+    if not settings.enable_mock_gateway:
+        raise HTTPException(status_code=404, detail="Not found")
+
     await enforce_rate_limit(request, "mock-callback", capacity=60, refill_per_second=10.0)
+    payload_str = canonical(
+        body.reference_id, body.status, body.gateway_txn_id, body.amount
+    )
+    if not verify_mock(payload_str, x_gateway_signature):
+        raise HTTPException(status_code=401, detail="Invalid signature")
     return await _process_payment(
         body.reference_id, body.status, body.gateway_txn_id, body.amount
     )

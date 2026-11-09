@@ -19,3 +19,19 @@ def verify(payload_str: str, provided: str | None) -> bool:
         return False
     expected = sign(payload_str)
     return hmac.compare_digest(expected, provided)
+
+
+def sign_mock(payload_str: str) -> str:
+    """Sign a mock-gateway payload using a strictly isolated secret."""
+    return hmac.new(
+        settings.mock_gateway_webhook_secret.encode(),
+        f"MOCK|{payload_str}".encode(),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def verify_mock(payload_str: str, provided: str | None) -> bool:
+    if not provided:
+        return False
+    expected = sign_mock(payload_str)
+    return hmac.compare_digest(expected, provided)

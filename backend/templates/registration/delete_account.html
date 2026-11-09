@@ -72,8 +72,8 @@
       {# Cancel — back to their dashboard #}
       {% if user.is_student %}
         <a href="{% url 'student-dashboard' %}"
-      {% elif user.is_company %}
-        <a href="{% url 'company-dashboard' %}"
+      {% elif user.is_organization %}
+        <a href="{% url 'organization-dashboard' %}"
       {% else %}
         <a href="{% url 'home' %}"
       {% endif %}

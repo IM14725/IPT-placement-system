@@ -45,7 +45,7 @@
   <form method="get" class="bg-surface-container-lowest p-md rounded-xl shadow-sm flex flex-wrap gap-md items-end">
     <div class="flex-1 min-w-[200px]">
       <label class="block font-metadata text-on-surface-variant mb-1">Search</label>
-      <input type="text" name="q" value="{{ q }}" placeholder="Reference, student, company, amount..." class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+      <input type="text" name="q" value="{{ q }}" placeholder="Reference, student, organization, amount..." class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none">
     </div>
     <div>
       <label class="block font-metadata text-on-surface-variant mb-1">Status</label>
@@ -84,7 +84,7 @@
               <th class="px-lg py-3 font-semibold">Reference</th>
               <th class="px-lg py-3 font-semibold">Student</th>
               <th class="px-lg py-3 font-semibold">Slot</th>
-              <th class="px-lg py-3 font-semibold">Company</th>
+              <th class="px-lg py-3 font-semibold">Organization</th>
               <th class="px-lg py-3 font-semibold">Status</th>
               <th class="px-lg py-3 font-semibold text-right">Amount</th>
               <th class="px-lg py-3 font-semibold">Date</th>
@@ -96,7 +96,7 @@
                 <td class="px-lg py-md font-mono text-metadata text-primary">{{ p.reference_id }}</td>
                 <td class="px-lg py-md font-medium text-on-surface">{{ p.student.user.email }}</td>
                 <td class="px-lg py-md text-on-surface">{{ p.application.slot.title }}</td>
-                <td class="px-lg py-md text-on-surface-variant">{{ p.application.slot.company.name }}</td>
+                <td class="px-lg py-md text-on-surface-variant">{{ p.application.slot.organization.name }}</td>
                 <td class="px-lg py-md text-on-surface">
                   {% if p.application.status == 'CANCELLED' %}
                     <span class="inline-flex items-center gap-1 text-error bg-error/10 px-2 py-0.5 rounded-full text-xs font-medium">

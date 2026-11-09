@@ -5,9 +5,9 @@ from apps.slots.models import Slot
 
 
 class SlotSerializer(serializers.ModelSerializer):
-    company_name = serializers.CharField(source="company.name", read_only=True)
-    company_approved = serializers.BooleanField(
-        source="company.is_approved", read_only=True
+    organization_name = serializers.CharField(source="organization.name", read_only=True)
+    organization_approved = serializers.BooleanField(
+        source="organization.is_approved", read_only=True
     )
     region = serializers.SerializerMethodField()
     district_name = serializers.CharField(source="district.name", read_only=True)
@@ -15,6 +15,7 @@ class SlotSerializer(serializers.ModelSerializer):
     booked_count = serializers.SerializerMethodField()
     education_level_display = serializers.SerializerMethodField()
     academic_year_display = serializers.SerializerMethodField()
+    deadline_passed = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Slot
@@ -24,9 +25,9 @@ class SlotSerializer(serializers.ModelSerializer):
             "description",
             "industry",
             "role_type",
-            "company",
-            "company_name",
-            "company_approved",
+            "organization",
+            "organization_name",
+            "organization_approved",
             "region",
             "district",
             "district_name",
@@ -36,6 +37,8 @@ class SlotSerializer(serializers.ModelSerializer):
             "education_level",
             "education_level_display",
             "academic_year_display",
+            "application_deadline",
+            "deadline_passed",
             "capacity",
             "booked_count",
             "available_count",

@@ -33,7 +33,7 @@
           <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">school</span>
         </div>
         <p class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">{% trans "University" %}</p>
-        <p class="font-headline-md font-headline-md text-on-surface truncate">{{ profile.university }}</p>
+        <p class="font-headline-md font-headline-md text-on-surface truncate">{{ profile.university|default:"Not specified" }}</p>
       </div>
       <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm relative overflow-hidden group">
         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-surface-container rounded-full blur-xl group-hover:bg-secondary-container/20 transition-colors"></div>
@@ -71,7 +71,7 @@
             <thead>
               <tr class="text-metadata font-label-caps text-on-surface-variant uppercase border-b border-surface-variant">
                 <th class="py-sm px-md font-medium">{% trans "Slot" %}</th>
-                <th class="py-sm px-md font-medium">{% trans "Company" %}</th>
+                <th class="py-sm px-md font-medium">{% trans "Organization" %}</th>
                 <th class="py-sm px-md font-medium">{% trans "Status" %}</th>
                 <th class="py-sm px-md font-medium text-right">{% trans "Payment" %}</th>
               </tr>
@@ -80,7 +80,7 @@
               {% for app in applications %}
                 <tr class="border-b border-surface-variant hover:bg-surface-container-low/50 transition-colors">
                   <td class="py-sm px-md font-medium">{{ app.slot.title }}</td>
-                  <td class="py-sm px-md">{{ app.slot.company.name }}</td>
+                  <td class="py-sm px-md">{{ app.slot.organization.name }}</td>
                   <td class="py-sm px-md">
                     {% if app.status == 'PAID' %}<span class="px-2 py-0.5 rounded-full text-metadata font-metadata bg-[#e8f5e9] text-[#1b5e20]">{% trans "Paid" %}</span>
                     {% elif app.status == 'UNPAID' %}<span class="px-2 py-0.5 rounded-full text-metadata font-metadata bg-error-container text-on-error-container">{% trans "Unpaid" %}</span>

@@ -3,7 +3,7 @@ from django import forms as django_forms
 from django.urls import reverse
 from django.utils.html import format_html
 
-from apps.students.models import StudentProfile
+from apps.students.models import StudentProfile, University
 from apps.core.admin_mixins import VerificationAdminMixin
 from apps.core.skill_fields import normalize_skills, skills_to_text
 
@@ -29,6 +29,13 @@ class StudentProfileAdminForm(django_forms.ModelForm):
         return normalize_skills(self.cleaned_data.get("skills"))
 
 
+@admin.register(University)
+class UniversityAdmin(admin.ModelAdmin):
+    list_display = ("name", "abbreviation", "institution_type", "region", "verification_status", "suggested_by")
+    list_filter = ("verification_status", "institution_type")
+    search_fields = ("name", "abbreviation")
+
+
 @admin.register(StudentProfile)
 class StudentProfileAdmin(VerificationAdminMixin, admin.ModelAdmin):
     form = StudentProfileAdminForm
@@ -47,11 +54,11 @@ class StudentProfileAdmin(VerificationAdminMixin, admin.ModelAdmin):
         "reviewed_at",
     )
     list_filter = ("verification_status", "university", "course", "education_level")
-    search_fields = ("user__email", "university", "course")
+    search_fields = ("user__email", "university__name", "course")
     list_editable = ("verification_status",)
     readonly_fields = ("created_at", "updated_at", "reviewed_at")
     fieldsets = (
-        (None, {"fields": ("user", "university", "course", "academic_year", "education_level", "gpa", "skills")}),
+        (None, {"fields": ("user", "university", "course", "academic_year", "graduation_year", "education_level", "gpa", "skills")}),
         ("Location", {"fields": ("region", "district")}),
         ("Verification", {"fields": ("verification_status", "rejection_reason", "reviewed_by", "reviewed_at")}),
     )

@@ -47,7 +47,7 @@ def build_payment_receipt(payment):
     c.setFont("Helvetica", 10)
     details = [
         ("Student", str(app.student.user.get_full_name() or app.student.user.email)),
-        ("Company", app.slot.company.name),
+        ("Organization", app.slot.organization.name),
         ("Slot", app.slot.title),
         ("District", str(app.slot.district)),
         ("Role", app.slot.role_type),

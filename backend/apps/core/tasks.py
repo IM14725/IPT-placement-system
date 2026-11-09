@@ -7,7 +7,7 @@ def aggregate():
     from django.db.models import Count, Sum
 
     from apps.applications.models import Application, ApplicationStatus
-    from apps.companies.models import CompanyProfile
+    from apps.companies.models import Organization
     from apps.payments.models import Payment, PaymentStatus
     from apps.students.models import StudentProfile, VerificationStatus
 
@@ -20,7 +20,7 @@ def aggregate():
         "verified_students": StudentProfile.objects.filter(
             verification_status=VerificationStatus.APPROVED
         ).count(),
-        "approved_companies": CompanyProfile.objects.filter(
+        "approved_organizations": Organization.objects.filter(
             verification_status=VerificationStatus.APPROVED
         ).count(),
         "active_placements": Application.objects.filter(

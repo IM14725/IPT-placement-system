@@ -24,7 +24,7 @@
               <div class="flex items-center gap-base flex-wrap">
                 <span class="font-headline-md text-headline-md text-on-surface">{{ app.slot.title }}</span>
               </div>
-              <span class="font-body-md text-body-md text-on-surface-variant">{{ app.slot.company.name }} · {{ app.slot.district }}</span>
+              <span class="font-body-md text-body-md text-on-surface-variant">{{ app.slot.organization.name }} · {{ app.slot.district }}</span>
             </div>
           </div>
           <div class="px-3 py-1 rounded-full border
@@ -57,7 +57,7 @@
                 {% elif app.status == 'UNPAID' %}{% trans "Payment Expired" %}{% else %}{% trans "Awaiting Payment" %}{% endif %}
               </span>
               <span class="font-body-md font-body-md text-on-surface-variant text-[12px]">
-                {% if app.status == 'PAID' %}{% if app.is_accepted %}{% trans "Payment verified, Placement confirmed" %}{% else %}{% trans "Pending company decision" %}{% endif %}
+                {% if app.status == 'PAID' %}{% if app.is_accepted %}{% trans "Payment verified, Placement confirmed" %}{% else %}{% trans "Pending organization decision" %}{% endif %}
                 {% elif app.status == 'UNPAID' %}{% trans "Slot released - re-book to start a new application" %}
                 {% else %}{% if app.payment_deadline %}{% blocktrans with deadline=app.payment_deadline|date:"M d, H:i" %}Pay by {{ deadline }} to keep your seat{% endblocktrans %}{% else %}{% trans "Pay fee to proceed to review" %}{% endif %}{% endif %}
               </span>

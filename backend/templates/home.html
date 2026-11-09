@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% trans "IPT Marketplace — Student & Company Matching" %}{% endblock %}
+{% block title %}{% trans "IPT Marketplace — Student & Organization Matching" %}{% endblock %}
 {% block content %}
 <div class="flex flex-col gap-lg">
   <!-- Hero Section -->
@@ -20,10 +20,10 @@
     </div>
     <div class="relative z-10 flex flex-col items-center max-w-[800px] text-center gap-lg">
       <h1 class="font-display text-display text-on-background tracking-tight">
-        {% blocktrans %}Connect students with companies for <br class="hidden sm:block"> <span class="text-primary">Industrial Practical Training.</span>{% endblocktrans %}
+        {% blocktrans %}Connect students with organizations for <br class="hidden sm:block"> <span class="text-primary">Industrial Practical Training.</span>{% endblocktrans %}
       </h1>
       <p class="font-body-lg text-body-lg text-on-surface-variant max-w-[600px]">
-        {% trans "A secure marketplace for students to find verified IPT slots and companies to manage talent efficiently." %}
+        {% trans "A secure marketplace for students to find verified IPT slots and organizations to manage talent efficiently." %}
       </p>
       <div class="flex flex-row gap-md mt-sm">
         <a href="{% url 'register' %}" class="px-lg py-sm rounded-full bg-primary text-on-primary font-metadata text-metadata uppercase tracking-wider shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-xs">
@@ -62,7 +62,7 @@
           <div class="w-12 h-12 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center shadow-md mb-xs">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">business_center</span>
           </div>
-          <h3 class="font-headline-md text-headline-md">For Companies</h3>
+          <h3 class="font-headline-md text-headline-md">For Organizations</h3>
           <p class="font-body-md text-body-md text-on-primary/80 leading-relaxed">
             Post verified training slots, review applications from pre-verified students, and manage communication via instant SMS alerts.
           </p>
@@ -76,7 +76,7 @@
           </div>
           <h3 class="font-headline-md text-headline-md text-on-surface">{% trans "Secure & Verified" %}</h3>
           <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-            {% trans "Built on trust. We enforce strict document verification protocols for both students and companies to ensure a safe and professional ecosystem." %}
+            {% trans "Built on trust. We enforce strict document verification protocols for both students and organizations to ensure a safe and professional ecosystem." %}
           </p>
         </div>
       </div>

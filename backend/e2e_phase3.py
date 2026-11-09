@@ -18,21 +18,21 @@ from apps.payments.models import Payment
 from apps.slots.models import Slot
 
 STUDENT_EMAIL = "student2@x.tz"
-COMPANY_EMAIL = "company2@x.tz"
+COMPANY_EMAIL = "organization2@x.tz"
 REALTIME = "http://127.0.0.1:8001"
 WS = "ws://127.0.0.1:8001"
 
 student_user = User.objects.get(email=STUDENT_EMAIL)
-company_user = User.objects.get(email=COMPANY_EMAIL)
+organization_user = User.objects.get(email=COMPANY_EMAIL)
 
 
 def _setup():
-    from apps.companies.models import CompanyProfile
+    from apps.companies.models import Organization
 
-    company = CompanyProfile.objects.get(user=company_user)
+    organization = Organization.objects.get(user=organization_user)
     first = Slot.objects.order_by("id").first()
     slot = Slot.objects.create(
-        company=company,
+        organization=organization,
         title=f"E2E Slot {int(time.time())}",
         description="Automated Phase 3 smoke test",
         industry="Software",
@@ -56,12 +56,13 @@ def _setup():
     assert r.status_code == 302 and "/student/payments/" in r.get("Location"), r.status_code
     payment_id = int(r.get("Location").split("/")[-2])
     payment = Payment.objects.get(id=payment_id)
-    token = client.get("/api/auth/my-token/").json()["token"]
+    token = client.get("/api/auth/ws-ticket/").json()["ticket"]
     return client, slot, payment, token
 
 
 async def ws_listener(token, user_id, out):
-    async with websockets.connect(f"{WS}/ws/notifications/{user_id}?token={token}") as ws:
+    # ``token`` is a single-use ws ticket (60s): connect right after fetching it.
+    async with websockets.connect(f"{WS}/ws/notifications/{user_id}?ticket={token}") as ws:
         first = await asyncio.wait_for(ws.recv(), timeout=6)
         print("ws first:", first)
         try:

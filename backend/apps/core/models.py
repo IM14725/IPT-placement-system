@@ -45,6 +45,57 @@ class AuditLog(models.Model):
         return f"{self.action} ({self.module}) @ {self.created_at:%Y-%m-%d %H:%M}"
 
 
+class Report(TimeStampedModel):
+    """A complaint or report filed by a user, reviewed by platform administrators."""
+
+    class Category(models.TextChoices):
+        FRAUD = "FRAUD", "Fraud or scam"
+        MISLEADING = "MISLEADING", "Misleading or fake opportunity"
+        PAYMENT = "PAYMENT", "Payment problem"
+        ABUSE = "ABUSE", "Harassment or abuse"
+        OTHER = "OTHER", "Other"
+
+    class Status(models.TextChoices):
+        OPEN = "OPEN", "Open"
+        IN_REVIEW = "IN_REVIEW", "In review"
+        RESOLVED = "RESOLVED", "Resolved"
+        DISMISSED = "DISMISSED", "Dismissed"
+
+    reporter = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="reports_filed",
+    )
+    organization = models.ForeignKey(
+        "companies.Organization",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="reports",
+    )
+    category = models.CharField(max_length=12, choices=Category.choices, default=Category.OTHER)
+    subject = models.CharField(max_length=200)
+    description = models.TextField()
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.OPEN)
+    admin_notes = models.TextField(blank=True)
+    handled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="reports_handled",
+    )
+    handled_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.get_category_display()}: {self.subject}"
+
+
 class IntegrityRecord(models.Model):
     """Append-only, tamper-evident ledger of sealed critical records."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -57,9 +108,8 @@ class IntegrityRecord(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["created_at", "id"]
         indexes = [models.Index(fields=["record_type", "record_id"])]
-
     def __str__(self):
         return f"{self.record_type}#{self.record_id} {self.record_hash[:12]}…"
 

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.password_validation import validate_password
 
-from apps.accounts.models import User, UserRole
+from apps.accounts.models import User, UserRole, normalize_phone
 
 FIELD_CLASS = (
     "w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md "
@@ -41,7 +41,7 @@ class RegisterForm(forms.ModelForm):
         widget=forms.PasswordInput(attrs={"class": FIELD_CLASS, "placeholder": "Repeat your password", "autocomplete": "new-password"}),
     )
     role = forms.ChoiceField(
-        choices=[(UserRole.STUDENT, "Student"), (UserRole.COMPANY, "Company")],
+        choices=[(UserRole.STUDENT, "Student"), (UserRole.ORGANIZATION, "Organization")],
         widget=forms.RadioSelect(attrs={"class": "peer sr-only"}),
     )
     phone = forms.CharField(
@@ -49,15 +49,15 @@ class RegisterForm(forms.ModelForm):
         validators=[validate_tz_phone],
         widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "2557XXXXXXXX", "autocomplete": "tel"}),
     )
-    company_name = forms.CharField(
+    organization_name = forms.CharField(
         required=False,
-        label="Company name",
+        label="Organization name",
         widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "e.g. Amani Logistics Ltd"}),
     )
 
     class Meta:
         model = User
-        fields = ("email", "first_name", "last_name", "phone", "role", "company_name")
+        fields = ("email", "first_name", "last_name", "phone", "role", "organization_name")
         widgets = {
             "email": forms.EmailInput(attrs={"class": FIELD_CLASS, "placeholder": "you@example.com", "autocomplete": "email"}),
             "first_name": forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "First name"}),
@@ -69,6 +69,14 @@ class RegisterForm(forms.ModelForm):
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("An account with this email already exists.")
         return email
+
+    def clean_phone(self):
+        phone = normalize_phone(self.cleaned_data.get("phone"))
+        if phone and User.objects.filter(phone=phone).exists():
+            raise forms.ValidationError(
+                "This phone number is already associated with an account. Please use another phone number."
+            )
+        return self.cleaned_data.get("phone")
 
     def clean(self):
         cleaned = super().clean()
@@ -82,9 +90,16 @@ class RegisterForm(forms.ModelForm):
             except forms.ValidationError as exc:
                 self.add_error("password1", exc.messages)
         role = cleaned.get("role")
-        if role == UserRole.COMPANY:
-            if not (cleaned.get("company_name") or "").strip():
-                self.add_error("company_name", "Company name is required.")
+        if role == UserRole.ORGANIZATION:
+            from apps.companies.services import organization_name_taken
+
+            cleaned["first_name"] = ""
+            cleaned["last_name"] = ""
+            organization_name = (cleaned.get("organization_name") or "").strip()
+            if not organization_name:
+                self.add_error("organization_name", "Organization name is required.")
+            elif organization_name_taken(organization_name):
+                self.add_error("organization_name", "An organization with this name is already registered.")
         else:
             if not (cleaned.get("first_name") or "").strip():
                 self.add_error("first_name", "First name is required.")
@@ -96,8 +111,8 @@ class RegisterForm(forms.ModelForm):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         user.role = self.cleaned_data["role"]
-        if user.role == UserRole.COMPANY:
-            user.first_name = (self.cleaned_data.get("company_name") or "").strip()
+        if user.role == UserRole.ORGANIZATION:
+            user.first_name = ""
             user.last_name = ""
         if commit:
             user.save()
@@ -121,24 +136,29 @@ class ForgotPasswordForm(forms.Form):
             attrs={"class": FIELD_CLASS, "placeholder": "you@example.com", "autocomplete": "email"}
         )
     )
-    phone = forms.CharField(
-        validators=[validate_tz_phone],
-        widget=forms.TextInput(
-            attrs={"class": FIELD_CLASS, "placeholder": "2557XXXXXXXX", "autocomplete": "tel"}
-        )
+
+
+class RecoveryMethodForm(forms.Form):
+    channel = forms.ChoiceField(
+        choices=[("EMAIL", "Email"), ("SMS", "SMS to my phone")],
+        initial="EMAIL",
+        widget=forms.RadioSelect,
     )
 
-    def clean(self):
-        cleaned = super().clean()
-        email = cleaned.get("email")
-        phone = cleaned.get("phone")
-        if email and phone:
-            user = User.objects.filter(email=email.lower().strip()).first()
-            if user is None:
-                self.add_error("email", "No account found with this email address.")
-            elif _normalize_phone(user.phone) != _normalize_phone(phone):
-                self.add_error("phone", "Phone number does not match this account.")
-        return cleaned
+
+class OtpCodeForm(forms.Form):
+    code = forms.CharField(
+        min_length=6,
+        max_length=6,
+        widget=forms.TextInput(
+            attrs={
+                "class": FIELD_CLASS,
+                "placeholder": "6-digit code",
+                "autocomplete": "one-time-code",
+                "inputmode": "numeric",
+            }
+        ),
+    )
 
 
 class ResetPasswordForm(forms.Form):

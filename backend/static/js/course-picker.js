@@ -57,7 +57,13 @@
 
     function renderList() {
       var uniInput = document.getElementById(uniInputId);
-      var uniName = uniInput ? uniInput.value : "";
+      var uniName = "";
+      if (uniInput && uniInput.tagName === "SELECT") {
+        var chosen = uniInput.options[uniInput.selectedIndex];
+        uniName = chosen && uniInput.value ? chosen.text : "";
+      } else if (uniInput) {
+        uniName = uniInput.value;
+      }
       
       var uni = institutions.find(function(i) {
          return i.name === uniName || (i.abbreviation && i.abbreviation === uniName);

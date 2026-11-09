@@ -7,10 +7,10 @@
 
   function connect() {
     if (!window.IPT.currentUserId) return;
-    fetch("/api/auth/my-token/", { credentials: "same-origin", cache: "no-store" })
+    fetch("/api/auth/ws-ticket/", { credentials: "same-origin", cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        var url = "ws://" + location.hostname + ":8001/ws/notifications/" + window.IPT.currentUserId + "?token=" + data.token;
+        var url = "ws://" + location.hostname + ":8001/ws/notifications/" + window.IPT.currentUserId + "?ticket=" + encodeURIComponent(data.ticket);
         socket = new WebSocket(url);
 
         socket.onopen = function () { retries = 0; };

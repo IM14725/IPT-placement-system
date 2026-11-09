@@ -5,6 +5,8 @@
 
   function initPicker(input) {
     if (!input || !institutions.length) return;
+    // The student profile uses a real <select> backed by university records.
+    if (input.tagName === "SELECT") return;
     input.setAttribute("autocomplete", "off");
 
     var wrapper = document.createElement("div");

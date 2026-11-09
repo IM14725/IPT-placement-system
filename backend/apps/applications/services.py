@@ -22,15 +22,25 @@ def create_application(student_profile, slot) -> Application:
         locked = (
             Slot.objects.select_for_update()
             .filter(pk=slot.pk)
-            .select_related("company")
+            .select_related("organization")
             .first()
         )
         if locked is None:
             raise SlotFullError("Slot no longer exists.")
+        holds_seat = Application.objects.filter(
+            student=student_profile,
+            slot=locked,
+            status__in=[ApplicationStatus.PENDING, ApplicationStatus.PAID],
+        ).exists()
+        if not holds_seat:
+            if locked.deadline_passed:
+                raise SlotFullError("The application deadline for this slot has passed.")
+            if locked.organization.is_suspended:
+                raise SlotFullError("This organization is not accepting applications right now.")
         if locked.is_full:
             raise SlotFullError("This slot is full.")
 
-        application, _ = Application.objects.get_or_create(
+        application, _ =Application.objects.get_or_create(
             student=student_profile, slot=locked
         )
         if application.status == ApplicationStatus.PAID:
@@ -57,8 +67,8 @@ def create_application(student_profile, slot) -> Application:
         return application
 
 
-def get_company_visible_applications(slot):
-    """Company-visible applicants: only those with a verified payment."""
+def get_organization_visible_applications(slot):
+    """Organization-visible applicants: only those with a verified payment."""
     return (
         Application.objects.filter(slot=slot, status=ApplicationStatus.PAID)
         .select_related("student__user", "payment")
@@ -79,7 +89,7 @@ def finalize_verified_payment(payment, *, gateway_txn_id="", payload=None, actor
     """Verify a payment and mark the application PAID (Django-side flow).
 
     - marks the Payment PAID
-    - transitions the Application to PAID (NOT accepted yet — the company
+    - transitions the Application to PAID (NOT accepted yet — the organization
       confirms after reviewing the application letter)
     - records the Type A notification
     - fires the Celery tasks (receipt email, submitted SMS, fanout, slot refresh)
@@ -105,8 +115,8 @@ def finalize_verified_payment(payment, *, gateway_txn_id="", payload=None, actor
         title="Application Submitted",
         body=(
             f"Your application for '{application.slot.title}' at "
-            f"{application.slot.company.name} has been submitted. "
-            f"Payment verified ({payment.reference_id}). The company will review "
+            f"{application.slot.organization.name} has been submitted. "
+            f"Payment verified ({payment.reference_id}). The organization will review "
             f"your application letter."
         ),
     )

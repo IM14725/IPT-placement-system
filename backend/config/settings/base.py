@@ -1,16 +1,77 @@
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 
 import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env = environ.Env(
-    DEBUG=(bool, True),
+    DEBUG=(bool, False),
     SECRET_KEY=(str, "django-insecure-dev-only-change-me"),
     ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1", "testserver"]),
 )
 
 environ.Env.read_env(BASE_DIR / ".env")
+
+KNOWN_INSECURE_SECRET_KEYS = frozenset({
+    "",
+    "django-insecure-dev-only-change-me",
+    "change-me",
+    "secret",
+})
+KNOWN_INSECURE_WEBHOOK_SECRETS = frozenset({
+    "",
+    "dev-webhook-secret",
+    "dev-mock-webhook-secret",
+    "MOCK_API_SECRET",
+})
+
+
+def validate_production_config(
+    *,
+    secret_key,
+    allowed_hosts,
+    gateway_webhook_secret,
+    selcom_api_key,
+    selcom_api_secret,
+    selcom_vendor_till,
+    database_url,
+    db_password,
+):
+    """Fail fast at startup if any production secret or setting is missing or uses a dev default."""
+    if not secret_key or secret_key in KNOWN_INSECURE_SECRET_KEYS or secret_key.startswith("django-insecure-") or len(secret_key) < 32:
+        raise ImproperlyConfigured(
+            "Production requires a strong SECRET_KEY (>= 32 chars, not a dev/insecure default)."
+        )
+    if not allowed_hosts or set(allowed_hosts).issubset({"localhost", "127.0.0.1", "testserver"}):
+        raise ImproperlyConfigured(
+            "Production requires explicit ALLOWED_HOSTS (cannot be empty or localhost-only)."
+        )
+    if not gateway_webhook_secret or gateway_webhook_secret in KNOWN_INSECURE_WEBHOOK_SECRETS or len(gateway_webhook_secret) < 16:
+        raise ImproperlyConfigured(
+            "Production requires a strong GATEWAY_WEBHOOK_SECRET (cannot use dev default)."
+        )
+    if not selcom_api_key or selcom_api_key == "MOCK_API_KEY":
+        raise ImproperlyConfigured(
+            "Production requires a real SELCOM_API_KEY (cannot use MOCK_API_KEY)."
+        )
+    if not selcom_api_secret or selcom_api_secret in KNOWN_INSECURE_WEBHOOK_SECRETS:
+        raise ImproperlyConfigured(
+            "Production requires a real SELCOM_API_SECRET (cannot use MOCK_API_SECRET)."
+        )
+    if not selcom_vendor_till or selcom_vendor_till == "MOCK_TILL":
+        raise ImproperlyConfigured(
+            "Production requires a real SELCOM_VENDOR_TILL (cannot use MOCK_TILL)."
+        )
+    if not database_url and (not db_password or db_password == "ipt_dev_password"):
+        raise ImproperlyConfigured(
+            "Production requires DATABASE_URL or a non-default DB_PASSWORD."
+        )
+    if database_url and "ipt_dev_password" in database_url:
+        raise ImproperlyConfigured(
+            "Production DATABASE_URL cannot use the default development password."
+        )
+
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
@@ -94,6 +155,10 @@ DATABASES = {
 
 AUTH_USER_MODEL = "accounts.User"
 
+# Temporary login lockout (apps/core/lockout.py): never a permanent account lock.
+LOGIN_LOCKOUT_ATTEMPTS = env.int("LOGIN_LOCKOUT_ATTEMPTS", default=5)
+LOGIN_LOCKOUT_SECONDS = env.int("LOGIN_LOCKOUT_SECONDS", default=300)
+
 LOGIN_URL = "/auth/login/"
 LOGIN_REDIRECT_URL = "/"
 
@@ -119,8 +184,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        # Session only: permanent API tokens would bypass the session lifetime rules.
         "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",

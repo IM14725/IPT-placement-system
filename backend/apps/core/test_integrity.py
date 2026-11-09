@@ -10,14 +10,14 @@ from apps.applications.services import (
     create_application,
     finalize_verified_payment,
 )
-from apps.companies.models import CompanyProfile
+from apps.companies.models import Organization
 from apps.core.immutability import verify_chain, verify_record
 from apps.core.models import AuditLog, IntegrityRecord
 from apps.documents.models import Document
 from apps.locations.models import District, Region
 from apps.payments.models import Payment, PaymentMethod
 from apps.slots.models import Slot
-from apps.students.models import StudentProfile, VerificationStatus
+from apps.students.models import StudentProfile, University, VerificationStatus
 
 
 @pytest.fixture
@@ -31,16 +31,16 @@ def district(region):
 
 
 @pytest.fixture
-def company_user():
+def organization_user():
     return User.objects.create_user(
-        email="company@x.tz", password="Secret123!", role=UserRole.COMPANY
+        email="organization@x.tz", password="Secret123!", role=UserRole.ORGANIZATION
     )
 
 
 @pytest.fixture
-def company(company_user):
-    return CompanyProfile.objects.create(
-        user=company_user,
+def organization(organization_user):
+    return Organization.objects.create(
+        user=organization_user,
         name="TechCorp Ltd",
         industry="Technology",
         verification_status=VerificationStatus.APPROVED,
@@ -48,9 +48,9 @@ def company(company_user):
 
 
 @pytest.fixture
-def slot(company, district):
+def slot(organization, district):
     return Slot.objects.create(
-        company=company,
+        organization=organization,
         title="Software Engineering Intern",
         industry="Technology",
         role_type="Internship",
@@ -63,9 +63,9 @@ def make_student(email):
     user = User.objects.create_user(email=email, password="Secret123!", role=UserRole.STUDENT)
     return StudentProfile.objects.create(
         user=user,
-        university="University of Dar es Salaam",
+        university=University.objects.get_or_create(name="University of Dar es Salaam")[0],
         course="Computer Science",
-        current_year=3,
+        academic_year=3,
         verification_status=VerificationStatus.APPROVED,
     )
 
@@ -212,7 +212,7 @@ def test_verify_record_detects_changed_fields(slot):
 
     student = make_student("s2@x.tz")
     app = create_application(student, slot)
-    rec = IntegrityRecord.objects.filter(record_type="APPLICATION", record_id=app.id).order_by("-id").first()
+    rec = IntegrityRecord.objects.filter(record_type="APPLICATION", record_id=app.id).order_by("-created_at", "-id").first()
     assert verify_record(IntegrityRecord, rec, _application_fields(app))
     tampered = _application_fields(app)
     tampered["status"] = "PAID"
@@ -223,7 +223,7 @@ def test_verify_record_detects_changed_fields(slot):
 def test_verify_chain_detects_break(slot):
     student = make_student("s3@x.tz")
     make_paid_application(student, slot)
-    first = IntegrityRecord.objects.order_by("id").first()
+    first = IntegrityRecord.objects.order_by("created_at", "id").first()
     IntegrityRecord.objects.filter(id=first.id).update(record_hash="deadbeef" * 8)
     issues = verify_chain(IntegrityRecord)
     assert issues
@@ -244,8 +244,8 @@ def test_apply_sets_letter_sha256(client, slot):
         },
     )
     assert resp.status_code == 302
-    pay_id = int(resp["Location"].strip("/").split("/")[-1])
+    pay_id = resp["Location"].strip("/").split("/")[-1]
     app = Payment.objects.get(id=pay_id).application
     assert app.letter_sha256
-    rec = IntegrityRecord.objects.filter(record_type="APPLICATION", record_id=app.id).order_by("-id").first()
+    rec = IntegrityRecord.objects.filter(record_type="APPLICATION", record_id=app.id).order_by("-created_at", "-id").first()
     assert rec.payload["letter_sha256"] == app.letter_sha256

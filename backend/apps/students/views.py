@@ -42,7 +42,7 @@ def dashboard(request):
     profile = _profile_required(request)
     applications = (
         Application.objects.filter(student__user=request.user)
-        .select_related("slot__company", "slot__district__region", "payment")
+        .select_related("slot__organization", "slot__district__region", "payment")
         .order_by("-created_at")[:10]
     )
     return render(
@@ -58,15 +58,22 @@ def profile(request):
         return HttpResponseForbidden("Student account required.")
     instance = _profile_required(request)
     if request.method == "POST":
-        form = StudentProfileForm(request.POST, request.FILES, instance=instance)
+        form = StudentProfileForm(request.POST, request.FILES, instance=instance, user=request.user)
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
             profile.save()
+            if form.cleaned_data.get("university_not_listed") and profile.university_id:
+                if not profile.university.is_approved:
+                    messages.info(
+                        request,
+                        "Your university suggestion was sent to the platform admins for review. "
+                        "It is saved on your profile in the meantime.",
+                    )
             messages.success(request, "Profile saved.")
             return redirect("student-dashboard")
     else:
-        form = StudentProfileForm(instance=instance)
+        form = StudentProfileForm(instance=instance, user=request.user)
     regions = get_regions()
     return render(
         request,
@@ -145,7 +152,7 @@ def applications(request):
 
     qs = (
         Application.objects.filter(student__user=request.user)
-        .select_related("slot__company", "slot__district__region", "payment")
+        .select_related("slot__organization", "slot__district__region", "payment")
         .order_by("-created_at")
     )
     page_obj = paginate(qs, request.GET.get("page"))
@@ -249,19 +256,27 @@ def payment(request, payment_id):
 
 @login_required
 def view_document(request, doc_id):
+    from apps.documents.validators import build_safe_file_response
+
     doc = get_object_or_404(Document, id=doc_id)
     user = request.user
     is_owner = doc.owner_id == user.id
     is_admin = user.is_staff or user.is_platform_admin
-    company_can_view = False
-    if user.is_company:
-        company_can_view = Application.objects.filter(
-            student__user=doc.owner_id,
-            slot__company__user=user,
-            status="PAID",
-        ).exists()
-    if not (is_owner or is_admin or company_can_view):
+    organization_can_view = False
+    if user.is_organization:
+        from apps.companies.services import get_user_organization
+
+        org = get_user_organization(user)
+        if org is not None:
+            organization_can_view = Application.objects.filter(
+                student__user=doc.owner_id,
+                slot__organization=org,
+                status="PAID",
+            ).exists()
+    if not (is_owner or is_admin or organization_can_view):
         raise Http404
+    if doc.scan_status == "ERROR":
+        return HttpResponseGone("This document failed security scanning and is unavailable.")
     if doc.sha256:
         doc.file.open("rb")
         try:
@@ -270,7 +285,11 @@ def view_document(request, doc_id):
             doc.file.close()
         if actual != doc.sha256:
             return HttpResponseGone("This document failed its integrity check and is unavailable.")
-    return FileResponse(doc.file.open("rb"), content_type=doc.mime_type or "application/octet-stream")
+    return build_safe_file_response(
+        doc.file,
+        filename=doc.original_name or "document",
+        declared_mime=doc.mime_type,
+    )
 
 
 @login_required
@@ -306,7 +325,7 @@ def cancel_application(request, app_id):
             return redirect("student-applications")
             
         if application.is_accepted:
-             messages.error(request, "Application has already been accepted by the company.")
+             messages.error(request, "Application has already been accepted by the organization.")
              return redirect("student-applications")
              
         # Execute cancellation
@@ -322,7 +341,7 @@ def cancel_application(request, app_id):
         profile.reapplication_credit = True
         profile.save(update_fields=["reapplication_credit", "updated_at"])
         
-        # Note: You also need to notify the company. 
+        # Note: You also need to notify the organization. 
         # A notification system can be hooked here, but for now we trust the db update.
         
         messages.success(request, "Application cancelled successfully. Your slot was returned and you now have a credit to apply for a new slot without paying.")
@@ -330,6 +349,8 @@ def cancel_application(request, app_id):
     return redirect("student-applications")
 @login_required
 def view_application_letter(request, app_id):
+    from apps.documents.validators import build_safe_file_response
+
     if not request.user.is_student:
         return HttpResponseForbidden("Student account required.")
     app = get_object_or_404(
@@ -349,18 +370,4 @@ def view_application_letter(request, app_id):
                 "This application letter failed its integrity check and is unavailable."
             )
     filename = app.letter_original_name or "application_letter.pdf"
-    
-    from pathlib import Path
-    ext = Path(filename).suffix.lower()
-    mimes = {
-        ".pdf": "application/pdf",
-        ".png": "image/png",
-        ".jpg": "image/jpeg",
-        ".jpeg": "image/jpeg",
-    }
-    
-    return FileResponse(
-        app.application_letter.open("rb"),
-        content_type=mimes.get(ext) or "application/octet-stream",
-        filename=filename,
-    )
+    return build_safe_file_response(app.application_letter, filename=filename)

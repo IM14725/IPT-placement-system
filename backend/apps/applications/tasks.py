@@ -55,14 +55,14 @@ def expire_unpaid():
 def submitted_sms(application_id):
     """Type A notification — SMS confirming the application was sent.
 
-    Includes Application ID, Company Name, and selected Slot.
+    Includes Application ID, Organization Name, and selected Slot.
     """
     from apps.applications.models import Application
     from apps.notifications.models import MessageChannel
 
     app = (
         Application.objects.select_related(
-            "student__user", "slot__company", "payment"
+            "student__user", "slot__organization", "payment"
         )
         .get(id=application_id)
     )
@@ -71,12 +71,12 @@ def submitted_sms(application_id):
         MessageChannel.SMS,
         {
             "app_id": app.id,
-            "company_name": app.slot.company.name,
+            "organization_name": app.slot.organization.name,
             "slot_title": app.slot.title,
             "student_name": app.student.user.full_name,
         },
         fallback_body=(
-            f"Application Sent! App ID: #{app.id} | Company: {app.slot.company.name} | "
+            f"Application Sent! App ID: #{app.id} | Organization: {app.slot.organization.name} | "
             f"Slot: {app.slot.title}. Track it on the IPT Marketplace."
         ),
     )
@@ -99,13 +99,13 @@ def submitted_sms(application_id):
     max_retries=8,
 )
 def acceptance_sms(application_id, company_message="", actor_id=None):
-    """Type B notification — company-triggered SMS telling the student to
+    """Type B notification — organization-triggered SMS telling the student to
     check their email for the acceptance letter / further instructions.
     """
     from apps.applications.models import Application
     from apps.notifications.models import MessageChannel
 
-    app = Application.objects.select_related("student__user", "slot__company").get(
+    app = Application.objects.select_related("student__user", "slot__organization").get(
         id=application_id
     )
     note = f"\n{company_message}" if company_message else ""
@@ -114,12 +114,12 @@ def acceptance_sms(application_id, company_message="", actor_id=None):
         MessageChannel.SMS,
         {
             "slot_title": app.slot.title,
-            "company_name": app.slot.company.name,
+            "organization_name": app.slot.organization.name,
             "student_name": app.student.user.full_name,
         },
         fallback_body=(
             f"Congratulations! You have been accepted for {app.slot.title} at "
-            f"{app.slot.company.name}. Check your email for the acceptance letter or "
+            f"{app.slot.organization.name}. Check your email for the acceptance letter or "
             f"further instructions.{note}"
         ),
     )
@@ -144,22 +144,22 @@ def acceptance_sms(application_id, company_message="", actor_id=None):
     max_retries=8,
 )
 def acceptance_email(application_id, company_message=""):
-    """Type B notification — company-triggered email confirming acceptance and
+    """Type B notification — organization-triggered email confirming acceptance and
     asking the student to open their email for the acceptance letter.
     """
     from apps.applications.models import Application
     from apps.notifications.models import MessageChannel
 
-    app = Application.objects.select_related("student__user", "slot__company").get(
+    app = Application.objects.select_related("student__user", "slot__organization").get(
         id=application_id
     )
-    note = f"\n\nNote from {app.slot.company.name}:\n{company_message}" if company_message else ""
+    note = f"\n\nNote from {app.slot.organization.name}:\n{company_message}" if company_message else ""
     subject, body = render_template(
         "acceptance_email",
         MessageChannel.EMAIL,
         {
             "student_name": app.student.user.full_name or app.student.user.email,
-            "company_name": app.slot.company.name,
+            "organization_name": app.slot.organization.name,
             "slot_title": app.slot.title,
             "app_id": app.id,
             "company_message": company_message,
@@ -168,11 +168,11 @@ def acceptance_email(application_id, company_message=""):
         fallback_body=(
             f"Dear {app.student.user.full_name or app.student.user.email},\n\n"
             f"Congratulations! Your application (ID: #{app.id}) for '{app.slot.title}' "
-            f"at {app.slot.company.name} has been accepted.\n\n"
+            f"at {app.slot.organization.name} has been accepted.\n\n"
             f"Please open your email and check for the official acceptance letter and "
-            f"further instructions from the company. Contact {app.slot.company.name} if "
+            f"further instructions from the organization. Contact {app.slot.organization.name} if "
             f"you have any questions.{note}\n\n"
-            f"Best regards,\n{app.slot.company.name}"
+            f"Best regards,\n{app.slot.organization.name}"
         ),
     )
     message = create_message(

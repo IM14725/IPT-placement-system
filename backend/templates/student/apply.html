@@ -12,7 +12,7 @@
     <div class="p-lg flex flex-col gap-md">
       <div class="flex items-start justify-between gap-sm">
         <div class="flex flex-col gap-xs">
-          <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{{ slot.company.name }}</span>
+          <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{{ slot.organization.name }}</span>
           <h2 class="font-headline-md text-headline-md text-on-surface">{{ slot.title }}</h2>
         </div>
         <span class="px-sm py-1 rounded-full bg-[#e8f5e9] text-[#1b5e20] font-label-caps text-label-caps flex items-center gap-1 whitespace-nowrap">
@@ -33,6 +33,12 @@
         <div class="flex items-center gap-xs font-body-md text-on-surface-variant col-span-2">
           <span class="material-symbols-outlined text-[18px] text-outline">school</span>
           <span>Dept: {{ slot.department }}</span>
+        </div>
+        {% endif %}
+        {% if slot.application_deadline %}
+        <div class="flex items-center gap-xs font-body-md col-span-2 {% if slot.deadline_passed %}text-error{% else %}text-on-surface-variant{% endif %}">
+          <span class="material-symbols-outlined text-[18px]">event</span>
+          <span>{% if slot.deadline_passed %}{% trans "Applications closed on" %}{% else %}{% trans "Apply by" %}{% endif %} {{ slot.application_deadline|date:"j M Y, H:i" }}</span>
         </div>
         {% endif %}
         <div class="flex items-center gap-xs font-body-md text-on-surface-variant col-span-2">

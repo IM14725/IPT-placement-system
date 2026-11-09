@@ -35,7 +35,7 @@
       <li><a href="#payments"         class="hover:text-primary transition-colors">{% trans "Payments &amp; Non-Refundability" %}</a></li>
       <li><a href="#slots"            class="hover:text-primary transition-colors">{% trans "Slot Selection, Hold &amp; Finality" %}</a></li>
       <li><a href="#cancellation"     class="hover:text-primary transition-colors">{% trans "Cancellation &amp; Application Credit" %}</a></li>
-      <li><a href="#company-review"   class="hover:text-primary transition-colors">{% trans "Company Review Obligation" %}</a></li>
+      <li><a href="#organization-review"   class="hover:text-primary transition-colors">{% trans "Organization Review Obligation" %}</a></li>
       <li><a href="#communications"   class="hover:text-primary transition-colors">{% trans "Communications &amp; Messaging" %}</a></li>
       <li><a href="#ip"               class="hover:text-primary transition-colors">{% trans "Intellectual Property" %}</a></li>
       <li><a href="#prohibited"       class="hover:text-primary transition-colors">{% trans "Prohibited Conduct" %}</a></li>
@@ -55,7 +55,7 @@
     <p class="font-body-md text-body-md text-on-surface-variant">
       {% blocktrans %}
         By accessing or using the IPT Marketplace — whether as a <strong>Student</strong>, a
-        <strong>Company</strong>, or an <strong>Institution</strong> — you agree to comply with
+        <strong>Organization</strong>, or an <strong>Institution</strong> — you agree to comply with
         these Terms and all regulations of the United Republic of Tanzania, including but not
         limited to the <em>Personal Data Protection Act, 2022</em>; the
         <em>Electronic Transactions Act (Cap. 442)</em> and its 2026 Order; the
@@ -98,13 +98,13 @@
             <div class="bg-surface-container rounded-xl p-md flex flex-col gap-xs">
         <div class="flex items-center gap-xs">
           <span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings:'FILL' 1;">business_center</span>
-          <h3 class="font-body-md font-semibold text-on-surface">{% trans "Companies" %}</h3>
+          <h3 class="font-body-md font-semibold text-on-surface">{% trans "Organizations" %}</h3>
         </div>
         <ul class="list-disc list-inside space-y-1 font-body-md text-body-md text-on-surface-variant">
           <li>{% trans "You must be a legally registered entity in Tanzania and upload valid BRELA certificate, TIN, and business license." %}</li>
           <li>{% trans "All posted slots must describe genuine, safe, and supervised training environments." %}</li>
           <li>{% trans "You must accurately state the number of available slots, location, department requirements, and stipend terms." %}</li>
-          <li>{% trans "Companies must not post fictitious slots or collect any fees directly from students outside the Platform." %}</li>
+          <li>{% trans "Organizations must not post fictitious slots or collect any fees directly from students outside the Platform." %}</li>
           <li>{% trans "You are responsible for reviewing applicants within the mandatory review period defined in Section 8." %}</li>
         </ul>
       </div>
@@ -134,7 +134,7 @@
       <p class="font-body-md text-body-md text-on-surface-variant">
         {% blocktrans %}
           In accordance with the <em>Personal Data Protection Act, 2022</em> (PDPA), all Students and
-          Companies must provide <strong>complete, accurate, and up-to-date</strong> information
+          Organizations must provide <strong>complete, accurate, and up-to-date</strong> information
           upon registration and throughout their use of the Platform.  You are strictly required
           to update your profile immediately if any academic, personal, or corporate details change.
         {% endblocktrans %}
@@ -189,7 +189,7 @@
     <p class="font-body-md text-body-md text-on-surface-variant">
       {% blocktrans %}
         The IPT Marketplace acts <strong>solely as an intermediary</strong> to connect students
-        seeking Industrial Practical Training with companies willing to host them.  The Platform does
+        seeking Industrial Practical Training with organizations willing to host them.  The Platform does
         not guarantee a successful placement, a positive evaluation outcome, or any future employment.
       {% endblocktrans %}
     </p>
@@ -202,13 +202,13 @@
           only and does <strong>not</strong> create an employer-employee relationship, an employment
           contract, or any entitlement to wages, benefits, or statutory protections afforded to
           employees under Tanzanian labour law, unless separately agreed in writing between the student
-          and the company.
+          and the organization.
         {% endblocktrans %}
       </p>
     </div>
     <p class="font-body-md text-body-md text-on-surface-variant">
       {% blocktrans %}
-        Companies hosting students must nonetheless ensure a safe, professional, and supervised
+        Organizations hosting students must nonetheless ensure a safe, professional, and supervised
         working environment and comply with all applicable Tanzanian occupational health and safety
         regulations throughout the training period.
       {% endblocktrans %}
@@ -271,7 +271,7 @@
           {% endblocktrans %}
         </p>
         <ul class="list-disc list-inside space-y-0.5 font-body-md text-body-md text-on-error-container">
-          <li>{% trans "Rejection of the application by a company." %}</li>
+          <li>{% trans "Rejection of the application by an organization." %}</li>
           <li>{% trans "Voluntary withdrawal from the IPT programme." %}</li>
           <li>{% trans "Failure to secure a final placement within the academic period." %}</li>
           <li>{% trans "Account suspension resulting from policy violations." %}</li>
@@ -325,7 +325,7 @@
       <li>
         <strong>{% trans "Irrevocability Upon Approval:" %}</strong>
         {% blocktrans %}
-          Once a company registers an official approval in the system, the slot assignment is
+          Once an organization registers an official approval in the system, the slot assignment is
           <strong>final and binding</strong>.  The student's cancellation mechanism is permanently
           disabled for that application.  No slot changes, swaps, or reassignment requests will be
           accepted after approval.
@@ -343,7 +343,7 @@
       <p class="font-body-md text-body-md text-on-surface-variant">
         {% blocktrans %}
           This rule exists under the principles of the <em>Fair Competition Act, 2003</em> to prevent
-          slot hoarding, protect companies from last-minute abandonment, and maintain platform integrity.
+          slot hoarding, protect organizations from last-minute abandonment, and maintain platform integrity.
           Students are strongly advised to verify their choice before completing payment.
         {% endblocktrans %}
       </p>
@@ -366,7 +366,7 @@
         <p class="font-body-md text-body-md text-on-surface-variant">
           {% blocktrans %}
             A student may cancel a pending application at any point <strong>strictly before</strong>
-            the company issues a formal approval, by clicking "Cancel Application" in their
+            the organization issues a formal approval, by clicking "Cancel Application" in their
             dashboard.  A confirmation modal will be displayed before the action is finalised.
           {% endblocktrans %}
         </p>
@@ -379,7 +379,7 @@
         <p class="font-body-md text-body-md text-on-surface-variant">
           {% blocktrans %}
             Upon cancellation, the system immediately transmits an electronic notice to both the
-            company (whose slot has been returned) and the Platform administrators.  This serves
+            organization (whose slot has been returned) and the Platform administrators.  This serves
             as verifiable proof of withdrawal under the <em>Electronic Transactions Act, Cap. 442</em>.
           {% endblocktrans %}
         </p>
@@ -418,7 +418,7 @@
       <span class="material-symbols-outlined text-error text-[20px] shrink-0 mt-0.5">block</span>
       <p class="font-body-md text-body-md text-on-surface-variant">
         {% blocktrans %}
-          <strong>Post-Approval Lock:</strong> Once a company approves an application, the
+          <strong>Post-Approval Lock:</strong> Once an organization approves an application, the
           cancellation mechanism is permanently disabled for that slot.  No further
           changes or cancellations will be accepted under any circumstances.
         {% endblocktrans %}
@@ -427,10 +427,10 @@
   </section>
 
   
-  <section id="company-review" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
+  <section id="organization-review" class="bg-surface-container-lowest rounded-2xl p-lg shadow-sm flex flex-col gap-sm scroll-mt-24">
     <div class="flex items-center gap-sm">
       <span class="flex items-center justify-center w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container font-bold text-body-md shrink-0">8</span>
-      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Company Review Obligation &amp; 24-Hour Cooling-Off Period" %}</h2>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Organization Review Obligation &amp; 24-Hour Cooling-Off Period" %}</h2>
     </div>
     <p class="font-body-md text-body-md text-on-surface-variant">
       {% blocktrans %}
@@ -443,7 +443,7 @@
       <li>
         <strong>{% trans "Mandatory Review Delay:" %}</strong>
         {% blocktrans %}
-          Companies are restricted from approving or rejecting an application until exactly
+          Organizations are restricted from approving or rejecting an application until exactly
           <strong>24 hours</strong> have elapsed from the time of submission.  The approval and
           rejection controls remain disabled within this window.
         {% endblocktrans %}
@@ -467,8 +467,8 @@
         <strong>{% trans "Post-Window Review:" %}</strong>
         {% blocktrans %}
           Once the 24-hour period expires, the student's right to independently cancel
-          is suspended.  The company is then authorised to issue a final approval or rejection
-          at their discretion.  Companies are encouraged to review all pending applications
+          is suspended.  The organization is then authorised to issue a final approval or rejection
+          at their discretion.  Organizations are encouraged to review all pending applications
           promptly to avoid unnecessary slot unavailability.
         {% endblocktrans %}
       </li>
@@ -477,9 +477,9 @@
       <span class="material-symbols-outlined text-[#1b5e20] text-[20px] shrink-0 mt-0.5">timer</span>
       <p class="font-body-md text-body-md text-[#1b5e20]">
         {% blocktrans %}
-          Companies that fail to review applications within a reasonable time after the
+          Organizations that fail to review applications within a reasonable time after the
           cooling-off window may impact the student's academic timeline.  Semauya Limited
-          reserves the right to follow up with companies and, in extreme cases of inactivity,
+          reserves the right to follow up with organizations and, in extreme cases of inactivity,
           intervene to protect student interests.
         {% endblocktrans %}
       </p>
@@ -596,7 +596,7 @@
       {% blocktrans %}
         You retain ownership of documents and content you upload.  By uploading, you grant
         Semauya Limited a limited, royalty-free licence to store, process, and share that content
-        with authorised parties (companies, institutions, administrators) strictly for the purposes
+        with authorised parties (organizations, institutions, administrators) strictly for the purposes
         of the IPT placement process.
       {% endblocktrans %}
     </p>
@@ -621,7 +621,7 @@
       <li>{% trans "Creating multiple accounts to circumvent bans, fees, or slot restrictions." %}</li>
       <li>{% trans "Scraping, crawling, or automated data extraction from the Platform without written authorisation." %}</li>
       <li>{% trans "Using the Platform for any purpose unrelated to IPT placement facilitation." %}</li>
-      <li>{% trans "Soliciting or accepting direct payments from students or companies outside the Platform." %}</li>
+      <li>{% trans "Soliciting or accepting direct payments from students or organizations outside the Platform." %}</li>
     </ul>
     <p class="font-body-md text-body-md text-on-surface-variant">
       {% blocktrans %}
@@ -645,7 +645,7 @@
     <ul class="list-disc list-outside ml-5 space-y-1 font-body-md text-body-md text-on-surface-variant">
       <li>{% trans "Any failure to secure an IPT placement." %}</li>
       <li>{% trans "Losses arising from mobile network downtime or failed payment gateway transactions beyond our control." %}</li>
-      <li>{% trans "The conduct, safety, or professionalism of any company or student during the placement period." %}</li>
+      <li>{% trans "The conduct, safety, or professionalism of any organization or student during the placement period." %}</li>
       <li>{% trans "Delays in SMS delivery caused by third-party operators." %}</li>
       <li>{% trans "Loss of data resulting from unauthorised access, force majeure, or acts of God." %}</li>
       <li>{% trans "Any indirect, incidental, special, or consequential damages arising from your use of the Platform." %}</li>

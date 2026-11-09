@@ -13,8 +13,8 @@ class SlotStatus(models.TextChoices):
 
 
 class Slot(TimeStampedModel):
-    company = models.ForeignKey(
-        "companies.CompanyProfile",
+    organization = models.ForeignKey(
+        "companies.Organization",
         on_delete=models.CASCADE,
         related_name="slots",
     )
@@ -41,6 +41,11 @@ class Slot(TimeStampedModel):
         choices=EducationLevel.choices,
         help_text="Minimum TCU qualification level required (Level 4 Certificate to Level 10 PhD).",
     )
+    application_deadline = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Optional. Students cannot start a new application after this time.",
+    )
     capacity = models.PositiveSmallIntegerField(default=1)
     stipend_available = models.BooleanField(default=False)
     stipend_amount = models.DecimalField(
@@ -57,6 +62,12 @@ class Slot(TimeStampedModel):
     @property
     def region(self):
         return self.district.region
+
+    @property
+    def deadline_passed(self):
+        from django.utils import timezone
+
+        return bool(self.application_deadline and self.application_deadline <= timezone.now())
 
     @property
     def booked_count(self):
@@ -83,4 +94,4 @@ class Slot(TimeStampedModel):
         self.save(update_fields=["status", "updated_at"])
 
     def __str__(self):
-        return f"{self.title} ({self.company.name})"
+        return f"{self.title} ({self.organization.name})"

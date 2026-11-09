@@ -1,39 +1,39 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% trans "Company Dashboard" %}{% endblock %}
+{% block title %}{% trans "Organization Dashboard" %}{% endblock %}
 {% block content %}
 <div class="flex flex-col gap-lg">
   <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
     <div class="flex flex-col gap-xs">
-      <h1 class="text-display font-display text-on-surface">{% trans "Company Dashboard" %}</h1>
+      <h1 class="text-display font-display text-on-surface">{% trans "Organization Dashboard" %}</h1>
       <p class="text-body-lg font-body-lg text-on-surface-variant">{% trans "Manage your opportunities and review applicants." %}</p>
     </div>
-    {% if company and company.is_approved %}
-      <a href="{% url 'company-slot-create' %}" class="bg-primary text-on-primary px-lg py-sm rounded-full text-body-md font-body-md font-bold shadow-md hover:shadow-lg transition-shadow flex items-center gap-xs">
+    {% if organization and organization.is_approved %}
+      <a href="{% url 'organization-slot-create' %}" class="bg-primary text-on-primary px-lg py-sm rounded-full text-body-md font-body-md font-bold shadow-md hover:shadow-lg transition-shadow flex items-center gap-xs">
         <span class="material-symbols-outlined">add</span>
         {% trans "New Slot" %}
       </a>
     {% endif %}
   </div>
 
-  {% if not company %}
+  {% if not organization %}
     <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-md text-body-md">
       <div class="flex items-start gap-sm">
         <span class="material-symbols-outlined text-tertiary">factory</span>
         <div>
           <p class="font-headline-md text-headline-md text-on-surface">{% trans "Welcome!" %}</p>
-          <p class="text-on-surface-variant mt-1">{% trans "Complete your company profile and upload your BRELA, TIN and license documents to get verified." %}</p>
+          <p class="text-on-surface-variant mt-1">{% trans "Complete your organization profile and upload your BRELA, TIN and license documents to get verified." %}</p>
         </div>
       </div>
-      <a href="{% url 'company-profile' %}" class="shrink-0 bg-primary text-on-primary px-md py-sm rounded-lg font-semibold hover:bg-primary-container transition-colors">{% trans "Go to profile" %}</a>
+      <a href="{% url 'organization-profile' %}" class="shrink-0 bg-primary text-on-primary px-md py-sm rounded-lg font-semibold hover:bg-primary-container transition-colors">{% trans "Go to profile" %}</a>
     </div>
-  {% elif not company.is_approved %}
+  {% elif not organization.is_approved %}
     <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex items-start gap-sm text-body-md">
       <span class="material-symbols-outlined text-[#a16207]">info</span>
       <div>
-        <p class="font-headline-md text-headline-md text-on-surface">{% trans "Your company is" %} {{ company.get_verification_status_display }}</p>
+        <p class="font-headline-md text-headline-md text-on-surface">{% trans "Your organization is" %} {{ organization.get_verification_status_display }}</p>
         <p class="text-on-surface-variant mt-1">{% trans "You can fill in your profile, but you can only post slots once the platform admin approves you." %}
-          {% if company.rejection_reason %} {% trans "Reason:" %} <span class="font-semibold">{{ company.rejection_reason }}</span>{% endif %}
+          {% if organization.rejection_reason %} {% trans "Reason:" %} <span class="font-semibold">{{ organization.rejection_reason }}</span>{% endif %}
         </p>
       </div>
     </div>
@@ -47,7 +47,7 @@
     </div>
   {% endif %}
 
-  {% if company %}
+  {% if organization %}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
       <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm flex items-center gap-md relative overflow-hidden group">
         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-surface-container rounded-full blur-xl group-hover:bg-primary-container/20 transition-colors"></div>
@@ -55,9 +55,9 @@
           <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">factory</span>
         </div>
         <div class="flex flex-col relative z-10">
-          <span class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Company" %}</span>
-          <span class="text-headline-md font-headline-md text-on-surface truncate">{{ company.name }}</span>
-          <span class="text-body-md font-body-md text-on-surface-variant">{{ company.industry }}</span>
+          <span class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Organization" %}</span>
+          <span class="text-headline-md font-headline-md text-on-surface truncate">{{ organization.name }}</span>
+          <span class="text-body-md font-body-md text-on-surface-variant">{{ organization.industry }}</span>
         </div>
       </div>
       <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm flex items-center gap-md relative overflow-hidden group">
@@ -67,9 +67,9 @@
         </div>
         <div class="flex flex-col relative z-10">
           <span class="text-metadata font-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Verification" %}</span>
-          {% if company.is_approved %}
+          {% if organization.is_approved %}
             <span class="text-headline-md font-headline-md text-[#1b5e20]">{% trans "Verified" %}</span>
-          {% elif company.verification_status == 'REJECTED' %}
+          {% elif organization.verification_status == 'REJECTED' %}
             <span class="text-headline-md font-headline-md text-error">{% trans "Rejected" %}</span>
           {% else %}
             <span class="text-headline-md font-headline-md text-[#a16207]">{% trans "Pending" %}</span>
@@ -89,7 +89,7 @@
     </div>
   {% endif %}
 
-  {% if company and company.is_approved %}
+  {% if organization and organization.is_approved %}
     <div class="flex flex-col gap-md mt-lg">
       <h2 class="text-headline-lg font-headline-lg text-on-surface">{% trans "Recent Slots" %}</h2>
       {% if slots %}
@@ -107,7 +107,7 @@
                   </span>
                 </div>
               </div>
-              <a href="{% url 'company-applicants' slot.id %}" class="text-primary hover:text-primary-container font-body-md font-bold transition-colors shrink-0">{% trans "View Applicants" %}</a>
+              <a href="{% url 'organization-applicants' slot.id %}" class="text-primary hover:text-primary-container font-body-md font-bold transition-colors shrink-0">{% trans "View Applicants" %}</a>
             </div>
           {% endfor %}
         </div>
@@ -118,7 +118,7 @@
           </div>
           <h3 class="font-headline-md font-headline-md text-on-surface mb-2">{% trans "No slots yet" %}</h3>
           <p class="font-body-md font-body-md text-on-surface-variant text-center max-w-md mb-lg">{% trans "You haven't posted any training opportunities. Create your first slot to start receiving applications." %}</p>
-          <a href="{% url 'company-slot-create' %}" class="bg-primary text-on-primary font-body-md font-body-md px-md py-sm rounded-lg hover:bg-primary-container transition-colors shadow-sm flex items-center gap-base">
+          <a href="{% url 'organization-slot-create' %}" class="bg-primary text-on-primary font-body-md font-body-md px-md py-sm rounded-lg hover:bg-primary-container transition-colors shadow-sm flex items-center gap-base">
             <span class="material-symbols-outlined text-[20px]">add</span>
             {% trans "Post your first slot" %}
           </a>

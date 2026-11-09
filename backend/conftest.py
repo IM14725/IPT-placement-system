@@ -3,6 +3,9 @@ import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 os.environ.setdefault("CACHE_ENABLED", "0")
 os.environ.setdefault("RATE_LIMIT_ENABLED", "0")
+# Tests must never send real SMS, even when backend/.env holds live Beem keys.
+os.environ["BEEM_API_KEY"] = ""
+os.environ["BEEM_SECRET_KEY"] = ""
 
 
 def pytest_configure(config):
@@ -10,6 +13,9 @@ def pytest_configure(config):
 
     settings.CELERY_TASK_ALWAYS_EAGER = True
     settings.CELERY_TASK_EAGER_PROPAGATES = False
+    # Settings may load before the env tweak above; blank the live SMS keys here too.
+    settings.BEEM_API_KEY = ""
+    settings.BEEM_SECRET_KEY = ""
     _install_fake_redis()
 
 

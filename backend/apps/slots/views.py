@@ -20,7 +20,7 @@ class SlotSearchThrottle(TokenBucketThrottle):
     refill_per_second = 20.0
 
 
-def _signature(region, district, department, academic_year, education_level):
+def _signature(region, district, department, academic_year, education_level, organization=""):
     raw = "|".join(
         [
             region or "",
@@ -28,20 +28,24 @@ def _signature(region, district, department, academic_year, education_level):
             (department or "").lower(),
             academic_year or "",
             education_level or "",
+            (organization or "").strip().lower(),
         ]
     )
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
 
 
-def _load_slot_search(region, district, department, academic_year, education_level):
+def _load_slot_search(region, district, department, academic_year, education_level, organization=""):
     """Run the search query with counts aggregated in a single DB hit."""
     qs = (
         Slot.objects.filter(
-            company__verification_status=VerificationStatus.APPROVED,
+            organization__verification_status=VerificationStatus.APPROVED,
+            organization__suspended_at__isnull=True,
         )
         .exclude(status__in=[SlotStatus.CLOSED])
-        .select_related("company", "district__region")
+        .select_related("organization", "district__region")
     )
+    if organization:
+        qs = qs.filter(organization__name__icontains=organization.strip())
 
     if region:
         qs = qs.filter(district__region_id=region)
@@ -79,8 +83,9 @@ def _load_slot_search(region, district, department, academic_year, education_lev
 class SlotSearchView(APIView):
     """Marketplace search with live filter reduction.
 
-    Query params: region, district, department, academic_year, education_level.
-    All slots from APPROVED companies are returned (including FULL ones so the
+    Query params: region, district, department, academic_year, education_level,
+    organization (name search).
+    All slots from APPROVED organizations are returned (including FULL ones so the
     front-end can render a "Slot Full" state); filters narrow the list.
 
     The result is cached in Redis against a versioned hot key with singleflight
@@ -98,20 +103,21 @@ class SlotSearchView(APIView):
         department = request.query_params.get("department")
         academic_year = request.query_params.get("academic_year")
         education_level = request.query_params.get("education_level")
+        organization = (request.query_params.get("organization") or "").strip()[:200]
 
         from apps.core.cache import incr_daily
 
         incr_daily("searches")
 
         key = slot_search_key(
-            _signature(region, district, department, academic_year, education_level)
+            _signature(region, district, department, academic_year, education_level, organization)
         )
         ttl = getattr(settings, "SLOT_SEARCH_CACHE_TTL", 20)
         data = cache_get_or_set(
             key,
             ttl,
             producer=lambda: _load_slot_search(
-                region, district, department, academic_year, education_level
+                region, district, department, academic_year, education_level, organization
             ),
         )
 

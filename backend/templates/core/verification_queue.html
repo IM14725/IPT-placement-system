@@ -7,7 +7,7 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="font-display text-display text-on-surface mb-xs">{% trans "Verification Queue" %}</h1>
-        <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Review and approve student and company verification requests." %}</p>
+        <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Review and approve student and organization verification requests." %}</p>
       </div>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
@@ -35,7 +35,7 @@
         <div class="absolute -right-8 -top-8 w-32 h-32 bg-tertiary/5 rounded-full blur-2xl group-hover:bg-tertiary/10 transition-colors"></div>
         <div class="flex flex-col gap-xs relative z-10">
           <span class="text-metadata font-label-caps text-on-surface-variant uppercase tracking-wider">{% trans "Review Queue" %}</span>
-          <span class="text-display font-display text-on-surface">{{ student_pending }}<span class="text-headline-md font-body-md">S</span> · {{ company_pending }}<span class="text-headline-md font-body-md">C</span></span>
+          <span class="text-display font-display text-on-surface">{{ student_pending }}<span class="text-headline-md font-body-md">S</span> · {{ organization_pending }}<span class="text-headline-md font-body-md">O</span></span>
         </div>
         <div class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center relative z-10">
           <span class="material-symbols-outlined text-on-tertiary-container">timer</span>
@@ -51,9 +51,9 @@
           {% trans "Incomplete Profiles" %}
           <span class="bg-primary-container text-on-primary-container text-metadata font-metadata px-2 py-0.5 rounded-full">{{ student_pending }}</span>
         </button>
-        <button aria-selected="false" class="px-md py-sm text-body-md font-body-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-xs" onclick="switchTab('companies')" role="tab">
-          {% trans "Companies" %}
-          <span class="bg-surface-variant text-on-surface-variant text-metadata font-metadata px-2 py-0.5 rounded-full">{{ company_pending }}</span>
+        <button aria-selected="false" class="px-md py-sm text-body-md font-body-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-xs" onclick="switchTab('organizations')" role="tab">
+          {% trans "Organizations" %}
+          <span class="bg-surface-variant text-on-surface-variant text-metadata font-metadata px-2 py-0.5 rounded-full">{{ organization_pending }}</span>
         </button>
       </div>
       <div class="flex items-center gap-sm w-full lg:w-auto">
@@ -122,13 +122,13 @@
       {% endif %}
     </div>
 
-    <div class="w-full hidden" id="tab-companies">
-      {% if companies %}
+    <div class="w-full hidden" id="tab-organizations">
+      {% if organizations %}
         <div class="w-full overflow-x-auto">
           <table class="w-full text-left min-w-[800px]">
             <thead>
               <tr class="text-metadata font-label-caps text-on-surface-variant border-b border-surface-variant">
-                <th class="py-sm px-sm font-medium w-1/3">{% trans "Company" %}</th>
+                <th class="py-sm px-sm font-medium w-1/3">{% trans "Organization" %}</th>
                 <th class="py-sm px-sm font-medium">{% trans "Industry" %}</th>
                 <th class="py-sm px-sm font-medium">{% trans "Submitted" %}</th>
                 <th class="py-sm px-sm font-medium">{% trans "Status" %}</th>
@@ -136,8 +136,8 @@
               </tr>
             </thead>
             <tbody class="queue-rows">
-              {% for c in companies %}
-                <tr class="border-b border-surface-variant hover:bg-surface/50 transition-colors group queue-row" data-name="{{ c.name|lower }} {{ c.industry|lower }} {{ c.user.email|lower }}">
+              {% for c in organizations %}
+                <tr class="border-b border-surface-variant hover:bg-surface/50 transition-colors group queue-row" data-name="{{ c.name|lower }} {{ c.industry|lower }} {{ c.email|default:c.user.email|lower }}">
                   <td class="py-sm px-sm">
                     <div class="flex items-center gap-sm">
                       <div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center shrink-0">
@@ -145,7 +145,7 @@
                       </div>
                       <div class="min-w-0">
                         <p class="text-body-md font-headline-md text-on-surface truncate">{{ c.name }}</p>
-                        <p class="text-metadata font-metadata text-on-surface-variant truncate">HR: {{ c.user.email }}</p>
+                        <p class="text-metadata font-metadata text-on-surface-variant truncate">{{ c.email|default:c.user.email }}</p>
                       </div>
                     </div>
                   </td>
@@ -160,7 +160,7 @@
                     </span>
                   </td>
                   <td class="py-sm px-sm text-right">
-                    <a class="inline-flex items-center justify-center px-sm py-1.5 border border-primary text-primary text-body-md font-metadata rounded-lg hover:bg-primary/5 transition-colors" href="{% url 'platform-company-verification' c.pk %}">
+                    <a class="inline-flex items-center justify-center px-sm py-1.5 border border-primary text-primary text-body-md font-metadata rounded-lg hover:bg-primary/5 transition-colors" href="{% url 'platform-organization-verification' c.pk %}">
                       {% trans "Review Details" %}
                     </a>
                   </td>
@@ -172,7 +172,7 @@
       {% else %}
         <div class="flex flex-col items-center justify-center py-xl text-center">
           <span class="material-symbols-outlined text-[48px] text-outline-variant mb-sm">domain_verification</span>
-          <p class="font-body-md text-on-surface-variant">{% trans "No companies awaiting verification." %}</p>
+          <p class="font-body-md text-on-surface-variant">{% trans "No organizations awaiting verification." %}</p>
         </div>
       {% endif %}
     </div>
@@ -182,7 +182,7 @@
 {% block scripts %}
 <script>
   function switchTab(tabId) {
-    const tabs = ['students', 'companies'];
+    const tabs = ['students', 'organizations'];
     tabs.forEach(tab => {
       const btn = document.querySelector(`button[onclick="switchTab('${tab}')"]`);
       const content = document.getElementById(`tab-${tab}`);

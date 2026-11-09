@@ -44,8 +44,12 @@
       </div>
     </div>
     <div class="w-full flex-1 flex flex-col gap-xs relative z-10">
-      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Department / Course" %}</label>
+      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Academic Discipline" %}</label>
       <input id="filter-department" type="text" placeholder="e.g. Computer Science" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow">
+    </div>
+    <div class="w-full flex-1 flex flex-col gap-xs relative z-10">
+      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Organization" %}</label>
+      <input id="filter-organization" type="text" placeholder="{% trans 'Search by organization name' %}" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow">
     </div>
       <div class="flex-1 min-w-[200px] flex flex-col gap-xs">
         <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Education Level (TCU)" %}</label>

@@ -13,8 +13,8 @@ def nav_user(request):
         profile = getattr(user, "student_profile", None)
         if profile and profile.profile_photo:
             photo = profile.profile_photo.url
-    elif user.is_company:
-        url = reverse("company-profile")
+    elif user.is_organization:
+        url = reverse("organization-profile")
     else:
         url = reverse("platform-verifications")
     return {

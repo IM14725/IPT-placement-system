@@ -28,7 +28,9 @@ def send_selcom_wallet_pull(transaction_id, phone_number, amount):
 
     try:
         if api_key == 'MOCK_API_KEY':
-            # Auto-approve the initiation locally when keys are mocked
+            if not getattr(settings, 'DEBUG', False):
+                return 500, {"result": "FAIL", "message": "Mock payment key is not permitted outside DEBUG mode."}
+            # Auto-approve the initiation locally when keys are mocked in DEBUG
             return 200, {"result": "SUCCESS", "transid": "MOCK-INITIATED-123", "message": "Mock prompt initiated."}
             
         from selcom_apigw_client import apigwClient
@@ -49,7 +51,9 @@ def verify_selcom_webhook_signature(raw_request_body, incoming_digest, incoming_
     if not incoming_digest or not incoming_timestamp:
         return False
 
-    api_secret = getattr(settings, 'SELCOM_API_SECRET', 'MOCK_API_SECRET')
+    api_secret = getattr(settings, 'SELCOM_API_SECRET', '')
+    if not api_secret or (not getattr(settings, 'DEBUG', False) and api_secret == 'MOCK_API_SECRET'):
+        return False
 
     # 1. Recreate the string base that Selcom hashed.
     message_to_sign = f"timestamp={incoming_timestamp}&body={raw_request_body.decode('utf-8')}"

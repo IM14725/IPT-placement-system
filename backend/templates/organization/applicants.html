@@ -8,7 +8,7 @@
     <div class="flex flex-wrap items-center gap-xs font-body-md text-on-surface-variant">
       <span class="font-bold text-primary">{{ slot.title }}</span>
       <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
-      <span>{{ slot.company.name }}</span>
+      <span>{{ slot.organization.name }}</span>
       <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
       <span class="inline-flex items-center gap-1 bg-tertiary-container/10 text-tertiary-container px-2 py-0.5 rounded-full font-metadata">
         <span class="material-symbols-outlined text-[14px]">group</span>
@@ -52,7 +52,7 @@
               <div class="flex flex-col gap-1 mt-1">
                 <div class="flex items-center gap-xs font-body-md text-on-surface-variant">
                   <span class="material-symbols-outlined text-[16px]">school</span>
-                  <span>{{ app.student.university }}</span>
+                  <span>{{ app.student.university|default:"—" }}</span>
                 </div>
                 <div class="flex flex-wrap items-center gap-x-sm gap-y-1 font-body-md text-on-surface-variant">
                   <span class="font-medium text-on-surface">{{ app.student.course }}</span>
@@ -71,7 +71,7 @@
           </div>
           <div class="flex flex-col gap-sm md:w-64 shrink-0 bg-surface-container-low p-sm rounded-lg self-stretch justify-between">
             {% if app.application_letter %}
-              <a href="{% url 'company-applicant-letter' app.id %}" class="inline-flex items-center gap-xs font-body-md text-primary hover:text-primary-fixed-variant transition-colors font-medium">
+              <a href="{% url 'organization-applicant-letter' app.id %}" class="inline-flex items-center gap-xs font-body-md text-primary hover:text-primary-fixed-variant transition-colors font-medium">
               <span class="material-symbols-outlined text-[18px]">note</span>
               {% trans "View Application Letter" %}
             </a>
@@ -98,7 +98,7 @@
                     </div>
                   </div>
                 {% else %}
-                  <form method="post" action="{% url 'company-acceptance-sms' app.id %}" class="flex flex-col gap-2 pt-2 mt-auto">
+                  <form method="post" action="{% url 'organization-acceptance-sms' app.id %}" class="flex flex-col gap-2 pt-2 mt-auto">
                     {% csrf_token %}
                     <label class="font-metadata text-on-surface-variant">{% trans "Acceptance Note (Optional)" %}</label>
                     <input type="text" name="message" placeholder="{% trans 'e.g. Report on Monday 8 AM' %}" class="w-full bg-surface-container-lowest font-body-md text-on-surface px-3 py-2 rounded-md outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-outline-variant">

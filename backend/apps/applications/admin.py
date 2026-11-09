@@ -5,15 +5,15 @@ from apps.applications.models import Application
 
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
-    list_display = ("id", "student", "slot", "company", "status", "created_at")
-    list_filter = ("status", "slot__company", "slot__industry")
-    search_fields = ("student__user__email", "slot__title", "slot__company__name")
+    list_display = ("id", "student", "slot", "organization", "status", "created_at")
+    list_filter = ("status", "slot__organization", "slot__industry")
+    search_fields = ("student__user__email", "slot__title", "slot__organization__name")
     readonly_fields = ("created_at", "updated_at", "payment_ref")
 
-    def company(self, obj):
-        return obj.slot.company.name
+    def organization(self, obj):
+        return obj.slot.organization.name
 
-    company.short_description = "Company"
+    organization.short_description = "Organization"
 
     def payment_ref(self, obj):
         payment = getattr(obj, "payment", None)

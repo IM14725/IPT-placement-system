@@ -5,7 +5,7 @@
   <div class="flex items-center justify-between">
     <div>
       <h1 class="font-display text-display text-on-surface mb-xs">Directory</h1>
-      <p class="font-body-lg text-body-lg text-on-surface-variant">Browse every student and company on the platform.</p>
+      <p class="font-body-lg text-body-lg text-on-surface-variant">Browse every student and organization on the platform.</p>
     </div>
   </div>
 
@@ -16,15 +16,20 @@
            class="px-md py-sm text-body-md font-body-md {% if tab == 'students' %}text-primary border-b-2 border-primary -mb-[1px]{% else %}text-on-surface-variant hover:text-on-surface{% endif %} flex items-center gap-xs transition-colors">
           Students
         </a>
-        <a href="?tab=companies{% for k, v in filters.items %}{% if v and k != 'university' and k != 'course' and k != 'year' and k != 'education_level' %}&{{ k }}={{ v }}{% endif %}{% endfor %}"
-           class="px-md py-sm text-body-md font-body-md {% if tab == 'companies' %}text-primary border-b-2 border-primary -mb-[1px]{% else %}text-on-surface-variant hover:text-on-surface{% endif %} flex items-center gap-xs transition-colors">
-          Companies
+        <a href="?tab=organizations{% for k, v in filters.items %}{% if v and k != 'university' and k != 'course' and k != 'year' and k != 'education_level' %}&{{ k }}={{ v }}{% endif %}{% endfor %}"
+           class="px-md py-sm text-body-md font-body-md {% if tab == 'organizations' %}text-primary border-b-2 border-primary -mb-[1px]{% else %}text-on-surface-variant hover:text-on-surface{% endif %} flex items-center gap-xs transition-colors">
+          Organizations
         </a>
+      </div>
+      <div class="flex items-center gap-sm">
+        <a href="?tab={{ tab }}" class="px-md py-1.5 rounded-full text-metadata font-metadata {% if not filters.account %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %} transition-colors">Active</a>
+        <a href="?tab={{ tab }}&account=suspended" class="px-md py-1.5 rounded-full text-metadata font-metadata {% if filters.account %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %} transition-colors">Suspended</a>
       </div>
     </div>
 
     <form method="get" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-md items-end">
       <input type="hidden" name="tab" value="{{ tab }}">
+      {% if filters.account %}<input type="hidden" name="account" value="{{ filters.account }}">{% endif %}
       <div class="flex flex-col gap-xs">
         <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="id_region">Region</label>
         <div class="ipt-field-box">
@@ -124,7 +129,7 @@
               <th class="py-sm px-sm font-medium">Year</th>
               <th class="py-sm px-sm font-medium">Status</th>
             {% else %}
-              <th class="py-sm px-sm font-medium w-1/4">Company</th>
+              <th class="py-sm px-sm font-medium w-1/4">Organization</th>
               <th class="py-sm px-sm font-medium">Industry</th>
               <th class="py-sm px-sm font-medium">Location</th>
               <th class="py-sm px-sm font-medium">Status</th>
@@ -133,7 +138,7 @@
         </thead>
         <tbody>
           {% for row in rows %}
-            <tr class="border-b border-surface-variant hover:bg-surface/50 transition-colors cursor-pointer" onclick="window.location.href='{% if tab == 'students' %}{% url 'platform-student-verification' row.pk %}{% else %}{% url 'platform-company-verification' row.pk %}{% endif %}'">
+            <tr class="border-b border-surface-variant hover:bg-surface/50 transition-colors cursor-pointer" onclick="window.location.href='{% if tab == 'students' %}{% url 'platform-student-verification' row.pk %}{% else %}{% url 'platform-organization-verification' row.pk %}{% endif %}'">
               {% if tab == 'students' %}
                 <td class="py-sm px-sm">
                   <div class="flex items-center gap-sm">
@@ -152,7 +157,7 @@
                 </td>
                 <td class="py-sm px-sm">
                   <div class="min-w-0">
-                    <p class="text-body-md font-body-md text-on-surface truncate">{{ row.university }}</p>
+                    <p class="text-body-md font-body-md text-on-surface truncate">{{ row.university|default:"—" }}</p>
                     <p class="text-metadata font-metadata text-on-surface-variant truncate">{{ row.course }}</p>
                   </div>
                 </td>
@@ -166,7 +171,7 @@
                     </div>
                     <div class="min-w-0">
                       <p class="text-body-md font-headline-md text-on-surface truncate">{{ row.name }}</p>
-                      <p class="text-metadata font-metadata text-on-surface-variant truncate">{{ row.user.email }}</p>
+                      <p class="text-metadata font-metadata text-on-surface-variant truncate">{{ row.email|default:row.user.email }}</p>
                     </div>
                   </div>
                 </td>

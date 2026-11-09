@@ -7,7 +7,7 @@
     <div class="flex flex-col gap-base">
       <h1 class="text-display font-display text-on-background tracking-tight">{% trans "Slots Directory" %}</h1>
       <p class="text-body-lg font-body-lg text-on-surface-variant max-w-2xl">
-        {% trans "Browse all training opportunities posted by companies on the platform." %}
+        {% trans "Browse all training opportunities posted by organizations on the platform." %}
       </p>
     </div>
   </div>
@@ -62,7 +62,7 @@
     <div class="flex flex-col sm:flex-row items-center gap-sm mt-xs relative z-10 w-full">
       <div class="ipt-field-box flex-1 w-full sm:w-auto">
         <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">search</span></span>
-        <input type="text" name="q" value="{{ q }}" placeholder="Search by title, company, or description..." class="w-full bg-transparent border-none focus:ring-0 text-body-md text-on-surface h-10 px-0 outline-none">
+        <input type="text" name="q" value="{{ q }}" placeholder="Search by title, organization, or description..." class="w-full bg-transparent border-none focus:ring-0 text-body-md text-on-surface h-10 px-0 outline-none">
       </div>
       <button type="submit" class="bg-primary text-on-primary hover:bg-primary-container px-xl h-10 rounded-lg transition-colors shrink-0 font-bold">Search</button>
       <a href="{% url 'platform-slots' %}" class="text-primary hover:underline px-md font-medium shrink-0">Clear</a>
@@ -82,7 +82,7 @@
                 {% else %}bg-outline-variant/30 text-on-surface-variant{% endif %}">{{ slot.get_status_display }}</span>
             </div>
             <div class="flex items-center gap-2 text-body-md font-body-md text-on-surface-variant truncate flex-wrap">
-              <span class="font-semibold text-on-surface">{{ slot.company.name }}</span>
+              <span class="font-semibold text-on-surface">{{ slot.organization.name }}</span>
               <span class="text-outline-variant text-xs">•</span>
               <span>{{ slot.role_type }}</span>
               {% if slot.department %}<span class="text-outline-variant text-xs">•</span><span>{{ slot.department }}</span>{% endif %}

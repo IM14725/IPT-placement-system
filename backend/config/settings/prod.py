@@ -1,28 +1,35 @@
 from .base import *  # noqa: F401,F403
-import dj_database_url
 import os
+import dj_database_url
 
 DEBUG = False
 
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = os.environ.get("SECRET_KEY", "")
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+GATEWAY_WEBHOOK_SECRET = os.environ.get("GATEWAY_WEBHOOK_SECRET", "")
+SELCOM_API_KEY = os.environ.get("SELCOM_API_KEY", "")
+SELCOM_API_SECRET = os.environ.get("SELCOM_API_SECRET", "")
+SELCOM_VENDOR_TILL = os.environ.get("SELCOM_VENDOR_TILL", "")
+_DATABASE_URL = os.environ.get("DATABASE_URL", "")
+_DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
 
-# In production override these:
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# EMAIL_HOST = env("EMAIL_HOST")
-# EMAIL_HOST_USER = env("EMAIL_HOST_USER")
-# EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
-# EMAIL_PORT = env("EMAIL_PORT", default=587)
-# EMAIL_USE_TLS = True
-# DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
-
-ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+validate_production_config(
+    secret_key=SECRET_KEY,
+    allowed_hosts=ALLOWED_HOSTS,
+    gateway_webhook_secret=GATEWAY_WEBHOOK_SECRET,
+    selcom_api_key=SELCOM_API_KEY,
+    selcom_api_secret=SELCOM_API_SECRET,
+    selcom_vendor_till=SELCOM_VENDOR_TILL,
+    database_url=_DATABASE_URL,
+    db_password=_DB_PASSWORD,
+)
 
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = True
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL')
-    )
-}
+if _DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.config(default=_DATABASE_URL, conn_max_age=60)
+    }
+

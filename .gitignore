@@ -11,10 +11,16 @@ backend/staticfiles/
 
 # Env & secrets
 .env
+**/.env
+**/.env.*
 
-# Celery
-celerybeat-schedule
+# Celery & test caches
+celerybeat-schedule*
+**/celerybeat-schedule*
 celerybeat.pid
+.pytest_cache/
+**/.pytest_cache/
+backend/check.out
 
 # IDE / OS
 .vscode/

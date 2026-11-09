@@ -23,7 +23,7 @@ def receipt_email(payment_id):
     from apps.payments.services import build_payment_receipt
 
     payment = Payment.objects.select_related(
-        "student__user", "application__slot__company"
+        "student__user", "application__slot__organization"
     ).get(id=payment_id)
     pdf_path = build_payment_receipt(payment)
     app = payment.application
@@ -33,7 +33,7 @@ def receipt_email(payment_id):
         MessageChannel.EMAIL,
         {
             "student_name": app.student.user.get_full_name() or app.student.user.email,
-            "company_name": app.slot.company.name,
+            "organization_name": app.slot.organization.name,
             "slot_title": app.slot.title,
             "amount": f"{payment.amount:,.2f}",
             "currency": payment.currency,
@@ -43,7 +43,7 @@ def receipt_email(payment_id):
         fallback_subject=f"Payment Receipt - {payment.reference_id}",
         fallback_body=(
             f"Dear {app.student.user.get_full_name() or app.student.user.email},\n\n"
-            f"Thank you for your application to {app.slot.company.name} "
+            f"Thank you for your application to {app.slot.organization.name} "
             f"({app.slot.title}). Your application fee of {payment.amount:,.2f} {payment.currency} "
             f"has been received.\n\n"
             f"Reference: {payment.reference_id}\n"

@@ -10,7 +10,7 @@
         {% trans "Manage your active training opportunities, track applications, and update availability across all your programs." %}
       </p>
     </div>
-    <a href="{% url 'company-slot-create' %}" class="bg-primary text-on-primary font-body-md text-body-md px-md py-sm rounded-lg hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap self-start md:self-auto flex items-center gap-base">
+    <a href="{% url 'organization-slot-create' %}" class="bg-primary text-on-primary font-body-md text-body-md px-md py-sm rounded-lg hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap self-start md:self-auto flex items-center gap-base">
       <span class="material-symbols-outlined text-[20px]">add</span>
       {% trans "New Slot" %}
     </a>
@@ -90,15 +90,15 @@
               </div>
             {% endif %}
             <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-surface-variant pt-md lg:pt-0 lg:pl-md w-full lg:w-auto mt-sm lg:mt-0 justify-end">
-              <a href="{% url 'company-applicants' slot.id %}" class="px-sm py-1.5 text-primary bg-primary/5 hover:bg-primary/10 rounded-lg text-body-md font-body-md font-medium transition-colors">{% trans "Applicants" %}</a>
-              <a href="{% url 'company-slot-edit' slot.id %}" class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="Edit"><span class="material-symbols-outlined text-[20px]">edit</span></a>
-              <form method="post" action="{% url 'company-slot-toggle' slot.id %}">
+              <a href="{% url 'organization-applicants' slot.id %}" class="px-sm py-1.5 text-primary bg-primary/5 hover:bg-primary/10 rounded-lg text-body-md font-body-md font-medium transition-colors">{% trans "Applicants" %}</a>
+              <a href="{% url 'organization-slot-edit' slot.id %}" class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="Edit"><span class="material-symbols-outlined text-[20px]">edit</span></a>
+              <form method="post" action="{% url 'organization-slot-toggle' slot.id %}">
                 {% csrf_token %}
                 <button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="{% if slot.status == 'PAUSED' %}Resume{% else %}Pause{% endif %}">
                   <span class="material-symbols-outlined text-[20px]">{% if slot.status == 'PAUSED' %}play_arrow{% else %}pause{% endif %}</span>
                 </button>
               </form>
-              <form method="post" action="{% url 'company-slot-delete' slot.id %}" onsubmit="return confirm('Delete this slot?');">
+              <form method="post" action="{% url 'organization-slot-delete' slot.id %}" onsubmit="return confirm('Delete this slot?');">
                 {% csrf_token %}
                 <button class="p-1.5 text-error hover:bg-error-container hover:text-on-error-container rounded-lg transition-colors ml-1" title="Delete"><span class="material-symbols-outlined text-[20px]">delete</span></button>
               </form>
@@ -114,7 +114,7 @@
       </div>
       <h3 class="text-headline-md font-headline-md text-on-surface mb-2">{% trans "No slots created yet" %}</h3>
       <p class="text-body-md font-body-md text-on-surface-variant text-center max-w-md mb-lg">{% trans "You haven't posted any training opportunities. Create your first slot to start receiving applications." %}</p>
-      <a href="{% url 'company-slot-create' %}" class="bg-primary text-on-primary font-body-md text-body-md px-md py-sm rounded-lg hover:bg-primary-container transition-colors shadow-sm flex items-center gap-base">
+      <a href="{% url 'organization-slot-create' %}" class="bg-primary text-on-primary font-body-md text-body-md px-md py-sm rounded-lg hover:bg-primary-container transition-colors shadow-sm flex items-center gap-base">
         <span class="material-symbols-outlined text-[20px]">add</span>
         {% trans "Create First Slot" %}
       </a>

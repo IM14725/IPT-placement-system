@@ -43,6 +43,7 @@
               {% elif field.name == 'department' %}account_tree
               {% elif field.name == 'education_level' %}workspace_premium
               {% elif field.name == 'academic_year' %}tag
+              {% elif field.name == 'application_deadline' %}event
               {% elif field.name == 'capacity' %}groups
               {% elif field.name == 'stipend_amount' %}payments
               {% elif field.name == 'skills_required' %}psychology
@@ -52,6 +53,9 @@
           </div>
           {% if field.name == 'skills_required' %}
             <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Separate skills with commas, e.g. Python, SQL, Communication." %}</p>
+          {% endif %}
+          {% if field.name == 'application_deadline' %}
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Optional. After this time students can no longer start a new application." %}</p>
           {% endif %}
           {% if field.name == 'education_level' %}
             <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Minimum TCU qualification: Level 4 Certificate to Level 10 PhD." %}</p>
@@ -88,7 +92,7 @@
         </div>
       </div>
       <div class="pt-sm mt-sm flex justify-end gap-md items-center">
-        <a href="{% url 'company-slots' %}" class="font-label-caps text-label-caps text-primary hover:text-primary/80 transition-colors uppercase tracking-widest px-sm py-2">{% trans "Cancel" %}</a>
+        <a href="{% url 'organization-slots' %}" class="font-label-caps text-label-caps text-primary hover:text-primary/80 transition-colors uppercase tracking-widest px-sm py-2">{% trans "Cancel" %}</a>
         <button class="bg-primary hover:bg-primary/90 text-on-primary font-body-lg text-body-lg px-xl py-3 rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-2" type="submit" data-loading>
           <span data-label>{% if editing %}{% trans "Save Changes" %}{% else %}{% trans "Post Slot" %}{% endif %}</span>
           <span class="material-symbols-outlined text-[20px]">arrow_forward</span>

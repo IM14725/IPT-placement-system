@@ -3,12 +3,12 @@ import json
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from app.core.auth import validate_token
+from app.core.auth import validate_ticket
 from app.core.redis import NOTIFY_CHANNEL, get_pub
 
 router = APIRouter()
 
-connections: dict[int, set[WebSocket]] = {}
+connections: dict[str, set[WebSocket]] = {}
 
 
 async def notify_subscriber_task():
@@ -33,9 +33,9 @@ async def notify_subscriber_task():
 
 
 @router.websocket("/ws/notifications/{user_id}")
-async def notifications(websocket: WebSocket, user_id: int):
-    token = websocket.query_params.get("token")
-    if not await validate_token(token, user_id):
+async def notifications(websocket: WebSocket, user_id: str):
+    ticket = websocket.query_params.get("ticket")
+    if not await validate_ticket(ticket, user_id):
         await websocket.close(code=4401)
         return
 

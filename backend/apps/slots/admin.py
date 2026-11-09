@@ -31,7 +31,7 @@ class SlotAdmin(admin.ModelAdmin):
     form = SlotAdminForm
     list_display = (
         "title",
-        "company",
+        "organization",
         "industry",
         "role_type",
         "district",
@@ -41,6 +41,6 @@ class SlotAdmin(admin.ModelAdmin):
         "stipend_available",
         "status",
     )
-    list_filter = ("status", "industry", "education_level", "stipend_available", "company__verification_status")
-    search_fields = ("title", "company__name")
+    list_filter = ("status", "industry", "education_level", "stipend_available", "organization__verification_status")
+    search_fields = ("title", "organization__name")
     readonly_fields = ("available_count", "created_at", "updated_at")
