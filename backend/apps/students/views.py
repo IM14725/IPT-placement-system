@@ -16,12 +16,12 @@ from apps.core.cache import get_institutions, get_regions, get_verification_stat
 from apps.core.education import education_level_choices, academic_year_choices
 from apps.core.immutability import sha256_bytes
 from apps.core.rate_limit import token_bucket
+from apps.core.security import safe_json_dumps
 from apps.documents.models import Document
 from apps.payments.models import Payment
+from apps.payments.utils import get_application_fee
 from apps.students.forms import DocumentUploadForm, StudentProfileForm
 from apps.students.models import StudentProfile, VerificationStatus
-
-_APPLICATION_FEE = 15000
 
 
 def _file_sha256(uploaded):
@@ -81,13 +81,14 @@ def profile(request):
         {
             "form": form,
             "profile": instance,
-            "regions_json": json.dumps(regions),
-            "institutions_json": json.dumps(get_institutions()),
+            "regions_json": safe_json_dumps(regions),
+            "institutions_json": safe_json_dumps(get_institutions()),
         },
     )
 
 
 @login_required
+@token_bucket(capacity=10, refill_per_second=1 / 30, scope="student-doc-upload", methods=["POST"])
 def documents(request):
     if not request.user.is_student:
         return HttpResponseForbidden("Student account required.")
@@ -212,11 +213,12 @@ def apply(request, slot_id):
                     ]
                 )
                 
+                fee = get_application_fee()
                 if is_credit:
                     Payment.objects.create(
                         student=profile,
                         application=application,
-                        amount=_APPLICATION_FEE,
+                        amount=fee,
                         status="PAID",
                         is_paid=True,
                         gateway_txn_id="CREDIT-REAPPLICATION",
@@ -230,7 +232,7 @@ def apply(request, slot_id):
                 payment = getattr(application, "payment", None)
                 if payment is None:
                     payment = Payment.objects.create(
-                        student=profile, application=application, amount=_APPLICATION_FEE
+                        student=profile, application=application, amount=fee
                     )
                 elif not payment.is_paid:
                     payment.status = "PENDING"

@@ -12,6 +12,7 @@ from apps.accounts.models import User
 from apps.companies.models import Organization
 from apps.core.models import Report
 from apps.core.pagination import paginate
+from apps.core.rate_limit import token_bucket
 from apps.core.views import _require_admin, _write_audit
 from apps.locations.models import Region
 from apps.students.models import StudentProfile, University, VerificationStatus
@@ -223,6 +224,7 @@ class ReportForm(forms.ModelForm):
 
 
 @login_required
+@token_bucket(capacity=5, refill_per_second=1 / 60, scope="submit-report", methods=["POST"])
 def submit_report(request):
     """Any signed-in user can file a complaint for platform admins to review."""
     if request.method == "POST":

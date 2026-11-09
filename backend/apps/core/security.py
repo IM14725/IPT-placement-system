@@ -15,6 +15,7 @@ MAINTENANCE_EXEMPT_PREFIXES = (
     "/health",
     "/static/",
     "/i18n/",
+    "/api/payments/webhook/",
     "/api/v1/payments/webhook/",
 )
 

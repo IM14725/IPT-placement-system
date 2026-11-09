@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
@@ -21,8 +23,11 @@ from django.conf import settings
 
 from apps.accounts.models import User, UserRole
 from apps.core import lockout
+from apps.core.audit import client_ip
 from apps.core.rate_limit import token_bucket
 from apps.core.redis_client import acquire_lock, release_lock
+
+logger = logging.getLogger("security")
 
 
 # Post-registration auto-login handoff: the task id is bound to the browser session
@@ -34,12 +39,12 @@ AUTH_FINALIZE_MAX_AGE = 60
 
 
 def _register_ip_key(request):
-    return f"ip:{request.META.get('REMOTE_ADDR', 'unknown')}"
+    return f"ip:{client_ip(request) or 'unknown'}"
 
 
 def _register_email_key(request):
     email = (request.POST.get("email") or "").strip().lower()
-    return f"ip:{request.META.get('REMOTE_ADDR', 'unknown')}:{email}"
+    return f"ip:{client_ip(request) or 'unknown'}:{email}"
 
 
 def _register_denied(request, result):
@@ -55,11 +60,11 @@ def _register_denied(request, result):
 
 def _login_rate_key(request):
     email = (request.POST.get("email") or "").strip().lower()
-    return f"ip:{request.META.get('REMOTE_ADDR', 'unknown')}:{email}"
+    return f"ip:{client_ip(request) or 'unknown'}:{email}"
 
 
 def _login_ip_key(request):
-    return f"ip:{request.META.get('REMOTE_ADDR', 'unknown')}"
+    return f"ip:{client_ip(request) or 'unknown'}"
 
 
 def _login_denied(request, result):
@@ -84,6 +89,7 @@ def home(request):
     key_fn=_register_ip_key,
     deny_view=_register_denied,
     methods=["POST"],
+    fail_closed=True,
 )
 @token_bucket(
     capacity=3,
@@ -92,6 +98,7 @@ def home(request):
     key_fn=_register_email_key,
     deny_view=_register_denied,
     methods=["POST"],
+    fail_closed=True,
 )
 def register(request):
     if request.user.is_authenticated:
@@ -134,6 +141,7 @@ def register(request):
     key_fn=_login_ip_key,
     deny_view=_login_denied,
     methods=["POST"],
+    fail_closed=True,
 )
 @token_bucket(
     capacity=5,
@@ -142,6 +150,7 @@ def register(request):
     key_fn=_login_rate_key,
     deny_view=_login_denied,
     methods=["POST"],
+    fail_closed=True,
 )
 def user_login(request):
     if request.user.is_authenticated:
@@ -281,6 +290,7 @@ def ws_ticket(request):
     scope="recovery-ip",
     key_fn=_login_ip_key,
     methods=["POST"],
+    fail_closed=True,
 )
 def forgot_password(request):
     """Recovery step 1: enter the account email, then go on to choose how to get the code.
@@ -326,6 +336,9 @@ def reset_password(request):
                 )
             user.set_password(form.cleaned_data["password1"])
             user.save(update_fields=["password"])
+            from apps.accounts.sessions import revoke_user_session
+
+            revoke_user_session(user, reason="password_reset")
             request.session.pop("pwd_reset_verified_user_id", None)
             messages.success(request, "Your password has been reset. Please log in.")
             return redirect("login")
@@ -397,6 +410,12 @@ from celery.result import AsyncResult
 
 
 @never_cache
+@token_bucket(
+    capacity=60,
+    refill_per_second=2.0,
+    scope="auth-task-status",
+    key_fn=_login_ip_key,
+)
 def check_auth_task(request, task_id):
     # Only the browser session that started the task may collect its result.
     if not task_id or request.session.get(AUTH_TASK_SESSION_KEY) != task_id:
@@ -411,12 +430,22 @@ def check_auth_task(request, task_id):
                 request.session.pop(AUTH_TASK_SESSION_KEY, None)
                 return JsonResponse({'status': 'SUCCESS', 'token': token})
             else:
-                error_msg = res.get('message', 'Failed') if isinstance(res, dict) else str(res)
+                error_msg = res.get('message', 'Registration could not be completed.') if isinstance(res, dict) else 'Registration could not be completed.'
                 return JsonResponse({'status': 'ERROR', 'message': error_msg})
-        except Exception as e:
-            return JsonResponse({'status': 'ERROR', 'message': str(e)})
+        except Exception:
+            logger.exception("Error retrieving auth task result for task_id=%s", task_id)
+            return JsonResponse({'status': 'ERROR', 'message': 'An unexpected error occurred while processing your request.'})
     return JsonResponse({'status': 'PENDING'})
 
+
+@token_bucket(
+    capacity=10,
+    refill_per_second=1 / 6,
+    scope="auth-finalize",
+    key_fn=_login_ip_key,
+    methods=["POST"],
+    fail_closed=True,
+)
 def finalize_auth(request):
     """Start the session after registration. Token must be fresh, signed and single-use."""
     if request.method == 'POST':

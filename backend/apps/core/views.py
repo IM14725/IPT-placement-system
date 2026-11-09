@@ -1,4 +1,5 @@
 import json
+import math
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -8,7 +9,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from apps.accounts.decorators import hardware_reverify
+from apps.core.audit import client_ip
 from apps.core.models import AuditLog, PlatformSetting
+from apps.core.rate_limit import token_bucket
+from apps.core.security import safe_json_dumps
 
 
 def health(request):
@@ -48,6 +52,7 @@ def legal_privacy(request):
 
 
 @login_required
+@token_bucket(capacity=5, refill_per_second=1 / 60, scope="pdpa-request", methods=["POST"])
 def legal_pdpa_request(request):
     """PDPA rights request form — Features 4 & 5 (Privacy §6)."""
     if request.method == "POST":
@@ -76,7 +81,7 @@ def legal_pdpa_request(request):
                 action="PDPA_REQUEST",
                 module="accounts",
                 description=f"Request type: {request_type}. Details: {details}",
-                ip_address=request.META.get("REMOTE_ADDR"),
+                ip_address=_client_ip(request),
             )
             messages.success(
                 request,
@@ -125,7 +130,7 @@ def _write_audit(request, action, module, description, *, actor=None, is_system=
 
 
 def _client_ip(request):
-    return request.META.get("REMOTE_ADDR")
+    return client_ip(request)
 
 
 def _get_setting(key, default=None):
@@ -572,7 +577,7 @@ def platform_student_edit(request, pk):
         "profile": student,
         "profile_type": "Student",
         "cancel_url": reverse("platform-student-verification", args=[student.pk]),
-        "regions_json": json.dumps(get_regions()),
+        "regions_json": safe_json_dumps(get_regions()),
     })
 
 
@@ -581,7 +586,6 @@ def platform_organization_edit(request, pk):
     from apps.companies.models import Organization
     from apps.companies.forms import OrganizationProfileForm
     from apps.core.cache import get_regions
-    import json
     from django.urls import reverse
 
     if not _require_admin(request, module="user_management", cap="edit"):
@@ -603,7 +607,7 @@ def platform_organization_edit(request, pk):
         "profile": organization,
         "profile_type": "Organization",
         "cancel_url": reverse("platform-organization-verification", args=[organization.pk]),
-        "regions_json": json.dumps(get_regions()),
+        "regions_json": safe_json_dumps(get_regions()),
     })
 
 
@@ -788,25 +792,50 @@ def admin_settings(request):
             "default_slot_limit": (request.POST.get("default_slot_limit"), "number"),
             "sms_enabled": (request.POST.get("sms_enabled") == "on", "bool"),
             "sms_api_endpoint": (request.POST.get("sms_api_endpoint"), "text"),
-            "sms_api_key": (request.POST.get("sms_api_key"), "text"),
             "maintenance_mode": (request.POST.get("maintenance_mode") == "on", "bool"),
             "student_req_student_id": (request.POST.get("student_req_student_id") == "on", "bool"),
             "student_req_transcript": (request.POST.get("student_req_transcript") == "on", "bool"),
             "student_req_cv": (request.POST.get("student_req_cv") == "on", "bool"),
         }
+        new_sms_key = (request.POST.get("sms_api_key") or "").strip()
+        if new_sms_key:
+            updates["sms_api_key"] = (new_sms_key, "text")
+
+        parsed_numbers = {}
+        for key, (value, vtype) in updates.items():
+            if vtype == "number":
+                if value in (None, ""):
+                    parsed_numbers[key] = 0.0
+                else:
+                    try:
+                        num = float(value)
+                    except (TypeError, ValueError):
+                        messages.error(
+                            request,
+                            f"Invalid number for '{key.replace('_', ' ')}'. Please enter a valid numeric value.",
+                        )
+                        return redirect("platform-settings")
+                    if not math.isfinite(num) or num < 0:
+                        messages.error(
+                            request,
+                            f"Value for '{key.replace('_', ' ')}' must be a non-negative number.",
+                        )
+                        return redirect("platform-settings")
+                    parsed_numbers[key] = num
+
         for key, (value, vtype) in updates.items():
             setting, _ = PlatformSetting.objects.get_or_create(
                 key=key,
                 defaults={
                     "label": key.replace("_", " ").title(),
                     "value_type": vtype,
-                    "value_text": "" if vtype != "text" else "",
-                    "value_number": None if vtype != "number" else (float(value) if value not in (None, "") else 0),
+                    "value_text": "",
+                    "value_number": parsed_numbers.get(key) if vtype == "number" else None,
                     "value_bool": False,
                 },
             )
             if vtype == "number":
-                setting.value_number = float(value) if value not in (None, "") else 0
+                setting.value_number = parsed_numbers[key]
             elif vtype == "bool":
                 setting.value_bool = bool(value)
             else:
@@ -926,8 +955,8 @@ def directory(request):
             "regions": regions,
             "districts": districts,
             "wards": wards,
-            "regions_json": json.dumps(regions),
-            "institutions_json": json.dumps(institutions),
+            "regions_json": safe_json_dumps(regions),
+            "institutions_json": safe_json_dumps(institutions),
             "years": years,
             "statuses": statuses,
             "education_levels": education_level_choices(),

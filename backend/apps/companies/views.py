@@ -51,6 +51,7 @@ from apps.core.audit import audit_event
 from apps.core.cache import get_regions
 from apps.core.models import AuditLog
 from apps.core.rate_limit import token_bucket
+from apps.core.security import safe_json_dumps
 from apps.documents.models import Document
 from apps.slots.models import Slot, SlotStatus
 
@@ -142,7 +143,7 @@ def profile(request):
             "organization": instance,
             "docs": docs,
             "upload_form": upload_form,
-            "regions_json": json.dumps(regions),
+            "regions_json": safe_json_dumps(regions),
             "members": members,
             "member_count": member_count,
             "max_members": MAX_ORGANIZATION_ACCOUNTS,
@@ -328,6 +329,7 @@ def audit_detail(request, log_id):
 
 @login_required
 @org_permission_required(DOCUMENTS_MANAGE)
+@token_bucket(capacity=10, refill_per_second=1 / 30, scope="org-doc-upload", methods=["POST"])
 def upload_document(request):
     if not request.user.is_organization:
         return HttpResponseForbidden("Organization account required.")
@@ -461,7 +463,7 @@ def slot_create(request):
     return render(
         request,
         "organization/slot_form.html",
-        {"form": form, "regions_json": json.dumps(regions), "editing": False},
+        {"form": form, "regions_json": safe_json_dumps(regions), "editing": False},
     )
 
 
@@ -492,7 +494,7 @@ def slot_edit(request, slot_id):
         "organization/slot_form.html",
         {
             "form": form,
-            "regions_json": json.dumps(regions),
+            "regions_json": safe_json_dumps(regions),
             "editing": True,
             "slot": slot,
             "current_region": slot.district.region_id,
