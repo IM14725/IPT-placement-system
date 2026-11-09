@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Former members{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <a href="{% url 'organization-profile' %}" class="text-primary font-semibold hover:underline flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Team accounts</a>
+    <h1 class="font-display text-display text-on-surface">Former Members</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+      People whose access to {{ organization.name }} was revoked. Their accounts and everything they did are kept: opportunities, applications, documents and decisions stay with the organization, and their actions remain attributed to them in the activity log.
+    </p>
+  </div>
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">
+          <th class="px-md py-sm">Name</th><th class="px-md py-sm">Email</th><th class="px-md py-sm">Previous role</th>
+          <th class="px-md py-sm">Date added</th><th class="px-md py-sm">Date removed</th><th class="px-md py-sm">Removed by</th><th class="px-md py-sm">Reason</th>
+        </tr>
+      </thead>
+      <tbody class="font-body-md text-body-md text-on-surface">
+        {% for m in former %}
+          <tr class="border-t border-surface-container align-top">
+            <td class="px-md py-sm">{{ m.user.get_full_name|default:"—" }}{% if m.position %}<div class="text-metadata text-on-surface-variant">{{ m.position }}</div>{% endif %}</td>
+            <td class="px-md py-sm break-all">{{ m.user.email }}</td>
+            <td class="px-md py-sm">{{ m.get_role_display }}</td>
+            <td class="px-md py-sm">{{ m.created_at|date:"j M Y" }}</td>
+            <td class="px-md py-sm">{{ m.removed_at|date:"j M Y H:i" }}</td>
+            <td class="px-md py-sm break-all">{{ m.removed_by.email|default:"—" }}</td>
+            <td class="px-md py-sm">{{ m.removal_reason }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="px-md py-xl text-center text-on-surface-variant">No one has been removed from this organization.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="font-metadata text-metadata text-on-surface-variant">Former members cannot sign in or see the organization's logs. Their history stays searchable in the <a class="text-primary hover:underline" href="{% url 'organization-audit-logs' %}">activity log</a>.</p>
+</div>
+{% endblock %}

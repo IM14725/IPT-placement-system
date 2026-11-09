@@ -220,6 +220,9 @@
   </nav>
 
   {% if user.is_authenticated %}
+  {% if emergency_session %}
+    <div class="fixed top-16 inset-x-0 z-40 bg-error text-on-error text-center text-metadata font-semibold py-1">EMERGENCY (break-glass) session: every action is logged and security is notified.</div>
+  {% endif %}
   <div id="sidebar-backdrop" class="fixed inset-x-0 top-16 bottom-0 z-30 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200"></div>
   <aside id="app-sidebar" aria-label="{% trans 'Main menu' %}" inert
          class="fixed left-0 top-16 bottom-0 z-40 w-72 max-w-[85vw] bg-surface-container-lowest border-r border-outline-variant shadow-2xl flex flex-col -translate-x-full transition-transform duration-200 ease-out">
@@ -249,7 +252,16 @@
         <a class="side-link {% is_active request 'platform-roles' %}" href="{% url 'platform-roles' %}"><span class="material-symbols-outlined">admin_panel_settings</span>{% trans "Roles" %}</a>
         <a class="side-link {% is_active request 'platform-integrity' %}" href="{% url 'platform-integrity' %}"><span class="material-symbols-outlined">verified_user</span>{% trans "Integrity" %}</a>
         <a class="side-link {% is_active request 'platform-settings' %}" href="{% url 'platform-settings' %}"><span class="material-symbols-outlined">settings</span>{% trans "Settings" %}</a>
+        <p class="side-heading">{% trans "Security" %}</p>
+        {% if user.is_super_admin %}
+        <a class="side-link {% is_active request 'platform-admins' 'platform-admin-new' 'platform-admin-detail' %}" href="{% url 'platform-admins' %}"><span class="material-symbols-outlined">manage_accounts</span>{% trans "Administrators" %}</a>
+        <a class="side-link {% is_active request 'platform-break-glass' %}" href="{% url 'platform-break-glass' %}"><span class="material-symbols-outlined">emergency</span>{% trans "Break-glass" %}</a>
+        {% endif %}
+        <a class="side-link {% is_active request 'platform-recovery' %}" href="{% url 'platform-recovery' %}"><span class="material-symbols-outlined">key</span>{% trans "Recovery requests" %}</a>
+        <a class="side-link {% is_active request 'mfa-settings' %}" href="{% url 'mfa-settings' %}"><span class="material-symbols-outlined">passkey</span>{% trans "My MFA" %}</a>
       {% endif %}
+      <p class="side-heading">{% trans "Account" %}</p>
+      <a class="side-link {% is_active request 'account-security' 'verify-contact' 'change-password' %}" href="{% url 'account-security' %}"><span class="material-symbols-outlined">shield_person</span>{% trans "Account &amp; security" %}</a>
     </nav>
     <div class="shrink-0 p-sm border-t border-outline-variant">
       <a href="{% url 'logout' %}" class="w-full flex items-center justify-center gap-xs px-md py-2.5 rounded-lg border border-error/40 text-error font-semibold hover:bg-error/10 transition-colors">
@@ -402,11 +414,12 @@
   {% if user.is_authenticated %}
     <script>
       window.IPT = window.IPT || {};
-      window.IPT.currentUserId = {{ user.id }};
+      window.IPT.currentUserId = "{{ user.id }}";
       window.IPT.csrf = "{{ csrf_token }}";
       window.IPT.userRole = "{{ user.role }}";
     </script>
     <script src="{% static 'js/ws.js' %}"></script>
+    <script src="{% static 'js/session-guard.js' %}"></script>
 
     <!-- Inactivity Timer Modal -->
     <div id="inactivity-modal" class="fixed top-4 left-4 z-[100] hidden bg-error-container text-on-error-container p-4 rounded-xl shadow-2xl max-w-xs border border-error/30 flex flex-col gap-2 transition-all">

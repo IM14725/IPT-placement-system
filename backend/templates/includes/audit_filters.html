@@ -1,0 +1,54 @@
+{% comment %}
+Shared audit filter form. Context: f (GET params), actions, modules (optional),
+organizations (platform only), export_label.
+{% endcomment %}
+<form method="get" class="p-md bg-surface-container-low grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-sm border-b border-surface-container-highest">
+  {% if organizations %}
+    <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Organization
+      <select name="organization" class="ipt-select">
+        <option value="">All organizations</option>
+        {% for o in organizations %}<option value="{{ o.id }}" {% if f.organization == o.id|stringformat:"s" %}selected{% endif %}>{{ o.name }}</option>{% endfor %}
+      </select>
+    </label>
+  {% endif %}
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Actor / member
+    <input name="actor" value="{{ f.actor|default:'' }}" placeholder="Name or email" class="w-full px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest">
+  </label>
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Action type
+    <input name="action" list="audit-actions" value="{{ f.action|default:'' }}" placeholder="e.g. Member Removed" class="w-full px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest">
+    <datalist id="audit-actions">{% for a in actions %}<option value="{{ a }}">{% endfor %}</datalist>
+  </label>
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Target / resource
+    <input name="target" value="{{ f.target|default:'' }}" placeholder="Application, slot, document…" class="w-full px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest">
+  </label>
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">From
+    <input type="date" name="date_from" value="{{ f.date_from|default:'' }}" class="w-full px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest">
+  </label>
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">To
+    <input type="date" name="date_to" value="{{ f.date_to|default:'' }}" class="w-full px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest">
+  </label>
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Status
+    <select name="status" class="ipt-select">
+      <option value="">Any</option>
+      <option value="SUCCESS" {% if f.status == 'SUCCESS' %}selected{% endif %}>Successful</option>
+      <option value="FAILED" {% if f.status == 'FAILED' %}selected{% endif %}>Failed</option>
+      <option value="REJECTED" {% if f.status == 'REJECTED' %}selected{% endif %}>Rejected</option>
+    </select>
+  </label>
+  {% if modules %}
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Module
+    <select name="module" class="ipt-select">
+      <option value="">All modules</option>
+      {% for m in modules %}<option value="{{ m }}" {% if f.module == m %}selected{% endif %}>{{ m }}</option>{% endfor %}
+    </select>
+  </label>
+  {% endif %}
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant md:col-span-2">Keyword
+    <input name="q" value="{{ f.q|default:'' }}" placeholder="Search anything…" class="w-full px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest">
+  </label>
+  <div class="flex items-end gap-sm">
+    <button type="submit" class="px-md py-2 bg-primary text-on-primary rounded-lg font-semibold">Search</button>
+    <a href="?" class="px-md py-2 bg-surface-container rounded-lg font-semibold text-on-surface">Reset</a>
+    <button type="submit" name="export" value="csv" class="px-md py-2 bg-surface-container rounded-lg font-semibold text-on-surface" title="Exports are recorded in the audit log">Export CSV</button>
+  </div>
+</form>

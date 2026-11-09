@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from apps.accounts.decorators import hardware_reverify
 from apps.core.models import AuditLog, PlatformSetting
 
 
@@ -392,7 +393,7 @@ def _missing_docs(owner_user, profile_kind, organization=None):
 
     if organization is not None:
         qs = Document.objects.filter(
-            owner_id__in=organization.member_user_ids(),
+            owner_id__in=organization.historical_member_user_ids(),
             doc_type__in=_required_docs(profile_kind),
         )
     else:
@@ -482,7 +483,7 @@ def organization_verification(request, pk):
     if not _require_admin(request, module="user_management"):
         return render(request, "core/forbidden.html", status=403)
     organization = get_object_or_404(Organization, pk=pk)
-    docs = Document.objects.filter(owner_id__in=organization.member_user_ids()).select_related("owner")
+    docs = Document.objects.filter(owner_id__in=organization.historical_member_user_ids()).select_related("owner")
     if request.method == "POST":
         decision = request.POST.get("decision")
         reason = request.POST.get("reason", "").strip()
@@ -655,44 +656,73 @@ def notification_templates(request):
 
 @login_required
 def audit_logs(request):
-    if not _require_admin(request, module="system_metrics"):
-        return render(request, "core/forbidden.html", status=403)
-    q = request.GET.get("q", "").strip()
-    module = request.GET.get("module", "")
-    logs = AuditLog.objects.all().select_related("actor")
-    if q:
-        from django.db.models import Q
-
-        logs = logs.filter(
-            Q(actor_label__icontains=q)
-            | Q(action__icontains=q)
-            | Q(description__icontains=q)
-            | Q(module__icontains=q)
-        )
-    if module:
-        logs = logs.filter(module=module)
-    logs = logs.order_by("-created_at")
-    modules = list(AuditLog.objects.values_list("module", flat=True).distinct().order_by("module"))
-    from apps.core.pagination import paginate
+    """Platform audit console: every organization's activity, with shared filters."""
     from urllib.parse import urlencode
 
-    page_obj = paginate(logs, request.GET.get("page"), page_size=50)
+    from django.http import HttpResponse
+
+    from apps.companies.models import Organization
+    from apps.core import audit as audit_lib
+    from apps.core.pagination import paginate
+
+    if not _require_admin(request, module="system_metrics"):
+        return render(request, "core/forbidden.html", status=403)
+    params = request.GET
+    logs = audit_lib.filter_audit_logs(
+        AuditLog.objects.all().select_related("actor", "organization"), params
+    ).order_by("-created_at")
+    if audit_lib.has_filters(params):
+        audit_lib.audit_event(
+            request,
+            action="Audit Log Searched",
+            module="Audit",
+            description="Searched the platform audit log",
+            context={k: v for k, v in params.items() if k in audit_lib.FILTER_KEYS and v},
+        )
+    if params.get("export") == "csv":
+        audit_lib.audit_event(
+            request,
+            action="Audit Log Exported",
+            module="Audit",
+            description="Exported the platform audit log (CSV)",
+            context={k: v for k, v in params.items() if k in audit_lib.FILTER_KEYS and v},
+        )
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="platform-audit.csv"'
+        return audit_lib.write_csv(response, logs)
+    modules = list(AuditLog.objects.values_list("module", flat=True).distinct().order_by("module"))
+    actions = list(AuditLog.objects.values_list("action", flat=True).distinct().order_by("action"))
+    page_obj = paginate(logs, params.get("page"), page_size=50)
     return render(
         request,
         "core/audit_logs.html",
         {
             "logs": page_obj,
             "page_obj": page_obj,
-            "querystring": urlencode({k: v for k, v in request.GET.items() if k != "page"}),
+            "querystring": urlencode({k: v for k, v in params.items() if k != "page"}),
             "modules": modules,
-            "q": q,
-            "module": module,
+            "actions": actions,
+            "organizations": Organization.objects.order_by("name").values("id", "name"),
+            "f": params,
             "total": AuditLog.objects.count(),
         },
     )
 
 
 @login_required
+def audit_detail(request, log_id):
+    if not _require_admin(request, module="system_metrics"):
+        return render(request, "core/forbidden.html", status=403)
+    log = get_object_or_404(AuditLog.objects.select_related("actor", "organization"), id=log_id)
+    return render(
+        request,
+        "core/audit_detail.html",
+        {"log": log, "back_url": "platform-audit-logs", "scope": "platform"},
+    )
+
+
+@login_required
+@hardware_reverify
 def role_management(request):
     from apps.accounts.models import AdminRole
 
@@ -747,6 +777,7 @@ def role_management(request):
 
 
 @login_required
+@hardware_reverify
 def admin_settings(request):
     if not _require_admin(request, super_only=True):
         return render(request, "core/forbidden.html", status=403)

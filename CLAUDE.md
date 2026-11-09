@@ -54,10 +54,14 @@ pytest apps/core/test_locks.py::test_name -x      # one test
 
 `backend/conftest.py` disables cache/rate limiting, runs Celery eagerly, and swaps `get_redis` for in-process `fakeredis` — tests never touch a real Redis, but they do need the Postgres DB (triggers are Postgres-specific). Utility scripts: `backend/e2e_phase3.py` (live end-to-end against running services), `backend/simulate_webhook.py`.
 
+### Identity & access (Feature 2)
+
+Sessions are 10 minutes, one per account, enforced by `apps/accounts/sessions.py` (`SessionPolicyMiddleware`); `apps/accounts/gates.py` blocks users who must change a temporary password or (admins) finish MFA. Use `revoke_user_session(user, reason)` after role changes, removal or suspension. Audit with `apps.core.audit.audit_event` (organization, actor role, target, outcome, context). High-risk admin POSTs use `@hardware_reverify`. OTPs live in `accounts/otp.py` (never queue a code or password on Celery). Admin MFA/recovery/break-glass: `accounts/mfa.py`, `recovery.py`, `breakglass.py`. Tests run with `ADMIN_MFA_ENFORCED=False` and blank SMS keys (`conftest.py`). Details: `plan.md`, section "Feature 2".
+
 ## Gotchas
 
 - The Windows dev environment is the primary target (`scripts/*.ps1`); `Dockerfile`/`docker-compose.yml` are a secondary path.
 - Long-running Django/uvicorn processes do not always reload; `plan.md` records bugs that were just a stale server — restart before assuming a code bug.
 - Uploads: <2 MB, extension allowlist and magic-byte check via `apps/documents/validators.py` (`validate_upload`); documents are served only through permission-checked views, and stored SHA-256 is re-verified on view (tamper → 410).
 - `.claudeignore` excludes migrations (`**/migrations/[0-9]*.py`) from Claude's view; read them explicitly when working on triggers or schema.
-- `plan.md` contains dev credentials; don't copy them into code or commits.
+- `plan.md` must not contain real credentials (the Postgres superuser password was removed; rotate it). Keep secrets in `backend/.env` (gitignored).

@@ -1,0 +1,61 @@
+{% comment %}
+Shared audit result table. Context: logs (page), detail_url_name, show_org (bool).
+{% endcomment %}
+<div class="overflow-x-auto w-full">
+  <table class="w-full text-left border-collapse">
+    <thead>
+      <tr class="bg-surface-container-lowest font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">
+        <th class="px-md py-sm font-medium w-[150px]">Time</th>
+        {% if show_org %}<th class="px-md py-sm font-medium">Organization</th>{% endif %}
+        <th class="px-md py-sm font-medium">Actor</th>
+        <th class="px-md py-sm font-medium">Action</th>
+        <th class="px-md py-sm font-medium hidden lg:table-cell">Target</th>
+        <th class="px-md py-sm font-medium">Outcome</th>
+        <th class="px-md py-sm font-medium"></th>
+      </tr>
+    </thead>
+    <tbody class="font-body-md text-body-md text-on-surface">
+      {% for log in logs %}
+        <tr class="hover:bg-surface-container-low/50 transition-colors border-t border-surface-container">
+          <td class="px-md py-sm">
+            <div class="flex flex-col">
+              <span class="font-medium">{{ log.created_at|date:"M j, Y" }}</span>
+              <span class="text-on-surface-variant text-metadata font-metadata">{{ log.created_at|date:"H:i:s" }}</span>
+            </div>
+          </td>
+          {% if show_org %}<td class="px-md py-sm">{{ log.organization.name|default:"—" }}</td>{% endif %}
+          <td class="px-md py-sm">
+            <div class="flex flex-col">
+              <span class="font-medium break-all">{{ log.actor_label|default:"System" }}</span>
+              <span class="text-metadata font-metadata text-primary">{{ log.actor_role|default:"" }}</span>
+            </div>
+          </td>
+          <td class="px-md py-sm">
+            <span class="font-medium">{{ log.action }}</span>
+            <div class="text-metadata font-metadata text-on-surface-variant">{{ log.module }}</div>
+          </td>
+          <td class="px-md py-sm hidden lg:table-cell">
+            {% if log.target_type %}
+              <span class="text-metadata font-metadata text-on-surface-variant">{{ log.target_type }}</span>
+              <div class="break-all">{{ log.target_label|truncatechars:50 }}</div>
+            {% else %}—{% endif %}
+          </td>
+          <td class="px-md py-sm">
+            <span class="px-2 py-1 rounded-md text-metadata font-metadata
+              {% if log.outcome == 'SUCCESS' %}bg-[#e8f5e9] text-[#1b5e20]{% elif log.outcome == 'FAILED' %}bg-error-container text-on-error-container{% else %}bg-[#fff4e5] text-[#a16207]{% endif %}">{{ log.get_outcome_display }}</span>
+          </td>
+          <td class="px-md py-sm text-right">
+            <a class="text-primary font-semibold hover:underline" href="{% url detail_url_name log.id %}">Details</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr class="border-t border-surface-container">
+          <td colspan="7" class="px-md py-xl text-center">
+            <span class="material-symbols-outlined text-[40px] text-outline-variant">history</span>
+            <p class="font-body-md text-on-surface-variant mt-sm">No audit records match your filters.</p>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

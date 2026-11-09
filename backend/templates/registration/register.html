@@ -131,6 +131,35 @@
           {% endif %}
         </div>
 
+        <div class="flex flex-col gap-md" data-organization-only style="display:none">
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.organization_email.id_for_label }}">{% trans "Official organization email" %}</label>
+            <div class="ipt-field-box {% if form.organization_email.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">alternate_email</span></span>
+              {{ form.organization_email }}
+            </div>
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "The organization's contact identity. You sign in with your own personal email below." %}</p>
+            {% if form.organization_email.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.organization_email.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.organization_phone.id_for_label }}">{% trans "Organization phone number" %}</label>
+            <div class="ipt-field-box {% if form.organization_phone.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">call</span></span>
+              {{ form.organization_phone }}
+            </div>
+            {% if form.organization_phone.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.organization_phone.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.position.id_for_label }}">{% trans "Your position in the organization" %}</label>
+            <div class="ipt-field-box {% if form.position.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">work</span></span>
+              {{ form.position }}
+            </div>
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "e.g. Human Resources Manager, Director, Training Coordinator. You become the organization's Manager." %}</p>
+            {% if form.position.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.position.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+
         <div class="flex flex-col gap-xs">
           <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.phone.id_for_label }}">{% trans "Phone number" %} <span class="text-on-surface-variant font-normal" data-phone-suffix></span></label>
           <div class="ipt-field-box {% if form.phone.errors %}is-error{% endif %}">
@@ -244,16 +273,11 @@
   const phoneSuffix = document.querySelector('[data-phone-suffix]');
   function syncNameFields() {
     const isOrg = document.querySelector('input[name="role"]:checked')?.value === 'ORGANIZATION';
-    if (personNameEl) {
-      personNameEl.style.display = isOrg ? 'none' : '';
-      if (isOrg) {
-        personNameEl.querySelectorAll('input').forEach(inp => { inp.value = ''; });
-      }
-    }
     if (organizationNameEl) {
       organizationNameEl.style.display = isOrg ? '' : 'none';
     }
-    phoneSuffix.textContent = isOrg ? '(organization line)' : '';
+    document.querySelectorAll('[data-organization-only]').forEach(el => { el.style.display = isOrg ? '' : 'none'; });
+    phoneSuffix.textContent = isOrg ? '(your own number)' : '';
   }
   document.querySelectorAll('input[name="role"]').forEach(r => r.addEventListener('change', syncNameFields));
   syncNameFields();

@@ -79,38 +79,86 @@
 
         <div class="flex flex-col gap-xs">
           {% for m in members %}
-            <div class="flex items-center justify-between p-sm rounded-lg bg-surface-container-low">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-sm p-sm rounded-lg bg-surface-container-low">
               <div class="flex items-center gap-sm min-w-0">
                 <div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-metadata shrink-0">
                   {{ m.user.email|slice:":2"|upper }}
                 </div>
                 <div class="flex flex-col min-w-0">
-                  <span class="font-body-md text-body-md font-medium text-on-surface truncate">{{ m.user.email }}</span>
-                  <span class="font-metadata text-metadata text-on-surface-variant">{{ m.get_role_display }} · {{ m.get_membership_status_display }}</span>
+                  <span class="font-body-md text-body-md font-medium text-on-surface truncate">{{ m.user.get_full_name|default:m.user.email }}</span>
+                  <span class="font-metadata text-metadata text-on-surface-variant truncate">{{ m.user.email }}</span>
+                  <span class="font-metadata text-metadata text-on-surface-variant">{{ m.get_role_display }}{% if m.position %} · {{ m.position }}{% endif %}</span>
                 </div>
               </div>
               {% if m.user_id == user.id or m.user_id == organization.user_id %}
-                <span class="font-label-caps text-label-caps uppercase px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant">{% trans "Primary" %}</span>
+                <span class="font-label-caps text-label-caps uppercase px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant">{% trans "Manager" %}</span>
               {% elif can_manage_members %}
-                <form method="post" action="{% url 'organization-remove-member' m.id %}" onsubmit="return confirm('Remove this organization account?');">
-                  {% csrf_token %}
-                  <button type="submit" class="text-error hover:bg-error-container/40 p-1.5 rounded-lg transition-colors" title="Remove account">
-                    <span class="material-symbols-outlined text-[20px]">person_remove</span>
-                  </button>
-                </form>
+                <div class="flex flex-col sm:flex-row gap-xs sm:items-center">
+                  <form method="post" action="{% url 'organization-member-role' m.id %}" class="flex items-center gap-xs">
+                    {% csrf_token %}
+                    <select name="role" class="ipt-select text-metadata" aria-label="{% trans 'Role' %}">
+                      {% for value, label in assignable_roles %}<option value="{{ value }}" {% if m.role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
+                    <button type="submit" class="px-sm py-1.5 rounded-lg bg-surface-container text-on-surface text-metadata font-semibold">{% trans "Set role" %}</button>
+                  </form>
+                  <form method="post" action="{% url 'organization-remove-member' m.id %}" class="flex items-center gap-xs" onsubmit="return confirm('Revoke this member\'s access? Their history is kept.');">
+                    {% csrf_token %}
+                    <input name="reason" required maxlength="200" placeholder="{% trans 'Reason for removal' %}" class="px-sm py-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-metadata">
+                    <button type="submit" class="text-error hover:bg-error-container/40 p-1.5 rounded-lg transition-colors" title="{% trans 'Remove access' %}">
+                      <span class="material-symbols-outlined text-[20px]">person_remove</span>
+                    </button>
+                  </form>
+                </div>
               {% endif %}
             </div>
           {% endfor %}
         </div>
 
+        <div class="flex flex-wrap gap-sm">
+          {% if can_manage_members %}
+            <a href="{% url 'organization-former-members' %}" class="flex items-center gap-xs text-primary font-semibold hover:underline"><span class="material-symbols-outlined text-[18px]">history</span>{% trans "Former Members" %} ({{ former_count }})</a>
+          {% endif %}
+          {% if can_view_audit %}
+            <a href="{% url 'organization-audit-logs' %}" class="flex items-center gap-xs text-primary font-semibold hover:underline"><span class="material-symbols-outlined text-[18px]">fact_check</span>{% trans "Activity log" %}</a>
+          {% endif %}
+        </div>
+
         {% if can_add_member %}
-          <form method="post" action="{% url 'organization-add-member' %}" class="grid grid-cols-1 md:grid-cols-3 gap-sm pt-sm border-t border-outline-variant/40 items-end">
+          <form method="post" action="{% url 'organization-add-member' %}" class="grid grid-cols-1 md:grid-cols-2 gap-sm pt-sm border-t border-outline-variant/40 items-end">
             {% csrf_token %}
+            <div class="flex flex-col gap-xs">
+              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.first_name.id_for_label }}">{{ member_form.first_name.label }}</label>
+              <div class="ipt-field-box">
+                <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">person</span></span>
+                {{ member_form.first_name }}
+              </div>
+            </div>
+            <div class="flex flex-col gap-xs">
+              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.last_name.id_for_label }}">{{ member_form.last_name.label }}</label>
+              <div class="ipt-field-box">
+                <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">person</span></span>
+                {{ member_form.last_name }}
+              </div>
+            </div>
             <div class="flex flex-col gap-xs">
               <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.email.id_for_label }}">{{ member_form.email.label }}</label>
               <div class="ipt-field-box">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">mail</span></span>
                 {{ member_form.email }}
+              </div>
+            </div>
+            <div class="flex flex-col gap-xs">
+              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.phone.id_for_label }}">{{ member_form.phone.label }}</label>
+              <div class="ipt-field-box">
+                <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">call</span></span>
+                {{ member_form.phone }}
+              </div>
+            </div>
+            <div class="flex flex-col gap-xs">
+              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.position.id_for_label }}">{{ member_form.position.label }}</label>
+              <div class="ipt-field-box">
+                <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">work</span></span>
+                {{ member_form.position }}
               </div>
             </div>
             <div class="flex flex-col gap-xs">
@@ -127,7 +175,8 @@
                 {{ member_form.password }}
               </div>
             </div>
-            <div class="md:col-span-3 flex justify-end mt-xs">
+            <p class="md:col-span-2 font-metadata text-metadata text-on-surface-variant">Each member signs in with their own email and password. They verify their email by code and must replace this temporary password at first sign-in.</p>
+            <div class="md:col-span-2 flex justify-end mt-xs">
               <button type="submit" class="bg-secondary text-on-secondary hover:bg-secondary-container font-body-md text-body-md font-semibold px-md py-2 rounded-lg shadow-sm transition-colors flex items-center gap-xs">
                 <span class="material-symbols-outlined text-[18px]">person_add</span>
                 {% trans "Add Organization Account" %}

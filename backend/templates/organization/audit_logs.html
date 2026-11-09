@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Organization audit log{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">{{ organization.name }}</span>
+    <h1 class="font-display text-display text-on-surface">Activity log</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+      Everything done in your organization's workspace, including actions by members who have since left. Entries cannot be edited or deleted. Searching and exporting are recorded too.
+    </p>
+  </div>
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm flex flex-col w-full overflow-hidden">
+    {% include "includes/audit_filters.html" %}
+    {% include "includes/audit_table.html" with detail_url_name="organization-audit-detail" show_org=False %}
+    {% include "includes/pagination.html" %}
+  </div>
+</div>
+{% endblock %}

@@ -2,4 +2,9 @@ from django.apps import AppConfig
 
 
 class AccountsConfig(AppConfig):
-    name = 'apps.accounts'
+    name = "apps.accounts"
+
+    def ready(self):
+        from apps.accounts import sessions
+
+        sessions.connect_signals()

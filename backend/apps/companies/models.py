@@ -17,8 +17,9 @@ class OrganizationType(models.TextChoices):
 
 
 class OrganizationMemberRole(models.TextChoices):
-    OWNER = "OWNER", _("Organization Owner")
-    MANAGER = "MANAGER", _("Organization Manager")
+    # The registering user. Shown as "Manager": the first member of an organization is its Manager.
+    OWNER = "OWNER", _("Manager (Owner)")
+    MANAGER = "MANAGER", _("Deputy Manager")
     RECRUITER = "RECRUITER", _("Organization Recruiter")
     UNIVERSITY_COORDINATOR = "UNIVERSITY_COORDINATOR", _("University Coordinator")
     UNIVERSITY_SUPERVISOR = "UNIVERSITY_SUPERVISOR", _("University Supervisor")
@@ -28,6 +29,8 @@ class MembershipStatus(models.TextChoices):
     ACTIVE = "ACTIVE", _("Active")
     INVITED = "INVITED", _("Invited")
     SUSPENDED = "SUSPENDED", _("Suspended")
+    # Access revoked by a Manager. The row (and the user account) is kept as history.
+    REMOVED = "REMOVED", _("Removed")
 
 
 class Organization(TimeStampedModel):
@@ -106,6 +109,16 @@ class Organization(TimeStampedModel):
     def is_verified(self):
         return self.verification_status == VerificationStatus.APPROVED
 
+    def historical_member_user_ids(self):
+        """Every user who has ever belonged to this organization, former members included.
+
+        Organization-owned data (documents, history) must not vanish when a member leaves.
+        """
+        ids = set(self.members.values_list("user_id", flat=True))
+        if self.user_id:
+            ids.add(self.user_id)
+        return list(ids)
+
     def member_user_ids(self):
         ids = set(
             self.members.filter(membership_status=MembershipStatus.ACTIVE).values_list(
@@ -164,6 +177,17 @@ class OrganizationMember(TimeStampedModel):
         choices=MembershipStatus.choices,
         default=MembershipStatus.ACTIVE,
     )
+    # Real-world job title (e.g. "Recruitment Officer"); the role above sets platform permissions.
+    position = models.CharField(max_length=120, blank=True)
+    removed_at = models.DateTimeField(null=True, blank=True)
+    removed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="member_removals",
+    )
+    removal_reason = models.TextField(blank=True)
 
     class Meta:
         ordering = ["created_at"]

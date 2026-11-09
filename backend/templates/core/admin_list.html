@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Administrators{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-md">
+    <div class="flex flex-col gap-xs">
+      <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Security</span>
+      <h1 class="font-display text-display text-on-surface">Administrators</h1>
+      <p class="font-body-md text-on-surface-variant max-w-2xl">Only a Super Admin can create administrators. There is no public admin registration. New admins receive a temporary password by email, must replace it, and must set up MFA before getting access.</p>
+    </div>
+    <a href="{% url 'platform-admin-new' %}" class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg flex items-center gap-xs self-start"><span class="material-symbols-outlined text-[18px]">person_add</span>New administrator</a>
+  </div>
+  {% if messages %}{% for message in messages %}<div class="rounded-lg bg-surface-container border-l-2 border-primary px-sm py-sm">{{ message }}</div>{% endfor %}{% endif %}
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead><tr class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">
+        <th class="px-md py-sm">Name</th><th class="px-md py-sm">Role</th><th class="px-md py-sm">MFA</th><th class="px-md py-sm">Status</th><th class="px-md py-sm"></th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+          <tr class="border-t border-surface-container">
+            <td class="px-md py-sm"><div class="font-medium">{{ r.user.get_full_name|default:"—" }}</div><div class="text-metadata text-on-surface-variant break-all">{{ r.user.email }}</div></td>
+            <td class="px-md py-sm">{% if r.user.role == 'SUPER_ADMIN' %}Super Admin{% else %}{{ r.user.admin_role.name|default:"—" }}{% endif %}{% if r.break_glass %} <span class="px-2 py-0.5 rounded bg-error-container text-on-error-container text-metadata">break-glass</span>{% endif %}{% if r.user.is_recovery_approver %} <span class="px-2 py-0.5 rounded bg-surface-container text-metadata">approver</span>{% endif %}</td>
+            <td class="px-md py-sm">{% if r.mfa %}{% if r.key %}Security key{% endif %}{% if r.key and r.totp %} + {% endif %}{% if r.totp %}Authenticator{% endif %}{% elif r.user.must_change_password %}Awaiting first sign-in{% else %}<span class="text-error font-semibold">Not set up</span>{% endif %}</td>
+            <td class="px-md py-sm">{% if r.user.is_active %}Active{% else %}<span class="text-error">Suspended</span>{% endif %}</td>
+            <td class="px-md py-sm text-right"><a class="text-primary font-semibold hover:underline" href="{% url 'platform-admin-detail' r.user.pk %}">Manage</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

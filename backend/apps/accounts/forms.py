@@ -29,6 +29,17 @@ def validate_tz_phone(value):
     return "+" + digits if normalized.startswith("+") else digits
 
 
+def validate_tz_any_phone(value):
+    """Organization lines may be landlines: 255 followed by 9 digits, any network."""
+    if not value:
+        return value
+    normalized = _normalize_phone(value)
+    digits = normalized.lstrip("+")
+    if not digits.startswith("255") or len(digits) != 12 or not digits.isdigit():
+        raise forms.ValidationError("Phone number must be 255 followed by 9 digits.")
+    return value
+
+
 class RegisterForm(forms.ModelForm):
     password1 = forms.CharField(
         label="Password",
@@ -54,10 +65,28 @@ class RegisterForm(forms.ModelForm):
         label="Organization name",
         widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "e.g. Amani Logistics Ltd"}),
     )
+    # Organization contact identity (separate from the first member's own login details).
+    organization_email = forms.EmailField(
+        required=False,
+        label="Official organization email",
+        widget=forms.EmailInput(attrs={"class": FIELD_CLASS, "placeholder": "info@organization.co.tz"}),
+    )
+    organization_phone = forms.CharField(
+        required=False,
+        label="Organization phone number",
+        validators=[validate_tz_any_phone],
+        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "2557XXXXXXXX"}),
+    )
+    position = forms.CharField(
+        required=False,
+        max_length=120,
+        label="Your position in the organization",
+        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "e.g. Human Resources Manager"}),
+    )
 
     class Meta:
         model = User
-        fields = ("email", "first_name", "last_name", "phone", "role", "organization_name")
+        fields = ("email", "first_name", "last_name", "phone", "role", "organization_name")  # + extras above
         widgets = {
             "email": forms.EmailInput(attrs={"class": FIELD_CLASS, "placeholder": "you@example.com", "autocomplete": "email"}),
             "first_name": forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "First name"}),
@@ -90,30 +119,38 @@ class RegisterForm(forms.ModelForm):
             except forms.ValidationError as exc:
                 self.add_error("password1", exc.messages)
         role = cleaned.get("role")
+        # Students and the first organization member both register as a named person.
+        if not (cleaned.get("first_name") or "").strip():
+            self.add_error("first_name", "First name is required.")
+        if not (cleaned.get("last_name") or "").strip():
+            self.add_error("last_name", "Last name is required.")
         if role == UserRole.ORGANIZATION:
-            from apps.companies.services import organization_name_taken
+            from apps.companies.services import organization_email_taken, organization_name_taken
 
-            cleaned["first_name"] = ""
-            cleaned["last_name"] = ""
             organization_name = (cleaned.get("organization_name") or "").strip()
             if not organization_name:
                 self.add_error("organization_name", "Organization name is required.")
             elif organization_name_taken(organization_name):
                 self.add_error("organization_name", "An organization with this name is already registered.")
-        else:
-            if not (cleaned.get("first_name") or "").strip():
-                self.add_error("first_name", "First name is required.")
-            if not (cleaned.get("last_name") or "").strip():
-                self.add_error("last_name", "Last name is required.")
+            org_email = (cleaned.get("organization_email") or "").strip().lower()
+            if not org_email:
+                self.add_error("organization_email", "The official organization email is required.")
+            elif organization_email_taken(org_email):
+                self.add_error(
+                    "organization_email", "An organization with this official email is already registered."
+                )
+            if not cleaned.get("organization_phone"):
+                self.add_error("organization_phone", "The organization phone number is required.")
+            if not (cleaned.get("position") or "").strip():
+                self.add_error("position", "Your position in the organization is required.")
+            if not cleaned.get("phone"):
+                self.add_error("phone", "Your own phone number is required.")
         return cleaned
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         user.role = self.cleaned_data["role"]
-        if user.role == UserRole.ORGANIZATION:
-            user.first_name = ""
-            user.last_name = ""
         if commit:
             user.save()
         return user
@@ -179,4 +216,68 @@ class ResetPasswordForm(forms.Form):
         p2 = cleaned.get("password2")
         if p1 and p2 and p1 != p2:
             self.add_error("password2", "Passwords do not match.")
+        return cleaned
+
+class _CurrentPasswordMixin:
+    """Contact changes and password changes re-ask for the current password."""
+
+    def __init__(self, *args, user=None, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_current_password(self):
+        pw = self.cleaned_data.get("current_password") or ""
+        if self.user is None or not self.user.check_password(pw):
+            raise forms.ValidationError("Your current password is incorrect.")
+        return pw
+
+
+_CURRENT_PW = forms.PasswordInput(
+    attrs={"class": FIELD_CLASS, "placeholder": "Current password", "autocomplete": "current-password"}
+)
+
+
+class ChangeEmailForm(_CurrentPasswordMixin, forms.Form):
+    email = forms.EmailField(
+        label="New email address",
+        widget=forms.EmailInput(attrs={"class": FIELD_CLASS, "placeholder": "new@example.com", "autocomplete": "email"}),
+    )
+    current_password = forms.CharField(label="Current password", widget=_CURRENT_PW)
+
+    def clean_email(self):
+        return self.cleaned_data["email"].strip().lower()
+
+
+class ChangePhoneForm(_CurrentPasswordMixin, forms.Form):
+    phone = forms.CharField(
+        label="Phone number",
+        validators=[validate_tz_phone],
+        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "2557XXXXXXXX", "autocomplete": "tel"}),
+    )
+    current_password = forms.CharField(label="Current password", widget=_CURRENT_PW)
+
+
+class ChangePasswordForm(_CurrentPasswordMixin, forms.Form):
+    current_password = forms.CharField(label="Current (or temporary) password", widget=_CURRENT_PW)
+    password1 = forms.CharField(
+        label="New password",
+        widget=forms.PasswordInput(attrs={"class": FIELD_CLASS, "autocomplete": "new-password"}),
+    )
+    password2 = forms.CharField(
+        label="Confirm new password",
+        widget=forms.PasswordInput(attrs={"class": FIELD_CLASS, "autocomplete": "new-password"}),
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        p1, p2 = cleaned.get("password1"), cleaned.get("password2")
+        if p1 and p2 and p1 != p2:
+            self.add_error("password2", "Passwords do not match.")
+        elif p1:
+            if cleaned.get("current_password") == p1:
+                self.add_error("password1", "Choose a password different from the current one.")
+            try:
+                validate_password(p1, user=self.user)
+            except forms.ValidationError as exc:
+                self.add_error("password1", exc.messages)
         return cleaned

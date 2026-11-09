@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ person.email }}{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto flex flex-col gap-md">
+  <a href="{% url 'platform-admins' %}" class="text-primary font-semibold hover:underline flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Administrators</a>
+  <div>
+    <h1 class="font-display text-display text-on-surface">{{ person.get_full_name|default:person.email }}</h1>
+    <p class="text-on-surface-variant break-all">{{ person.email }}{% if person.phone %} · {{ person.phone }}{% endif %}{% if person.job_title %} · {{ person.job_title }}{% endif %}</p>
+  </div>
+  {% if messages %}{% for message in messages %}<div class="rounded-lg bg-surface-container border-l-2 border-primary px-sm py-sm">{{ message }}</div>{% endfor %}{% endif %}
+
+  <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-sm">
+    <h2 class="font-headline-md text-headline-md">Security status</h2>
+    <ul class="text-body-md">
+      <li>Account: {% if person.is_active %}active{% else %}<strong class="text-error">suspended</strong>{% if person.suspension_reason %} ({{ person.suspension_reason }}){% endif %}{% endif %}</li>
+      <li>Onboarding: {% if person.must_change_password %}waiting for first sign-in (temporary password{% if person.temp_password_expires_at %} expires {{ person.temp_password_expires_at|date:"j M H:i" }}{% endif %}){% else %}complete{% endif %}</li>
+      <li>MFA: {% if mfa_enrolled %}enrolled{% else %}<strong class="text-error">not set up</strong>{% endif %} — security key: {{ has_key|yesno:"yes,no" }}, authenticator app: {{ has_totp|yesno:"yes,no" }}, recovery codes left: {{ codes_left }}</li>
+      <li>Recovery approver: {{ person.is_recovery_approver|yesno:"yes,no" }}</li>
+    </ul>
+    {% if person.must_change_password %}
+      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="reissue"><button class="text-primary font-semibold hover:underline" type="submit">Issue a new temporary password</button></form>
+    {% endif %}
+  </section>
+
+  {% if person.role == 'ADMIN' %}
+  <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-sm">
+    <h2 class="font-headline-md text-headline-md">Administrative role</h2>
+    <p class="text-on-surface-variant">Access follows the role's permission matrix. Changing it signs the administrator out so the new privileges take effect on a fresh session.</p>
+    <form method="post" class="flex flex-wrap gap-sm items-end">{% csrf_token %}<input type="hidden" name="action" value="role">
+      <select name="admin_role" class="ipt-select">{% for r in roles %}<option value="{{ r.id }}" {% if person.admin_role_id == r.id %}selected{% endif %}>{{ r.name }}</option>{% endfor %}</select>
+      <button class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg" type="submit">Change role</button></form>
+    <dl class="grid grid-cols-2 sm:grid-cols-4 gap-xs text-metadata">
+      {% for module, caps in permissions.items %}<div class="bg-surface-container rounded-lg p-xs"><dt class="font-semibold">{{ module }}</dt><dd>{% for cap, on in caps.items %}{% if on %}{{ cap }} {% endif %}{% endfor %}</dd></div>{% endfor %}
+    </dl>
+  </section>
+  {% endif %}
+
+  <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-sm">
+    <h2 class="font-headline-md text-headline-md">Controls</h2>
+    <form method="post" class="flex items-center gap-sm">{% csrf_token %}<input type="hidden" name="action" value="approver"><input type="hidden" name="value" value="{% if person.is_recovery_approver %}0{% else %}1{% endif %}">
+      <button class="bg-surface-container font-semibold px-md py-2 rounded-lg" type="submit">{% if person.is_recovery_approver %}Remove as recovery approver{% else %}Designate as recovery approver{% endif %}</button></form>
+    {% if person.is_active %}
+      <form method="post" class="flex flex-wrap gap-sm items-end" onsubmit="return confirm('Suspend this administrator?');">{% csrf_token %}<input type="hidden" name="action" value="suspend">
+        <input name="reason" required placeholder="Reason" class="px-sm py-2 rounded-lg border border-outline-variant"><button class="text-error font-semibold px-md py-2 rounded-lg border border-error/40" type="submit">Suspend</button></form>
+    {% else %}
+      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="reactivate"><button class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg" type="submit">Reactivate</button></form>
+    {% endif %}
+  </section>
+
+  <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg">
+    <h2 class="font-headline-md text-headline-md mb-sm">Recent activity</h2>
+    <ul class="text-body-md">{% for e in recent %}<li class="border-t border-surface-container py-1">{{ e.created_at|date:"j M H:i" }} — {{ e.action }}</li>{% empty %}<li class="text-on-surface-variant">Nothing yet.</li>{% endfor %}</ul>
+  </section>
+</div>
+{% endblock %}

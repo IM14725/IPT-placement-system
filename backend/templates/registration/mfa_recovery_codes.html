@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Your recovery codes{% endblock %}
+{% block content %}
+<div class="w-full max-w-lg mx-auto my-xl auth-card bg-surface-container-lowest rounded-2xl shadow-xl p-lg flex flex-col gap-md">
+  <h1 class="font-headline-lg text-headline-lg text-on-surface">Your recovery codes</h1>
+  <p class="rounded-lg bg-[#fff4e5] text-[#a16207] px-sm py-sm font-semibold">This is the only time these codes are shown. We store only a hash, so they cannot be shown again.</p>
+  <ul class="grid grid-cols-2 gap-xs font-mono text-body-lg bg-surface-container rounded-lg p-md">
+    {% for c in codes %}<li>{{ c }}</li>{% endfor %}
+  </ul>
+  <ul class="list-disc pl-md text-on-surface-variant text-body-md">
+    <li>Each code works once. Using one asks you to generate a new set.</li>
+    <li>Write them on paper and keep them in a safe or other secure offline place.</li>
+    <li>Do not save them in a normal file, email, chat or shared password document.</li>
+    <li>Any older codes are now invalid.</li>
+  </ul>
+  <button type="button" onclick="window.print()" class="justify-self-start text-primary font-semibold hover:underline">Print</button>
+  <a class="bg-primary text-on-primary font-semibold py-3 rounded-lg text-center" href="{% url 'mfa-settings' %}">I have stored them safely</a>
+</div>
+{% endblock %}

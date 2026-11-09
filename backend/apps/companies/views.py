@@ -28,10 +28,13 @@ from apps.companies.models import (
 from apps.companies.services import (
     active_organization_session_count,
     add_organization_member,
+    change_member_role,
+    remove_organization_member,
     get_user_organization,
     is_profile_complete,
 )
 from apps.companies.permissions import (
+    AUDIT_VIEW,
     APPLICANTS_ACCEPT,
     APPLICANTS_VIEW,
     DOCUMENTS_MANAGE,
@@ -43,7 +46,10 @@ from apps.companies.permissions import (
     org_has_perm,
     org_permission_required,
 )
+from apps.core import audit as audit_lib
+from apps.core.audit import audit_event
 from apps.core.cache import get_regions
+from apps.core.models import AuditLog
 from apps.core.rate_limit import token_bucket
 from apps.documents.models import Document
 from apps.slots.models import Slot, SlotStatus
@@ -60,7 +66,8 @@ def _get_organization(request, require_complete=True):
 
 def _org_documents_qs(organization, fallback_user):
     if organization is not None:
-        return Document.objects.filter(owner_id__in=organization.member_user_ids())
+        # Organization-owned: includes documents uploaded by members who have since left.
+        return Document.objects.filter(owner_id__in=organization.historical_member_user_ids())
     return Document.objects.filter(owner=fallback_user)
 
 
@@ -103,6 +110,15 @@ def profile(request):
             if not profile_obj.user_id:
                 profile_obj.user = request.user
             profile_obj.save()
+            audit_event(
+                request,
+                action="Organization Profile Updated",
+                module="Organization Profile",
+                organization=profile_obj,
+                target=profile_obj,
+                description="Organization profile saved",
+                context={"changed": sorted(form.changed_data)},
+            )
             messages.success(request, "Organization profile saved.")
             return redirect("organization-dashboard")
     else:
@@ -139,6 +155,12 @@ def profile(request):
             "can_manage_members": org_has_perm(request.user, MEMBERS_MANAGE, instance),
             "can_manage_documents": org_has_perm(request.user, DOCUMENTS_MANAGE, instance),
             "member_form": OrganizationMemberCreateForm(),
+            "former_count": instance.members.filter(membership_status=MembershipStatus.REMOVED).count() if instance else 0,
+            "can_view_audit": org_has_perm(request.user, AUDIT_VIEW, instance),
+            "assignable_roles": [
+                (OrganizationMemberRole.RECRUITER, "Recruiter"),
+                (OrganizationMemberRole.MANAGER, "Deputy Manager"),
+            ],
             "session_count": session_count,
             "max_sessions": MAX_ORGANIZATION_CONCURRENT_LOGINS,
         },
@@ -162,8 +184,17 @@ def add_member(request):
                 email=form.cleaned_data["email"],
                 password=form.cleaned_data["password"],
                 role=form.cleaned_data["role"],
+                phone=form.cleaned_data.get("phone", ""),
+                first_name=form.cleaned_data["first_name"],
+                last_name=form.cleaned_data["last_name"],
+                position=form.cleaned_data.get("position", ""),
+                added_by=request.user,
+                request=request,
             )
-            messages.success(request, "Organization team account created.")
+            messages.success(
+                request,
+                "Team account created. They must verify their email and choose a new password at first sign-in.",
+            )
         except ValidationError as exc:
             messages.error(request, exc.message if hasattr(exc, "message") else "; ".join(exc.messages))
     else:
@@ -181,16 +212,118 @@ def remove_member(request, member_id):
     organization = _get_organization(request, require_complete=False)
     if organization is None:
         return redirect("organization-profile")
+    # Tenant scoped: a member id from another organization is a 404, not a removal.
     member = get_object_or_404(OrganizationMember, id=member_id, organization=organization)
-    if member.user_id == request.user.id or member.user_id == organization.user_id:
-        messages.error(request, "Cannot remove the primary organization owner account.")
-        return redirect("organization-profile")
-    member_user = member.user
-    member.delete()
-    member_user.is_active = False
-    member_user.save(update_fields=["is_active"])
-    messages.success(request, "Organization team account removed.")
+    try:
+        remove_organization_member(
+            organization, member, request.user, request.POST.get("reason", ""), request=request
+        )
+        messages.success(
+            request, "Access revoked. The member now appears under Former Members; their history is kept."
+        )
+    except ValidationError as exc:
+        messages.error(request, exc.message if hasattr(exc, "message") else "; ".join(exc.messages))
     return redirect("organization-profile")
+
+
+@login_required
+@org_permission_required(MEMBERS_MANAGE)
+def change_member_role_view(request, member_id):
+    if not request.user.is_organization or request.method != "POST":
+        return HttpResponseForbidden("Organization account and POST required.")
+    organization = _get_organization(request, require_complete=False)
+    if organization is None:
+        return redirect("organization-profile")
+    member = get_object_or_404(OrganizationMember, id=member_id, organization=organization)
+    try:
+        change_member_role(organization, member, request.POST.get("role", ""), request.user, request=request)
+        messages.success(request, "Role updated. The member must sign in again to use it.")
+    except ValidationError as exc:
+        messages.error(request, exc.message if hasattr(exc, "message") else "; ".join(exc.messages))
+    return redirect("organization-profile")
+
+
+@login_required
+@org_permission_required(MEMBERS_MANAGE)
+def former_members(request):
+    organization = _get_organization(request, require_complete=False)
+    if organization is None:
+        return redirect("organization-profile")
+    former = (
+        organization.members.filter(membership_status=MembershipStatus.REMOVED)
+        .select_related("user", "removed_by")
+        .order_by("-removed_at")
+    )
+    return render(
+        request,
+        "organization/former_members.html",
+        {"organization": organization, "former": former},
+    )
+
+
+def _org_for_audit(request):
+    return get_user_organization(request.user)
+
+
+@login_required
+@org_permission_required(AUDIT_VIEW)
+def audit_logs(request):
+    from apps.core.pagination import paginate
+    from django.http import HttpResponse
+    from urllib.parse import urlencode
+
+    organization = _org_for_audit(request)
+    if organization is None:
+        return redirect("organization-profile")
+    base = AuditLog.objects.filter(organization=organization)
+    params = {k: v for k, v in request.GET.items() if k != "organization"}  # never cross tenants
+    qs = audit_lib.filter_audit_logs(base, params).select_related("actor")
+    if audit_lib.has_filters(params):
+        audit_event(
+            request,
+            action="Audit Log Searched",
+            module="Audit",
+            organization=organization,
+            description="Searched the organization audit log",
+            context={k: v for k, v in params.items() if k in audit_lib.FILTER_KEYS and v},
+        )
+    if request.GET.get("export") == "csv":
+        audit_event(
+            request,
+            action="Audit Log Exported",
+            module="Audit",
+            organization=organization,
+            description="Exported the organization audit log (CSV)",
+        )
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="organization-audit.csv"'
+        return audit_lib.write_csv(response, qs.order_by("-created_at"))
+    page_obj = paginate(qs.order_by("-created_at"), request.GET.get("page"), page_size=50)
+    actions = list(base.values_list("action", flat=True).distinct().order_by("action"))
+    return render(
+        request,
+        "organization/audit_logs.html",
+        {
+            "organization": organization,
+            "logs": page_obj,
+            "page_obj": page_obj,
+            "querystring": urlencode({k: v for k, v in request.GET.items() if k != "page"}),
+            "actions": actions,
+            "f": params,
+        },
+    )
+
+
+@login_required
+@org_permission_required(AUDIT_VIEW)
+def audit_detail(request, log_id):
+    organization = _org_for_audit(request)
+    log = get_object_or_404(AuditLog, id=log_id, organization=organization)
+    return render(
+        request,
+        "core/audit_detail.html",
+        {"log": log, "back_url": "organization-audit-logs", "scope": "organization"},
+    )
 
 
 @login_required
@@ -212,6 +345,15 @@ def upload_document(request):
             from apps.core.cache import enqueue_once
 
             enqueue_once("documents.scan", [doc.id])
+            audit_event(
+                request,
+                action="Document Uploaded",
+                module="Documents",
+                organization=organization,
+                target=doc,
+                target_label=f"{doc.get_doc_type_display()} ({doc.original_name})",
+                description=f"Uploaded {doc.get_doc_type_display()}",
+            )
             messages.success(request, "Organization document uploaded for review.")
         except ValidationError as exc:
             messages.error(request, exc.message)
@@ -225,10 +367,20 @@ def delete_document(request, doc_id):
         return HttpResponseForbidden("Organization account and POST required.")
     organization = _get_organization(request, require_complete=False)
     if organization is not None:
-        doc = get_object_or_404(Document, id=doc_id, owner_id__in=organization.member_user_ids())
+        doc = get_object_or_404(Document, id=doc_id, owner_id__in=organization.historical_member_user_ids())
     else:
         doc = get_object_or_404(Document, id=doc_id, owner=request.user)
     doc_type_name = doc.get_doc_type_display()
+    audit_event(
+        request,
+        action="Document Deleted",
+        module="Documents",
+        organization=organization,
+        target_type="Document",
+        target_id=str(doc.id),
+        target_label=f"{doc_type_name} ({doc.original_name})",
+        description=f"Deleted {doc_type_name}",
+    )
     doc.file.delete(save=False)
     doc.delete()
     messages.success(request, f"{doc_type_name} deleted. You must upload a replacement.")
@@ -298,6 +450,10 @@ def slot_create(request):
             slot = form.save(commit=False)
             slot.organization = organization
             slot.save()
+            audit_event(
+                request, action="Slot Created", module="Opportunities", organization=organization,
+                target=slot, description=f"Created slot {slot.title}",
+            )
             messages.success(request, "Slot created and now visible to students.")
             return redirect("organization-slots")
     else:
@@ -322,6 +478,11 @@ def slot_edit(request, slot_id):
         form = SlotForm(request.POST, instance=slot)
         if form.is_valid():
             form.save()
+            audit_event(
+                request, action="Slot Edited", module="Opportunities", organization=organization,
+                target=slot, description=f"Edited slot {slot.title}",
+                context={"changed": sorted(form.changed_data)},
+            )
             messages.success(request, "Slot updated.")
             return redirect("organization-slots")
     else:
@@ -354,6 +515,11 @@ def slot_toggle(request, slot_id):
     else:
         slot.status = SlotStatus.PAUSED
     slot.save(update_fields=["status", "updated_at"])
+    audit_event(
+        request, action="Slot Published" if slot.status == SlotStatus.OPEN else "Slot Paused",
+        module="Opportunities", organization=organization, target=slot,
+        description=f"Slot {slot.title} is now {slot.status}",
+    )
     return redirect("organization-slots")
 
 
@@ -366,6 +532,11 @@ def slot_delete(request, slot_id):
     if organization is None:
         return redirect("organization-profile")
     slot = get_object_or_404(Slot, id=slot_id, organization=organization)
+    audit_event(
+        request, action="Slot Deleted", module="Opportunities", organization=organization,
+        target_type="Slot", target_id=str(slot.id), target_label=slot.title,
+        description=f"Deleted slot {slot.title}",
+    )
     slot.delete()
     messages.success(request, "Slot deleted.")
     return redirect("organization-slots")
@@ -423,6 +594,11 @@ def applicant_documents(request, app_id):
     if app.status != ApplicationStatus.PAID:
         return HttpResponseForbidden("This application has not been paid.")
     docs = Document.objects.filter(owner=app.student.user)
+    audit_event(
+        request, action="Applicant Documents Viewed", module="Documents", organization=organization,
+        target=app, target_label=f"{app.student.user.email} -> {app.slot.title}",
+        description="Opened an applicant's documents",
+    )
     return render(
         request,
         "organization/student_documents.html",
@@ -447,6 +623,11 @@ def send_acceptance_sms(request, app_id):
     from apps.applications.tasks import acceptance_email, acceptance_sms
 
     accept_application(app, company_message=message)
+    audit_event(
+        request, action="Application Accepted", module="Applications", organization=organization,
+        target=app, target_label=f"{app.student.user.email} -> {app.slot.title}",
+        description="Accepted an application and sent confirmation",
+    )
     acceptance_sms.delay(app.id, message, actor_id=request.user.id)
     acceptance_email.delay(app.id, message)
     messages.success(

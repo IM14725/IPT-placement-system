@@ -37,9 +37,32 @@ class AuditLog(models.Model):
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     is_system = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Structured fields (organization-scoped auditing). Historical actor identity is kept in
+    # actor_label / actor_role so former members stay searchable after the FK is gone.
+    organization = models.ForeignKey(
+        "companies.Organization",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="audit_logs",
+    )
+    actor_role = models.CharField(max_length=60, blank=True)
+    target_type = models.CharField(max_length=60, blank=True)
+    target_id = models.CharField(max_length=64, blank=True)
+    target_label = models.CharField(max_length=200, blank=True)
+    outcome = models.CharField(
+        max_length=10,
+        choices=[("SUCCESS", "Success"), ("FAILED", "Failed"), ("REJECTED", "Rejected")],
+        default="SUCCESS",
+    )
+    context = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["organization", "-created_at"]),
+            models.Index(fields=["actor", "-created_at"]),
+        ]
 
     def __str__(self):
         return f"{self.action} ({self.module}) @ {self.created_at:%Y-%m-%d %H:%M}"

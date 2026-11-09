@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Set up authenticator app{% endblock %}
+{% block content %}
+<div class="w-full max-w-md mx-auto my-xl auth-card bg-surface-container-lowest rounded-2xl shadow-xl p-lg flex flex-col gap-md">
+  <h1 class="font-headline-lg text-headline-lg text-on-surface">Authenticator app</h1>
+  <p class="font-body-md text-on-surface-variant">Scan the QR code with an authenticator app (Google Authenticator, Authy, 1Password…), then enter the 6-digit code it shows.</p>
+  {% if messages %}{% for message in messages %}<div class="rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-on-error-container">{{ message }}</div>{% endfor %}{% endif %}
+  <div class="self-center bg-white p-sm rounded-lg">{{ qr|safe }}</div>
+  <p class="text-metadata text-on-surface-variant text-center break-all">Can't scan? Enter this key manually: <code class="font-mono">{{ secret }}</code></p>
+  <form method="post" class="flex flex-col gap-sm">
+    {% csrf_token %}
+    <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required placeholder="6-digit code" class="w-full px-sm py-3 rounded-lg border border-outline-variant bg-surface-container-lowest">
+    <button class="bg-primary text-on-primary font-semibold py-3 rounded-lg" type="submit">Confirm and enable</button>
+  </form>
+  <a class="text-center text-primary font-semibold hover:underline" href="{% url 'mfa-settings' %}">Cancel</a>
+</div>
+{% endblock %}

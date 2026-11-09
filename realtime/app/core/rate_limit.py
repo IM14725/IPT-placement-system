@@ -71,9 +71,15 @@ async def consume(namespace, bucket, capacity, refill_per_second, cost=1.0, now=
 
 
 def client_bucket(request: Request) -> str:
-    """Bucket key from the caller: realtime callbacks carry the caller's IP."""
-    forwarded = request.headers.get("x-forwarded-for")
-    ip = (forwarded.split(",")[0] if forwarded else request.client.host if request.client else "unknown").strip()
+    """Bucket key from the caller: only trust X-Forwarded-For when behind configured proxies."""
+    trusted = int(getattr(settings, "trusted_proxy_count", 0) or 0)
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if trusted > 0 and forwarded:
+        parts = [p.strip() for p in forwarded.split(",") if p.strip()]
+        if parts:
+            ip = parts[max(0, len(parts) - trusted)]
+            return f"ip:{ip}"
+    ip = (request.client.host if request.client else "unknown").strip()
     return f"ip:{ip}"
 
 

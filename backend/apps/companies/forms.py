@@ -100,12 +100,32 @@ class OrganizationMemberCreateForm(forms.Form):
             attrs={"class": FIELD_CLASS, "placeholder": "staff@organization.co.tz", "autocomplete": "off"}
         ),
     )
+    first_name = forms.CharField(
+        label=_("First name"),
+        max_length=150,
+        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "First name"}),
+    )
+    last_name = forms.CharField(
+        label=_("Last name"),
+        max_length=150,
+        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "Last name"}),
+    )
+    position = forms.CharField(
+        label=_("Position in the organization"),
+        max_length=120,
+        required=False,
+        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "e.g. Recruitment Officer"}),
+    )
+    phone = forms.CharField(
+        label=_("Phone"),
+        required=False,
+        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "2557XXXXXXXX", "autocomplete": "off"}),
+    )
     role = forms.ChoiceField(
         label=_("Role"),
         choices=[
-            (OrganizationMemberRole.MANAGER, _("Organization Manager")),
-            (OrganizationMemberRole.RECRUITER, _("Organization Recruiter")),
-            (OrganizationMemberRole.OWNER, _("Organization Owner")),
+            (OrganizationMemberRole.RECRUITER, _("Recruiter")),
+            (OrganizationMemberRole.MANAGER, _("Deputy Manager")),
         ],
         widget=forms.Select(attrs={"class": "ipt-select"}),
     )
@@ -145,7 +165,7 @@ class OrganizationDocumentUploadForm(forms.Form):
         org = organization or (get_user_organization(user) if user else None)
         if org is not None:
             existing_types = set(
-                Document.objects.filter(owner_id__in=org.member_user_ids()).values_list("doc_type", flat=True)
+                Document.objects.filter(owner_id__in=org.historical_member_user_ids()).values_list("doc_type", flat=True)
             )
             self.fields["doc_type"].choices = [
                 c for c in all_choices if c[0] not in existing_types

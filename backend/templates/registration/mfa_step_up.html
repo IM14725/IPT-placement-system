@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Confirm with your security key{% endblock %}
+{% block content %}
+<div class="w-full max-w-md mx-auto my-xl auth-card bg-surface-container-lowest rounded-2xl shadow-xl p-lg lg:p-xl flex flex-col gap-md">
+  <div class="flex flex-col gap-xs">
+    <h1 class="font-headline-lg text-headline-lg text-on-surface">High-risk action</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">Changing administrators, roles, security or payment settings, suspending accounts and recovery decisions need your hardware security key. The confirmation is good for {{ seconds }} seconds.</p>
+  </div>
+  {% if messages %}{% for message in messages %}<div class="rounded-lg bg-surface-container border-l-2 border-primary px-sm py-sm">{{ message }}</div>{% endfor %}{% endif %}
+  <div id="key-error" class="hidden rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-on-error-container"></div>
+  {% if has_key %}
+    <button id="use-key" type="button" class="w-full bg-primary text-on-primary font-body-lg font-medium py-3 rounded-lg shadow-md flex items-center justify-center gap-xs"><span class="material-symbols-outlined">passkey</span>Touch my security key</button>
+  {% else %}
+    <p class="rounded-lg bg-[#fff4e5] text-[#a16207] px-sm py-sm">You have no security key registered, so high-risk actions are unavailable. <a class="underline font-semibold" href="{% url 'mfa-settings' %}">Register a key</a>.</p>
+  {% endif %}
+  <a class="text-center text-primary font-semibold hover:underline" href="{{ next }}">Cancel</a>
+  {% csrf_token %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% load static %}{% static 'js/webauthn.js' %}"></script>
+<script>
+  (function () {
+    var btn = document.getElementById("use-key"); if (!btn) return;
+    var box = document.getElementById("key-error");
+    btn.addEventListener("click", function () {
+      box.classList.add("hidden"); btn.disabled = true;
+      IPTWebAuthn.authenticate("{{ next|escapejs }}").then(function (r) { window.location.href = r.redirect; })
+        .catch(function (e) { btn.disabled = false; box.textContent = e.message; box.classList.remove("hidden"); });
+    });
+  })();
+</script>
+{% endblock %}

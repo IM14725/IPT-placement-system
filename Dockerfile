@@ -17,3 +17,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY . /app/
+
+# Create a non-root user and transfer ownership
+RUN useradd --create-home --shell /bin/bash appuser \
+    && chown -R appuser:appuser /app
+
+USER appuser

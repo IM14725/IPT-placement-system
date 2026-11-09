@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
+from apps.accounts.decorators import hardware_reverify
 from apps.accounts.models import User
 from apps.companies.models import Organization
 from apps.core.models import Report
@@ -136,6 +137,7 @@ def universities(request):
 
 
 @login_required
+@hardware_reverify
 def account_status(request):
     """Suspend or reactivate a student account or a whole organization (POST only)."""
     if request.method != "POST":

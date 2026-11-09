@@ -178,6 +178,12 @@ def apply(request, slot_id):
     if profile is None or not profile.is_verified:
         messages.error(request, "Your profile must be verified before applying.")
         return redirect("student-documents")
+    if not request.user.phone_verified:
+        messages.warning(
+            request,
+            "Verify your phone number before applying: add it under Account & security and enter the SMS code.",
+        )
+        return redirect("account-security")
     slot = get_object_or_404(Slot, id=slot_id)
 
     if request.method == "POST":
@@ -263,18 +269,39 @@ def view_document(request, doc_id):
     is_owner = doc.owner_id == user.id
     is_admin = user.is_staff or user.is_platform_admin
     organization_can_view = False
+    viewer_org = None
     if user.is_organization:
+        from apps.companies.permissions import APPLICANTS_VIEW, ORG_VIEW, org_has_perm
         from apps.companies.services import get_user_organization
 
-        org = get_user_organization(user)
-        if org is not None:
-            organization_can_view = Application.objects.filter(
-                student__user=doc.owner_id,
-                slot__organization=org,
-                status="PAID",
-            ).exists()
+        viewer_org = get_user_organization(user)
+        if viewer_org is not None:
+            # A student's documents: only for a paid application to *this* organization,
+            # and only for members whose role may see applicants.
+            if org_has_perm(user, APPLICANTS_VIEW, viewer_org):
+                organization_can_view = Application.objects.filter(
+                    student__user=doc.owner_id,
+                    slot__organization=viewer_org,
+                    status="PAID",
+                ).exists()
+            # The organization's own documents: any active member, including documents
+            # uploaded by people who have since left. Never another organization's.
+            if not organization_can_view and org_has_perm(user, ORG_VIEW, viewer_org):
+                organization_can_view = doc.owner_id in viewer_org.historical_member_user_ids()
     if not (is_owner or is_admin or organization_can_view):
         raise Http404
+    if not is_owner:
+        from apps.core.audit import audit_event
+
+        audit_event(
+            request,
+            action="Document Accessed",
+            module="Documents",
+            organization=viewer_org,
+            target=doc,
+            target_label=f"{doc.get_doc_type_display()} ({doc.original_name})",
+            description=f"Viewed {doc.get_doc_type_display()} owned by {doc.owner.email}",
+        )
     if doc.scan_status == "ERROR":
         return HttpResponseGone("This document failed security scanning and is unavailable.")
     if doc.sha256:

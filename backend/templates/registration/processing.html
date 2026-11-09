@@ -48,7 +48,17 @@
             document.getElementById('finalize-form').submit();
           } else if (data.status === 'ERROR') {
             const errorDiv = document.getElementById('error-message');
-            errorDiv.innerHTML = `<div class="flex items-start gap-xs"><span class="material-symbols-outlined text-[18px] mt-px">error</span><span>${data.message || 'An error occurred'}</span></div>`;
+            errorDiv.textContent = '';
+            const row = document.createElement('div');
+            row.className = 'flex items-start gap-xs';
+            const icon = document.createElement('span');
+            icon.className = 'material-symbols-outlined text-[18px] mt-px';
+            icon.textContent = 'error';
+            const msgSpan = document.createElement('span');
+            msgSpan.textContent = data.message || 'An error occurred';
+            row.appendChild(icon);
+            row.appendChild(msgSpan);
+            errorDiv.appendChild(row);
             errorDiv.classList.remove('hidden');
             document.getElementById('back-button').classList.remove('hidden');
             

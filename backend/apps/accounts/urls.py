@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.accounts import views, views_otp
+from apps.accounts import views, views_account, views_mfa, views_otp
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -13,6 +13,24 @@ urlpatterns = [
     path("auth/reset-password/verify/", views_otp.reset_verify, name="reset-verify"),
     path("auth/verify-email/", views_otp.verify_email, name="verify-email"),
     path("auth/logout/", views.user_logout, name="logout"),
+    path("auth/account/", views_account.account_security, name="account-security"),
+    path("auth/account/email/", views_account.change_email, name="change-email"),
+    path("auth/account/phone/", views_account.change_phone, name="change-phone"),
+    path("auth/account/verify/<str:kind>/", views_account.verify_contact, name="verify-contact"),
+    path("auth/change-password/", views_account.change_password, name="change-password"),
+    path("auth/mfa/", views_mfa.mfa_challenge, name="mfa-challenge"),
+    path("auth/mfa/settings/", views_mfa.mfa_settings, name="mfa-settings"),
+    path("auth/mfa/totp/", views_mfa.mfa_totp_setup, name="mfa-totp-setup"),
+    path("auth/mfa/step-up/", views_mfa.mfa_step_up, name="mfa-step-up"),
+    path("auth/mfa/recovery-codes/", views_mfa.mfa_recovery_codes, name="mfa-recovery-codes"),
+    path("auth/mfa/remove/totp/", views_mfa.mfa_remove, {"kind": "totp"}, name="mfa-remove-totp"),
+    path("auth/mfa/remove/key/<uuid:pk>/", views_mfa.mfa_remove, {"kind": "key"}, name="mfa-remove-key"),
+    path("auth/mfa/webauthn/register-options/", views_mfa.webauthn_register_options, name="webauthn-register-options"),
+    path("auth/mfa/webauthn/register-verify/", views_mfa.webauthn_register_verify, name="webauthn-register-verify"),
+    path("auth/mfa/webauthn/auth-options/", views_mfa.webauthn_auth_options, name="webauthn-auth-options"),
+    path("auth/mfa/webauthn/auth-verify/", views_mfa.webauthn_auth_verify, name="webauthn-auth-verify"),
+    path("auth/admin-recovery/", views_mfa.admin_recovery_request, name="admin-recovery-request"),
+    path("auth/session-status/", views.session_status, name="session-status"),
     path("api/auth/ws-ticket/", views.ws_ticket, name="ws-ticket"),
     path("auth/notification-settings/", views.notification_settings, name="notification-settings"),
     path("auth/delete-account/", views.request_account_deletion, name="delete-account"),

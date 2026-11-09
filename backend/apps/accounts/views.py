@@ -107,6 +107,9 @@ def register(request):
                 "password_hash": make_password(form.cleaned_data.get("password1")),
                 "role": str(form.cleaned_data.get("role")),
                 "organization_name": form.cleaned_data.get("organization_name"),
+                "organization_email": form.cleaned_data.get("organization_email"),
+                "organization_phone": form.cleaned_data.get("organization_phone"),
+                "position": form.cleaned_data.get("position"),
                 "first_name": form.cleaned_data.get("first_name"),
                 "last_name": form.cleaned_data.get("last_name"),
                 "phone": form.cleaned_data.get("phone"),
@@ -143,6 +146,13 @@ def register(request):
 def user_login(request):
     if request.user.is_authenticated:
         return redirect(_dashboard_url(request.user))
+    if request.method == "GET" and request.GET.get("reason") in ("expired", "elsewhere"):
+        messages.info(
+            request,
+            "Your session has ended because it expired."
+            if request.GET["reason"] == "expired"
+            else "You were signed out because your account signed in on another device.",
+        )
     if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -189,12 +199,32 @@ def _start_session(request, user):
     organization login cap is enforced and the session is created.
     Returns ``(redirect_response, None)`` or ``(None, error_message)``.
     """
+    from django.utils import timezone
+
     from apps.companies.services import OrganizationSessionLimitError, can_organization_login
 
+    if (
+        user.must_change_password
+        and user.temp_password_expires_at
+        and user.temp_password_expires_at < timezone.now()
+    ):
+        return None, "Your temporary password has expired. Ask an administrator for a new one."
     if _needs_email_verification(user):
         from apps.accounts.views_otp import begin_email_verification
 
         return begin_email_verification(request, user), None
+    from apps.accounts import mfa
+
+    if (
+        mfa.enforced()
+        and mfa.is_admin_user(user)
+        and not user.must_change_password
+        and mfa.mfa_enrolled(user)
+    ):
+        # Enrolled administrators only get a session after a second factor.
+        from apps.accounts.views_mfa import begin_mfa_challenge
+
+        return begin_mfa_challenge(request, user), None
     try:
         ok, msg = can_organization_login(user, request.session.session_key)
         if ok:
@@ -203,6 +233,16 @@ def _start_session(request, user):
     except OrganizationSessionLimitError as exc:
         msg = str(exc)
     return None, msg
+
+
+@never_cache
+def session_status(request):
+    """Polled by the page so an expired/replaced session is noticed promptly in every tab."""
+    from apps.accounts.sessions import seconds_remaining
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"valid": False}, status=401)
+    return JsonResponse({"valid": True, "expires_in": seconds_remaining(request)})
 
 
 def user_logout(request):

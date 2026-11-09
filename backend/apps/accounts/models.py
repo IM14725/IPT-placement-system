@@ -90,6 +90,14 @@ class User(AbstractUser):
     # Set when a platform admin suspends the account (is_active is also cleared).
     suspended_at = models.DateTimeField(null=True, blank=True)
     suspension_reason = models.TextField(blank=True)
+    # The one live Django session for this account (one active device per user).
+    current_session_key = models.CharField(max_length=40, blank=True, default="")
+    # Admin onboarding: a temporary password must be replaced before anything else.
+    must_change_password = models.BooleanField(default=False)
+    temp_password_expires_at = models.DateTimeField(null=True, blank=True)
+    job_title = models.CharField(max_length=120, blank=True)
+    # Designated to approve Super Admin recovery requests (M-of-N quorum).
+    is_recovery_approver = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -149,7 +157,7 @@ class User(AbstractUser):
     @property
     def is_platform_admin(self):
         """Any platform-level admin (Platform Admin or Super Admin)."""
-        return self.role in (UserRole.ADMIN, UserRole.SUPER_ADMIN)
+        return self.is_active and self.role in (UserRole.ADMIN, UserRole.SUPER_ADMIN)
 
     def has_admin_permission(self, module, cap="view"):
         """Platform console check: Super Admin always; Platform Admin via AdminRole matrix."""
@@ -179,6 +187,8 @@ def normalize_phone(value):
 class OtpPurpose(models.TextChoices):
     REGISTER = "REGISTER", "Registration"
     RECOVERY = "RECOVERY", "Password recovery"
+    CHANGE_EMAIL = "CHANGE_EMAIL", "Change email"
+    CHANGE_PHONE = "CHANGE_PHONE", "Change phone"
 
 
 class OtpChannel(models.TextChoices):
@@ -202,3 +212,90 @@ class OneTimeCode(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=["user", "purpose", "-created_at"])]
+
+# ── Administrator MFA, recovery and break-glass ─────────────────────────────
+
+class TotpDevice(models.Model):
+    """Authenticator-app secret (encrypted at rest). ``last_counter`` blocks code replay."""
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="totp_device")
+    secret_enc = models.TextField()
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    last_counter = models.BigIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class WebAuthnCredential(models.Model):
+    """A FIDO2 / WebAuthn security key."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="webauthn_credentials")
+    credential_id = models.CharField(max_length=512, unique=True)  # base64url
+    public_key = models.BinaryField()
+    sign_count = models.BigIntegerField(default=0)
+    name = models.CharField(max_length=80, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+
+class RecoveryCode(models.Model):
+    """One-use offline MFA recovery code. Only a keyed hash is stored."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recovery_codes")
+    code_hash = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["user", "code_hash"])]
+
+
+class RecoveryStatus(models.TextChoices):
+    PENDING = "PENDING", "Pending"
+    EXECUTED = "EXECUTED", "Approved and executed"
+    REJECTED = "REJECTED", "Rejected"
+    EXPIRED = "EXPIRED", "Expired"
+
+
+class AdminRecoveryRequest(models.Model):
+    """M-of-N recovery of an administrator's MFA, approved by designated administrators."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recovery_requests")
+    status = models.CharField(max_length=10, choices=RecoveryStatus.choices, default=RecoveryStatus.PENDING)
+    required_approvals = models.PositiveSmallIntegerField(default=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    executed_at = models.DateTimeField(null=True, blank=True)
+    requester_ip = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+class AdminRecoveryApproval(models.Model):
+    request = models.ForeignKey(AdminRecoveryRequest, on_delete=models.CASCADE, related_name="decisions")
+    approver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recovery_decisions")
+    approve = models.BooleanField()
+    note = models.CharField(max_length=200, blank=True)
+    decided_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["request", "approver"], name="uniq_recovery_decision")]
+
+
+class BreakGlassAccount(models.Model):
+    """Emergency Super Admin: offline credentials + hardware key, never for routine use."""
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="break_glass")
+    created_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name="break_glass_created"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+    rotation_required = models.BooleanField(default=False)
+    review_pending = models.BooleanField(default=False)

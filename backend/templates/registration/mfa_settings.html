@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Multi-factor authentication{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Administrator security</span>
+    <h1 class="font-display text-display text-on-surface">Multi-factor authentication</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      {% if requires_fido %}As a Super Admin you must use a hardware security key (FIDO2). An authenticator app alone is not accepted.{% else %}Use an authenticator app or, preferably, a hardware security key.{% endif %}
+      Administrative access starts once your setup below is complete.
+    </p>
+  </div>
+
+  {% if messages %}{% for message in messages %}<div class="rounded-lg border-l-2 px-sm py-sm {% if message.tags == 'error' %}bg-error-container/40 border-error text-on-error-container{% else %}bg-surface-container border-primary{% endif %}">{{ message }}</div>{% endfor %}{% endif %}
+  {% if recovery_used %}<div class="rounded-lg bg-[#fff4e5] text-[#a16207] px-sm py-sm">You signed in with a recovery code. Generate a new set of codes below before continuing.</div>{% endif %}
+  <div id="key-error" class="hidden rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-on-error-container"></div>
+
+  <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-md">
+    <h2 class="font-headline-md text-headline-md">Hardware security keys (FIDO2)</h2>
+    {% for key in keys %}
+      <div class="flex items-center justify-between gap-sm bg-surface-container-low rounded-lg p-sm">
+        <div><strong>{{ key.name }}</strong><div class="text-metadata text-on-surface-variant">Added {{ key.created_at|date:"j M Y" }}{% if key.last_used_at %} · last used {{ key.last_used_at|date:"j M Y H:i" }}{% endif %}</div></div>
+        <form method="post" action="{% url 'mfa-remove-key' key.id %}" class="flex gap-xs" onsubmit="return confirm('Remove this key?');">
+          {% csrf_token %}<input type="password" name="password" placeholder="Your password" required class="px-sm py-1.5 rounded-lg border border-outline-variant">
+          <button class="text-error font-semibold px-sm" type="submit">Remove</button>
+        </form>
+      </div>
+    {% empty %}<p class="text-on-surface-variant">No security key registered.</p>{% endfor %}
+    <form id="key-form" class="flex flex-wrap gap-sm items-end">
+      <label class="flex flex-col gap-1 text-metadata text-on-surface-variant">Key name<input id="key-name" value="Security key" maxlength="80" class="px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest"></label>
+      <button id="add-key" type="submit" class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg">Add a security key</button>
+    </form>
+    {% csrf_token %}
+  </section>
+
+  <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-sm">
+    <h2 class="font-headline-md text-headline-md">Authenticator app (TOTP)</h2>
+    {% if requires_fido %}
+      <p class="text-on-surface-variant">Not available for Super Admin accounts.</p>
+    {% elif has_totp %}
+      <p>An authenticator app is registered.</p>
+      <form method="post" action="{% url 'mfa-remove-totp' %}" class="flex gap-xs">{% csrf_token %}
+        <input type="password" name="password" placeholder="Your password" required class="px-sm py-1.5 rounded-lg border border-outline-variant"><button class="text-error font-semibold px-sm" type="submit">Remove</button></form>
+    {% else %}
+      <a class="justify-self-start text-primary font-semibold hover:underline" href="{% url 'mfa-totp-setup' %}">Set up an authenticator app</a>
+    {% endif %}
+  </section>
+
+  <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-sm">
+    <h2 class="font-headline-md text-headline-md">Offline recovery codes</h2>
+    <p class="text-on-surface-variant">{% if codes_exist %}{{ codes_left }} unused code(s) left.{% else %}You have no recovery codes yet. Generate them now.{% endif %} Codes are shown once, work once, and generating a new set invalidates the old one. Store them offline, never in a shared file or password document.</p>
+    {% if enrolled %}
+    <form method="post" action="{% url 'mfa-recovery-codes' %}" class="flex flex-wrap gap-sm items-end">
+      {% csrf_token %}
+      <label class="flex flex-col gap-1 text-metadata text-on-surface-variant">Confirm your password<input type="password" name="password" required class="px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest"></label>
+      <button class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg" type="submit">{% if codes_exist %}Generate a new set{% else %}Generate recovery codes{% endif %}</button>
+    </form>
+    {% else %}<p class="text-on-surface-variant">Add a factor above first.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% load static %}{% static 'js/webauthn.js' %}"></script>
+<script>
+  document.getElementById("key-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var box = document.getElementById("key-error"); box.classList.add("hidden");
+    if (!window.IPTWebAuthn.supported()) { box.textContent = "This browser does not support security keys (use HTTPS or localhost)."; box.classList.remove("hidden"); return; }
+    IPTWebAuthn.register(document.getElementById("key-name").value)
+      .then(function (r) { window.location.href = r.redirect; })
+      .catch(function (err) { box.textContent = err.message; box.classList.remove("hidden"); });
+  });
+</script>
+{% endblock %}

@@ -53,7 +53,7 @@ def channel_verified(user, channel):
     return bool(user.phone and user.phone_verified)
 
 
-def send_otp(user, purpose, channel):
+def send_otp(user, purpose, channel, destination=None):
     if getattr(settings, "RATE_LIMIT_ENABLED", True):
         rl = consume(
             "otp-send", f"{user.pk}:{purpose}", OTP_SEND_CAPACITY, OTP_SEND_REFILL_PER_SECOND
@@ -61,7 +61,7 @@ def send_otp(user, purpose, channel):
         if not rl.allowed:
             return SendResult(False, retry_after=max(1, int(rl.retry_after)))
 
-    destination = destination_for(user, channel)
+    destination = destination or destination_for(user, channel)
     if not destination:
         return SendResult(False)
 
@@ -91,6 +91,18 @@ def send_otp(user, purpose, channel):
     except Exception:  # noqa: BLE001 - provider outage must not leak or crash the flow
         return SendResult(False)
     return SendResult(True)
+
+
+def pending_destination(user, purpose):
+    """Where the live (unused, unexpired) code for ``purpose`` was sent, e.g. the NEW email."""
+    otp = (
+        OneTimeCode.objects.filter(
+            user=user, purpose=purpose, consumed_at__isnull=True, expires_at__gt=timezone.now()
+        )
+        .order_by("-created_at")
+        .first()
+    )
+    return otp.destination if otp else None
 
 
 @transaction.atomic

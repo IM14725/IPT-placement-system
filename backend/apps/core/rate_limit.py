@@ -7,6 +7,7 @@ quiet bucket simply grows back to full capacity over time. The check is atomic
 (Lua) so concurrent requests cannot over-draw the bucket.
 """
 
+import logging
 import time
 from functools import wraps
 
@@ -14,7 +15,10 @@ from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.throttling import BaseThrottle
 
+from apps.core.audit import client_ip
 from apps.core.redis_client import get_redis
+
+logger = logging.getLogger("security")
 
 _TOKEN_BUCKET_LUA = """
 local key = KEYS[1]
@@ -54,11 +58,21 @@ class RateLimitResult:
         self.retry_after = retry_after
 
 
-def consume(namespace, bucket, capacity, refill_per_second, cost=1.0, now=None):
+def consume(
+    namespace,
+    bucket,
+    capacity,
+    refill_per_second,
+    cost=1.0,
+    now=None,
+    fail_closed=False,
+):
     """Attempt to draw ``cost`` tokens from the bucket. Returns RateLimitResult.
 
     ``capacity``: max tokens the bucket holds. ``refill_per_second``: tokens
     added per second while the bucket is below capacity.
+    ``fail_closed``: when True (or ``settings.RATE_LIMIT_FAIL_CLOSED`` is True),
+    deny requests if Redis is unreachable instead of failing open.
     """
     now = int(now * 1000) if now is not None else int(time.time() * 1000)
     key = f"{settings.CACHE_KEY_PREFIX}:rl:{namespace}:{bucket}"
@@ -75,7 +89,11 @@ def consume(namespace, bucket, capacity, refill_per_second, cost=1.0, now=None):
             int(ttl_ms),
         )
         return RateLimitResult(bool(allowed), float(remaining), int(retry_ms) / 1000.0)
-    except Exception:  # noqa: BLE001 - fail open when Redis is unavailable
+    except Exception:  # noqa: BLE001
+        if fail_closed or getattr(settings, "RATE_LIMIT_FAIL_CLOSED", False):
+            logger.error("Rate limiter Redis failure (failing closed) for namespace=%s", namespace)
+            return RateLimitResult(False, 0.0, 5.0)
+        logger.warning("Rate limiter Redis failure (failing open) for namespace=%s", namespace)
         return RateLimitResult(True, capacity, 0)
 
 
@@ -83,7 +101,7 @@ def _default_bucket(request):
     user = getattr(request, "user", None)
     if user is not None and user.is_authenticated:
         return f"user:{user.pk}"
-    return f"ip:{request.META.get('REMOTE_ADDR', 'unknown')}"
+    return f"ip:{client_ip(request) or 'unknown'}"
 
 
 def token_bucket(
@@ -94,6 +112,7 @@ def token_bucket(
     key_fn=None,
     deny_view=None,
     methods=None,
+    fail_closed=False,
 ):
     """Decorator for function views. Denies with 429 (or ``deny_view``).
 
@@ -109,7 +128,14 @@ def token_bucket(
             if not getattr(settings, "RATE_LIMIT_ENABLED", True):
                 return view(request, *args, **kwargs)
             bucket = key_fn(request) if key_fn else _default_bucket(request)
-            result = consume(scope, bucket, capacity, refill_per_second, cost)
+            result = consume(
+                scope,
+                bucket,
+                capacity,
+                refill_per_second,
+                cost,
+                fail_closed=fail_closed,
+            )
             request._rate_limit = result
             if not result.allowed:
                 if deny_view is not None:
@@ -141,12 +167,13 @@ class TokenBucketThrottle(BaseThrottle):
     capacity = 60
     refill_per_second = 1.0
     cost = 1.0
+    fail_closed = False
 
     def get_bucket(self, request, view):
         user = getattr(request, "user", None)
         if user is not None and user.is_authenticated:
             return f"user:{user.pk}"
-        return f"ip:{request.META.get('REMOTE_ADDR', 'unknown')}"
+        return f"ip:{client_ip(request) or 'unknown'}"
 
     def allow_request(self, request, view):
         if not getattr(settings, "RATE_LIMIT_ENABLED", True):
@@ -157,6 +184,7 @@ class TokenBucketThrottle(BaseThrottle):
             self.capacity,
             self.refill_per_second,
             self.cost,
+            fail_closed=self.fail_closed,
         )
         self._result = result
         request._rate_limit = result

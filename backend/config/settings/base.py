@@ -101,12 +101,16 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "apps.core.security.SecurityHeadersMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     # Activates the per-user/site language for every request (EN / Kiswahili).
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.accounts.sessions.SessionPolicyMiddleware",
+    "apps.accounts.gates.AccountGateMiddleware",
+    "apps.core.security.MaintenanceModeMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -154,6 +158,31 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = "accounts.User"
+
+# Sessions: a hard 10-minute lifetime enforced on the server (apps/accounts/sessions.py),
+# one live session per account, HttpOnly + SameSite cookies. Nothing is kept in JS storage.
+SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE", default=600)
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"  # Lax: the payment gateway returns users via top-level GET
+SESSION_SAVE_EVERY_REQUEST = False
+CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+X_FRAME_OPTIONS = "DENY"
+TRUSTED_PROXY_COUNT = env.int("TRUSTED_PROXY_COUNT", default=0)
+
+# Administrator MFA. TOTP or a security key for admins; a FIDO2/WebAuthn key is mandatory for
+# Super Admins and is the only factor accepted for high-risk actions (hardware re-verification).
+ADMIN_MFA_ENFORCED = env.bool("ADMIN_MFA_ENFORCED", default=True)
+SUPER_ADMIN_REQUIRE_FIDO2 = env.bool("SUPER_ADMIN_REQUIRE_FIDO2", default=True)
+HARDWARE_REVERIFY_SECONDS = env.int("HARDWARE_REVERIFY_SECONDS", default=300)
+ADMIN_TEMP_PASSWORD_HOURS = env.int("ADMIN_TEMP_PASSWORD_HOURS", default=24)
+ADMIN_RECOVERY_APPROVALS = env.int("ADMIN_RECOVERY_APPROVALS", default=2)
+ADMIN_RECOVERY_HOURS = env.int("ADMIN_RECOVERY_HOURS", default=24)
+# WebAuthn relying party. Left blank = derived from the request host (works on localhost).
+WEBAUTHN_RP_ID = env("WEBAUTHN_RP_ID", default="")
+WEBAUTHN_RP_NAME = env("WEBAUTHN_RP_NAME", default="IPT Marketplace")
 
 # Temporary login lockout (apps/core/lockout.py): never a permanent account lock.
 LOGIN_LOCKOUT_ATTEMPTS = env.int("LOGIN_LOCKOUT_ATTEMPTS", default=5)
@@ -256,3 +285,31 @@ FASTAPI_URL = env("FASTAPI_URL", default="http://127.0.0.1:8001")
 
 # Gateway webhook shared secret (dev)
 GATEWAY_WEBHOOK_SECRET = env("GATEWAY_WEBHOOK_SECRET", default="dev-webhook-secret")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "security": {
+            "format": "[%(asctime)s] %(levelname)s %(name)s: %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "security",
+        },
+    },
+    "loggers": {
+        "security": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.security": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
+}

@@ -85,14 +85,11 @@ def test_up_to_five_concurrent_organization_logins_at_once():
 
     assert OrganizationSession.objects.filter(organization=org).count() == MAX_ORGANIZATION_CONCURRENT_LOGINS
 
-    # With 5 active sessions, a 6th concurrent login session for the same organization is blocked
-    ok, msg = can_organization_login(owner, session_key="new-6th-session-key")
-    assert ok is False
-    assert "5" in msg
+    # The cap counts people, not devices: each person has one session, so the owner signing
+    # in again (a second device) replaces their own session and is never blocked by it.
+    ok, _ = can_organization_login(owner, session_key="owner-second-device")
+    assert ok is True
 
     # Logging out one client frees a slot immediately
     clients[0].logout()
     assert OrganizationSession.objects.filter(organization=org).count() == MAX_ORGANIZATION_CONCURRENT_LOGINS - 1
-
-    ok_after, _ = can_organization_login(owner, session_key="new-6th-session-key")
-    assert ok_after is True

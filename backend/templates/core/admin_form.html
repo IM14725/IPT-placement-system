@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}New administrator{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto flex flex-col gap-md">
+  <a href="{% url 'platform-admins' %}" class="text-primary font-semibold hover:underline flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Administrators</a>
+  <h1 class="font-display text-display text-on-surface">New administrator</h1>
+  <p class="font-body-md text-on-surface-variant">A temporary password is generated and emailed to the new administrator; it is never shown here. It expires and cannot become their permanent password. Creating an administrator needs your hardware key and is recorded in the audit log.</p>
+  {% if messages %}{% for message in messages %}<div class="rounded-lg bg-[#fff4e5] text-[#a16207] px-sm py-sm">{{ message }}</div>{% endfor %}{% endif %}
+  <form method="post" class="bg-surface-container-lowest rounded-xl shadow-sm p-lg grid grid-cols-1 md:grid-cols-2 gap-md" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="md:col-span-2 rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-on-error-container">{{ form.non_field_errors.0 }}</div>{% endif %}
+    {% for field in form %}
+      <div class="flex flex-col gap-xs {% if field.name == 'super_admin' %}md:col-span-2{% endif %}">
+        <label class="font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for err in field.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ err }}</p>{% endfor %}
+      </div>
+    {% endfor %}
+    <div class="md:col-span-2 flex justify-end"><button class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg" type="submit">Create administrator</button></div>
+  </form>
+</div>
+{% endblock %}

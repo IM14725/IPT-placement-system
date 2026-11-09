@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Account &amp; security{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Account</span>
+    <h1 class="font-display text-display text-on-surface">Account &amp; security</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">Your email and phone are your sign-in and recovery methods. A change is saved only after you enter a code sent to the <em>new</em> value, and each email or phone can belong to one account only.</p>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="rounded-lg border-l-2 px-sm py-sm text-body-md {% if message.tags == 'error' %}bg-error-container/40 border-error text-on-error-container{% else %}bg-surface-container border-primary text-on-surface{% endif %}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-md">
+    <div class="flex items-center justify-between gap-sm flex-wrap">
+      <h2 class="font-headline-md text-headline-md text-on-surface">Email address</h2>
+      <span class="px-3 py-1 rounded-full text-metadata font-semibold {% if user.email_verified %}bg-[#e8f5e9] text-[#1b5e20]{% else %}bg-[#fff4e5] text-[#a16207]{% endif %}">{% if user.email_verified %}Verified{% else %}Not verified{% endif %}</span>
+    </div>
+    <p class="break-all font-body-md">{{ user.email }}</p>
+    <form method="post" action="{% url 'change-email' %}" class="grid grid-cols-1 md:grid-cols-2 gap-sm items-end">
+      {% csrf_token %}
+      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{{ email_form.email.label }}{{ email_form.email }}</label>
+      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{{ email_form.current_password.label }}{{ email_form.current_password }}</label>
+      <button type="submit" class="md:col-span-2 justify-self-start bg-primary text-on-primary font-semibold px-md py-2 rounded-lg">Send code to new email</button>
+    </form>
+  </section>
+
+  <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-md">
+    <div class="flex items-center justify-between gap-sm flex-wrap">
+      <h2 class="font-headline-md text-headline-md text-on-surface">Phone number</h2>
+      <span class="px-3 py-1 rounded-full text-metadata font-semibold {% if user.phone and user.phone_verified %}bg-[#e8f5e9] text-[#1b5e20]{% else %}bg-[#fff4e5] text-[#a16207]{% endif %}">{% if user.phone and user.phone_verified %}Verified{% elif user.phone %}Not verified{% else %}Not added{% endif %}</span>
+    </div>
+    <p class="font-body-md">{{ user.phone|default:"No phone number on file." }}</p>
+    {% if user.is_student %}<p class="font-metadata text-metadata text-on-surface-variant">Students must verify their phone before they can submit an IPT application.</p>{% endif %}
+    <form method="post" action="{% url 'change-phone' %}" class="grid grid-cols-1 md:grid-cols-2 gap-sm items-end">
+      {% csrf_token %}
+      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{{ phone_form.phone.label }} (use your current number to verify it){{ phone_form.phone }}</label>
+      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{{ phone_form.current_password.label }}{{ phone_form.current_password }}</label>
+      <button type="submit" class="md:col-span-2 justify-self-start bg-primary text-on-primary font-semibold px-md py-2 rounded-lg">Send SMS code</button>
+    </form>
+  </section>
+
+  <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-sm">
+    <h2 class="font-headline-md text-headline-md text-on-surface">Password &amp; session</h2>
+    <p class="font-body-md text-on-surface-variant">Signed-in sessions last 10 minutes and only one device can be signed in at a time. This session ends in about {{ session_seconds }} seconds.</p>
+    <a href="{% url 'change-password' %}" class="justify-self-start text-primary font-semibold hover:underline">Change password</a>
+    {% if user.is_platform_admin %}<a href="{% url 'mfa-settings' %}" class="justify-self-start text-primary font-semibold hover:underline">Multi-factor authentication &amp; recovery codes</a>{% endif %}
+  </section>
+</div>
+{% endblock %}

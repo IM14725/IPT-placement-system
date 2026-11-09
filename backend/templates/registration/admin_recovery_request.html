@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Administrator recovery{% endblock %}
+{% block content %}
+<div class="w-full max-w-md mx-auto my-xl auth-card bg-surface-container-lowest rounded-2xl shadow-xl p-lg flex flex-col gap-md">
+  <h1 class="font-headline-lg text-headline-lg text-on-surface">Administrator recovery</h1>
+  <p class="font-body-md text-on-surface-variant">Lost your security key and recovery codes? Ask the designated approvers to reset your MFA. A request needs approval from several administrators, who will verify your identity separately.</p>
+  {% if submitted %}
+    <div class="rounded-lg bg-surface-container border-l-2 border-primary px-sm py-sm">If that email belongs to an administrator, the approvers have been notified. You will get an email once a decision is made.</div>
+  {% endif %}
+  <form method="post" class="flex flex-col gap-sm">
+    {% csrf_token %}
+    <label class="font-semibold" for="rec-email">Your administrator email</label>
+    <input id="rec-email" type="email" name="email" required class="w-full px-sm py-3 rounded-lg border border-outline-variant bg-surface-container-lowest">
+    <button class="bg-primary text-on-primary font-semibold py-3 rounded-lg" type="submit">Request recovery</button>
+  </form>
+  <a class="text-center text-primary font-semibold hover:underline" href="{% url 'login' %}">Back to sign in</a>
+</div>
+{% endblock %}

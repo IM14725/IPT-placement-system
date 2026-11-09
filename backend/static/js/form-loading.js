@@ -92,7 +92,13 @@
                     form.removeAttribute("data-loading-submitting");
                     var errBox = document.createElement('div');
                     errBox.className = 'rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-body-md text-on-error-container flex items-start gap-xs mb-md';
-                    errBox.innerHTML = '<span class="material-symbols-outlined text-[18px] mt-px">error</span><span>' + (d.message || "Authentication failed") + '</span>';
+                    var errIcon = document.createElement('span');
+                    errIcon.className = 'material-symbols-outlined text-[18px] mt-px';
+                    errIcon.textContent = 'error';
+                    var errText = document.createElement('span');
+                    errText.textContent = d.message || "Authentication failed";
+                    errBox.appendChild(errIcon);
+                    errBox.appendChild(errText);
                     form.insertBefore(errBox, form.firstChild);
                   } else {
                     setTimeout(poll, 1500);

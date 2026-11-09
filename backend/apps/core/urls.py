@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.core import views, views_governance
+from apps.core import views, views_admins, views_governance
 
 urlpatterns = [
     path("", views.health, name="health"),
@@ -35,9 +35,15 @@ urlpatterns = [
     ),
     path("templates/", views.notification_templates, name="platform-templates"),
     path("audit-logs/", views.audit_logs, name="platform-audit-logs"),
+    path("audit-logs/<uuid:log_id>/", views.audit_detail, name="platform-audit-detail"),
     path("roles/", views.role_management, name="platform-roles"),
     path("settings/", views.admin_settings, name="platform-settings"),
     path("integrity/", views.integrity, name="platform-integrity"),
+    path("admins/", views_admins.admin_list, name="platform-admins"),
+    path("admins/new/", views_admins.admin_create, name="platform-admin-new"),
+    path("admins/<uuid:pk>/", views_admins.admin_detail, name="platform-admin-detail"),
+    path("recovery/", views_admins.recovery_queue, name="platform-recovery"),
+    path("break-glass/", views_admins.break_glass, name="platform-break-glass"),
     # Legal pages — public
     path("legal/terms/", views.legal_terms, name="legal-terms"),
     path("legal/privacy/", views.legal_privacy, name="legal-privacy"),

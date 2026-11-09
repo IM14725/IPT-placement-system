@@ -28,6 +28,8 @@ def org_users(db):
     recruiter = add_organization_member(
         org, "recruiter@o.tz", PW, role=OrganizationMemberRole.RECRUITER
     ).user
+    # These tests are about role permissions, not the first-login temporary-password step.
+    User.objects.filter(pk__in=[manager.pk, recruiter.pk]).update(must_change_password=False)
     return org, owner, manager, recruiter
 
 

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Break-glass accounts{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <span class="font-label-caps text-label-caps text-error tracking-widest uppercase">Emergency access</span>
+    <h1 class="font-display text-display text-on-surface">Break-glass accounts</h1>
+    <p class="font-body-md text-on-surface-variant max-w-3xl">For catastrophic situations only (for example every Super Admin key is lost). Each account has a high-entropy credential kept offline in a tamper-evident safe and a hardware key. Use triggers an immediate alert, full logging, a security review and credential rotation. It never bypasses audit logging or other controls.</p>
+  </div>
+  {% if messages %}{% for message in messages %}<div class="rounded-lg bg-surface-container border-l-2 border-primary px-sm py-sm">{{ message }}</div>{% endfor %}{% endif %}
+  <div class="flex flex-col gap-sm">
+    {% for item in accounts %}
+      {% with a=item.a %}
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-xs">
+        <div class="flex flex-wrap justify-between gap-sm"><strong class="break-all">{{ a.user.email }}</strong>
+          <span class="text-metadata text-on-surface-variant">Created {{ a.created_at|date:"j M Y" }}{% if a.last_used_at %} · last used {{ a.last_used_at|date:"j M Y H:i" }}{% else %} · never used{% endif %}</span></div>
+        <p class="text-body-md">Hardware key: {% if item.key %}registered{% else %}<strong class="text-error">not registered: sign in once during the setup ceremony and add the key, or it cannot be used</strong>{% endif %}</p>
+        {% if a.review_pending %}<p class="rounded-lg bg-error-container/40 px-sm py-xs text-on-error-container">Security review pending after use.</p>{% endif %}
+        {% if a.rotation_required %}<p class="rounded-lg bg-[#fff4e5] text-[#a16207] px-sm py-xs">Credentials must be rotated.</p>{% endif %}
+        <div class="flex flex-wrap gap-sm">
+          <form method="post">{% csrf_token %}<input type="hidden" name="account_id" value="{{ a.pk }}"><button name="action" value="rotate" class="bg-surface-container font-semibold px-md py-1.5 rounded-lg" type="submit" onclick="return confirm('Rotate the credential? The old one stops working.');">Rotate credentials</button></form>
+          {% if a.review_pending %}<form method="post">{% csrf_token %}<input type="hidden" name="account_id" value="{{ a.pk }}"><button name="action" value="reviewed" class="bg-primary text-on-primary font-semibold px-md py-1.5 rounded-lg" type="submit">Mark review complete</button></form>{% endif %}
+        </div>
+      </div>
+      {% endwith %}
+    {% empty %}<p class="text-on-surface-variant">No break-glass account exists.</p>{% endfor %}
+  </div>
+  <form method="post" class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-wrap gap-sm items-end">
+    {% csrf_token %}<input type="hidden" name="action" value="create">
+    <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Mailbox for the emergency account<input type="email" name="email" required placeholder="breakglass@yourorg.tz" class="px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest"></label>
+    <button class="bg-error text-on-error font-semibold px-md py-2 rounded-lg" type="submit">Create emergency account</button>
+  </form>
+</div>
+{% endblock %}

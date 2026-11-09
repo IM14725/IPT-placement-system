@@ -27,8 +27,8 @@ def process_registration_task(form_data):
         if user.role == "ORGANIZATION":
             from apps.companies.services import organization_name_taken, create_organization
 
-            user.first_name = ""
-            user.last_name = ""
+            user.first_name = (form_data.get("first_name") or "").strip()
+            user.last_name = (form_data.get("last_name") or "").strip()
             organization_name = (form_data.get("organization_name") or "").strip()
             if not organization_name:
                 return {"status": "error", "message": "Organization name is required."}
@@ -36,7 +36,13 @@ def process_registration_task(form_data):
                 return {"status": "error", "message": "An organization with this name is already registered."}
             with transaction.atomic():
                 user.save()
-                create_organization(user, organization_name)
+                create_organization(
+                    user,
+                    organization_name,
+                    email=form_data.get("organization_email") or "",
+                    phone=form_data.get("organization_phone") or "",
+                    position=form_data.get("position") or "",
+                )
         else:
             user.first_name = (form_data.get("first_name") or "").strip()
             user.last_name = (form_data.get("last_name") or "").strip()

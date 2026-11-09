@@ -7,6 +7,23 @@ from apps.core.immutability import seal
 
 
 def _audit_fields(instance):
+    fields = _audit_base_fields(instance)
+    # Structured fields join the hash only when present, so records sealed before they
+    # existed keep verifying against the ledger.
+    extra = {
+        "organization_id": instance.organization_id,
+        "actor_role": instance.actor_role,
+        "target_type": instance.target_type,
+        "target_id": instance.target_id,
+        "target_label": instance.target_label,
+        "outcome": instance.outcome if instance.outcome != "SUCCESS" else "",
+        "context": instance.context,
+    }
+    fields.update({k: v for k, v in extra.items() if v})
+    return fields
+
+
+def _audit_base_fields(instance):
     return {
         "actor_id": instance.actor_id,
         "actor_label": instance.actor_label,

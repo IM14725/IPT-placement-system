@@ -22,7 +22,8 @@ def nav_user(request):
             "url": url,
             "photo": photo,
             "name": user.full_name or user.email,
-        }
+        },
+        "emergency_session": user.role == "SUPER_ADMIN" and hasattr(user, "break_glass"),
     }
 
 

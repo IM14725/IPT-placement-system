@@ -53,11 +53,15 @@ def test_drf_token_issued():
 
 def _organization_form_data(**overrides):
     data = {
-        "email": "owner@acme.tz",
-        "first_name": "",
-        "last_name": "",
+        "email": "hr@personal.tz",
+        "first_name": "Neema",
+        "last_name": "Mushi",
+        "phone": "255712000111",
         "role": UserRole.ORGANIZATION,
         "organization_name": "Acme Industrial Ltd",
+        "organization_email": "info@acme.tz",
+        "organization_phone": "255222000111",
+        "position": "Human Resources Manager",
         "password1": "Secret123!x",
         "password2": "Secret123!x",
     }
@@ -70,55 +74,58 @@ def _task_data(**overrides):
     data = _organization_form_data(**overrides)
     data.pop("password1")
     data.pop("password2")
-    return {**data, "role": "ORGANIZATION", "phone": "", "password_hash": make_password("Secret123!x")}
+    return {**data, "role": "ORGANIZATION", "password_hash": make_password("Secret123!x")}
 
 
 @pytest.mark.django_db
-def test_organization_registration_uses_only_organization_name_and_creates_member():
+def test_organization_registration_creates_org_and_first_member_as_manager():
     from apps.accounts.tasks import process_registration_task
     from apps.companies.models import Organization, OrganizationMember, OrganizationMemberRole
 
-    result = process_registration_task(
-        _task_data(first_name="Ignored", last_name="Ignored")
-    )
+    result = process_registration_task(_task_data())
     assert result["status"] == "success"
-    user = User.objects.get(email="owner@acme.tz")
-    assert (user.first_name, user.last_name) == ("", "")
-    assert user.full_name == "Acme Industrial Ltd"
+    user = User.objects.get(email="hr@personal.tz")  # the member's own login email
+    assert user.full_name == "Neema Mushi" and user.phone == "255712000111"
     org = Organization.objects.get(user=user)
     assert org.name == "Acme Industrial Ltd"
-    assert OrganizationMember.objects.filter(
-        organization=org, user=user, role=OrganizationMemberRole.OWNER
-    ).exists()
+    assert org.email == "info@acme.tz" and org.phone == "255222000111"  # official contact identity
+    member = OrganizationMember.objects.get(organization=org, user=user)
+    assert member.role == OrganizationMemberRole.OWNER  # shown as "Manager (Owner)"
+    assert member.position == "Human Resources Manager"  # real-world position, separate from the role
+    assert member.get_role_display().startswith("Manager")
 
 
 @pytest.mark.django_db
-def test_organization_registration_form_does_not_require_person_name_and_enforces_unique_org():
+def test_organization_registration_form_requires_organization_and_first_member_details():
     from apps.accounts.forms import RegisterForm
     from apps.accounts.tasks import process_registration_task
 
-    form = RegisterForm(_organization_form_data(first_name="", last_name=""))
-    assert form.is_valid(), form.errors
-    assert form.cleaned_data["first_name"] == ""
-    assert form.cleaned_data["last_name"] == ""
+    assert RegisterForm(_organization_form_data()).is_valid()
+    for missing in ("organization_name", "organization_email", "organization_phone", "position", "first_name", "last_name", "phone"):
+        form = RegisterForm(_organization_form_data(**{missing: ""}))
+        assert not form.is_valid() and missing in form.errors, missing
 
     student_form = RegisterForm(
         {
-            "email": "student@acme.tz",
-            "first_name": "",
-            "last_name": "",
-            "role": UserRole.STUDENT,
-            "password1": "Secret123!x",
-            "password2": "Secret123!x",
+            "email": "student@acme.tz", "first_name": "", "last_name": "", "role": UserRole.STUDENT,
+            "password1": "Secret123!x", "password2": "Secret123!x",
         }
     )
     assert not student_form.is_valid()
     assert "first_name" in student_form.errors and "last_name" in student_form.errors
 
     process_registration_task(_task_data())
-    dup = RegisterForm(_organization_form_data(email="other@acme.tz", organization_name="acme industrial ltd"))
+    dup = RegisterForm(
+        _organization_form_data(
+            email="other@personal.tz", phone="255712000222",
+            organization_name="acme industrial ltd", organization_email="INFO@acme.tz",
+        )
+    )
     assert not dup.is_valid()
-    assert "organization_name" in dup.errors
+    assert "organization_name" in dup.errors and "organization_email" in dup.errors
+    # The member's own email and phone stay unique per account.
+    same = RegisterForm(_organization_form_data(organization_name="Other Co", organization_email="x@other.tz"))
+    assert not same.is_valid() and "email" in same.errors and "phone" in same.errors
 
 
 # ── IAM step 1: closed authentication holes ─────────────────────────────────
@@ -131,10 +138,10 @@ def test_registration_task_stores_hash_and_rejects_missing_hash():
     bad.pop("password_hash")
     bad["password1"] = "Secret123!x"
     assert process_registration_task(bad)["status"] == "error"
-    assert not User.objects.filter(email="owner@acme.tz").exists()
+    assert not User.objects.filter(email="hr@personal.tz").exists()
 
     assert process_registration_task(_task_data())["status"] == "success"
-    assert User.objects.get(email="owner@acme.tz").check_password("Secret123!x")
+    assert User.objects.get(email="hr@personal.tz").check_password("Secret123!x")
 
 
 @pytest.mark.django_db
@@ -466,3 +473,152 @@ def test_email_step_goes_to_method_choice_without_sending_or_revealing(client, c
     assert fresh.get("/auth/reset-password/method/").url.endswith("/auth/forgot-password/")
     assert fresh.get("/auth/reset-password/verify/").url.endswith("/auth/forgot-password/")
     assert client.get("/auth/reset-password/verify/").url.endswith("/auth/reset-password/method/")
+
+
+# ── IAM step 3: sessions ────────────────────────────────────────────────────
+import time as _time
+
+from django.conf import settings as dj_settings
+
+
+def _login(client, email="s@x.tz", password="Secret123!x"):
+    return client.post("/auth/login/", {"email": email, "password": password})
+
+
+def _student(email="s@x.tz"):
+    return User.objects.create_user(
+        email=email, password="Secret123!x", role=UserRole.STUDENT, email_verified=True
+    )
+
+
+@pytest.mark.django_db
+def test_session_cookie_flags_and_lifetime():
+    assert dj_settings.SESSION_COOKIE_AGE == 600
+    assert dj_settings.SESSION_COOKIE_HTTPONLY is True
+    assert dj_settings.SESSION_COOKIE_SAMESITE in ("Lax", "Strict")
+    _student()
+    resp = _login(Client())
+    morsel = resp.cookies[dj_settings.SESSION_COOKIE_NAME]
+    assert morsel["httponly"] and morsel["samesite"] == "Lax" and int(morsel["max-age"]) <= 600
+
+
+@pytest.mark.django_db
+def test_session_key_is_long_random_and_rotates_on_login():
+    c = Client()
+    c.get("/auth/login/")
+    _student()
+    c.post("/auth/login/", {"email": "nobody@x.tz", "password": "x"})  # creates an anonymous session
+    before = c.cookies.get(dj_settings.SESSION_COOKIE_NAME)
+    before = before.value if before else ""
+    _login(c)
+    after = c.cookies[dj_settings.SESSION_COOKIE_NAME].value
+    assert before != after and len(after) >= 32  # 32 chars of a 36-symbol alphabet >= 165 bits
+
+
+@pytest.mark.django_db
+def test_second_device_logs_the_first_out_in_both_directions():
+    user = _student()
+    a, b = Client(), Client()
+    assert _login(a).status_code == 302
+    assert a.get("/auth/session-status/").json()["valid"] is True
+    assert _login(b).status_code == 302
+    assert a.get("/auth/session-status/").status_code == 401  # device A is out
+    assert b.get("/auth/session-status/").json()["valid"] is True
+    assert _login(a).status_code == 302  # and back again
+    assert b.get("/auth/session-status/").status_code == 401
+    user.refresh_from_db()
+    from django.contrib.sessions.models import Session
+
+    assert Session.objects.filter(session_key=user.current_session_key).exists()
+    # Old rows are destroyed on the server, not merely forgotten by the browser.
+    assert Session.objects.filter(session_key__in=[
+        a.cookies[dj_settings.SESSION_COOKIE_NAME].value,
+        b.cookies[dj_settings.SESSION_COOKIE_NAME].value,
+    ]).count() == 1
+
+
+@pytest.mark.django_db
+def test_session_dies_after_ten_minutes_even_if_never_used_again(monkeypatch):
+    _student()
+    c = Client()
+    _login(c)
+    assert c.get("/auth/session-status/").json()["valid"] is True
+    key = c.cookies[dj_settings.SESSION_COOKIE_NAME].value
+    real = _time.time()
+    monkeypatch.setattr("apps.accounts.sessions.time.time", lambda: real + 601)
+    assert c.get("/auth/session-status/").status_code == 401
+    page = c.get("/auth/notification-settings/")
+    assert page.status_code == 302 and "/auth/login/" in page.url
+    from django.contrib.sessions.models import Session
+
+    # The server destroyed it; the cookie value alone is worthless.
+    assert not Session.objects.filter(session_key=key).exists()
+
+
+@pytest.mark.django_db
+def test_logout_destroys_server_session_and_stale_cookie_is_rejected():
+    _student()
+    c = Client()
+    _login(c)
+    stolen = c.cookies[dj_settings.SESSION_COOKIE_NAME].value
+    c.get("/auth/logout/")
+    from django.contrib.sessions.models import Session
+
+    assert not Session.objects.filter(session_key=stolen).exists()
+    thief = Client()
+    thief.cookies[dj_settings.SESSION_COOKIE_NAME] = stolen
+    assert thief.get("/auth/session-status/").status_code == 401
+
+
+@pytest.mark.django_db
+def test_authenticated_pages_are_not_cached():
+    _student()
+    c = Client()
+    _login(c)
+    cc = c.get("/auth/notification-settings/")["Cache-Control"]
+    assert "no-store" in cc and "private" in cc
+
+
+@pytest.mark.django_db
+def test_organization_cap_counts_people_and_a_members_second_device_replaces_the_first():
+    from apps.companies.models import MembershipStatus, OrganizationMember
+    from apps.companies.services import create_organization
+
+    owner = User.objects.create_user(
+        email="o@x.tz", password="Secret123!x", role=UserRole.ORGANIZATION, email_verified=True
+    )
+    org = create_organization(owner, "Acme Co")
+    emails = ["o@x.tz"]
+    for i in range(4):
+        u = User.objects.create_user(
+            email=f"m{i}@x.tz", password="Secret123!x", role=UserRole.ORGANIZATION, email_verified=True
+        )
+        OrganizationMember.objects.create(
+            organization=org, user=u, role="RECRUITER", membership_status=MembershipStatus.ACTIVE
+        )
+        emails.append(f"m{i}@x.tz")
+    clients = []
+    for email in emails:
+        c = Client()
+        assert _login(c, email).status_code == 302
+        clients.append(c)
+    # Five people are logged in at once; each has exactly one session.
+    from apps.companies.models import OrganizationSession
+
+    assert OrganizationSession.objects.filter(organization=org).count() == 5
+    again = Client()
+    assert _login(again, "m3@x.tz").status_code == 302  # not blocked by the cap
+    assert clients[4].get("/auth/session-status/").status_code == 401
+    assert OrganizationSession.objects.filter(organization=org).count() == 5
+
+
+@pytest.mark.django_db
+def test_login_and_logout_are_audited():
+    from apps.core.models import AuditLog
+
+    _student()
+    c = Client()
+    _login(c)
+    c.get("/auth/logout/")
+    actions = list(AuditLog.objects.filter(module="Security").values_list("action", flat=True))
+    assert "Login" in actions and "Logout" in actions

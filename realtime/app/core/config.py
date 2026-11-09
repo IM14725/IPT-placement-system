@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     enable_mock_gateway: bool = False
     cors_allowed_origins: list[str] = ["http://localhost:8000", "http://127.0.0.1:8000"]
     cache_key_prefix: str = "ipt"
+    trusted_proxy_count: int = 0
     ws_host: str = "127.0.0.1"
     ws_port: int = 8001
 

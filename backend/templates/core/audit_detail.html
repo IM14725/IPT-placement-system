@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Audit event{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto flex flex-col gap-md">
+  <a href="{% url back_url %}" class="text-primary font-semibold hover:underline flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Back to audit log</a>
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-md">
+    <div>
+      <span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">{{ log.module }}</span>
+      <h1 class="font-headline-lg text-headline-lg text-on-surface">{{ log.action }}</h1>
+      <p class="text-on-surface-variant">{{ log.created_at|date:"l, j F Y H:i:s" }}</p>
+    </div>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-md font-body-md">
+      <div><dt class="font-metadata text-metadata text-on-surface-variant uppercase">Outcome</dt><dd>{{ log.get_outcome_display }}</dd></div>
+      {% if scope == "platform" %}<div><dt class="font-metadata text-metadata text-on-surface-variant uppercase">Organization</dt><dd>{{ log.organization.name|default:"—" }}</dd></div>{% endif %}
+      <div><dt class="font-metadata text-metadata text-on-surface-variant uppercase">Actor</dt><dd class="break-all">{{ log.actor_label|default:"System" }}</dd></div>
+      <div><dt class="font-metadata text-metadata text-on-surface-variant uppercase">Role at the time</dt><dd>{{ log.actor_role|default:"—" }}</dd></div>
+      <div><dt class="font-metadata text-metadata text-on-surface-variant uppercase">Target</dt><dd class="break-all">{% if log.target_type %}{{ log.target_type }}: {{ log.target_label }}{% else %}—{% endif %}</dd></div>
+      <div><dt class="font-metadata text-metadata text-on-surface-variant uppercase">IP address</dt><dd class="font-mono">{{ log.ip_address|default:"—" }}</dd></div>
+    </dl>
+    {% if log.description %}
+      <div><h2 class="font-metadata text-metadata text-on-surface-variant uppercase">Description</h2><p>{{ log.description }}</p></div>
+    {% endif %}
+    {% if log.context %}
+      <div>
+        <h2 class="font-metadata text-metadata text-on-surface-variant uppercase mb-xs">Context</h2>
+        <pre class="bg-surface-container rounded-lg p-sm overflow-x-auto text-metadata">{{ log.context|pprint }}</pre>
+      </div>
+    {% endif %}
+    <p class="font-metadata text-metadata text-on-surface-variant">Event ID {{ log.id }} · sealed in the integrity ledger; it cannot be edited or deleted.</p>
+  </div>
+</div>
+{% endblock %}

@@ -23,9 +23,14 @@ async def notify_subscriber_task():
             except json.JSONDecodeError:
                 continue
             user_id = payload.get("user_id")
+            revoked = payload.get("type") == "session_revoked"
             for ws in list(connections.get(user_id, set())):
                 try:
                     await ws.send_json(payload)
+                    if revoked:
+                        # Django already destroyed the session; drop the socket too.
+                        await ws.close(code=4401)
+                        connections.get(user_id, set()).discard(ws)
                 except Exception:  # noqa: BLE001
                     connections.get(user_id, set()).discard(ws)
     finally:

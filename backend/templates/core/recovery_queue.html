@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Recovery requests{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Security</span>
+    <h1 class="font-display text-display text-on-surface">Administrator recovery</h1>
+    <p class="font-body-md text-on-surface-variant max-w-3xl">A locked-out administrator's MFA is reset only when {{ needed }} designated approvers agree. Verify the person out of band first. You can never decide your own request, every decision is audited, and each decision needs your hardware key.</p>
+  </div>
+  {% if messages %}{% for message in messages %}<div class="rounded-lg bg-surface-container border-l-2 border-primary px-sm py-sm">{{ message }}</div>{% endfor %}{% endif %}
+  <p class="text-body-md">Designated approvers ({{ approvers|length }}): {% for a in approvers %}{{ a.email }}{% if not forloop.last %}, {% endif %}{% empty %}<strong class="text-error">none designated: recovery is unavailable</strong>{% endfor %}</p>
+  <div class="flex flex-col gap-sm">
+    {% for r in rows %}
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-xs">
+        <div class="flex flex-wrap justify-between gap-sm">
+          <div><strong class="break-all">{{ r.req.target.email }}</strong><div class="text-metadata text-on-surface-variant">Requested {{ r.req.created_at|date:"j M H:i" }} · expires {{ r.req.expires_at|date:"j M H:i" }}</div></div>
+          <span class="px-3 py-1 rounded-full text-metadata font-semibold h-fit {% if r.req.status == 'PENDING' %}bg-[#fff4e5] text-[#a16207]{% elif r.req.status == 'EXECUTED' %}bg-[#e8f5e9] text-[#1b5e20]{% else %}bg-surface-container{% endif %}">{{ r.req.get_status_display }}</span>
+        </div>
+        <p class="text-body-md">{{ r.approvals }} of {{ r.req.required_approvals }} approvals · {{ r.rejections }} rejection(s)</p>
+        <ul class="text-metadata text-on-surface-variant">{% for d in r.req.decisions.all %}<li>{{ d.approver.email }}: {% if d.approve %}approved{% else %}rejected{% endif %} ({{ d.decided_at|date:"j M H:i" }})</li>{% endfor %}</ul>
+        {% if r.can_vote %}
+          <form method="post" class="flex flex-wrap gap-sm items-center">{% csrf_token %}<input type="hidden" name="request_id" value="{{ r.req.id }}">
+            <input name="note" maxlength="200" placeholder="Note (optional)" class="px-sm py-1.5 rounded-lg border border-outline-variant">
+            <button name="decision" value="approve" class="bg-primary text-on-primary font-semibold px-md py-1.5 rounded-lg" type="submit">Approve</button>
+            <button name="decision" value="reject" class="text-error font-semibold px-md py-1.5 rounded-lg border border-error/40" type="submit">Reject</button>
+          </form>
+        {% elif r.own %}<p class="text-metadata text-on-surface-variant">This is your own request: you cannot decide it.</p>{% endif %}
+      </div>
+    {% empty %}<p class="text-on-surface-variant">No recovery requests.</p>{% endfor %}
+  </div>
+</div>
+{% endblock %}

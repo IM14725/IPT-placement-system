@@ -61,7 +61,8 @@ IPT-system/
 - **Multi-account organizations**: an organization has up to **5 active members** (`OrganizationMember`, `MAX_ORGANIZATION_ACCOUNTS`) and up to **5 concurrent logins** (`OrganizationSession`, `MAX_ORGANIZATION_CONCURRENT_LOGINS`; tracked from `user_logged_in/out` signals in `companies/apps.py`; a 6th login is refused until a session ends or expires). Owners/managers add and remove staff from the organization profile page.
 - **Suspension**: platform admins can suspend/reactivate a student or a whole organization (sets `is_active=False` + `suspended_at`); suspended organizations are hidden from search and take no new applications. Every admin action is written to the hash-chained audit log.
 - DRF permission classes: `IsStudent / IsOrganization / IsPlatformAdmin / IsPlatformSuperAdmin / IsVerifiedStudent / IsApprovedOrganization / IsOrganizationOwner`.
-- Cross-service auth: DRF `TokenAuthentication` (token in shared `authtoken_token` table) — FastAPI validates the same token on WS connect and API calls.
+- Cross-service auth: **no permanent API tokens** (removed 2026-11-09). The browser fetches a single-use, 60 s WebSocket ticket from `/api/auth/ws-ticket/` (Redis key `ipt:wsticket:*`, `apps/core/ws_tickets.py`); FastAPI redeems it with an atomic `GETDEL` (`realtime/app/core/auth.py`). DRF uses `SessionAuthentication` only. The `authtoken_token` table is now unused.
+- **Identity & access management (Feature 2)**: OTP registration/recovery, 5-minute login lockout, 10-minute one-device sessions, verified email/phone changes, administrator accounts + MFA (TOTP / FIDO2), M-of-N recovery, break-glass accounts, structured org audit trail, soft member removal. Full detail in the section **"Feature 2 — Identity & Access Management (IAM) — DONE"** below.
 - Webhook security: HMAC-SHA256 signature + idempotency by `gateway_txn_id` + replay rejection.
 - Upload validation: **< 2 MB** for all documents and images, magic-byte MIME check, extension allowlist, SHA-256 checksum.
 - Documents served only through permission-checked views (never bare MEDIA_URL).
@@ -117,7 +118,7 @@ Marketplace fetches `/api/slots/search/?region=&district=&department=&academic_y
 
 ## 9. FastAPI Async Layer
 
-- `GET /ws/notifications/{user_id}?token=` — persistent WebSocket; Redis pub/sub subscriber pushes notifications in real time.
+- `GET /ws/notifications/{user_id}?ticket=` — persistent WebSocket (`user_id` is a UUID string); authenticated with a single-use ticket; the Redis pub/sub subscriber pushes notifications and `session_revoked` events (the socket is then closed with 4401).
 - `POST /api/v1/payments/callback` — async: HMAC validate + idempotency → update DB → enqueue Celery tasks.
 - `POST /api/v1/payments/mock/initiate` + `/mock/callback` — mock gateway simulator (dev-only).
 
@@ -131,7 +132,7 @@ Marketplace fetches `/api/slots/search/?region=&district=&department=&academic_y
 
 ## 11. Prerequisites / Credentials
 
-- PostgreSQL superuser: `postgres` / `sechenga14` (provided).
+- PostgreSQL superuser: `postgres` / `<superuser password: keep it in your own secrets store, not in this file>`.
 - App DB role: `ipt` / `ipt_dev_password` (dev).
 - Redis: Docker Desktop + `redis:7-alpine` on `localhost:6379`.
 
@@ -370,7 +371,8 @@ Marketplace fetches `/api/slots/search/?region=&district=&department=&academic_y
 - **Registration**: choosing "Organization" hides first/last name and asks only for the organization name (+ email, password, optional phone); `process_registration_task` creates the user and organization in one transaction and rejects a duplicate organization name. Students still give first + last name.
 - **Platform admin side**: `SUPER_ADMIN` role + `AdminRole` capability matrix (migration `accounts.0004`), role-management page, audit log.
 
-### Login/registration run as Celery tasks; dev runs them eagerly - DONE (2026-11-07)
+### Login/registration run as Celery tasks; dev runs them eagerly - DONE (2026-11-07) — PARTLY SUPERSEDED 2026-11-09
+- **Superseded by Feature 2**: login is now checked **inline** in the view (the raw password never goes on the Celery broker; `process_login_task` was deleted). Registration still runs as a task but receives only a password **hash**. The post-registration hand-off token is bound to the submitting session, single-use and valid 60 s. After registration the account must pass an **email OTP** before it can sign in. The notes below describe the original design.
 - `POST /auth/login/` and `/auth/register/` enqueue `process_login_task` / `process_registration_task` and the page polls `/auth/task-status/<id>/`; on success a signed token is posted to `/auth/finalize/` which calls `login()`.
 - **Symptom**: with no Celery worker running, the poll never completes and the log fills with `task-status ... 200 21` (status stays `PENDING`). **Fix**: `config/settings/dev.py` sets `CELERY_TASK_ALWAYS_EAGER = True` and `CELERY_TASK_STORE_EAGER_RESULT = True`, so in dev the task runs inside the request and its result is still readable by the poll (needs Redis for the result store). Production (`prod.py`) still needs a real worker. Verified live: a wrong-password login returns `ERROR` on the first poll.
 - Side effect: in dev every Celery task (email, SMS, PDF, fan-out) also runs inside the web request.
@@ -383,6 +385,69 @@ Marketplace fetches `/api/slots/search/?region=&district=&department=&academic_y
 - Styles live in the `<style>` block of `base.html` (`.side-link`, `.side-heading`); the old `.nav-link` rule is kept for any page that still uses it. Footer gained a "Report a problem" link for signed-in non-admins.
 - Verified by rendering `home.html` for anonymous / student / organization / admin: drawer present with the right links and active highlight, Logout outside the link list. **Not yet checked visually in a browser.**
 
+### Feature 2 — Identity & Access Management (IAM) — DONE (2026-11-09)
+
+Built in order (tests: `pytest apps`, 100+ tests; new files `accounts/tests.py`, `accounts/test_contact_and_password.py`, `accounts/test_admin_mfa.py`, `companies/test_iam_org.py`). Migrations: `accounts.0007–0010`, `companies.0005`, `core.0005` (run `python manage.py migrate`; 0007 adds a unique-phone constraint, so duplicate phone numbers must be resolved first).
+
+**Step 1 — closed authentication holes**
+- Removed `TokenAuthentication`, `/api/auth/token/`, `/api/auth/my-token/` (permanent, never revoked, bypassed session rules). WebSocket uses single-use tickets (see section 3).
+- Passwords no longer travel through Celery; login is inline; registration task takes `password_hash`.
+- `/auth/finalize/`: `TimestampSigner` (salt `accounts.finalize-auth`, 60 s), stored in the session that started the task, consumed on use. `/auth/task-status/<id>/` only answers the session that created the task.
+- Old "reset password by knowing email + phone" flow removed (it was an account takeover); recovery needs an OTP. Realtime WS path typed `user_id` as `int` although ids are UUIDs: fixed (not tested live).
+
+**Step 2 — OTP, lockout, unique phone** (`accounts/otp.py`, `core/lockout.py`)
+- `OneTimeCode` rows: 6 digits, **5 min** expiry, single use, **HMAC-hashed** (never stored plain), 5 guesses then dead, a new code invalidates the previous one, resend limited by the existing token bucket (`consume`, burst 3 then 1/min). Delivered **synchronously** (a Celery task would put the code on the broker).
+- **Registration**: account is created first, then an **email-only** OTP (no channel choice) is required before the first sign-in (students and organization members; admins are exempt). **Recovery and later flows offer email or SMS**; a code is only sent to a method already verified on the account; identical response whether or not the account exists. Recovery is three screens: email → choose method (`/auth/reset-password/method/`) → code → new password. A password change signs out all other sessions (Django ties sessions to the password hash).
+- **Lockout**: 5 failed logins on an email (`LOGIN_LOCKOUT_ATTEMPTS`) lock sign-in for 5 min (`LOGIN_LOCKOUT_SECONDS`), keyed on the submitted email whether or not an account exists; never disables the account; cleared on success. Works alongside the existing token-bucket limiter (not a second limiter). Trade-off: someone can lock out a known email for 5 minutes.
+- **Phones** are stored digits-only and unique (DB partial unique index `uniq_user_phone_nonblank`); emails already unique.
+
+**Step 3 — sessions** (`accounts/sessions.py`, `SessionPolicyMiddleware`)
+- Hard **10 min** lifetime from login (`SESSION_COOKIE_AGE=600`), enforced on the server per request (login time in the session) and by the session row expiry, so it holds offline. HttpOnly, SameSite=Lax, Secure in prod; nothing in localStorage/sessionStorage. Session ids are Django CSPRNG (>=160 bits), rotated at login, MFA elevation, hardware step-up, forced password change.
+- **One live session per account**: `User.current_session_key`; a new login destroys the old session row and publishes `session_revoked` on `ipt:notify` (ws.js redirects the old tabs; the realtime service closes the socket). `static/js/session-guard.js` polls `/auth/session-status/` every 20 s and warns 60 s before expiry. The backend alone decides validity.
+- The organization cap now counts **people** (max 5 members => 5 logins); a member signing in again replaces their own session. Logout destroys the server session; authenticated responses send `Cache-Control: no-store`.
+- Role changes / removal / suspension call `revoke_user_session` so the user must sign in again with a new id. The old client-side 2-minute idle logout in `base.html` is unchanged (stricter).
+
+**Step 4 — audit trail** (`core/audit.py`)
+- `AuditLog` gained `organization`, `actor_role` (role at the time), `target_type/id/label`, `outcome` (SUCCESS/FAILED/REJECTED), `context` JSON. Actor name+email is copied into `actor_label`, so former members stay attributable and searchable. Sealed into the integrity ledger; new fields join the hash only when set, so old records still verify.
+- Org events recorded: login/logout, member add/remove/role change, profile edits, slot create/edit/publish/pause/delete, application accept, applicant-document views, document upload/delete/access, audit searches and exports.
+- **Org view** `/organization/audit/` (Manager (Owner) and Deputy Manager only; recruiters and former members get nothing; always scoped to the viewer's organization). **Platform console** `/platform/audit-logs/` with organization / actor / action / date range / target / status / module / keyword filters, event detail, CSV export; searching and exporting are themselves audited. Shared implementation `filter_audit_logs`.
+
+**Step 5 — organization members**
+- First registrant is `OWNER`, displayed as **Manager (Owner)**; `MANAGER` is displayed **Deputy Manager** (labels only; RBAC matrix unchanged, plus `audit.view` for both).
+- Removal is **soft**: `OrganizationMember.membership_status=REMOVED` with `removed_at/by/reason`, user `is_active=False` (never deleted), sessions destroyed, audited. **Former Members** page `/organization/team/former/` (name, email, previous role, date added/removed, removed by, reason). Role change page action revokes the member's session. Members get their own credentials: Manager sets a **temporary password** that must be replaced at first sign-in (`must_change_password` gate) after the member verifies their own email by OTP.
+- Documents are organization-owned: scoped by `Organization.historical_member_user_ids()` so a former member's uploads stay with the organization. `view_document` is tenant- and permission-scoped (student documents only for a paid application to the viewer's organization and `applicants.view`; org documents for any active member) and audits access. Cross-organization direct-URL probes (slots, applicants, letters, documents, audit events, removal) all 404/403 (tested).
+
+**Step 6 — organization registration**
+- Organization form collects organization name, official email, organization phone (landline allowed), plus the first member's full name, personal login email, own phone and position. `OrganizationMember.position` holds the real-world title; the role (Manager) sets permissions.
+
+**Step 7 — contact changes** (`accounts/views_account.py`, page `/auth/account/`)
+- Change email or phone: current password + OTP sent to the **new** value; nothing is saved until it is verified; wrong code rejects, expired code needs a new one; uniqueness re-checked at save time with the agreed message and no identity leak. The same flow verifies the current phone. Students **cannot apply** until their phone is verified. `/auth/change-password/` also serves the forced first-login change. Sidebar link "Account & security" for everyone.
+
+**Step 8 — administrators and MFA**
+- **Creation**: Super Admin only (`/platform/admins/`), no public admin registration (`RegisterForm` offers only Student/Organization). Generates a temporary password (`ADMIN_TEMP_PASSWORD_HOURS`, default 24) emailed to the admin, never shown; must be replaced at first sign-in, then MFA is set up before any admin page works (`accounts/gates.py`). Role change, suspension, approver designation, temporary-password reissue are audited and end the admin's session.
+- **MFA** (`accounts/mfa.py`): TOTP (secret Fernet-encrypted, replay-protected) or FIDO2/WebAuthn (`webauthn` lib; RP id derived from the request host, works on `localhost`, not on a bare IP). **Super Admins and break-glass accounts must use a hardware key**; TOTP is refused for them. Sign-in is password -> second factor -> session (no session after the password alone). 5 failed factors lock for 5 min. `static/js/webauthn.js` talks to `/auth/mfa/webauthn/*`.
+- **Recovery codes**: 10 one-use codes per set, shown once, stored only as HMAC hashes; required before admin access; using one forces generating a new set (old set invalid).
+- **Hardware re-verification** (`@hardware_reverify`, `HARDWARE_REVERIFY_SECONDS=300`) on POSTs for: create/modify admins, role matrix, platform settings, account suspension, recovery decisions, break-glass actions. Step-up page `/auth/mfa/step-up/`; it rotates the session id.
+- **M-of-N recovery** (`accounts/recovery.py`): locked-out admin files a request at `/auth/admin-recovery/` (generic answer, rate limited); designated approvers (`User.is_recovery_approver`) vote in `/platform/recovery/`; the requester can never approve their own, only designated approvers vote, one vote each, `ADMIN_RECOVERY_APPROVALS` (default 2) approvals execute (target's keys, TOTP and codes wiped, sessions ended, must re-enroll), quorum becoming impossible rejects; every step audited.
+- **Break-glass** (`accounts/breakglass.py`, `/platform/break-glass/`): 256-bit password shown once for offline storage, hardware key mandatory (register it during the setup ceremony), TOTP/recovery codes not accepted, every normal control still applies. Use raises an audit event + email to all other Super Admins, flags `review_pending` + `rotation_required`, shows an emergency banner, and tags its audit actions `break_glass`. Rotation and review are explicit actions.
+
+**Settings / env** (`config/settings/base.py`): `SESSION_COOKIE_AGE`, `LOGIN_LOCKOUT_ATTEMPTS/SECONDS`, `ADMIN_MFA_ENFORCED`, `SUPER_ADMIN_REQUIRE_FIDO2`, `HARDWARE_REVERIFY_SECONDS`, `ADMIN_TEMP_PASSWORD_HOURS`, `ADMIN_RECOVERY_APPROVALS/HOURS`, `WEBAUTHN_RP_ID/NAME`. Tests set `ADMIN_MFA_ENFORCED=False` and blank the Beem SMS keys in `conftest.py` (tests must never send real SMS).
+
+**Rollout notes for the dev database**
+- Existing students/organization users have `email_verified=False` and are asked to verify at next login. Existing admins (`admin@admin.com`, `admin@test.com`) must enroll MFA at next login and, as Super Admins, **need a FIDO2 key**. Without one, set `SUPER_ADMIN_REQUIRE_FIDO2=False` (TOTP then works) or `ADMIN_MFA_ENFORCED=False` in `backend/.env` for local work only.
+- Real SMS: `BEEM_API_KEY`/`BEEM_SECRET_KEY` in `backend/.env` (gitignored); Beem only delivers from a sender name registered on the account (`BEEM_SENDER_ID`).
+- Restart Django, Celery and uvicorn after pulling; old processes keep serving old code.
+
+**Spec section 14 verification checklist (result)**
+1. One active session per account, org limit kept: done + tested. 2. Server-side expiry incl. offline: done + tested (time-travel test). 3. Session id regenerated on role change/elevation: role changes destroy the session; MFA/step-up/password change rotate the id: tested. 4. Documents tenant-scoped: fixed + tested. 5. Member removal preserves history: tested. 6. Team changes in the ledger: tested. 7. Former members searchable in audit: tested. 8. Admin creation Super-Admin-only + onboarding: tested. 9. MFA enforced before admin access: tested. 10. Cross-organization direct URL access: tested.
+
+**Known gaps / not verified**
+- FIDO2 is verified end-to-end only against a **software authenticator** in tests; no physical key or real browser was used. The new pages (admin console, MFA, audit, former members, account security) were **not checked visually in a browser**.
+- Realtime ticket redemption and the `session_revoked` socket close are not covered by automated tests; run `backend/e2e_phase3.py` / a live check.
+- Former members cannot be re-added with the same email (their account is kept inactive); email/phone changes do not need hardware keys; temporary passwords go by email only (no SMS); the recovery-request form is public by design (rate limited, generic answers).
+- Anonymous-session flows (OTP, recovery) also live under the 10-minute cookie age.
+- The previous `plan.md` contained the Postgres superuser password; it was already committed in the initial commit, so **rotate that password** (it is now removed from this file).
+
 ## 13. Run Instructions (dev)
 
 ```powershell
@@ -390,7 +455,7 @@ Marketplace fetches `/api/slots/search/?region=&district=&department=&academic_y
 backend\.venv\Scripts\python -m pip install -r backend\requirements-dev.txt
 
 # 1) Database (once)
-$env:PG_USER='postgres'; $env:PG_SUPERUSER_PASSWORD='sechenga14'
+$env:PG_USER='postgres'; $env:PG_SUPERUSER_PASSWORD='<your postgres superuser password>'
 scripts\create_db.ps1
 
 # 2) Redis (once)
