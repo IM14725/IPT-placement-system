@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Locations{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Platform Records</span>
+    <h1 class="font-display text-display text-on-surface">Locations</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-2">
+      The regions, districts and wards used by slots, student profiles and organizations. A record that is still in use can't be deleted.
+    </p>
+  </div>
+
+  <div class="flex flex-wrap gap-sm">
+    {% for value, name, count in tabs %}
+      <a href="?kind={{ value }}" class="px-md py-1.5 rounded-full text-metadata font-metadata transition-colors {% if kind == value %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %}">
+        {{ name }} <span class="opacity-70">({{ count }})</span>
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-lg">
+    <div class="xl:col-span-2 bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+      <form method="get" class="p-md bg-surface-container-low border-b border-surface-container-highest flex flex-wrap gap-sm">
+        <input type="hidden" name="kind" value="{{ kind }}">
+        <div class="ipt-field-box flex-1 min-w-[10rem]"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input name="q" value="{{ q }}" placeholder="Search by name"></div>
+        {% if kind != "regions" %}
+          <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">map</span></span><select name="region">
+            <option value="">All regions</option>
+            {% for r in regions %}<option value="{{ r.id }}" {% if r.id|stringformat:"s" == region_id %}selected{% endif %}>{{ r.name }}</option>{% endfor %}
+          </select></div>
+        {% endif %}
+        {% if kind == "wards" and districts %}
+          <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">location_on</span></span><select name="district">
+            <option value="">All districts</option>
+            {% for d in districts %}<option value="{{ d.id }}" {% if d.id|stringformat:"s" == district_id %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+          </select></div>
+        {% endif %}
+        <button class="px-md py-2 bg-surface-container hover:bg-surface-container-high rounded-full font-metadata text-metadata" type="submit">Filter</button>
+      </form>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left min-w-[560px]">
+          <thead>
+            <tr class="text-metadata font-label-caps text-on-surface-variant border-b border-surface-variant">
+              <th class="py-sm px-md font-medium">{{ label }}</th>
+              {% if kind == "districts" %}<th class="py-sm px-md font-medium">Region</th><th class="py-sm px-md font-medium">Wards</th>{% endif %}
+              {% if kind == "wards" %}<th class="py-sm px-md font-medium">District</th><th class="py-sm px-md font-medium">Region</th>{% endif %}
+              {% if kind == "regions" %}<th class="py-sm px-md font-medium">Districts</th>{% endif %}
+              <th class="py-sm px-md font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="font-body-md text-body-md text-on-surface">
+            {% for row in rows %}
+              <tr class="border-b border-surface-variant align-top">
+                <td class="py-sm px-md font-semibold">{{ row.name }}</td>
+                {% if kind == "districts" %}
+                  <td class="py-sm px-md text-on-surface-variant">{{ row.region.name }}</td>
+                  <td class="py-sm px-md">{{ row.child_count }}</td>
+                {% elif kind == "wards" %}
+                  <td class="py-sm px-md text-on-surface-variant">{{ row.district.name }}</td>
+                  <td class="py-sm px-md text-on-surface-variant">{{ row.district.region.name }}</td>
+                {% else %}
+                  <td class="py-sm px-md">{{ row.child_count }}</td>
+                {% endif %}
+                <td class="py-sm px-md">
+                  <div class="flex flex-wrap gap-xs items-center">
+                    <a href="?kind={{ kind }}&edit={{ row.id }}" class="px-sm py-1 rounded-full bg-surface-container font-metadata text-metadata">Edit</a>
+                    <form method="post" onsubmit="return confirm('Delete this {{ label|lower }}?');">{% csrf_token %}
+                      <input type="hidden" name="kind" value="{{ kind }}">
+                      <input type="hidden" name="id" value="{{ row.id }}">
+                      <button name="action" value="delete" class="px-sm py-1 rounded-full bg-error/10 text-error font-metadata text-metadata" type="submit">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="py-xl text-center text-on-surface-variant">No {{ kind }} here.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "includes/pagination.html" %}
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-sm h-fit">
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% if edit_obj %}Edit {{ label|lower }}{% else %}Add a {{ label|lower }}{% endif %}</h2>
+      <form method="post" class="flex flex-col gap-sm">
+        {% csrf_token %}
+        <input type="hidden" name="kind" value="{{ kind }}">
+        {% if edit_obj %}
+          <input type="hidden" name="action" value="update">
+          <input type="hidden" name="id" value="{{ edit_obj.id }}">
+        {% else %}
+          <input type="hidden" name="action" value="create">
+        {% endif %}
+        {% for field in form %}
+          {% include "includes/form_field.html" with field=field label_class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" %}
+        {% endfor %}
+        <div class="flex gap-sm">
+          <button class="mt-xs bg-primary text-on-primary rounded-full px-md py-2 font-body-md" type="submit">{% if edit_obj %}Save changes{% else %}Add {{ label|lower }}{% endif %}</button>
+          {% if edit_obj %}<a href="?kind={{ kind }}" class="mt-xs px-md py-2 rounded-full bg-surface-container font-body-md">Cancel</a>{% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

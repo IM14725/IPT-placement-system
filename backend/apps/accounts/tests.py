@@ -125,7 +125,8 @@ def test_organization_registration_form_requires_organization_and_first_member_d
     assert "organization_name" in dup.errors and "organization_email" in dup.errors
     # The member's own email and phone stay unique per account.
     same = RegisterForm(_organization_form_data(organization_name="Other Co", organization_email="x@other.tz"))
-    assert not same.is_valid() and "email" in same.errors and "phone" in same.errors
+    # The phone is rejected generically; an existing email is deliberately NOT reported (no enumeration).
+    assert not same.is_valid() and "phone" in same.errors and "email" not in same.errors
 
 
 # ── IAM step 1: closed authentication holes ─────────────────────────────────
@@ -409,11 +410,18 @@ def test_login_lockout_after_five_failures_then_lifts():
     User.objects.create_user(
         email="l@x.tz", password="Secret123!x", role=UserRole.STUDENT, email_verified=True
     )
-    for _ in range(5):
+    for _ in range(4):
         assert client.post("/auth/login/", {"email": "l@x.tz", "password": "bad"}).status_code == 200
+    # The fifth failure trips the lock and immediately shows a live countdown.
+    tripped = client.post("/auth/login/", {"email": "l@x.tz", "password": "bad"})
+    body = tripped.content.decode()
+    assert tripped.status_code == 429 and 'data-countdown="' in body and "Too many failed attempts" in body
+    assert 0 < int(tripped["Retry-After"]) <= 300
     # Locked: even the correct password is refused, and the message is generic.
     locked = client.post("/auth/login/", {"email": "l@x.tz", "password": "Secret123!x"})
     assert locked.status_code == 429 and "_auth_user_id" not in client.session
+    # The rate limiter answers here, but the timer still reflects the (longer) lock.
+    assert int(locked["Retry-After"]) > 30
     keys = list(get_redis().scan_iter("*lockout:login:l@x.tz:lock"))
     assert len(keys) == 1 and 0 < get_redis().ttl(keys[0]) <= 300
     # After the 5 minutes pass (key expires) the same account logs in: it was never disabled.
@@ -446,7 +454,7 @@ def test_phone_numbers_are_unique_across_formats():
         }
     )
     assert not form.is_valid()
-    assert "already associated with an account" in form.errors["phone"][0]
+    assert "can't be used" in form.errors["phone"][0]  # generic: never says the number is registered
     with pytest.raises(IntegrityError), transaction.atomic():
         User.objects.create_user(email="y@x.tz", password="Secret123!x", phone="255712345678")
     # Blank phones may repeat.
@@ -622,3 +630,57 @@ def test_login_and_logout_are_audited():
     c.get("/auth/logout/")
     actions = list(AuditLog.objects.filter(module="Security").values_list("action", flat=True))
     assert "Login" in actions and "Logout" in actions
+
+
+def _at(monkeypatch, real, seconds):
+    monkeypatch.setattr("apps.accounts.sessions.time.time", lambda: real + seconds)
+
+
+@pytest.mark.django_db
+def test_activity_restarts_the_ten_minutes(monkeypatch):
+    _student()
+    c = Client()
+    _login(c)
+    real = _time.time()
+    _at(monkeypatch, real, 400)  # 6m40s in: the person moves the mouse
+    assert c.post("/auth/session-extend/").json()["expires_in"] >= 595
+    _at(monkeypatch, real, 800)  # 13m20s after login, but only 6m40s since the last movement
+    assert c.get("/auth/session-status/").status_code == 200
+    _at(monkeypatch, real, 400 + 601)  # ten idle minutes after the last movement
+    assert c.get("/auth/session-status/").status_code == 401
+
+
+@pytest.mark.django_db
+def test_polling_status_never_extends_the_session(monkeypatch):
+    _student()
+    c = Client()
+    _login(c)
+    real = _time.time()
+    for t in (200, 400, 590):  # an untouched tab keeps polling
+        _at(monkeypatch, real, t)
+        assert c.get("/auth/session-status/").status_code == 200
+    _at(monkeypatch, real, 601)
+    assert c.get("/auth/session-status/").status_code == 401
+
+
+@pytest.mark.django_db
+def test_activity_cannot_extend_past_the_absolute_ceiling(monkeypatch, settings):
+    settings.SESSION_ABSOLUTE_MAX_SECONDS = 1000
+    _student()
+    c = Client()
+    _login(c)
+    real = _time.time()
+    for t in (500, 900):
+        _at(monkeypatch, real, t)
+        assert c.post("/auth/session-extend/").status_code == 200
+    _at(monkeypatch, real, 1001)  # idle for only 101 s, but past the ceiling
+    assert c.get("/auth/session-status/").status_code == 401
+
+
+@pytest.mark.django_db
+def test_extend_needs_a_signed_in_session_and_post():
+    assert Client().post("/auth/session-extend/").status_code == 401
+    _student()
+    c = Client()
+    _login(c)
+    assert c.get("/auth/session-extend/").status_code == 405

@@ -49,6 +49,13 @@
     return !!tpl.content.querySelector("form[data-loading-form], form");
   }
 
+  // Page scripts bound to the old form's elements must re-run on the new one.
+  function swapForm(oldForm, newForm) {
+    oldForm.parentNode.replaceChild(newForm, oldForm);
+    install(newForm);
+    document.dispatchEvent(new CustomEvent("ipt:form-swapped", { detail: { form: newForm } }));
+  }
+
   function install(form) {
     if (form.hasAttribute("data-loading-installed")) return;
     form.setAttribute("data-loading-installed", "1");
@@ -122,10 +129,7 @@
               // form + errors. Swap the fresh <form> in place and dismiss the
               // spinner after the minimum visible time.
               var newForm = parseForm(html);
-              if (newForm) {
-                form.parentNode.replaceChild(newForm, form);
-                install(newForm);
-              }
+              if (newForm) swapForm(form, newForm);
               hideOverlay();
               return;
             }
@@ -133,10 +137,7 @@
             if (containsForm(html)) {
               // 200 with a form = validation error re-render.
               var errorForm = parseForm(html);
-              if (errorForm) {
-                form.parentNode.replaceChild(errorForm, form);
-                install(errorForm);
-              }
+              if (errorForm) swapForm(form, errorForm);
               hideOverlay();
               return;
             }

@@ -163,6 +163,7 @@ def acceptance_email(application_id, company_message=""):
             "slot_title": app.slot.title,
             "app_id": app.id,
             "company_message": company_message,
+            "company_note": note,
         },
         fallback_subject=f"Congratulations! You have been accepted — {app.slot.title}",
         fallback_body=(

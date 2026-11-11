@@ -1,11 +1,15 @@
 from django.urls import path
 
-from apps.accounts import views, views_account, views_mfa, views_otp
+from apps.accounts import seo, views, views_account, views_mfa, views_otp
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("robots.txt", seo.robots_txt, name="robots"),
+    path("sitemap.xml", seo.sitemap_xml, name="sitemap"),
     path("dashboard/", views.dashboard_redirect, name="dashboard"),
     path("auth/register/", views.register, name="register"),
+    path("auth/funnel/", views.funnel_event, name="funnel-event"),
+    path("slots/public/", views.public_slots_fragment, name="public-slots"),
     path("auth/login/", views.user_login, name="login"),
     path("auth/forgot-password/", views.forgot_password, name="forgot-password"),
     path("auth/reset-password/", views.reset_password, name="reset-password"),
@@ -31,6 +35,7 @@ urlpatterns = [
     path("auth/mfa/webauthn/auth-verify/", views_mfa.webauthn_auth_verify, name="webauthn-auth-verify"),
     path("auth/admin-recovery/", views_mfa.admin_recovery_request, name="admin-recovery-request"),
     path("auth/session-status/", views.session_status, name="session-status"),
+    path("auth/session-extend/", views.session_extend, name="session-extend"),
     path("api/auth/ws-ticket/", views.ws_ticket, name="ws-ticket"),
     path("auth/notification-settings/", views.notification_settings, name="notification-settings"),
     path("auth/delete-account/", views.request_account_deletion, name="delete-account"),

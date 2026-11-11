@@ -21,13 +21,13 @@
       <div class="flex items-center justify-between gap-sm bg-surface-container-low rounded-lg p-sm">
         <div><strong>{{ key.name }}</strong><div class="text-metadata text-on-surface-variant">Added {{ key.created_at|date:"j M Y" }}{% if key.last_used_at %} · last used {{ key.last_used_at|date:"j M Y H:i" }}{% endif %}</div></div>
         <form method="post" action="{% url 'mfa-remove-key' key.id %}" class="flex gap-xs" onsubmit="return confirm('Remove this key?');">
-          {% csrf_token %}<input type="password" name="password" placeholder="Your password" required class="px-sm py-1.5 rounded-lg border border-outline-variant">
+          {% csrf_token %}<div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span><input type="password" name="password" placeholder="Your password" required></div>
           <button class="text-error font-semibold px-sm" type="submit">Remove</button>
         </form>
       </div>
     {% empty %}<p class="text-on-surface-variant">No security key registered.</p>{% endfor %}
     <form id="key-form" class="flex flex-wrap gap-sm items-end">
-      <label class="flex flex-col gap-1 text-metadata text-on-surface-variant">Key name<input id="key-name" value="Security key" maxlength="80" class="px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest"></label>
+      <label class="flex flex-col gap-1 text-metadata text-on-surface-variant">Key name<div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">person</span></span><input id="key-name" value="Security key" maxlength="80"></div></label>
       <button id="add-key" type="submit" class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg">Add a security key</button>
     </form>
     {% csrf_token %}
@@ -40,7 +40,7 @@
     {% elif has_totp %}
       <p>An authenticator app is registered.</p>
       <form method="post" action="{% url 'mfa-remove-totp' %}" class="flex gap-xs">{% csrf_token %}
-        <input type="password" name="password" placeholder="Your password" required class="px-sm py-1.5 rounded-lg border border-outline-variant"><button class="text-error font-semibold px-sm" type="submit">Remove</button></form>
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span><input type="password" name="password" placeholder="Your password" required></div><button class="text-error font-semibold px-sm" type="submit">Remove</button></form>
     {% else %}
       <a class="justify-self-start text-primary font-semibold hover:underline" href="{% url 'mfa-totp-setup' %}">Set up an authenticator app</a>
     {% endif %}
@@ -52,7 +52,7 @@
     {% if enrolled %}
     <form method="post" action="{% url 'mfa-recovery-codes' %}" class="flex flex-wrap gap-sm items-end">
       {% csrf_token %}
-      <label class="flex flex-col gap-1 text-metadata text-on-surface-variant">Confirm your password<input type="password" name="password" required class="px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest"></label>
+      <label class="flex flex-col gap-1 text-metadata text-on-surface-variant">Confirm your password<div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span><input type="password" name="password" required></div></label>
       <button class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg" type="submit">{% if codes_exist %}Generate a new set{% else %}Generate recovery codes{% endif %}</button>
     </form>
     {% else %}<p class="text-on-surface-variant">Add a factor above first.</p>{% endif %}

@@ -237,7 +237,9 @@ def submit_report(request):
             return redirect("report-submit")
     else:
         form = ReportForm()
-    return render(request, "core/report_form.html", {"form": form})
+    # Status only: admin_notes are internal and never shown to the reporter.
+    my_reports = Report.objects.filter(reporter=request.user).order_by("-created_at")[:20]
+    return render(request, "core/report_form.html", {"form": form, "my_reports": my_reports})
 
 
 @login_required

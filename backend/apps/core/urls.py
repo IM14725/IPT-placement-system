@@ -1,6 +1,7 @@
 from django.urls import path
 
 from apps.core import views, views_admins, views_governance
+from apps.locations import views_admin as locations_admin
 
 urlpatterns = [
     path("", views.health, name="health"),
@@ -11,6 +12,7 @@ urlpatterns = [
     path("directory/", views.directory, name="platform-directory"),
     path("slots/", views.admin_slots, name="platform-slots"),
     path("universities/", views_governance.universities, name="platform-universities"),
+    path("locations/", locations_admin.locations, name="platform-locations"),
     path("account-status/", views_governance.account_status, name="platform-account-status"),
     path("reports/", views_governance.reports, name="platform-reports"),
     path(

@@ -93,6 +93,13 @@ def send_otp(user, purpose, channel, destination=None):
     return SendResult(True)
 
 
+def invalidate_pending(user, purpose):
+    """Void every unused code for ``purpose`` (e.g. recovery codes once the user logs in)."""
+    return OneTimeCode.objects.filter(
+        user=user, purpose=purpose, consumed_at__isnull=True
+    ).update(consumed_at=timezone.now())
+
+
 def pending_destination(user, purpose):
     """Where the live (unused, unexpired) code for ``purpose`` was sent, e.g. the NEW email."""
     otp = (

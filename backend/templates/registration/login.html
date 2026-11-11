@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load i18n static %}
 {% block title %}{% trans "Login" %}{% endblock %}
+{% block robots %}index, follow{% endblock %}
+{% block meta_description %}{% trans "Log in to IPT Marketplace to manage your Industrial Practical Training applications." %}{% endblock %}
 {% block content %}
 <div class="w-full max-w-[1080px] mx-auto my-md auth-card bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden flex flex-col lg:flex-row min-h-[640px]">
   <!-- Brand panel -->
@@ -38,7 +40,7 @@
         </div>
       </div>
     </div>
-    <span class="relative z-10 font-metadata text-metadata text-on-primary/60">&copy; {% now "Y" %} IPT Marketplace. Designed by semauya.</span>
+    <span class="relative z-10 font-metadata text-metadata text-on-primary/60">&copy; {% now "Y" %} IPT Marketplace. {% trans "Designed by semauya." %}</span>
   </div>
 
   <!-- Form panel -->
@@ -60,7 +62,19 @@
 
       <form method="post" class="flex flex-col gap-md" novalidate data-loading-form>
         {% csrf_token %}
-        {% if form.non_field_errors %}
+        <div style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true">{{ form.website }}</div>
+        {{ form.form_ts }}
+        {% if lockout_seconds %}
+          <div class="rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-body-md text-on-error-container flex items-start gap-xs" role="alert" data-lockout>
+            <span class="material-symbols-outlined text-[18px] mt-px">timer</span>
+            <span>
+              {% trans lockout_message %}
+              <span data-lockout-wait>{% trans "Try again in" %}</span>
+              <strong class="tabular-nums" role="timer" data-countdown="{{ lockout_seconds }}">{{ lockout_clock }}</strong>
+              <span data-lockout-ready hidden>{% trans "You can try again now." %}</span>
+            </span>
+          </div>
+        {% elif form.non_field_errors %}
           <div class="rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-body-md text-on-error-container flex items-start gap-xs">
             <span class="material-symbols-outlined text-[18px] mt-px">error</span>
             <span>{{ form.non_field_errors.0 }}</span>
@@ -86,7 +100,7 @@
           <div class="ipt-field-box {% if form.password.errors %}is-error{% endif %}">
             <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span>
             {{ form.password }}
-            <button type="button" class="ipt-field-action" onclick="togglePassword(this, '{{ form.password.id_for_label }}')" aria-label="Show password">
+            <button type="button" class="ipt-field-action" onclick="togglePassword(this, '{{ form.password.id_for_label }}')" aria-label="{% trans "Show password" %}">
               <span class="material-symbols-outlined text-[20px]" data-icon="eye">visibility</span>
             </button>
           </div>
@@ -107,15 +121,56 @@
         <div class="flex-1 h-px bg-outline-variant"></div>
       </div>
 
-      <a href="{% url 'register' %}" class="w-full text-center bg-surface-container text-on-surface font-body-md text-body-md font-semibold py-3 rounded-lg hover:bg-surface-container-high transition-colors flex items-center justify-center gap-xs">
-        <span class="material-symbols-outlined text-[18px]">person_add</span>
-        {% trans "Create an account" %}
-      </a>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-sm">
+        <a href="{% url 'register' %}?role=student" class="text-center bg-surface-container text-on-surface font-body-md text-body-md font-semibold py-3 rounded-lg hover:bg-surface-container-high transition-colors flex items-center justify-center gap-xs">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">school</span>{% trans "I'm a student" %}
+        </a>
+        <a href="{% url 'register' %}?role=organization" class="text-center bg-surface-container text-on-surface font-body-md text-body-md font-semibold py-3 rounded-lg hover:bg-surface-container-high transition-colors flex items-center justify-center gap-xs">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">business_center</span>{% trans "I'm an organization" %}
+        </a>
+      </div>
     </div>
   </div>
 </div>
 {% endblock %}
 {% block scripts %}
+<script>
+  // Live lockout countdown. Runs for any [data-countdown] element, including one that
+  // arrives later when form-loading.js swaps a re-rendered form into the page.
+  (function () {
+    function fmt(s) { return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+
+    function start(el) {
+      if (el.dataset.countdownStarted) return;
+      el.dataset.countdownStarted = "1";
+      var end = Date.now() + parseInt(el.dataset.countdown, 10) * 1000;
+      var box = el.closest("[data-lockout]");
+      var form = el.closest("form");
+      var button = form && form.querySelector('button[type="submit"]');
+      if (button) button.disabled = true;
+
+      var timer = setInterval(tick, 250);
+      function tick() {
+        if (!el.isConnected) { clearInterval(timer); return; }
+        var left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+        el.textContent = fmt(left);
+        if (left > 0) return;
+        clearInterval(timer);
+        if (button) button.disabled = false;
+        if (box) {
+          box.querySelector("[data-lockout-wait]").hidden = true;
+          el.hidden = true;
+          box.querySelector("[data-lockout-ready]").hidden = false;
+        }
+      }
+      tick();
+    }
+
+    function scan() { document.querySelectorAll("[data-countdown]").forEach(start); }
+    scan();
+    new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
+  })();
+</script>
 <script>
   function togglePassword(btn, id) {
     const input = document.getElementById(id);

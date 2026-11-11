@@ -247,9 +247,14 @@ def invalidate_user_validation(user_id):
     cache_delete(f"validation:verification:user:{user_id}")
 
 
-def invalidate_locations():
+def invalidate_locations(region_id=None, district_id=None):
     cache_delete("locations:regions")
     cache_delete("locations:districts:all")
+    cache_delete("locations:wards:all")
+    if region_id:
+        cache_delete(f"locations:districts:{region_id}")
+    if district_id:
+        cache_delete(f"locations:wards:{district_id}")
 
 
 def _load_regions():
@@ -300,3 +305,36 @@ def _load_institutions():
 
     with open(settings.INSTITUTIONS_DATA_FILE, encoding="utf-8") as fh:
         return json.load(fh)["institutions"]
+
+def incr_daily_field(prefix, field, when=None, ttl_days=45):
+    """Bump ``field`` inside a per-day Redis hash (e.g. one counter per region). Fails open."""
+    if not _enabled() or not field:
+        return
+    key = _key(f"stats:{prefix}:{(when or datetime.date.today()).isoformat()}")
+    try:
+        pipe = get_redis().pipeline()
+        pipe.hincrby(key, str(field), 1)
+        pipe.expire(key, ttl_days * 86400)
+        pipe.execute()
+    except Exception:  # noqa: BLE001 - fail open
+        pass
+
+
+def daily_field_totals(prefix, days=30, when=None):
+    """Sum of every field of the per-day hashes over the last ``days`` days: ``{field: total}``."""
+    if not _enabled():
+        return {}
+    end = when or datetime.date.today()
+    keys = [_key(f"stats:{prefix}:{(end - datetime.timedelta(days=i)).isoformat()}") for i in range(days)]
+    totals = {}
+    try:
+        pipe = get_redis().pipeline()
+        for key in keys:
+            pipe.hgetall(key)
+        for table in pipe.execute():
+            for field, value in (table or {}).items():
+                field = field.decode() if isinstance(field, bytes) else field
+                totals[field] = totals.get(field, 0) + int(value)
+    except Exception:  # noqa: BLE001 - fail open
+        return {}
+    return totals

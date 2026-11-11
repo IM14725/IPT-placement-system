@@ -152,7 +152,12 @@ def invalidate_student(sender, instance, **kwargs):
 @receiver(post_delete, sender="locations.Region", dispatch_uid="invalidate_region_delete")
 @receiver(post_save, sender="locations.District", dispatch_uid="invalidate_district_save")
 @receiver(post_delete, sender="locations.District", dispatch_uid="invalidate_district_delete")
+@receiver(post_save, sender="locations.Ward", dispatch_uid="invalidate_ward_save")
+@receiver(post_delete, sender="locations.Ward", dispatch_uid="invalidate_ward_delete")
 def invalidate_locations(sender, instance, **kwargs):
     from apps.core.cache import invalidate_locations
 
-    invalidate_locations()
+    invalidate_locations(
+        region_id=getattr(instance, "region_id", None),
+        district_id=getattr(instance, "district_id", None),
+    )

@@ -110,18 +110,22 @@ def test_m6_and_m10_admin_settings_hides_sms_api_key_and_validates_numbers():
     html = get_resp.content.decode("utf-8")
     assert "SUPER-SECRET-SMS-KEY-999" not in html
 
-    # 2. Submitting an empty sms_api_key preserves the existing key
+    assert 'name="sms_api_key"' not in html and 'name="sms_api_endpoint"' not in html  # no gateway fields at all
+
+    # 2. The gateway key/endpoint cannot be changed from the browser, even by a crafted POST
     post_empty = c.post(
         "/platform/settings/",
         {
             "app_fee_amount": "20000",
             "max_applications_per_student": "4",
             "default_slot_limit": "50",
-            "sms_api_key": "",
+            "sms_api_key": "HIJACKED",
+            "sms_api_endpoint": "https://evil.example/sms",
         },
     )
     assert post_empty.status_code == 302
     assert PlatformSetting.objects.get(key="sms_api_key").value_text == "SUPER-SECRET-SMS-KEY-999"
+    assert not PlatformSetting.objects.filter(key="sms_api_endpoint", value_text__contains="evil").exists()
     assert PlatformSetting.objects.get(key="app_fee_amount").value_number == 20000
 
     # 3. Submitting invalid float does not crash with 500; returns 302 with error message and keeps 20000

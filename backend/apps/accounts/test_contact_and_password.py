@@ -259,3 +259,48 @@ def test_org_member_added_by_manager_gets_a_temporary_password_flow():
     assert resp.url == "/auth/verify-email/"  # proves they own their own email first
     c.post("/auth/verify-email/", {"code": _mail_code()})
     assert c.get("/organization/dashboard/").url == "/auth/change-password/"
+
+
+@pytest.mark.django_db
+def test_password_login_voids_a_pending_recovery_code():
+    """An organization manager who asks for a reset code, then remembers the password."""
+    user = _user(email="mgr@x.tz", role=UserRole.ORGANIZATION)
+    c = Client()
+    c.post("/auth/forgot-password/", {"email": user.email})
+    c.post("/auth/reset-password/method/", {"channel": "EMAIL"})
+    code = _mail_code()
+    assert OneTimeCode.objects.filter(user=user, purpose=OtpPurpose.RECOVERY, consumed_at__isnull=True).exists()
+
+    resp = c.post("/auth/login/", {"email": user.email, "password": PW})
+    assert resp.status_code == 302
+    assert "_auth_user_id" in c.session
+
+    assert not OneTimeCode.objects.filter(
+        user=user, purpose=OtpPurpose.RECOVERY, consumed_at__isnull=True
+    ).exists()
+    assert otp.verify_otp(user, OtpPurpose.RECOVERY, code) == otp.EXPIRED
+
+
+@pytest.mark.django_db
+def test_register_errors_name_each_bad_field_and_keep_what_was_typed():
+    resp = Client().post(
+        "/auth/register/",
+        {
+            "role": UserRole.STUDENT,
+            "email": "not-an-email",
+            "first_name": "Amina",
+            "last_name": "",
+            "phone": "0712345678",
+            "password1": PW,
+            "password2": "different",
+            "accept_terms": "on",
+        },
+    )
+    html = resp.content.decode()
+    assert resp.status_code == 200
+    assert "form-error-summary" not in html  # no banner: the fields themselves carry the errors
+    assert html.count("ipt-field-box is-error") == 4  # email, last name, phone, confirm password
+    assert html.count('<p class="ipt-field-error">') == 4
+    assert 'value="not-an-email"' in html and 'value="Amina"' in html and 'value="0712345678"' in html
+    assert re.search(r'id="id_accept_terms"[^>]*\schecked', html)  # the ticked box survives
+    assert PW not in html  # passwords are never echoed back

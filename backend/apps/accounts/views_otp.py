@@ -1,12 +1,13 @@
 """OTP screens: email verification after registration, and password-recovery code entry."""
 
+from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
 from apps.accounts import otp
 from apps.accounts.forms import OtpCodeForm, RecoveryMethodForm
 from apps.accounts.models import OtpChannel, OtpPurpose, User
-from apps.core.rate_limit import token_bucket
+from apps.core.rate_limit import consume, token_bucket
 
 VERIFY_USER_KEY = "otp_register_user_id"
 RESET_EMAIL_KEY = "pwd_reset_email"
@@ -32,6 +33,54 @@ def begin_email_verification(request, user):
     return redirect("verify-email")
 
 
+DECOY_VERIFY = "decoy"
+
+
+def begin_decoy_verification(request):
+    """An existing address was 'registered': mirror the real flow without ever issuing a code."""
+    request.session[VERIFY_USER_KEY] = DECOY_VERIFY
+    return redirect("verify-email")
+
+
+def _decoy_verify_email(request):
+    from apps.accounts.views import DECOY_EMAIL_SESSION_KEY
+
+    email = request.session.get(DECOY_EMAIL_SESSION_KEY)
+    if not email:
+        request.session.pop(VERIFY_USER_KEY, None)
+        return redirect("login")
+    form = OtpCodeForm(request.POST or None)
+    if request.method == "POST":
+        if request.POST.get("action") == "resend":
+            # Same send limits and messages as a real code, so the limits can't tell the two apart.
+            sent = True
+            if getattr(settings, "RATE_LIMIT_ENABLED", True):
+                rl = consume("otp-send", f"decoy:{email}", otp.OTP_SEND_CAPACITY, otp.OTP_SEND_REFILL_PER_SECOND)
+                sent = rl.allowed
+                result = otp.SendResult(sent, retry_after=0 if sent else max(1, int(rl.retry_after)))
+            else:
+                result = otp.SendResult(True)
+            if sent:
+                request.session["decoy_attempts"] = 0
+            _notify_send_result(request, result)
+            return redirect("verify-email")
+        if form.is_valid():
+            attempts = request.session.get("decoy_attempts", 0) + 1
+            request.session["decoy_attempts"] = attempts
+            # A real code locks after 5 wrong guesses; mirror that.
+            form.add_error("code", _INVALID_MSG if attempts <= otp.OTP_MAX_ATTEMPTS else _EXPIRED_MSG)
+    return render(
+        request,
+        "registration/otp_verify.html",
+        {
+            "form": form,
+            "heading": "Verify your email",
+            "intro": f"We sent a 6-digit code to {_mask_email(email)}. It expires in 5 minutes.",
+            "submit_label": "Verify and continue",
+        },
+    )
+
+
 def _notify_send_result(request, result):
     if result.sent:
         messages.success(request, "A new code has been sent.")
@@ -47,6 +96,8 @@ def _notify_send_result(request, result):
 def verify_email(request):
     from apps.accounts.views import _start_session
 
+    if request.session.get(VERIFY_USER_KEY) == DECOY_VERIFY:
+        return _decoy_verify_email(request)
     user = User.objects.filter(pk=request.session.get(VERIFY_USER_KEY), is_active=True).first()
     if user is None:
         return redirect("login")

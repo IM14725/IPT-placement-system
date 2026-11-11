@@ -45,12 +45,7 @@
               <p class="text-body-md text-on-surface-variant">Set the standard processing fee required for student applications.</p>
             </div>
             <div class="flex items-center gap-sm max-w-sm">
-              <div class="relative w-full">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span class="text-on-surface-variant text-body-md">TZS</span>
-                </div>
-                <input name="app_fee_amount" class="w-full bg-surface-bright rounded-lg py-2 pl-12 pr-4 text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-shadow ring-1 ring-outline-variant" type="number" value="{{ settings.app_fee_amount.value_number|default:15000 }}">
-              </div>
+              <div class="ipt-field-box w-full"><span class="ipt-field-prefix">TZS</span><input name="app_fee_amount" type="number" value="{{ settings.app_fee_amount.value_number|default:15000 }}"></div>
             </div>
           </div>
           <div class="h-px w-full bg-surface-variant"></div>
@@ -92,11 +87,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-md mt-xs">
               <div class="flex flex-col gap-xs">
                 <label class="text-metadata font-semibold text-on-surface">Max Applications Per Student</label>
-                <input name="max_applications_per_student" class="w-full bg-surface-bright rounded-lg px-4 py-2 text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-shadow ring-1 ring-outline-variant" type="number" value="{{ settings.max_applications_per_student.value_number|default:3 }}">
+                <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">tag</span></span><input name="max_applications_per_student" type="number" value="{{ settings.max_applications_per_student.value_number|default:3 }}"></div>
               </div>
               <div class="flex flex-col gap-xs">
                 <label class="text-metadata font-semibold text-on-surface">Default Slot Applicant Limit</label>
-                <input name="default_slot_limit" class="w-full bg-surface-bright rounded-lg px-4 py-2 text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-shadow ring-1 ring-outline-variant" type="number" value="{{ settings.default_slot_limit.value_number|default:50 }}">
+                <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">tag</span></span><input name="default_slot_limit" type="number" value="{{ settings.default_slot_limit.value_number|default:50 }}"></div>
                 <span class="text-metadata text-on-surface-variant">Auto-closes slots when reached.</span>
               </div>
             </div>
@@ -117,59 +112,24 @@
               </div>
               <input type="checkbox" name="sms_enabled" class="w-11 h-6 rounded-full accent-[#3525cd]" {% if settings.sms_enabled.value_bool %}checked{% endif %}>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-md mt-xs">
-              <div class="flex flex-col gap-xs">
-                <label class="text-metadata font-semibold text-on-surface">API Endpoint URL</label>
-                <input name="sms_api_endpoint" class="w-full bg-surface-bright rounded-lg px-4 py-2 text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-shadow ring-1 ring-outline-variant" type="text" value="{{ settings.sms_api_endpoint.value_text|default:'https://api.tz-sms-provider.com/v1/send' }}">
-              </div>
-              <div class="flex flex-col gap-xs">
-                <label class="text-metadata font-semibold text-on-surface">API Key</label>
-                <input name="sms_api_key" class="w-full bg-surface-bright rounded-lg px-4 py-2 text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-shadow ring-1 ring-outline-variant" type="password" value="" autocomplete="new-password" placeholder="{% if settings.sms_api_key.value_text %}•••••••• (configured — enter new key to replace){% else %}Enter API key{% endif %}">
-              </div>
-            </div>
+            <p class="font-metadata text-metadata text-on-surface-variant flex items-center gap-xs"><span class="material-symbols-outlined text-[16px]">lock</span>The SMS gateway address and key are managed on the server and are not shown or editable here.</p>
           </div>
           <div class="h-px w-full bg-surface-variant"></div>
           <div class="p-md flex flex-col gap-sm">
             <div>
-              <h3 class="text-body-lg font-semibold text-on-surface">System Email Templates</h3>
-              <p class="text-body-md text-on-surface-variant">Manage the content of automated emails sent to users.</p>
+              <h3 class="text-body-lg font-semibold text-on-surface">Message Templates</h3>
+              <p class="text-body-md text-on-surface-variant">Manage the content of the automated emails and SMS sent to users.</p>
             </div>
             <div class="flex flex-col gap-2 mt-xs">
-              <a href="{% url 'platform-templates' %}?key=welcome_email" class="flex items-center justify-between p-sm rounded-lg bg-surface-bright ring-1 ring-surface-variant hover:ring-primary transition-all">
+              <a href="{% url 'platform-templates' %}" class="flex items-center justify-between p-sm rounded-lg bg-surface-bright ring-1 ring-surface-variant hover:ring-primary transition-all group">
                 <div class="flex items-center gap-sm">
-                  <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-primary">waving_hand</span>
-                  </div>
+                  <span class="material-symbols-outlined text-primary">mail</span>
                   <div class="flex flex-col">
-                    <span class="text-body-md font-semibold text-on-surface">Welcome to IPT Marketplace</span>
-                    <span class="text-metadata text-on-surface-variant">Sent upon successful registration.</span>
+                    <span class="text-body-md font-semibold text-on-surface">Email and SMS message templates</span>
+                    <span class="text-metadata text-on-surface-variant">Payment receipt, application submitted and acceptance messages.</span>
                   </div>
                 </div>
-                <span class="px-sm py-1 rounded-md text-primary font-semibold text-metadata hover:bg-primary/10 transition-colors">Edit</span>
-              </a>
-              <a href="{% url 'platform-templates' %}?key=receipt_email" class="flex items-center justify-between p-sm rounded-lg bg-surface-bright ring-1 ring-surface-variant hover:ring-primary transition-all">
-                <div class="flex items-center gap-sm">
-                  <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-primary">receipt_long</span>
-                  </div>
-                  <div class="flex flex-col">
-                    <span class="text-body-md font-semibold text-on-surface">Payment Received Confirmation</span>
-                    <span class="text-metadata text-on-surface-variant">Sent when application fee is verified.</span>
-                  </div>
-                </div>
-                <span class="px-sm py-1 rounded-md text-primary font-semibold text-metadata hover:bg-primary/10 transition-colors">Edit</span>
-              </a>
-              <a href="{% url 'platform-templates' %}?key=verification_rejected_email" class="flex items-center justify-between p-sm rounded-lg bg-surface-bright ring-1 ring-surface-variant hover:ring-primary transition-all">
-                <div class="flex items-center gap-sm">
-                  <div class="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-error">gpp_bad</span>
-                  </div>
-                  <div class="flex flex-col">
-                    <span class="text-body-md font-semibold text-on-surface">Verification Rejected</span>
-                    <span class="text-metadata text-on-surface-variant">Sent when submitted documents fail checks.</span>
-                  </div>
-                </div>
-                <span class="px-sm py-1 rounded-md text-primary font-semibold text-metadata hover:bg-primary/10 transition-colors">Edit</span>
+                <span class="px-sm py-1 rounded-md text-primary font-semibold text-metadata group-hover:bg-primary/10 transition-colors">Manage</span>
               </a>
             </div>
           </div>

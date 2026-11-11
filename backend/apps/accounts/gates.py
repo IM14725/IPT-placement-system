@@ -13,6 +13,7 @@ from apps.accounts.models import RecoveryCode
 ALWAYS_ALLOWED = (
     "/auth/logout/",
     "/auth/session-status/",
+    "/auth/session-extend/",
     "/static/",
     "/i18n/",
 )

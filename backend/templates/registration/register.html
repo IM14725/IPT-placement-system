@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load i18n static %}
-{% block title %}Create Account{% endblock %}
+{% block title %}{% trans "Create Account" %}{% endblock %}
+{% block robots %}index, follow{% endblock %}
+{% block meta_description %}{% trans "Create a free IPT Marketplace account as a student or an organization." %}{% endblock %}
 {% block content %}
 <div class="w-full max-w-[1080px] mx-auto my-md auth-card bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden flex flex-col lg:flex-row min-h-[640px]">
   <!-- Brand panel -->
@@ -14,7 +16,7 @@
       </div>
       <div class="flex flex-col gap-sm">
         <h2 class="font-display text-display leading-tight tracking-tight">
-          Join the marketplace for <span class="text-secondary-fixed">real-world training.</span>
+          {% blocktrans %}Join the marketplace for <span class="text-secondary-fixed">real-world training.</span>{% endblocktrans %}
         </h2>
         <div class="flex flex-col gap-sm">
           <div class="flex items-center gap-sm text-on-secondary/90">
@@ -38,7 +40,7 @@
         </div>
       </div>
     </div>
-    <span class="relative z-10 font-metadata text-metadata text-on-secondary/60">&copy; {% now "Y" %} IPT Marketplace. Designed by semauya.</span>
+    <span class="relative z-10 font-metadata text-metadata text-on-secondary/60">&copy; {% now "Y" %} IPT Marketplace. {% trans "Designed by semauya." %}</span>
   </div>
 
   <!-- Form panel -->
@@ -58,8 +60,10 @@
         <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Join the marketplace as a student or organization." %}</p>
       </div>
 
-       <form method="post" class="flex flex-col gap-md" novalidate data-loading-form>
+       <form method="post" class="flex flex-col gap-md" novalidate data-loading-form{% if preselected_role %} data-preselected="1"{% endif %}>
         {% csrf_token %}
+        <div style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true">{{ form.website }}</div>
+        {{ form.form_ts }}
         {% if form.non_field_errors %}
           <div class="rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-body-md text-on-error-container flex items-start gap-xs">
             <span class="material-symbols-outlined text-[18px] mt-px">error</span>
@@ -67,6 +71,28 @@
           </div>
         {% endif %}
 
+        <!-- Wizard progress -->
+        <div class="flex flex-col gap-xs" data-wiz-progress>
+          <ol class="flex items-center">
+            <li data-wiz-dot="1" class="flex items-center flex-1 gap-xs min-w-0">
+              <span data-dot class="w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center font-metadata text-metadata font-bold">1</span>
+              <span data-dot-label class="hidden sm:inline font-metadata text-metadata truncate">{% trans "Role" %}</span>
+              <span data-dot-line class="flex-1 h-0.5 mx-xs bg-outline-variant"></span>
+            </li>
+            <li data-wiz-dot="2" class="flex items-center flex-1 gap-xs min-w-0">
+              <span data-dot class="w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center font-metadata text-metadata font-bold">2</span>
+              <span data-dot-label class="hidden sm:inline font-metadata text-metadata truncate">{% trans "Details" %}</span>
+              <span data-dot-line class="flex-1 h-0.5 mx-xs bg-outline-variant"></span>
+            </li>
+            <li data-wiz-dot="3" class="flex items-center gap-xs min-w-0">
+              <span data-dot class="w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center font-metadata text-metadata font-bold">3</span>
+              <span data-dot-label class="hidden sm:inline font-metadata text-metadata truncate">{% trans "Password" %}</span>
+            </li>
+          </ol>
+          <p class="font-metadata text-metadata text-on-surface-variant" data-wiz-status aria-live="polite"></p>
+        </div>
+
+        <div data-step="1" class="flex flex-col gap-md">
         <!-- Role selector cards -->
         <div class="flex flex-col gap-xs">
           <span class="font-body-md text-body-md font-semibold text-on-surface">{% trans "I am a..." %}</span>
@@ -75,7 +101,7 @@
               <label class="relative cursor-pointer">
                 {{ radio.tag }}
                 <span class="flex flex-col items-center gap-xs p-md rounded-xl border-2 border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:border-primary/50 transition-all peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:text-primary">
-                  <span class="material-symbols-outlined text-[28px]">{% if radio.choice_label == 'Student' %}school{% else %}business_center{% endif %}</span>
+                  <span class="material-symbols-outlined text-[28px]">{% if radio.data.value == 'STUDENT' %}school{% else %}business_center{% endif %}</span>
                   <span class="font-body-md text-body-md font-semibold">{{ radio.choice_label }}</span>
                 </span>
               </label>
@@ -84,6 +110,14 @@
           {% if form.role.errors %}<p class="font-metadata text-metadata text-error">{{ form.role.errors.0 }}</p>{% endif %}
         </div>
 
+          <div class="flex gap-sm mt-xs" data-wiz-nav><button type="button" data-wiz-next class="flex-1 bg-secondary text-on-secondary font-body-lg text-body-lg font-medium py-3 rounded-lg shadow-md hover:shadow-lg hover:bg-secondary-container transition-all flex items-center justify-center gap-xs"><span>{% trans "Continue" %}</span><span class="material-symbols-outlined text-[20px]">arrow_forward</span></button></div>
+        </div>
+
+        <div data-step="2" class="hidden flex flex-col gap-md">
+          <p class="flex items-center justify-between gap-sm rounded-lg bg-surface-container px-sm py-xs font-body-md text-body-md text-on-surface-variant">
+            <span>{% trans "Registering as" %} <strong class="text-on-surface" data-role-label></strong></span>
+            <button type="button" data-wiz-back class="text-primary font-semibold hover:underline">{% trans "Change" %}</button>
+          </p>
         <div class="flex flex-col gap-xs">
           <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.email.id_for_label }}">{% trans "Email address" %}</label>
           <div class="ipt-field-box {% if form.email.errors %}is-error{% endif %}">
@@ -139,6 +173,7 @@
               {{ form.organization_email }}
             </div>
             <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "The organization's contact identity. You sign in with your own personal email below." %}</p>
+            <p id="org-email-free-note" class="ipt-field-desc hidden" style="color:#a16207"><span class="material-symbols-outlined">warning</span>{% trans "Use your company email domain if you have one. Gmail and similar addresses are accepted, but we check those organizations more carefully." %}</p>
             {% if form.organization_email.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.organization_email.errors.0 }}</p>{% endif %}
           </div>
           <div class="flex flex-col gap-xs">
@@ -148,6 +183,24 @@
               {{ form.organization_phone }}
             </div>
             {% if form.organization_phone.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.organization_phone.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.brela_number.id_for_label }}">{% trans "BRELA registration number" %} <span class="text-on-surface-variant font-normal">({% trans "optional" %})</span></label>
+            <div class="ipt-field-box {% if form.brela_number.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">app_registration</span></span>
+              {{ form.brela_number }}
+            </div>
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Helps us verify your organization faster. You can also add it later in your profile." %}</p>
+            {% if form.brela_number.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.brela_number.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.tin.id_for_label }}">{% trans "TIN (Taxpayer Identification Number)" %} <span class="text-on-surface-variant font-normal">({% trans "optional" %})</span></label>
+            <div class="ipt-field-box {% if form.tin.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">receipt_long</span></span>
+              {{ form.tin }}
+            </div>
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "9 digits from TRA, for example 123-456-789." %}</p>
+            {% if form.tin.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.tin.errors.0 }}</p>{% endif %}
           </div>
           <div class="flex flex-col gap-xs">
             <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.position.id_for_label }}">{% trans "Your position in the organization" %}</label>
@@ -166,18 +219,22 @@
             <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">call</span></span>
             {{ form.phone }}
           </div>
-          <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Optional - use 2556 or 2557 followed by 8 digits, e.g. 255712345678." %}</p>
+          <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Optional. Type it the way you dial it, e.g. 0712 345 678." %}</p>
           {% if form.phone.errors %}
             <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.phone.errors.0 }}</p>
           {% endif %}
         </div>
 
+          <div class="flex gap-sm mt-xs" data-wiz-nav><button type="button" data-wiz-back class="px-md py-3 rounded-lg border border-outline-variant text-on-surface font-body-md font-semibold hover:bg-surface-container transition-colors">{% trans "Back" %}</button><button type="button" data-wiz-next class="flex-1 bg-secondary text-on-secondary font-body-lg text-body-lg font-medium py-3 rounded-lg shadow-md hover:shadow-lg hover:bg-secondary-container transition-all flex items-center justify-center gap-xs"><span>{% trans "Continue" %}</span><span class="material-symbols-outlined text-[20px]">arrow_forward</span></button></div>
+        </div>
+
+        <div data-step="3" class="hidden flex flex-col gap-md">
         <div class="flex flex-col gap-xs">
           <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.password1.id_for_label }}">{% trans "Password" %}</label>
           <div class="ipt-field-box {% if form.password1.errors %}is-error{% endif %}">
             <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span>
             {{ form.password1 }}
-            <button type="button" class="ipt-field-action" onclick="togglePassword(this, '{{ form.password1.id_for_label }}')" aria-label="Show password">
+            <button type="button" class="ipt-field-action" onclick="togglePassword(this, '{{ form.password1.id_for_label }}')" aria-label="{% trans "Show password" %}">
               <span class="material-symbols-outlined text-[20px]" data-icon="eye">visibility</span>
             </button>
           </div>
@@ -194,7 +251,7 @@
         </div>
 
         <div class="flex flex-col gap-xs">
-          <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.password2.id_for_label }}">Confirm password</label>
+          <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.password2.id_for_label }}">{% trans "Confirm password" %}</label>
           <div class="ipt-field-box {% if form.password2.errors %}is-error{% endif %}">
             <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span>
             {{ form.password2 }}
@@ -213,7 +270,7 @@
                       transition-all duration-200 hover:border-primary/40 has-[:checked]:border-primary has-[:checked]:bg-primary/5">
           <div class="relative flex items-center justify-center shrink-0 mt-0.5">
             <input type="checkbox" id="id_accept_terms" name="accept_terms"
-                   class="peer sr-only" autocomplete="off">
+                   class="peer sr-only" autocomplete="off"{% if accept_terms %} checked{% endif %}>
             <span class="w-5 h-5 rounded border-2 border-outline-variant bg-surface-container-lowest
                          peer-checked:border-primary peer-checked:bg-primary
                          transition-all duration-150"></span>
@@ -249,6 +306,8 @@
           <span data-label>{% trans "Create Account" %}</span>
           <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
         </button>
+        <button type="button" data-wiz-back class="w-full py-2 rounded-lg text-on-surface-variant font-body-md font-semibold hover:bg-surface-container transition-colors">{% trans "Back" %}</button>
+        </div>
       </form>
 
       <div class="flex items-center justify-center gap-2 text-on-surface-variant/70">
@@ -261,6 +320,22 @@
 {% endblock %}
 {% block scripts %}
 <script>
+  const RI = {
+    weak: "{% filter escapejs %}{% trans 'Weak' %}{% endfilter %}",
+    fair: "{% filter escapejs %}{% trans 'Fair' %}{% endfilter %}",
+    good: "{% filter escapejs %}{% trans 'Good' %}{% endfilter %}",
+    strong: "{% filter escapejs %}{% trans 'Strong' %}{% endfilter %}",
+    stepOf: "{% filter escapejs %}{% trans 'Step __N__ of 3' %}{% endfilter %}",
+    pickRole: "{% filter escapejs %}{% trans 'Choose whether you are a student or an organization.' %}{% endfilter %}",
+    required: "{% filter escapejs %}{% trans 'This field is required.' %}{% endfilter %}",
+    email: "{% filter escapejs %}{% trans 'Enter a valid email address.' %}{% endfilter %}",
+    phoneNeeded: "{% filter escapejs %}{% trans 'Your own phone number is required.' %}{% endfilter %}",
+    orgPhoneNeeded: "{% filter escapejs %}{% trans 'The organization phone number is required.' %}{% endfilter %}",
+    pwShort: "{% filter escapejs %}{% trans 'Use at least 8 characters.' %}{% endfilter %}",
+    pwMismatch: "{% filter escapejs %}{% trans 'Passwords do not match.' %}{% endfilter %}",
+    tin: "{% filter escapejs %}{% trans 'A TIN has 9 digits, for example 123-456-789.' %}{% endfilter %}"
+  };
+
   function togglePassword(btn, id) {
     const input = document.getElementById(id);
     const icon = btn.querySelector('[data-icon]');
@@ -268,68 +343,232 @@
     input.type = show ? "text" : "password";
     icon.textContent = show ? "visibility_off" : "visibility";
   }
-  const personNameEl = document.querySelector('[data-person-name]');
-  const organizationNameEl = document.querySelector('[data-organization-name]');
-  const phoneSuffix = document.querySelector('[data-phone-suffix]');
-  function syncNameFields() {
-    const isOrg = document.querySelector('input[name="role"]:checked')?.value === 'ORGANIZATION';
-    if (organizationNameEl) {
-      organizationNameEl.style.display = isOrg ? '' : 'none';
+
+
+  // ── 3-step wizard (browser-side checks per step; the server still validates everything on submit) ──
+  function initWizard(form) {
+    const steps = Array.from(form.querySelectorAll('[data-step]'));
+    if (!steps.length) return;
+    const status = form.querySelector('[data-wiz-status]');
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    let current = 1;
+
+    function isOrg() { return form.querySelector('input[name="role"]:checked')?.value === 'ORGANIZATION'; }
+    function val(name) { return (form.querySelector('[name="' + name + '"]')?.value || '').trim(); }
+    function visible(name) { return form.querySelector('#id_' + name); }
+
+    function clearError(input) {
+      const box = input.closest('.ipt-field-box') || input.parentElement;
+      box.classList.remove('is-error');
+      input.removeAttribute('aria-invalid');
+      const wrap = box.parentElement;
+      wrap.querySelectorAll('[data-wiz-error]').forEach(el => el.remove());
     }
-    document.querySelectorAll('[data-organization-only]').forEach(el => { el.style.display = isOrg ? '' : 'none'; });
-    phoneSuffix.textContent = isOrg ? '(your own number)' : '';
-  }
-  document.querySelectorAll('input[name="role"]').forEach(r => r.addEventListener('change', syncNameFields));
-  syncNameFields();
-  const pwInput = document.getElementById('{{ form.password1.id_for_label }}');
-  const meter = document.getElementById('pw-meter');
-  const bar = document.getElementById('pw-meter-bar');
-  const label = document.getElementById('pw-meter-label');
-  function ratePassword() {
-    const v = pwInput.value;
-    if (!v) { meter.style.display = 'none'; return; }
-    meter.style.display = 'flex';
-    let score = 0;
-    if (v.length >= 8) score++;
-    if (v.length >= 12) score++;
-    if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
-    if (/\d/.test(v)) score++;
-    if (/[^A-Za-z0-9]/.test(v)) score++;
-    const levels = [
-      { pct: 20, color: '#ba1a1a', text: 'Weak' },
-      { pct: 40, color: '#ba1a1a', text: 'Weak' },
-      { pct: 60, color: '#f9a825', text: 'Fair' },
-      { pct: 80, color: '#2e7d32', text: 'Good' },
-      { pct: 100, color: '#2e7d32', text: 'Strong' }
-    ];
-    const lvl = levels[Math.min(score, 4)];
-    bar.style.width = lvl.pct + '%';
-    bar.style.backgroundColor = lvl.color;
-    label.textContent = lvl.text;
-    label.style.color = lvl.color;
-  }
-  pwInput.addEventListener('input', ratePassword);
-
-  // ── T&C checkbox ─────────────────────────────────────────────────────────
-  const tcBox  = document.getElementById('id_accept_terms');
-  const tcBtn  = document.getElementById('register-btn');
-  const tcErr  = document.getElementById('tc-error');
-
-  function syncTcBtn() {
-    const checked = tcBox.checked;
-    tcBtn.disabled = !checked;
-    tcErr.classList.toggle('hidden', checked);
-  }
-  tcBox.addEventListener('change', syncTcBtn);
-
-  // Guard: if somehow the form is submitted without the checkbox (e.g. via Enter key)
-  tcBtn.closest('form').addEventListener('submit', function(e) {
-    if (!tcBox.checked) {
-      e.preventDefault();
-      tcErr.classList.remove('hidden');
-      tcBox.closest('label').classList.add('border-error');
-      tcBox.focus();
+    function setError(input, message) {
+      clearError(input);
+      const box = input.closest('.ipt-field-box') || input.parentElement;
+      box.classList.add('is-error');
+      input.setAttribute('aria-invalid', 'true');
+      const p = document.createElement('p');
+      p.className = 'ipt-field-error';
+      p.setAttribute('data-wiz-error', '');
+      p.innerHTML = '<span class="material-symbols-outlined">error</span>';
+      p.appendChild(document.createTextNode(message));
+      box.insertAdjacentElement('afterend', p);
     }
-  });
+    form.addEventListener('input', e => { if (e.target.matches('input')) clearError(e.target); });
+
+    // Returns the first invalid input of a step (after marking every invalid one), or null.
+    function check(step) {
+      let first = null;
+      function bad(input, msg) { if (!input) return; setError(input, msg); first = first || input; }
+      if (step === 1) {
+        const picked = form.querySelector('input[name="role"]:checked');
+        const holder = form.querySelector('#role-cards');
+        holder.parentElement.querySelectorAll('[data-wiz-error]').forEach(el => el.remove());
+        if (!picked) {
+          const p = document.createElement('p');
+          p.className = 'ipt-field-error'; p.setAttribute('data-wiz-error', '');
+          p.innerHTML = '<span class="material-symbols-outlined">error</span>';
+          p.appendChild(document.createTextNode(RI.pickRole));
+          holder.insertAdjacentElement('afterend', p);
+          first = holder.querySelector('input');
+        }
+      } else if (step === 2) {
+        const email = visible('email');
+        if (!emailRe.test(email.value.trim())) bad(email, email.value.trim() ? RI.email : RI.required);
+        ['first_name', 'last_name'].forEach(n => { const el = visible(n); if (!el.value.trim()) bad(el, RI.required); });
+        const phone = visible('phone');
+        const phoneErr = window.IPT.phone ? window.IPT.phone.validate(phone) : '';
+        if (phoneErr) bad(phone, phoneErr);
+        else if (isOrg() && !val('phone')) bad(phone, RI.phoneNeeded);
+        if (isOrg()) {
+          if (!val('organization_name')) bad(visible('organization_name'), RI.required);
+          const oe = visible('organization_email');
+          if (!emailRe.test(oe.value.trim())) bad(oe, oe.value.trim() ? RI.email : RI.required);
+          const op = visible('organization_phone');
+          const opErr = window.IPT.phone ? window.IPT.phone.validate(op) : '';
+          if (opErr) bad(op, opErr); else if (!val('organization_phone')) bad(op, RI.orgPhoneNeeded);
+          if (!val('position')) bad(visible('position'), RI.required);
+          const tin = visible('tin');
+          if (tin.value.trim() && tin.value.replace(/[\s.\-]/g, '').match(/^\d{9}$/) === null) bad(tin, RI.tin);
+        }
+      } else if (step === 3) {
+        const p1 = visible('password1'), p2 = visible('password2');
+        if (p1.value.length < 8) bad(p1, RI.pwShort);
+        if (p2.value !== p1.value) bad(p2, RI.pwMismatch);
+      }
+      return first;
+    }
+
+    const FREE = ['gmail.com','googlemail.com','yahoo.com','yahoo.co.uk','ymail.com','rocketmail.com','hotmail.com','hotmail.co.uk',
+                  'outlook.com','live.com','msn.com','icloud.com','me.com','aol.com','proton.me','protonmail.com','gmx.com','mail.com','zoho.com','yandex.com'];
+    const orgEmail = visible('organization_email'), freeNote = form.querySelector('#org-email-free-note');
+    function syncFreeNote() {
+      if (!orgEmail || !freeNote) return;
+      const domain = orgEmail.value.trim().toLowerCase().split('@')[1] || '';
+      freeNote.classList.toggle('hidden', FREE.indexOf(domain) === -1);
+    }
+    if (orgEmail) { orgEmail.addEventListener('input', syncFreeNote); syncFreeNote(); }
+
+    const reported = {};
+    function report(step) {
+      if (reported[step]) return;
+      reported[step] = true;
+      try {
+        const body = new FormData(); body.append('step', step);
+        fetch('{% url "funnel-event" %}', { method: 'POST', body: body, keepalive: true, credentials: 'omit' }).catch(() => {});
+      } catch (e) { /* analytics must never get in the way */ }
+    }
+
+    function show(n, focus) {
+      current = n;
+      const roleLabel = form.querySelector('[data-role-label]');
+      const picked = form.querySelector('input[name="role"]:checked');
+      if (roleLabel) roleLabel.textContent = picked ? picked.closest('label').querySelector('.font-semibold').textContent.trim() : '';
+      steps.forEach((el, i) => el.classList.toggle('hidden', i + 1 !== n));
+      form.querySelectorAll('[data-wiz-dot]').forEach(li => {
+        const i = Number(li.dataset.wizDot);
+        const dot = li.querySelector('[data-dot]'), line = li.querySelector('[data-dot-line]'), label = li.querySelector('[data-dot-label]');
+        const done = i < n, now = i === n;
+        dot.className = 'w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center font-metadata text-metadata font-bold ' +
+          (done || now ? 'bg-secondary text-on-secondary border-secondary' : 'border-outline-variant text-on-surface-variant');
+        dot.textContent = done ? '✓' : String(i);
+        if (now) dot.setAttribute('aria-current', 'step'); else dot.removeAttribute('aria-current');
+        if (line) line.className = 'flex-1 h-0.5 mx-xs ' + (done ? 'bg-secondary' : 'bg-outline-variant');
+        if (label) label.className = 'hidden sm:inline font-metadata text-metadata truncate ' + (done || now ? 'text-on-surface font-semibold' : 'text-on-surface-variant');
+      });
+      if (status) status.textContent = RI.stepOf.replace('__N__', n);
+      if (focus) {
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const f = steps[n - 1].querySelector('input:not([type="hidden"]):not(.sr-only), select');
+        if (f && n > 1) f.focus({ preventScroll: true });
+      }
+    }
+
+    function next() {
+      const bad = check(current);
+      if (bad) { bad.focus && bad.focus({ preventScroll: false }); return; }
+      show(Math.min(current + 1, steps.length), true);
+      if (current === 2) report('register_step2'); else if (current === 3) report('register_step3');
+    }
+
+    form.querySelectorAll('[data-wiz-next]').forEach(b => b.addEventListener('click', next));
+    form.querySelectorAll('[data-wiz-back]').forEach(b => b.addEventListener('click', () => show(Math.max(current - 1, 1), true)));
+    // Enter inside steps 1-2 means "Continue", never "submit".
+    // Capture phase + stopImmediatePropagation: form-loading.js would otherwise still POST the form.
+    form.addEventListener('submit', e => {
+      if (current < steps.length) { e.preventDefault(); e.stopImmediatePropagation(); next(); return; }
+      const bad = check(3);
+      if (bad) { e.preventDefault(); e.stopImmediatePropagation(); bad.focus(); }
+    }, true);
+
+    // Re-rendered after a server error: open the first step that has a problem.
+    let start = 1;
+    for (let i = 0; i < steps.length; i++) { if (steps[i].querySelector('.is-error')) { start = i + 1; break; } }
+    // Arrived from "I'm a student / I'm an organization": the role is already chosen, so begin at step 2.
+    if (start === 1 && form.dataset.preselected && form.querySelector('input[name="role"]:checked')) {
+      show(2, false);
+      report('register_step2');
+      return;
+    }
+    show(start, false);
+  }
+
+  // Wires up whichever <form> is on the page. Called on load and again each time
+  // form-loading.js swaps in a re-rendered form (its elements are brand new).
+  function initRegisterForm(form) {
+    if (!form) return;
+    const organizationNameEl = form.querySelector('[data-organization-name]');
+    const phoneSuffix = form.querySelector('[data-phone-suffix]');
+    function syncNameFields() {
+      const isOrg = form.querySelector('input[name="role"]:checked')?.value === 'ORGANIZATION';
+      if (organizationNameEl) organizationNameEl.style.display = isOrg ? '' : 'none';
+      form.querySelectorAll('[data-organization-only]').forEach(el => { el.style.display = isOrg ? '' : 'none'; });
+      if (phoneSuffix) phoneSuffix.textContent = isOrg ? '(your own number)' : '';
+    }
+    form.querySelectorAll('input[name="role"]').forEach(r => r.addEventListener('change', syncNameFields));
+    syncNameFields();
+    initWizard(form);
+
+    const pwInput = form.querySelector('#{{ form.password1.id_for_label }}');
+    const meter = form.querySelector('#pw-meter');
+    const bar = form.querySelector('#pw-meter-bar');
+    const label = form.querySelector('#pw-meter-label');
+    function ratePassword() {
+      const v = pwInput.value;
+      if (!v) { meter.style.display = 'none'; return; }
+      meter.style.display = 'flex';
+      let score = 0;
+      if (v.length >= 8) score++;
+      if (v.length >= 12) score++;
+      if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+      if (/\d/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+      const levels = [
+        { pct: 20, color: '#ba1a1a', text: RI.weak },
+        { pct: 40, color: '#ba1a1a', text: RI.weak },
+        { pct: 60, color: '#f9a825', text: RI.fair },
+        { pct: 80, color: '#2e7d32', text: RI.good },
+        { pct: 100, color: '#2e7d32', text: RI.strong }
+      ];
+      const lvl = levels[Math.min(score, 4)];
+      bar.style.width = lvl.pct + '%';
+      bar.style.backgroundColor = lvl.color;
+      label.textContent = lvl.text;
+      label.style.color = lvl.color;
+    }
+    pwInput.addEventListener('input', ratePassword);
+
+    // ── T&C checkbox ───────────────────────────────────────────────────────
+    const tcBox = form.querySelector('#id_accept_terms');
+    const tcBtn = form.querySelector('#register-btn');
+    const tcErr = form.querySelector('#tc-error');
+    function syncTcBtn() {
+      tcBtn.disabled = !tcBox.checked;
+      tcErr.classList.toggle('hidden', tcBox.checked);
+    }
+    tcBox.addEventListener('change', syncTcBtn);
+    syncTcBtn();
+
+    // Guard: if somehow the form is submitted without the checkbox (e.g. via Enter key)
+    form.addEventListener('submit', function (e) {
+      if (!tcBox.checked) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        tcErr.classList.remove('hidden');
+        tcBox.closest('label').classList.add('border-error');
+        tcBox.focus();
+      }
+    }, true);
+
+    // Flag invalid inputs for assistive tech, then bring the first one into view.
+    form.querySelectorAll('.is-error input').forEach(el => el.setAttribute('aria-invalid', 'true'));
+    const firstBad = form.querySelector('.is-error');
+    if (firstBad) firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  initRegisterForm(document.querySelector('form[data-loading-form]'));
+  document.addEventListener('ipt:form-swapped', e => initRegisterForm(e.detail.form));
 </script>
 {% endblock %}

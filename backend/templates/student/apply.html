@@ -20,7 +20,7 @@
           {{ slot.available_count }} available
         </span>
       </div>
-      <div class="grid grid-cols-2 gap-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-sm">
         <div class="flex items-center gap-xs font-body-md text-on-surface-variant">
           <span class="material-symbols-outlined text-[18px] text-outline">location_on</span>
           <span>{{ slot.district }} · {{ slot.district.region }}</span>
@@ -30,18 +30,18 @@
           <span>{{ slot.role_type }}{% if slot.level %} · Year {{ slot.level }}{% endif %}</span>
         </div>
         {% if slot.department %}
-        <div class="flex items-center gap-xs font-body-md text-on-surface-variant col-span-2">
+        <div class="flex items-center gap-xs font-body-md text-on-surface-variant sm:col-span-2">
           <span class="material-symbols-outlined text-[18px] text-outline">school</span>
           <span>Dept: {{ slot.department }}</span>
         </div>
         {% endif %}
         {% if slot.application_deadline %}
-        <div class="flex items-center gap-xs font-body-md col-span-2 {% if slot.deadline_passed %}text-error{% else %}text-on-surface-variant{% endif %}">
+        <div class="flex items-center gap-xs font-body-md sm:col-span-2 {% if slot.deadline_passed %}text-error{% else %}text-on-surface-variant{% endif %}">
           <span class="material-symbols-outlined text-[18px]">event</span>
           <span>{% if slot.deadline_passed %}{% trans "Applications closed on" %}{% else %}{% trans "Apply by" %}{% endif %} {{ slot.application_deadline|date:"j M Y, H:i" }}</span>
         </div>
         {% endif %}
-        <div class="flex items-center gap-xs font-body-md text-on-surface-variant col-span-2">
+        <div class="flex items-center gap-xs font-body-md text-on-surface-variant sm:col-span-2">
           <span class="material-symbols-outlined text-[18px] text-[#1b5e20]">payments</span>
           {% if slot.stipend_available %}
             <span class="font-semibold text-[#1b5e20]">TZS {{ slot.stipend_amount }}/month</span>

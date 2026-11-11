@@ -1,0 +1,147 @@
+/* Theme tokens: light (default) + dark. Mirrors the Tailwind palette in base.html.
+   Dark follows the device (prefers-color-scheme) unless the user picks Light/Dark; the
+   choice is stored in localStorage('ipt-theme') and applied as html.dark before first paint. */
+:root {
+  --c-on-tertiary-fixed-variant: 123 47 0;
+  --c-outline: 119 117 135;
+  --c-on-primary-fixed-variant: 51 35 204;
+  --c-on-secondary: 255 255 255;
+  --c-on-primary: 255 255 255;
+  --c-tertiary-fixed: 255 219 204;
+  --c-on-secondary-fixed: 7 0 108;
+  --c-inverse-surface: 46 49 50;
+  --c-inverse-on-surface: 240 241 242;
+  --c-error: 186 26 26;
+  --c-on-surface: 25 28 29;
+  --c-background: 248 249 250;
+  --c-surface-container-lowest: 255 255 255;
+  --c-surface-tint: 77 68 227;
+  --c-secondary: 70 72 212;
+  --c-surface-container-highest: 225 227 228;
+  --c-on-primary-container: 218 215 255;
+  --c-on-error-container: 147 0 10;
+  --c-tertiary: 126 48 0;
+  --c-on-secondary-container: 255 251 255;
+  --c-primary: 53 37 205;
+  --c-on-primary-fixed: 15 0 105;
+  --c-primary-container: 79 70 229;
+  --c-on-error: 255 255 255;
+  --c-tertiary-fixed-dim: 255 182 149;
+  --c-surface-container-low: 243 244 245;
+  --c-surface-bright: 248 249 250;
+  --c-secondary-container: 96 99 238;
+  --c-secondary-fixed-dim: 192 193 255;
+  --c-on-background: 25 28 29;
+  --c-surface-dim: 217 218 219;
+  --c-surface: 248 249 250;
+  --c-primary-fixed: 226 223 255;
+  --c-primary-fixed-dim: 195 192 255;
+  --c-surface-container: 237 238 239;
+  --c-secondary-fixed: 225 224 255;
+  --c-outline-variant: 199 196 216;
+  --c-on-secondary-fixed-variant: 47 46 190;
+  --c-surface-variant: 225 227 228;
+  --c-on-tertiary-fixed: 53 16 0;
+  --c-inverse-primary: 195 192 255;
+  --c-on-tertiary: 255 255 255;
+  --c-on-surface-variant: 70 69 85;
+  --c-on-tertiary-container: 255 210 190;
+  --c-error-container: 255 218 214;
+  --c-surface-container-high: 231 232 233;
+  --c-tertiary-container: 164 65 0;
+  --c-brand: 53 37 205;
+  --c-ok-bg: 232 245 233;
+  --c-ok-fg: 27 94 32;
+  color-scheme: light;
+}
+html.dark {
+  --c-on-tertiary-fixed-variant: 255 182 149;
+  --c-outline: 145 143 161;
+  --c-on-primary-fixed-variant: 195 192 255;
+  --c-on-secondary: 16 0 169;
+  --c-on-primary: 29 0 165;
+  --c-tertiary-fixed: 90 35 0;
+  --c-on-secondary-fixed: 225 224 255;
+  --c-inverse-surface: 225 227 228;
+  --c-inverse-on-surface: 46 49 50;
+  --c-error: 255 180 171;
+  --c-on-surface: 225 227 228;
+  --c-background: 17 19 21;
+  --c-surface-container-lowest: 12 14 16;
+  --c-surface-tint: 195 192 255;
+  --c-secondary: 192 193 255;
+  --c-surface-container-highest: 50 53 55;
+  --c-on-primary-container: 218 215 255;
+  --c-on-error-container: 255 218 214;
+  --c-tertiary: 255 182 149;
+  --c-on-secondary-container: 255 251 255;
+  --c-primary: 195 192 255;
+  --c-on-primary-fixed: 226 223 255;
+  --c-primary-container: 79 70 229;
+  --c-on-error: 105 0 5;
+  --c-tertiary-fixed-dim: 255 182 149;
+  --c-surface-container-low: 25 28 30;
+  --c-surface-bright: 55 57 59;
+  --c-secondary-container: 96 99 238;
+  --c-secondary-fixed-dim: 192 193 255;
+  --c-on-background: 225 227 228;
+  --c-surface-dim: 17 19 21;
+  --c-surface: 17 19 21;
+  --c-primary-fixed: 45 42 110;
+  --c-primary-fixed-dim: 195 192 255;
+  --c-surface-container: 29 32 34;
+  --c-secondary-fixed: 43 42 120;
+  --c-outline-variant: 70 69 85;
+  --c-on-secondary-fixed-variant: 192 193 255;
+  --c-surface-variant: 50 53 55;
+  --c-on-tertiary-fixed: 255 219 204;
+  --c-inverse-primary: 53 37 205;
+  --c-on-tertiary: 87 31 0;
+  --c-on-surface-variant: 199 196 216;
+  --c-on-tertiary-container: 255 210 190;
+  --c-error-container: 147 0 10;
+  --c-surface-container-high: 39 42 44;
+  --c-tertiary-container: 164 65 0;
+  --c-brand: 53 37 205;
+  --c-ok-bg: 25 57 27;
+  --c-ok-fg: 129 201 149;
+  color-scheme: dark;
+}
+
+/* Arbitrary-hex utilities (success greens, warning ambers ...) get dark counterparts. */
+html.dark .bg-\[\#bbf7d0\] { background-color: #163b23 !important; }
+html.dark .bg-\[\#dbeafe\] { background-color: #16263b !important; }
+html.dark .bg-\[\#e8f5e9\] { background-color: #19391b !important; }
+html.dark .bg-\[\#ecfdf5\] { background-color: #163b2a !important; }
+html.dark .bg-\[\#f0fdf4\] { background-color: #163b22 !important; }
+html.dark .bg-\[\#fef08a\] { background-color: #3b3716 !important; }
+html.dark .bg-\[\#fef3c7\] { background-color: #3b3416 !important; }
+html.dark .bg-\[\#fff4e5\] { background-color: #3b2c16 !important; }
+html.dark .bg-\[\#fff8e1\] { background-color: #3b3316 !important; }
+html.dark .border-\[\#a5d6a7\] { border-color: #306932 !important; }
+html.dark .border-\[\#a7f3d0\] { border-color: #2a6f4f !important; }
+html.dark .border-\[\#bbf7d0\] { border-color: #2a6f42 !important; }
+html.dark .border-\[\#c8e6c9\] { border-color: #306932 !important; }
+html.dark .border-\[\#fde047\] { border-color: #6f642a !important; }
+html.dark .hover\:bg-\[\#ffe9cc\]:hover { background-color: #3b2b16 !important; }
+html.dark .ring-\[\#e8f5e9\] { --tw-ring-color: #2e6b33 !important; }
+html.dark .text-\[\#006e1c\] { color: #77f898 !important; }
+html.dark .text-\[\#065F46\] { color: #79f7d3 !important; }
+html.dark .text-\[\#15803d\] { color: #84ebab !important; }
+html.dark .text-\[\#166534\] { color: #8ae5ad !important; }
+html.dark .text-\[\#1b5e20\] { color: #90df96 !important; }
+html.dark .text-\[\#1e40af\] { color: #859dea !important; }
+html.dark .text-\[\#4a3900\] { color: #f8da77 !important; }
+html.dark .text-\[\#6d28d9\] { color: #ad86ea !important; }
+html.dark .text-\[\#854d0e\] { color: #f1bb7e !important; }
+html.dark .text-\[\#92400E\] { color: #f3a97d !important; }
+html.dark .text-\[\#991B1B\] { color: #ea8686 !important; }
+html.dark .text-\[\#a16207\] { color: #f8c377 !important; }
+html.dark .bg-\[\#bbf7d0\]\/30 { background-color: #163b23 !important; }
+html.dark .bg-\[\#dbeafe\]\/40 { background-color: #16263b !important; }
+html.dark .bg-\[\#e8f5e9\]\/50 { background-color: #19391b !important; }
+html.dark .bg-\[\#e8f5e9\]\/60 { background-color: #19391b !important; }
+html.dark .bg-\[\#fef08a\]\/30 { background-color: #3b3716 !important; }
+html.dark .bg-\[\#fef08a\]\/40 { background-color: #3b3716 !important; }
+html.dark img:not(.no-dim) { filter: brightness(.92); }
+html.dark ::selection { background: rgb(var(--c-primary) / .35); }

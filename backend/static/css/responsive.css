@@ -1,0 +1,170 @@
+/* Responsive layout, navigation rail, card tables, print and large-screen rules.
+   Loaded after the Tailwind CDN <style>, so overrides that must beat utilities use !important. */
+
+/* ---------- Base safety net: nothing may push the page wider than the screen ---------- */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { overflow-x: clip; }
+img, video, canvas, iframe { max-width: 100%; }
+img, video { height: auto; }
+main { overflow-wrap: break-word; }
+pre, code { max-width: 100%; overflow-x: auto; }
+#topbar > div {
+  padding-left: max(0.75rem, env(safe-area-inset-left));
+  padding-right: max(0.75rem, env(safe-area-inset-right));
+}
+#app-shell { min-height: calc(100vh - 4rem); }
+
+/* ---------- Navigation: phone drawer (<768px) ---------- */
+#app-sidebar {
+  width: min(70vw, 280px);
+  transform: translateX(-100%);
+  transition: transform 0.2s ease-out, width 0.2s ease-out;
+  overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+body.sb-open #app-sidebar { transform: none; }
+#app-sidebar .side-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#app-sidebar nav { overflow-x: hidden; }
+.side-link { min-height: 44px; }
+
+/* ---------- Navigation: icon rail on tablet/desktop (>=768px), expands on click and pushes content ---------- */
+@media (min-width: 768px) {
+  #app-sidebar { width: 72px; transform: none; }
+  body.sb-open #app-sidebar { width: 256px; }
+  #sidebar-backdrop { display: none !important; }
+  body.has-sidebar #app-shell { padding-left: 72px; transition: padding-left 0.2s ease-out; }
+  body.has-sidebar.sb-open #app-shell { padding-left: 256px; }
+
+  body:not(.sb-open) #app-sidebar .side-label { display: none; }
+  body:not(.sb-open) #app-sidebar .side-link { justify-content: center; padding: 10px 0; gap: 0; }
+  body:not(.sb-open) #app-sidebar .side-heading {
+    height: 1px; padding: 0; margin: 8px 14px; overflow: hidden; font-size: 0;
+    background: rgb(var(--c-outline-variant));
+  }
+  body:not(.sb-open) #app-sidebar > div a { padding-left: 0; padding-right: 0; gap: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #app-sidebar, body.has-sidebar #app-shell { transition: none !important; }
+}
+
+/* ---------- Tables become stacked cards on phones (labels are added by responsive.js) ---------- */
+@media screen and (max-width: 639px) {
+  table.rt, table.rt tbody { display: block; width: 100%; min-width: 0 !important; }
+  table.rt thead {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  table.rt tr {
+    display: block; margin: 0 0 12px; padding: 6px 0; overflow: hidden;
+    border: 1px solid rgb(var(--c-outline-variant)) !important; border-radius: 12px;
+    background: rgb(var(--c-surface-container-lowest));
+  }
+  table.rt td {
+    display: flex !important; align-items: center; justify-content: space-between; gap: 12px;
+    width: auto !important; min-width: 0; padding: 8px 14px !important; border: 0 !important;
+    text-align: right !important; overflow-wrap: anywhere;
+  }
+  table.rt td::before {
+    content: attr(data-label); flex: none; max-width: 45%; text-align: left;
+    font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    color: rgb(var(--c-outline));
+  }
+  table.rt td[data-label=""]::before, table.rt td:not([data-label])::before { display: none; }
+  table.rt td[data-label=""], table.rt td:not([data-label]) { justify-content: flex-end; }
+  table.rt td[colspan] { display: block !important; text-align: center !important; }
+  table.rt td:empty { display: none !important; }
+  /* scroll wrappers are pointless once rows are cards */
+  .overflow-x-auto:has(> table.rt) { overflow: visible; }
+}
+
+/* ---------- Phones: comfortable inputs and type ---------- */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px !important; }
+  .ipt-field-box > input, .ipt-field-box > select, .ipt-field-box > textarea,
+  .ipt-field-box > .ipt-combobox > input { font-size: 16px !important; }
+}
+@media (max-width: 479px) {
+  .text-display { font-size: 28px !important; line-height: 34px !important; }
+  .text-headline-lg { font-size: 24px !important; line-height: 30px !important; }
+  .ipt-field-icon { width: 40px; }
+}
+@media (max-width: 359px) {
+  main { padding-left: 10px !important; padding-right: 10px !important; }
+  .ipt-media-preview { flex-wrap: wrap; }
+}
+@media (pointer: coarse) {
+  button, [role="button"], select, .ipt-field-action { min-height: 40px; }
+}
+
+/* ---------- Large screens / TVs ---------- */
+@media (min-width: 1536px) {
+  [class~="max-w-[1280px]"] { max-width: 1440px !important; }
+}
+@media (min-width: 1920px) {
+  html { zoom: 1.1; }
+  [class~="max-w-[1280px]"] { max-width: 1560px !important; }
+}
+@media (min-width: 2560px) {
+  html { zoom: 1.35; }
+  [class~="max-w-[1280px]"] { max-width: 1680px !important; }
+}
+
+/* ---------- Dark mode fixes for things Tailwind tokens cannot reach ---------- */
+html.dark .ipt-field-box > select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23c7c4d8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
+html.dark #sidebar-backdrop { background: rgba(0, 0, 0, 0.6); }
+
+/* ---------- Print ---------- */
+@media print {
+  @page { margin: 14mm; }
+  html, body { background: #fff !important; color: #000 !important; zoom: 1 !important; }
+  #topbar, #app-sidebar, #sidebar-backdrop, footer, #toast-container, #inactivity-modal, #ipt-form-loading,
+  #tc-banner, #theme-toggle, .no-print, button, [role="dialog"], form[action*="set_language"] { display: none !important; }
+  body.has-sidebar #app-shell, #app-shell { padding-left: 0 !important; min-height: 0; }
+  main { padding: 0 !important; max-width: none !important; }
+  * { box-shadow: none !important; text-shadow: none !important; }
+  .overflow-x-auto, .overflow-auto, .overflow-hidden { overflow: visible !important; }
+  table { width: 100% !important; min-width: 0 !important; border-collapse: collapse; }
+  thead { display: table-header-group; }
+  tr, .break-inside-avoid, section, article { break-inside: avoid; }
+  a { color: inherit !important; text-decoration: none; }
+  a[href^="http"]:not([href*="localhost"])::after { content: " (" attr(href) ")"; font-size: 10px; color: #555; }
+  h1, h2, h3 { break-after: avoid; }
+}
+
+/* ---------- Phone input: fixed +255 prefix (static/js/phone-input.js) ---------- */
+.ipt-phone-prefix {
+  display: flex; align-items: center; flex: none; padding: 0 10px; font-size: 14px; font-weight: 600;
+  color: rgb(var(--c-on-surface-variant)); background: rgb(var(--c-surface-container));
+  border-right: 1px solid rgb(var(--c-outline-variant)); user-select: none;
+}
+.ipt-phone-wrap { display: flex; align-items: stretch; width: 100%; }
+.ipt-phone-wrap > .ipt-phone-prefix { border: 1px solid rgb(var(--c-outline-variant)); border-right: 0; border-radius: 0.5rem 0 0 0.5rem; }
+.ipt-phone-wrap > input { border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; min-width: 0; }
+
+/* ---------- One input style everywhere ----------
+   The icon-chip field (.ipt-field-box, defined in base.html) is the standard. A prefix chip ("+255", "TZS")
+   replaces the icon where the text itself is the hint. Anything that is still a bare control (dynamic JS
+   widgets, third-party markup) falls back to the same box look through :where(), whose zero specificity lets
+   every utility class and the .ipt-field-box rules win. */
+.ipt-field-prefix {
+  display: flex; align-items: center; flex: none; padding: 0 12px; font-size: 14px; font-weight: 600;
+  color: rgb(var(--c-on-surface-variant)); background: rgb(var(--c-surface-container));
+  border-right: 1px solid rgb(var(--c-outline-variant)); user-select: none;
+}
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"]):not([type="file"]):not([type="range"]):not([type="color"]), select, textarea) {
+  border: 1px solid rgb(var(--c-outline-variant)); border-radius: 0.5rem;
+  background-color: rgb(var(--c-surface-container-lowest)); color: rgb(var(--c-on-surface));
+  padding: 10px 12px; font-family: "Inter", sans-serif; font-size: 14px; line-height: 20px;
+}
+:where(input, select, textarea):focus-visible { outline: none; border-color: rgb(var(--c-primary)); box-shadow: 0 0 0 2px rgb(var(--c-primary) / 0.3); }
+:where(input, select, textarea):disabled { opacity: 0.6; cursor: not-allowed; }
+:where(input, textarea)::placeholder { color: rgb(var(--c-outline)); }
+:where(input[type="checkbox"], input[type="radio"]) { accent-color: rgb(var(--c-primary)); width: 1rem; height: 1rem; }
+/* the box draws the focus ring and error state; the control inside must not draw a second one */
+.ipt-field-box > :is(input, select, textarea):focus-visible { box-shadow: none !important; border: none !important; }
+.ipt-field-box > select { cursor: pointer; }
+.ipt-field-box > input[type="date"], .ipt-field-box > input[type="search"] { min-height: 40px; }
+.ipt-field-box.max-w-\[190px\] > select { padding-right: 32px; }
+.ipt-field-box { min-width: 0; }
+.ipt-field-box > textarea { min-height: 80px; }

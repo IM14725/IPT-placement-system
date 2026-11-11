@@ -9,7 +9,7 @@
   <p class="text-metadata text-on-surface-variant text-center break-all">Can't scan? Enter this key manually: <code class="font-mono">{{ secret }}</code></p>
   <form method="post" class="flex flex-col gap-sm">
     {% csrf_token %}
-    <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required placeholder="6-digit code" class="w-full px-sm py-3 rounded-lg border border-outline-variant bg-surface-container-lowest">
+    <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">pin</span></span><input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required placeholder="6-digit code"></div>
     <button class="bg-primary text-on-primary font-semibold py-3 rounded-lg" type="submit">Confirm and enable</button>
   </form>
   <a class="text-center text-primary font-semibold hover:underline" href="{% url 'mfa-settings' %}">Cancel</a>

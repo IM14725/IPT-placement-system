@@ -32,8 +32,8 @@
     dropdown.style.padding = "4px";
     dropdown.style.maxHeight = "240px";
     dropdown.style.overflowY = "auto";
-    dropdown.style.background = "#ffffff";
-    dropdown.style.border = "1px solid #cbd5e1";
+    dropdown.style.background = "rgb(var(--c-surface-container-lowest))";
+    dropdown.style.border = "1px solid rgb(var(--c-outline-variant))";
     dropdown.style.borderRadius = "10px";
     dropdown.style.boxShadow = "0 10px 25px rgba(0,0,0,0.12)";
     dropdown.style.listStyle = "none";
@@ -43,7 +43,7 @@
     var noMatch = document.createElement("li");
     noMatch.textContent = "No matching course found (select university first)";
     noMatch.style.padding = "10px 12px";
-    noMatch.style.color = "#64748b";
+    noMatch.style.color = "rgb(var(--c-on-surface-variant))";
     noMatch.style.fontSize = "14px";
     noMatch.style.display = "none";
 
@@ -110,7 +110,7 @@
         li.style.borderRadius = "8px";
         li.style.cursor = "pointer";
         li.style.fontSize = "14px";
-        li.style.color = "#1e293b";
+        li.style.color = "rgb(var(--c-on-surface))";
         li.setAttribute("role", "option");
         li.addEventListener("mousedown", function (e) {
           e.preventDefault();
@@ -128,11 +128,11 @@
     function setActive(idx) {
       items.forEach(function (li, i) {
         if (i === idx) {
-          li.style.background = "#eef2ff";
-          li.style.color = "#3730a3";
+          li.style.background = "rgb(var(--c-primary-fixed))";
+          li.style.color = "rgb(var(--c-on-primary-fixed-variant))";
         } else {
           li.style.background = "transparent";
-          li.style.color = "#1e293b";
+          li.style.color = "rgb(var(--c-on-surface))";
         }
       });
       activeIndex = idx;

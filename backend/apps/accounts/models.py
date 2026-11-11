@@ -12,7 +12,7 @@ class UserRole(models.TextChoices):
 
 
 # Console modules/capabilities an AdminRole can grant (see core.views.role_management).
-ADMIN_MODULES = ("user_management", "slot_verification", "financial_ledger", "system_metrics")
+ADMIN_MODULES = ("user_management", "slot_verification", "financial_ledger", "system_metrics", "locations")
 ADMIN_CAPS = ("view", "create", "edit", "delete")
 
 

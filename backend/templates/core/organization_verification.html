@@ -39,6 +39,20 @@
             <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Phone</span>
             <span class="font-body-lg text-body-lg text-on-surface">{{ organization.phone|default:organization.user.phone|default:"—" }}</span>
           </div>
+          <div class="flex flex-col gap-xs">
+            <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">BRELA registration number</span>
+            <span class="font-body-lg text-body-lg text-on-surface font-mono">{{ organization.brela_number|default:"— not provided" }}</span>
+          </div>
+          <div class="flex flex-col gap-xs">
+            <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">TIN</span>
+            <span class="font-body-lg text-body-lg text-on-surface font-mono">{{ organization.tin|default:"— not provided" }}</span>
+          </div>
+          {% if organization.official_email_is_free %}
+          <div class="md:col-span-2 rounded-lg bg-[#fff4e5] border-l-2 border-[#f9a825] px-sm py-sm text-body-md text-[#4a3900] flex items-start gap-xs">
+            <span class="material-symbols-outlined text-[18px] mt-px">warning</span>
+            <span>The official organization email is on a free webmail provider. Check the documents carefully.</span>
+          </div>
+          {% endif %}
           <div class="flex flex-col gap-xs md:col-span-2">
             <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Location</span>
             <div class="flex items-start gap-xs">
@@ -121,7 +135,7 @@
           <form method="post" class="flex flex-col gap-base">
             {% csrf_token %}
             <label class="font-body-md text-body-md font-bold text-on-surface" for="review-notes">Internal Notes / Rejection Reason</label>
-            <textarea class="w-full bg-surface border border-outline-variant rounded-lg p-sm font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none placeholder:text-outline-variant" id="review-notes" name="reason" placeholder="Add notes or specify what needs to be re-uploaded..." rows="4"></textarea>
+            <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><textarea id="review-notes" name="reason" placeholder="Add notes or specify what needs to be re-uploaded..." rows="4"></textarea></div>
             <div class="flex flex-col gap-sm mt-sm">
               <button class="w-full py-3 bg-primary text-on-primary rounded-full font-body-md text-body-md font-bold hover:bg-primary/90 hover:shadow-lg transition-all flex items-center justify-center gap-xs" name="decision" value="approve" type="submit">
                 <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>

@@ -26,44 +26,38 @@
     <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none"></div>
     <div class="w-full flex-1 flex flex-col gap-xs relative z-10">
       <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Region" %}</label>
-      <div class="ipt-filter-select">
-        <select id="filter-region" class="w-full h-10 px-sm pr-8 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer">
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">map</span></span><select id="filter-region">
           <option value="">{% trans "All Regions" %}</option>
           {% for r in regions %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}
-        </select>
-        <span class="ipt-filter-caret"><span class="material-symbols-outlined">expand_more</span></span>
-      </div>
+        </select></div>
     </div>
     <div class="w-full flex-1 flex flex-col gap-xs relative z-10">
       <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "District" %}</label>
-      <div class="ipt-filter-select">
-        <select id="filter-district" class="w-full h-10 px-sm pr-8 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">location_on</span></span><select id="filter-district">
           <option value="">{% trans "All Districts" %}</option>
-        </select>
-        <span class="ipt-filter-caret"><span class="material-symbols-outlined">expand_more</span></span>
-      </div>
+        </select></div>
     </div>
     <div class="w-full flex-1 flex flex-col gap-xs relative z-10">
       <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Academic Discipline" %}</label>
-      <input id="filter-department" type="text" placeholder="e.g. Computer Science" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow">
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">work</span></span><input id="filter-department" type="text" placeholder="e.g. Computer Science"></div>
     </div>
     <div class="w-full flex-1 flex flex-col gap-xs relative z-10">
       <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Organization" %}</label>
-      <input id="filter-organization" type="text" placeholder="{% trans 'Search by organization name' %}" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow">
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input id="filter-organization" type="text" placeholder="{% trans 'Search by organization name' %}"></div>
     </div>
       <div class="flex-1 min-w-[200px] flex flex-col gap-xs">
         <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Education Level (TCU)" %}</label>
-        <select id="filter-education-level" name="education_level" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer">
+        <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">school</span></span><select id="filter-education-level" name="education_level">
           <option value="">{% trans "Any Qualification" %}</option>
           {% for value, label in education_levels %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-        </select>
+        </select></div>
       </div>
       <div class="flex-1 min-w-[200px] flex flex-col gap-xs">
         <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Academic Year</label>
-        <select id="filter-academic-year" name="academic_year" class="w-full h-10 px-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow appearance-none cursor-pointer">
+        <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">tag</span></span><select id="filter-academic-year" name="academic_year">
           <option value="">Any Year</option>
           {% for value, label in academic_years %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-        </select>
+        </select></div>
       </div>
   </div>
 

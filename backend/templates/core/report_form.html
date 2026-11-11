@@ -11,15 +11,30 @@
   <form method="post" class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
     {% csrf_token %}
     {% for field in form %}
-      <div class="flex flex-col gap-xs">
-        <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% if field.errors %}<p class="text-error font-metadata text-metadata">{{ field.errors.0 }}</p>{% endif %}
-      </div>
+      {% include "includes/form_field.html" with field=field %}
     {% endfor %}
     <div class="flex justify-end">
       <button class="bg-primary text-on-primary rounded-full px-xl py-3 font-body-lg" type="submit">Send report</button>
     </div>
   </form>
+
+  <section class="flex flex-col gap-sm" aria-labelledby="my-reports-heading">
+    <h2 id="my-reports-heading" class="font-headline-md text-headline-md text-on-surface">Your reports</h2>
+    {% for r in my_reports %}
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-xs">
+        <div class="flex flex-wrap items-start justify-between gap-sm">
+          <p class="font-body-md text-body-md font-semibold text-on-surface">{{ r.subject }}</p>
+          <span class="px-sm py-1 rounded-full text-metadata font-metadata {% if r.status == 'RESOLVED' %}bg-primary/10 text-primary{% elif r.status == 'DISMISSED' %}bg-surface-container text-on-surface-variant{% else %}bg-surface-container text-on-surface{% endif %}">{{ r.get_status_display }}</span>
+        </div>
+        <p class="text-metadata font-metadata text-on-surface-variant">
+          {{ r.get_category_display }} · sent {{ r.created_at|date:"j M Y, H:i" }}
+          {% if r.organization %}· about {{ r.organization.name }}{% endif %}
+          {% if r.handled_at %}· reviewed {{ r.handled_at|date:"j M Y" }}{% endif %}
+        </p>
+      </div>
+    {% empty %}
+      <p class="font-body-md text-body-md text-on-surface-variant">You haven't sent any reports yet.</p>
+    {% endfor %}
+  </section>
 </div>
 {% endblock %}

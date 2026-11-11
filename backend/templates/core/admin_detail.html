@@ -27,7 +27,7 @@
     <h2 class="font-headline-md text-headline-md">Administrative role</h2>
     <p class="text-on-surface-variant">Access follows the role's permission matrix. Changing it signs the administrator out so the new privileges take effect on a fresh session.</p>
     <form method="post" class="flex flex-wrap gap-sm items-end">{% csrf_token %}<input type="hidden" name="action" value="role">
-      <select name="admin_role" class="ipt-select">{% for r in roles %}<option value="{{ r.id }}" {% if person.admin_role_id == r.id %}selected{% endif %}>{{ r.name }}</option>{% endfor %}</select>
+      <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">tag</span></span><select name="admin_role">{% for r in roles %}<option value="{{ r.id }}" {% if person.admin_role_id == r.id %}selected{% endif %}>{{ r.name }}</option>{% endfor %}</select></div>
       <button class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg" type="submit">Change role</button></form>
     <dl class="grid grid-cols-2 sm:grid-cols-4 gap-xs text-metadata">
       {% for module, caps in permissions.items %}<div class="bg-surface-container rounded-lg p-xs"><dt class="font-semibold">{{ module }}</dt><dd>{% for cap, on in caps.items %}{% if on %}{{ cap }} {% endif %}{% endfor %}</dd></div>{% endfor %}
@@ -41,7 +41,7 @@
       <button class="bg-surface-container font-semibold px-md py-2 rounded-lg" type="submit">{% if person.is_recovery_approver %}Remove as recovery approver{% else %}Designate as recovery approver{% endif %}</button></form>
     {% if person.is_active %}
       <form method="post" class="flex flex-wrap gap-sm items-end" onsubmit="return confirm('Suspend this administrator?');">{% csrf_token %}<input type="hidden" name="action" value="suspend">
-        <input name="reason" required placeholder="Reason" class="px-sm py-2 rounded-lg border border-outline-variant"><button class="text-error font-semibold px-md py-2 rounded-lg border border-error/40" type="submit">Suspend</button></form>
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input name="reason" required placeholder="Reason"></div><button class="text-error font-semibold px-md py-2 rounded-lg border border-error/40" type="submit">Suspend</button></form>
     {% else %}
       <form method="post">{% csrf_token %}<input type="hidden" name="action" value="reactivate"><button class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg" type="submit">Reactivate</button></form>
     {% endif %}

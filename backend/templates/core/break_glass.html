@@ -27,7 +27,7 @@
   </div>
   <form method="post" class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-wrap gap-sm items-end">
     {% csrf_token %}<input type="hidden" name="action" value="create">
-    <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Mailbox for the emergency account<input type="email" name="email" required placeholder="breakglass@yourorg.tz" class="px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest"></label>
+    <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Mailbox for the emergency account<div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">mail</span></span><input type="email" name="email" required placeholder="breakglass@yourorg.tz"></div></label>
     <button class="bg-error text-on-error font-semibold px-md py-2 rounded-lg" type="submit">Create emergency account</button>
   </form>
 </div>

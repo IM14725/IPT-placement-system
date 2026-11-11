@@ -1,12 +1,14 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% block title %}{% trans "IPT Marketplace — Student & Organization Matching" %}{% endblock %}
+{% block meta_title %}{% trans "IPT Marketplace — Industrial Practical Training in Tanzania" %}{% endblock %}
+{% block robots %}index, follow{% endblock %}
 {% block content %}
-<div class="flex flex-col gap-lg">
+<div class="flex flex-col gap-xl">
   <!-- Hero Section -->
   <section class="relative flex flex-col items-center justify-center w-full px-md py-xl overflow-hidden min-h-[60vh]">
     <div class="absolute inset-0 z-0 pointer-events-none opacity-30">
-      <svg class="absolute w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+      <svg class="absolute w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100" aria-hidden="true">
         <defs>
           <radialGradient cx="50%" cy="50%" fx="50%" fy="50%" id="heroGlow" r="50%">
             <stop offset="0%" stop-color="#3525cd" stop-opacity="0.2"></stop>
@@ -25,20 +27,183 @@
       <p class="font-body-lg text-body-lg text-on-surface-variant max-w-[600px]">
         {% trans "A secure marketplace for students to find verified IPT slots and organizations to manage talent efficiently." %}
       </p>
-      <div class="flex flex-row gap-md mt-sm">
-        <a href="{% url 'register' %}" class="px-lg py-sm rounded-full bg-primary text-on-primary font-metadata text-metadata uppercase tracking-wider shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-xs">
-          <span>{% trans "Get Started" %}</span>
-          <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+      <div class="flex flex-col sm:flex-row gap-sm sm:gap-md mt-sm w-full sm:w-auto">
+        <a href="{% url 'register' %}?role=student" class="justify-center px-lg py-sm rounded-full bg-primary text-on-primary font-metadata text-metadata uppercase tracking-wider shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-xs">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">school</span>
+          <span>{% trans "I'm a student" %}</span>
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_forward</span>
         </a>
-        <a href="{% url 'login' %}" class="px-lg py-sm rounded-full bg-transparent text-primary font-metadata text-metadata uppercase tracking-wider border-2 border-primary hover:bg-primary/5 transition-colors duration-300">
-          {% trans "Login" %}
+        <a href="{% url 'register' %}?role=organization" class="justify-center px-lg py-sm rounded-full bg-transparent text-primary font-metadata text-metadata uppercase tracking-wider border-2 border-primary hover:bg-primary/5 transition-colors duration-300 flex items-center gap-xs">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">business_center</span>
+          <span>{% trans "I'm an organization" %}</span>
         </a>
+      </div>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% trans "Already registered?" %}
+        <a href="{% url 'login' %}" class="text-primary font-semibold hover:underline">{% trans "Login" %}</a>
+      </p>
+    </div>
+  </section>
+
+  {% if counters %}
+  <!-- Live trust numbers (each counter appears only once it passes its minimum) -->
+  <section class="w-full max-w-container-max mx-auto" aria-label="{% trans 'Platform numbers' %}">
+    <div class="flex flex-wrap justify-center gap-sm sm:gap-md">
+      {% for c in counters %}
+      <div class="flex-1 basis-[140px] sm:basis-[200px] max-w-[320px] bg-surface-container rounded-2xl p-md sm:p-lg flex flex-col items-center text-center gap-xs shadow-sm">
+        <span class="material-symbols-outlined text-primary text-[28px]" aria-hidden="true">{{ c.icon }}</span>
+        <span class="font-display text-headline-lg sm:text-display text-on-surface">{{ c.value }}</span>
+        <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">
+          {% if c.key == "organizations" %}{% trans "Verified organizations" %}
+          {% elif c.key == "slots" %}{% blocktrans with seats=seats %}Open slots · {{ seats }} seats{% endblocktrans %}
+          {% elif c.key == "universities" %}{% trans "Universities" %}
+          {% elif c.key == "students" %}{% trans "Students registered" %}
+          {% else %}{% trans "Regions with openings" %}{% endif %}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if has_open_slots or filtered %}
+  <!-- Search open slots by place (no organization details until the visitor signs in) -->
+  <section class="w-full max-w-container-max mx-auto" aria-labelledby="preview-heading" id="slots">
+    <div class="flex flex-wrap items-end justify-between gap-sm mb-md">
+      <div>
+        <div class="flex items-center gap-sm mb-xs">
+          <div class="w-8 h-[2px] bg-primary"></div>
+          <span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">{% trans "Open now" %}</span>
+        </div>
+        <h2 id="preview-heading" class="font-headline-lg text-headline-lg text-on-surface">{% trans "Find a training slot" %}</h2>
+      </div>
+    </div>
+
+    <form method="get" action="{% url 'home' %}#slots" id="slot-search" class="bg-surface-container rounded-2xl p-md grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-sm items-end"
+          data-districts-url="/api/locations/districts/" data-fragment-url="{% url 'public-slots' %}"
+          data-all-districts="{% trans 'All districts' %}" data-loading-districts="{% trans 'Loading…' %}" data-error="{% trans 'We could not load the slots. Please try again.' %}">
+      <div class="flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="search-region">{% trans "Region" %}</label>
+        <div class="ipt-field-box">
+          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">map</span></span>
+          <select id="search-region" name="region">
+            <option value="">{% trans "All regions" %}</option>
+            {% for r in regions %}<option value="{{ r.id }}"{% if r.id == filters.region %} selected{% endif %}>{{ r.name }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="search-district">{% trans "District" %}</label>
+        <div class="ipt-field-box">
+          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">location_on</span></span>
+          <select id="search-district" name="district"{% if not filters.region %} disabled{% endif %}>
+            <option value="">{% trans "All districts" %}</option>
+            {% for d in districts %}<option value="{{ d.id }}"{% if d.id == filters.district %} selected{% endif %}>{{ d.name }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="search-industry">{% trans "Industry / field" %}</label>
+        <div class="ipt-field-box">
+          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">work</span></span>
+          <input id="search-industry" name="industry" type="search" list="search-industries" maxlength="80" autocomplete="off"
+                 value="{{ filters.industry }}" placeholder="{% trans 'e.g. Technology' %}">
+          <datalist id="search-industries">{% for i in industries %}<option value="{{ i }}">{% endfor %}</datalist>
+        </div>
+      </div>
+      <div class="flex flex-col gap-xs">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="search-level">{% trans "Education level" %}</label>
+        <div class="ipt-field-box">
+          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">school</span></span>
+          <select id="search-level" name="level">
+            <option value="">{% trans "Any level" %}</option>
+            {% for value, label in levels %}<option value="{{ value }}"{% if value == filters.level %} selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="flex gap-xs sm:col-span-2 lg:col-span-1">
+        <button type="submit" class="flex-1 lg:flex-none px-md py-2.5 rounded-lg bg-primary text-on-primary font-body-md font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-xs">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">search</span>{% trans "Search" %}
+        </button>
+        <a href="{% url 'home' %}#slots" id="search-clear" class="px-md py-2.5 rounded-lg border border-outline-variant text-on-surface font-body-md font-semibold hover:bg-surface-container-high transition-colors{% if not filtered %} hidden{% endif %}">{% trans "Clear" %}</a>
+      </div>
+    </form>
+
+    <div id="slot-results" class="mt-md" aria-busy="false">
+      {% include "includes/public_slots.html" %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- How it works -->
+  <section class="w-full max-w-container-max mx-auto" aria-labelledby="how-heading" id="how-it-works">
+    <div class="flex flex-col items-center text-center gap-sm mb-lg">
+      <div class="flex items-center gap-sm">
+        <div class="w-8 h-[2px] bg-primary"></div>
+        <span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">{% trans "How it works" %}</span>
+        <div class="w-8 h-[2px] bg-primary"></div>
+      </div>
+      <h2 id="how-heading" class="font-headline-lg text-headline-lg text-on-surface">{% trans "From sign-up to placement" %}</h2>
+      <div role="tablist" aria-label="{% trans 'Choose your role' %}" class="inline-flex p-1 rounded-full bg-surface-container mt-xs">
+        <button type="button" role="tab" id="tab-student" aria-controls="panel-student" aria-selected="true" data-how-tab="student"
+                class="px-md py-2 rounded-full font-metadata text-metadata font-semibold uppercase tracking-wider transition-colors">{% trans "Students" %}</button>
+        <button type="button" role="tab" id="tab-org" aria-controls="panel-org" aria-selected="false" data-how-tab="org"
+                class="px-md py-2 rounded-full font-metadata text-metadata font-semibold uppercase tracking-wider transition-colors">{% trans "Organizations" %}</button>
+      </div>
+    </div>
+
+    <ol id="panel-student" role="tabpanel" aria-labelledby="tab-student" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-md">
+      {% include "includes/how_step.html" with n=1 icon="person_add" title=_("Create your account") text=_("Register and confirm your email and phone number.") %}
+      {% include "includes/how_step.html" with n=2 icon="badge" title=_("Verify your documents") text=_("Upload your student ID and details so organizations can trust you.") %}
+      {% include "includes/how_step.html" with n=3 icon="search" title=_("Find a slot and apply") text=_("Browse verified training slots by region and field, then apply.") %}
+      {% include "includes/how_step.html" with n=4 icon="payments" title=_("Pay the application fee") text=_("Pay by mobile money within 3 hours to confirm your seat.") %}
+      {% include "includes/how_step.html" with n=5 icon="notifications_active" title=_("Get reviewed and notified") text=_("The organization reviews your application and you are alerted by SMS and email.") %}
+    </ol>
+    <ol id="panel-org" role="tabpanel" aria-labelledby="tab-org" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-md">
+      {% include "includes/how_step.html" with n=1 icon="apartment" title=_("Register your organization") text=_("Create the account and add your official contact details.") %}
+      {% include "includes/how_step.html" with n=2 icon="verified" title=_("Get verified") text=_("Our team reviews your organization so students know you are genuine.") %}
+      {% include "includes/how_step.html" with n=3 icon="work" title=_("Post training slots") text=_("Describe the role, location, level and number of seats you offer.") %}
+      {% include "includes/how_step.html" with n=4 icon="groups" title=_("Review applicants") text=_("See pre-verified students who have completed their application.") %}
+      {% include "includes/how_step.html" with n=5 icon="sms" title=_("Accept and stay in touch") text=_("Confirm your choices and keep in touch through instant alerts.") %}
+    </ol>
+  </section>
+
+  <!-- Application fee -->
+  <section class="w-full max-w-container-max mx-auto" aria-labelledby="fee-heading">
+    <div class="rounded-2xl bg-surface-container p-lg sm:p-xl grid grid-cols-1 lg:grid-cols-2 gap-lg items-center">
+      <div class="flex flex-col gap-sm">
+        <div class="flex items-center gap-sm">
+          <div class="w-8 h-[2px] bg-primary"></div>
+          <span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">{% trans "Simple, transparent fee" %}</span>
+        </div>
+        <h2 id="fee-heading" class="font-headline-lg text-headline-lg text-on-surface">
+          {% blocktrans with fee=fee|floatformat:"0g" %}One application fee: TZS {{ fee }}{% endblocktrans %}
+        </h2>
+        <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          {% trans "Students pay a one-time application fee by mobile money. Your application becomes visible to the organization only after your payment is confirmed." %}
+        </p>
+        <p class="flex items-start gap-xs font-body-md text-body-md text-on-surface-variant">
+          <span class="material-symbols-outlined text-[20px] text-primary shrink-0" aria-hidden="true">timer</span>
+          <span>{% trans "Your seat is held for 3 hours. If payment is not completed in that time, the seat is released to other students." %}</span>
+        </p>
+        <p class="flex items-start gap-xs font-body-md text-body-md text-on-surface-variant">
+          <span class="material-symbols-outlined text-[20px] text-primary shrink-0" aria-hidden="true">gavel</span>
+          <span>{% url 'legal-terms' as terms_url %}{% blocktrans with url=terms_url %}Fees are non-refundable. Read the <a href="{{ url }}#payments" class="text-primary font-semibold hover:underline">payments and refund policy</a> before you apply.{% endblocktrans %}</span>
+        </p>
+      </div>
+      <div class="flex flex-col items-center lg:items-end gap-sm">
+        <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Pay with" %}</span>
+        <ul class="flex flex-wrap justify-center lg:justify-end gap-sm">
+          <li class="px-md py-sm rounded-xl bg-surface-container-lowest border border-outline-variant font-body-md font-semibold text-on-surface">M-Pesa</li>
+          <li class="px-md py-sm rounded-xl bg-surface-container-lowest border border-outline-variant font-body-md font-semibold text-on-surface">Mixx by Yas</li>
+          <li class="px-md py-sm rounded-xl bg-surface-container-lowest border border-outline-variant font-body-md font-semibold text-on-surface">Airtel Money</li>
+        </ul>
       </div>
     </div>
   </section>
 
   <!-- Features Section -->
-  <section class="w-full max-w-container-max mx-auto px-md py-lg">
+  <section class="w-full max-w-container-max mx-auto py-lg">
     <div class="flex items-center gap-sm mb-lg">
       <div class="w-8 h-[2px] bg-primary"></div>
       <span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">{% trans "Platform Features" %}</span>
@@ -50,9 +215,9 @@
           <div class="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-md mb-xs">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span>
           </div>
-          <h3 class="font-headline-md text-headline-md text-on-surface">For Students</h3>
+          <h3 class="font-headline-md text-headline-md text-on-surface">{% trans "For Students" %}</h3>
           <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-            Verify your academic documents, browse available training slots, and secure your placement with one-tap mobile money.
+            {% trans "Verify your academic documents, browse available training slots, and secure your placement with one-tap mobile money." %}
           </p>
         </div>
       </div>
@@ -62,9 +227,9 @@
           <div class="w-12 h-12 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center shadow-md mb-xs">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">business_center</span>
           </div>
-          <h3 class="font-headline-md text-headline-md">For Organizations</h3>
+          <h3 class="font-headline-md text-headline-md">{% trans "For Organizations" %}</h3>
           <p class="font-body-md text-body-md text-on-primary/80 leading-relaxed">
-            Post verified training slots, review applications from pre-verified students, and manage communication via instant SMS alerts.
+            {% trans "Post verified training slots, review applications from pre-verified students, and manage communication via instant SMS alerts." %}
           </p>
         </div>
       </div>
@@ -82,5 +247,100 @@
       </div>
     </div>
   </section>
+
+  <!-- Frequently asked questions -->
+  <section class="w-full max-w-[860px] mx-auto" aria-labelledby="faq-heading" id="faq">
+    <div class="flex flex-col items-center text-center gap-sm mb-lg">
+      <div class="flex items-center gap-sm">
+        <div class="w-8 h-[2px] bg-primary"></div>
+        <span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">{% trans "FAQ" %}</span>
+        <div class="w-8 h-[2px] bg-primary"></div>
+      </div>
+      <h2 id="faq-heading" class="font-headline-lg text-headline-lg text-on-surface">{% trans "Frequently asked questions" %}</h2>
+    </div>
+    <div class="flex flex-col gap-sm">
+      {% include "includes/faq_item.html" with q=_("Who can use IPT Marketplace?") a=_("Students at Tanzanian universities and colleges who are looking for an Industrial Practical Training placement, and organizations that offer training slots.") %}
+      <details class="group bg-surface-container-lowest border border-outline-variant rounded-xl">
+        <summary class="flex items-center justify-between gap-sm cursor-pointer list-none p-md font-body-lg text-body-lg font-semibold text-on-surface">
+          {% trans "Does it cost anything to sign up?" %}
+          <span class="material-symbols-outlined shrink-0 transition-transform group-open:rotate-180" aria-hidden="true">expand_more</span>
+        </summary>
+        <p class="px-md pb-md font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          {% blocktrans with fee=fee|floatformat:"0g" %}Creating an account is free. Students pay an application fee of TZS {{ fee }} for each application.{% endblocktrans %}
+        </p>
+      </details>
+      {% include "includes/faq_item.html" with q=_("How do I pay?") a=_("By mobile money (M-Pesa, Mixx by Yas or Airtel Money) from your application page, within 3 hours of applying.") %}
+      {% include "includes/faq_item.html" with q=_("What if I do not pay within 3 hours?") a=_("Your seat is released so that other students can apply for it.") %}
+      <details class="group bg-surface-container-lowest border border-outline-variant rounded-xl">
+        <summary class="flex items-center justify-between gap-sm cursor-pointer list-none p-md font-body-lg text-body-lg font-semibold text-on-surface">
+          {% trans "Can I get my fee back?" %}
+          <span class="material-symbols-outlined shrink-0 transition-transform group-open:rotate-180" aria-hidden="true">expand_more</span>
+        </summary>
+        <p class="px-md pb-md font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          {% url 'legal-terms' as terms_url %}{% blocktrans with url=terms_url %}Fees are non-refundable. Please read the <a href="{{ url }}#payments" class="text-primary font-semibold hover:underline">payments and refund policy</a> in our Terms before you apply.{% endblocktrans %}
+        </p>
+      </details>
+      {% include "includes/faq_item.html" with q=_("Why do I need to verify my documents?") a=_("Verification keeps the marketplace trustworthy. Students upload their student ID and details, and organizations submit their registration documents. Our team reviews them before approval.") %}
+      {% include "includes/faq_item.html" with q=_("When does an organization see my application?") a=_("Only after your application fee is confirmed. This way organizations review serious, verified candidates.") %}
+      <details class="group bg-surface-container-lowest border border-outline-variant rounded-xl">
+        <summary class="flex items-center justify-between gap-sm cursor-pointer list-none p-md font-body-lg text-body-lg font-semibold text-on-surface">
+          {% trans "Is my information safe?" %}
+          <span class="material-symbols-outlined shrink-0 transition-transform group-open:rotate-180" aria-hidden="true">expand_more</span>
+        </summary>
+        <p class="px-md pb-md font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          {% url 'legal-privacy' as privacy_url %}{% blocktrans with url=privacy_url %}Your documents are stored securely and only seen by our verification team. For your protection you are signed out after 10 minutes of inactivity. Read our <a href="{{ url }}" class="text-primary font-semibold hover:underline">Privacy Policy</a> for details.{% endblocktrans %}
+        </p>
+      </details>
+      {% include "includes/faq_item.html" with q=_("Who can I contact for help?") a=_("Use the WhatsApp button on this page, call 0787 196 911 or 0756 322 833, or email semauyatech@gmail.com.") %}
+    </div>
+  </section>
+
+  <!-- Closing call to action -->
+  <section class="w-full max-w-container-max mx-auto">
+    <div class="rounded-2xl bg-primary text-on-primary p-lg sm:p-xl flex flex-col sm:flex-row items-center justify-between gap-md text-center sm:text-left">
+      <div class="flex flex-col gap-xs">
+        <h2 class="font-headline-lg text-headline-lg">{% trans "Ready to start your training journey?" %}</h2>
+        <p class="font-body-md text-body-md text-on-primary/80">{% trans "Create a free account in about two minutes." %}</p>
+      </div>
+      <div class="shrink-0 flex flex-col sm:flex-row gap-sm w-full sm:w-auto">
+        <a href="{% url 'register' %}?role=student" class="justify-center px-lg py-sm rounded-full bg-surface-container-lowest text-primary font-metadata text-metadata uppercase tracking-wider font-semibold hover:shadow-xl transition-all flex items-center gap-xs">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">school</span>{% trans "I'm a student" %}
+        </a>
+        <a href="{% url 'register' %}?role=organization" class="justify-center px-lg py-sm rounded-full border-2 border-on-primary/60 text-on-primary font-metadata text-metadata uppercase tracking-wider font-semibold hover:bg-on-primary/10 transition-colors flex items-center gap-xs">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">business_center</span>{% trans "I'm an organization" %}
+        </a>
+      </div>
+    </div>
+  </section>
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/public-search.js' %}"></script>
+<script>
+  (function () {
+    var tabs = document.querySelectorAll("[data-how-tab]");
+    var panels = { student: document.getElementById("panel-student"), org: document.getElementById("panel-org") };
+    function select(name) {
+      tabs.forEach(function (t) {
+        var on = t.dataset.howTab === name;
+        t.setAttribute("aria-selected", on ? "true" : "false");
+        t.classList.toggle("bg-primary", on);
+        t.classList.toggle("text-on-primary", on);
+        t.classList.toggle("text-on-surface-variant", !on);
+      });
+      Object.keys(panels).forEach(function (k) { panels[k].classList.toggle("hidden", k !== name); });
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener("click", function () { select(t.dataset.howTab); });
+      t.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+          var next = t.dataset.howTab === "student" ? "org" : "student";
+          select(next);
+          document.getElementById("tab-" + next).focus();
+        }
+      });
+    });
+    select("student");
+  })();
+</script>
 {% endblock %}

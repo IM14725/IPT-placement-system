@@ -95,16 +95,12 @@
     {# ── Additional details textarea (shown conditionally) ── #}
     <div id="details-section" class="hidden flex flex-col gap-xs">
       <label for="details" class="font-body-lg text-on-surface">{% trans "Additional Details" %}</label>
-      <textarea
-        name="details"
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><textarea name="details"
         id="details"
         rows="4"
         maxlength="500"
         placeholder="{% trans 'Please provide as much detail as possible to help us process your request quickly.' %}"
-        class="w-full rounded-xl border border-outline bg-surface px-md py-sm
-               font-body-md text-body-md text-on-surface placeholder-on-surface-variant/50
-               focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none"
-      ></textarea>
+></textarea></div>
       <p class="font-body-sm text-body-sm text-on-surface-variant">{% trans "Maximum 500 characters." %}</p>
     </div>
 

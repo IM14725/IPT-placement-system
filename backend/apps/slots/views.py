@@ -108,6 +108,10 @@ class SlotSearchView(APIView):
         from apps.core.cache import incr_daily
 
         incr_daily("searches")
+        if region or district:
+            from apps.accounts.public import record_region_search
+
+            record_region_search(region, district)
 
         key = slot_search_key(
             _signature(region, district, department, academic_year, education_level, organization)

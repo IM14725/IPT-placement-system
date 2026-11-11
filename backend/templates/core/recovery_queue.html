@@ -20,7 +20,7 @@
         <ul class="text-metadata text-on-surface-variant">{% for d in r.req.decisions.all %}<li>{{ d.approver.email }}: {% if d.approve %}approved{% else %}rejected{% endif %} ({{ d.decided_at|date:"j M H:i" }})</li>{% endfor %}</ul>
         {% if r.can_vote %}
           <form method="post" class="flex flex-wrap gap-sm items-center">{% csrf_token %}<input type="hidden" name="request_id" value="{{ r.req.id }}">
-            <input name="note" maxlength="200" placeholder="Note (optional)" class="px-sm py-1.5 rounded-lg border border-outline-variant">
+            <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input name="note" maxlength="200" placeholder="Note (optional)"></div>
             <button name="decision" value="approve" class="bg-primary text-on-primary font-semibold px-md py-1.5 rounded-lg" type="submit">Approve</button>
             <button name="decision" value="reject" class="text-error font-semibold px-md py-1.5 rounded-lg border border-error/40" type="submit">Reject</button>
           </form>

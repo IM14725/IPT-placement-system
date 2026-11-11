@@ -355,7 +355,7 @@ def test_audit_filters_org_actor_action_dates_target_status_keyword(alpha, beta)
     assert "Application Accepted" in ids(target="app-1") and "Application Accepted" in ids(target="Slot A")
     assert "Login" in ids(status="FAILED") and "Application Accepted" not in ids(status="FAILED")
     assert "Application Accepted" in ids(q="stu@x.tz")
-    today = timezone.now().date()
+    today = timezone.localdate()  # the filters use local (Dar es Salaam) dates, not UTC
     assert "Application Accepted" in ids(date_from=str(today - timedelta(days=1)), date_to=str(today))
     assert not ids(date_from=str(today + timedelta(days=1)))
     assert not ids(date_to=str(today - timedelta(days=2)))

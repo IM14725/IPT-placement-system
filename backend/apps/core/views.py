@@ -228,80 +228,37 @@ def ledger(request):
 
 @login_required
 def metrics(request):
+    from apps.core.metrics import RANGES, normalise_range
+
     if not _require_admin(request, module="system_metrics"):
         return render(request, "core/forbidden.html", status=403)
-    data = _compute_metrics()
-    return render(request, "core/metrics.html", {"data": data})
+    range_key = normalise_range(request.GET.get("range"))
+    data = _compute_metrics(range_key)
+    labels = {"7": "7 days", "30": "30 days", "90": "90 days", "all": "All time"}
+    return render(
+        request,
+        "core/metrics.html",
+        {"data": data, "range": range_key, "ranges": [(r, labels[r]) for r in RANGES]},
+    )
 
 
-def _compute_metrics():
-    from datetime import timedelta
-
+def _compute_metrics(range_key="30"):
     from apps.accounts.models import User
     from apps.applications.models import Application, ApplicationStatus
     from apps.companies.models import Organization
+    from apps.core.funnel import funnel_summary
+    from apps.core.metrics import build_charts
     from apps.payments.models import Payment, PaymentStatus
     from apps.slots.models import Slot, SlotStatus
     from apps.students.models import StudentProfile, VerificationStatus
-    from django.db.models.functions import TruncDate
 
-    from apps.core.cache import daily_series
-
-    days = 30
-    start = timezone.localdate() - timedelta(days=days - 1)
-
-    def _zero_filled(by_day):
-        return [
-            {
-                "date": (start + timedelta(days=i)).isoformat(),
-                "value": by_day.get((start + timedelta(days=i)).isoformat(), 0),
-            }
-            for i in range(days)
-        ]
-
-    # Revenue trend: real paid-payment history aggregated per day.
-    revenue_by_day = {
-        d.isoformat(): float(total)
-        for d, total in Payment.objects.filter(
-            status=PaymentStatus.PAID, paid_at__isnull=False
-        )
-        .annotate(day=TruncDate("paid_at"))
-        .values("day")
-        .annotate(total=Sum("amount"))
-        .values_list("day", "total")
-    }
-
-    # Login trend: distinct users who last logged in each day (Django updates
-    # ``last_login`` on every successful ``login()``).
-    login_by_day = {
-        d.isoformat(): int(n)
-        for d, n in User.objects.exclude(last_login=None)
-        .annotate(day=TruncDate("last_login"))
-        .values("day")
-        .annotate(n=Count("id"))
-        .values_list("day", "n")
-    }
-
-    # Slot-search trend: Redis per-day counter (started now; 0 for earlier days).
-    search_series = daily_series("searches", days=days)
-
-    
-    # Applied slots by region and district
-    applied_by_region_raw = Application.objects.values('slot__district__region__id', 'slot__district__region__name').annotate(count=Count('id')).order_by('-count')
-    applied_by_region = [
-        {'id': str(r['slot__district__region__id']), 'name': r['slot__district__region__name'] or 'Unknown', 'count': r['count']}
-        for r in applied_by_region_raw
-    ]
-
-    applied_by_district_raw = Application.objects.values('slot__district__id', 'slot__district__name', 'slot__district__region__id').annotate(count=Count('id')).order_by('-count')
-    applied_by_district = [
-        {'id': str(r['slot__district__id']), 'name': r['slot__district__name'] or 'Unknown', 'region_id': str(r['slot__district__region__id']), 'count': r['count']}
-        for r in applied_by_district_raw
-    ]
-
+    charts = build_charts(range_key)
+    # The funnel counters live in Redis and are kept for 45 days.
+    funnel_days = {"7": 7, "30": 30}.get(charts["range"], 45)
     return {
-        "applied_by_region": applied_by_region,
-        "applied_by_district": applied_by_district,
+        "charts": charts,
+        "funnel": funnel_summary(days=funnel_days),
+        "funnel_days": funnel_days,
         "users": User.objects.count(),
         "students": StudentProfile.objects.count(),
         "students_verified": StudentProfile.objects.filter(
@@ -326,9 +283,6 @@ def _compute_metrics():
             total=Sum("amount")
         )["total"]
         or 0,
-        "revenue_series": _zero_filled(revenue_by_day),
-        "login_series": _zero_filled(login_by_day),
-        "search_series": search_series,
     }
 
 
@@ -613,48 +567,159 @@ def platform_organization_edit(request, pk):
 
 @login_required
 def notification_templates(request):
-    from apps.notifications.models import NotificationTemplate
+    """Create, edit, duplicate, delete and test the editable text of the system's email/SMS messages.
+
+    A template only takes effect when its key is one of the system events in
+    ``apps.notifications.events.EVENTS`` (the senders look templates up by key + channel), so new templates
+    are created *for* an event and the channel always follows the event.
+    """
+    from django.shortcuts import get_object_or_404
+
+    from apps.core import providers
+    from apps.core.rate_limit import consume
+    from apps.notifications import events as ev
+    from apps.notifications.models import MessageChannel, NotificationTemplate
 
     if not _require_admin(request, super_only=True):
         return render(request, "core/forbidden.html", status=403)
-    templates = NotificationTemplate.objects.all().order_by("key")
-    selected = None
+
+    def _values(src):
+        return {
+            "name": (src.get("name") or "").strip(),
+            "trigger_label": (src.get("trigger_label") or "").strip(),
+            "subject": src.get("subject") or "",
+            "body": src.get("body") or "",
+            "description": (src.get("description") or "").strip(),
+            "is_active": src.get("is_active") in ("on", True),
+        }
+
+    errors = []
+    values = None
+    mode = None
+    new_event = None
+
     if request.method == "POST":
-        key = request.POST.get("key", "").strip()
-        name = request.POST.get("name", "").strip()
-        channel = request.POST.get("channel")
-        subject = request.POST.get("subject", "")
-        body = request.POST.get("body", "")
-        description = request.POST.get("description", "")
-        trigger_label = request.POST.get("trigger_label", "")
-        is_active = request.POST.get("is_active") == "on"
-        if key and name:
-            template, _ = NotificationTemplate.objects.update_or_create(
+        action = request.POST.get("action", "save")
+        values = _values(request.POST)
+        key = (request.POST.get("key") or "").strip()
+
+        if action == "delete":
+            template = get_object_or_404(NotificationTemplate, key=key)
+            name = template.name
+            template.delete()
+            _write_audit(request, "Template Deleted", "Notification Templates", f"Deleted notification template '{name}' ({key}).")
+            messages.success(request, f"'{name}' was deleted. The built-in wording is used for this message until you create it again.")
+            return redirect("platform-templates")
+
+        existing = NotificationTemplate.objects.filter(key=key).first()
+        event = ev.EVENTS.get(key)
+        if action == "create":
+            mode = "new"
+            if event is None or existing is not None:
+                messages.error(request, "Choose a system message that does not have a template yet.")
+                return redirect(f"{request.path}?new=1")
+            new_event = event
+        elif existing is None:
+            messages.error(request, "That template no longer exists.")
+            return redirect("platform-templates")
+        else:
+            mode = "edit"
+
+        errors = ev.validate_text(event, values["subject"], values["body"])
+        if not values["name"]:
+            errors.append("The template needs a name.")
+
+        if not errors and action == "test":
+            channel = event.channel if event else existing.channel
+            subject, body = ev.render_sample(event, values["subject"], values["body"])
+            target = request.user.phone if channel == MessageChannel.SMS else request.user.email
+            if not target:
+                errors.append("Your account has no phone number to send the SMS test to." if channel == MessageChannel.SMS
+                              else "Your account has no email address to send the test to.")
+            elif not consume("template-test", str(request.user.pk), 5, 5 / 3600).allowed:
+                errors.append("You have sent several tests recently. Please wait a little before sending another.")
+            else:
+                try:
+                    if channel == MessageChannel.SMS:
+                        providers.send_sms(target, body)
+                    else:
+                        providers.send_email("[TEST] " + (subject or "IPT Marketplace"), [target], body)
+                except Exception:  # noqa: BLE001 - show the admin a clean message, never a traceback
+                    errors.append("The test message could not be sent. Check the email/SMS provider settings.")
+                else:
+                    _write_audit(request, "Template Test Sent", "Notification Templates", f"Sent a test of '{key}' to the admin who edited it.")
+                    messages.success(request, "A test message was sent to you using sample values.")
+                    return redirect(f"{request.path}?key={key}")
+        elif not errors and action in ("save", "create"):
+            channel = event.channel if event else existing.channel
+            template, _created = NotificationTemplate.objects.update_or_create(
                 key=key,
                 defaults={
-                    "name": name,
+                    "name": values["name"],
                     "channel": channel,
-                    "subject": subject,
-                    "body": body,
-                    "description": description,
-                    "trigger_label": trigger_label,
-                    "is_active": is_active,
+                    "subject": values["subject"] if channel == MessageChannel.EMAIL else "",
+                    "body": values["body"],
+                    "description": values["description"],
+                    "trigger_label": values["trigger_label"] or (event.trigger if event else ""),
+                    "is_active": values["is_active"],
                 },
             )
-            _write_audit(request, "Template Saved", "Notification Templates",
-                         f"Saved notification template '{template.name}' ({template.key}).")
-            messages.success(request, "Template saved.")
+            _write_audit(request, "Template Saved", "Notification Templates", f"Saved notification template '{template.name}' ({template.key}).")
+            messages.success(request, "Template saved." if action == "save" else "Template created.")
             return redirect(f"{request.path}?key={template.key}")
-        messages.error(request, "Key and name are required.")
-    key = request.GET.get("key")
-    if key:
-        selected = templates.filter(key=key).first() or templates.first()
-    elif templates.exists():
-        selected = templates.first()
+        if key and mode == "edit":
+            selected = existing
+        else:
+            selected = None
+    else:
+        selected = None
+
+    templates = list(NotificationTemplate.objects.order_by("name"))
+    used_keys = {t.key for t in templates}
+    free_events = [e for e in ev.EVENTS.values() if e.key not in used_keys]
+
+    if request.method == "GET":
+        if request.GET.get("new"):
+            mode = "new"
+            new_event = ev.EVENTS.get(request.GET.get("event", "")) if request.GET.get("event") in {e.key for e in free_events} else (free_events[0] if free_events else None)
+            if new_event:
+                source = NotificationTemplate.objects.filter(key=request.GET.get("copy", "")).first()
+                if source:  # duplicate: start from another template's wording
+                    values = _values({"name": new_event.label, "trigger_label": new_event.trigger, "subject": source.subject,
+                                      "body": source.body, "description": source.description, "is_active": True})
+                else:
+                    values = _values({"name": new_event.label, "trigger_label": new_event.trigger, "subject": new_event.default_subject,
+                                      "body": new_event.default_body, "description": f"Sent when: {new_event.trigger.lower()}.", "is_active": True})
+        else:
+            wanted = request.GET.get("key")
+            selected = next((t for t in templates if t.key == wanted), None) or (templates[0] if templates else None)
+            mode = "edit" if selected else "empty"
+    elif mode == "edit" and selected is not None:
+        selected = next((t for t in templates if t.key == selected.key), selected)
+
+    event = new_event if mode == "new" else (ev.EVENTS.get(selected.key) if selected else None)
+    channel = (event.channel if event else (selected.channel if selected else None))
+    if mode == "edit" and values is None and selected is not None:
+        values = _values({"name": selected.name, "trigger_label": selected.trigger_label, "subject": selected.subject,
+                          "body": selected.body, "description": selected.description, "is_active": selected.is_active})
     return render(
         request,
         "core/notification_templates.html",
-        {"templates": templates, "selected": selected},
+        {
+            "templates": templates,
+            "selected": selected,
+            "mode": mode,
+            "event": event,
+            "channel": channel,
+            "is_email": channel == MessageChannel.EMAIL,
+            "values": values or {},
+            "errors": errors,
+            "free_events": free_events,
+            "variables": event.variables if event else [],
+            "samples": event.samples if event else {},
+            "sms_segment": ev.SMS_SEGMENT,
+            "copy_from": request.GET.get("copy", ""),
+        },
     )
 
 
@@ -738,7 +803,7 @@ def role_management(request):
     if request.method == "POST":
         active_role = get_object_or_404(AdminRole, pk=request.POST.get("role_id"))
         permissions = {}
-        for module in ("user_management", "slot_verification", "financial_ledger", "system_metrics"):
+        for module in ("user_management", "slot_verification", "financial_ledger", "system_metrics", "locations"):
             permissions[module] = {
                 cap: request.POST.get(f"perm_{module}_{cap}") == "on"
                 for cap in ("view", "create", "edit", "delete")
@@ -759,6 +824,7 @@ def role_management(request):
         ("slot_verification", "Slot Verification", "Approve or reject posted opportunities"),
         ("financial_ledger", "Financial Ledger", "View transactions and manage fee structures"),
         ("system_metrics", "System Metrics", "Access to analytics and reporting dashboards"),
+        ("locations", "Locations", "Manage regions, districts and wards"),
     ]
     caps = ("view", "create", "edit", "delete")
     active_perms = active_role.permissions if active_role else {}
@@ -791,15 +857,13 @@ def admin_settings(request):
             "max_applications_per_student": (request.POST.get("max_applications_per_student"), "number"),
             "default_slot_limit": (request.POST.get("default_slot_limit"), "number"),
             "sms_enabled": (request.POST.get("sms_enabled") == "on", "bool"),
-            "sms_api_endpoint": (request.POST.get("sms_api_endpoint"), "text"),
             "maintenance_mode": (request.POST.get("maintenance_mode") == "on", "bool"),
             "student_req_student_id": (request.POST.get("student_req_student_id") == "on", "bool"),
             "student_req_transcript": (request.POST.get("student_req_transcript") == "on", "bool"),
             "student_req_cv": (request.POST.get("student_req_cv") == "on", "bool"),
         }
-        new_sms_key = (request.POST.get("sms_api_key") or "").strip()
-        if new_sms_key:
-            updates["sms_api_key"] = (new_sms_key, "text")
+        # The SMS gateway address and key are server-side configuration (.env), never editable from the
+        # browser: sms_api_endpoint / sms_api_key in a POST are ignored on purpose.
 
         parsed_numbers = {}
         for key, (value, vtype) in updates.items():

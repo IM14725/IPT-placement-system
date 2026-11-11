@@ -81,6 +81,12 @@ class Organization(TimeStampedModel):
         choices=VerificationStatus.choices,
         default=VerificationStatus.PENDING,
     )
+    brela_number = models.CharField(
+        max_length=40, blank=True, help_text=_("Company registration number from your BRELA certificate (optional).")
+    )
+    tin = models.CharField(
+        max_length=11, blank=True, help_text=_("TRA Taxpayer Identification Number, 9 digits (optional).")
+    )
     rejection_reason = models.TextField(blank=True)
     reviewed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -96,6 +102,13 @@ class Organization(TimeStampedModel):
     class Meta:
         verbose_name = _("Organization")
         verbose_name_plural = _("Organizations")
+
+    @property
+    def official_email_is_free(self):
+        """True when the official email is on a webmail provider (a note for the reviewer, never a block)."""
+        from apps.companies.identifiers import is_free_email
+
+        return is_free_email(self.email)
 
     @property
     def is_suspended(self):

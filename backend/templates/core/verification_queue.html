@@ -57,10 +57,7 @@
         </button>
       </div>
       <div class="flex items-center gap-sm w-full lg:w-auto">
-        <div class="relative w-full lg:w-64">
-          <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
-          <input id="queue-search" class="w-full pl-xl pr-sm py-2 bg-surface rounded-lg border border-outline-variant focus:border-primary focus:outline-none transition-colors text-body-md font-body-md text-on-surface placeholder:text-outline-variant" placeholder="{% trans "Search by name..." %}" type="text" oninput="filterQueue(this.value)">
-        </div>
+        <div class="ipt-field-box w-full lg:w-64"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input id="queue-search" type="search" placeholder="{% trans " autocomplete="off"></div>
       </div>
     </div>
 

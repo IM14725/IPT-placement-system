@@ -72,238 +72,83 @@
     </div>
   </div>
 
-  <!-- Trend charts -->
-  <section class="flex flex-col gap-md mt-md">
+  <!-- Range switch -->
+  <div class="flex flex-wrap items-center justify-between gap-sm mt-md">
     <div class="flex items-center gap-sm">
       <span class="material-symbols-outlined text-primary">monitoring</span>
-      <h2 class="font-headline-md text-headline-md text-on-surface">Activity Trends (last 30 days)</h2>
+      <h2 class="font-headline-md text-headline-md text-on-surface">Charts <span class="text-on-surface-variant font-normal">&middot; {{ data.charts.range_label }}</span></h2>
     </div>
+    <nav class="inline-flex p-1 rounded-full bg-surface-container" aria-label="Date range">
+      {% for value, label in ranges %}
+        <a href="?range={{ value }}"{% if value == range %} aria-current="true"{% endif %}
+           class="px-md py-1.5 rounded-full font-metadata text-metadata font-semibold transition-colors {% if value == range %}bg-primary text-on-primary{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </nav>
+  </div>
 
+  {% for section in data.charts.sections %}
+  <section class="flex flex-col gap-md">
+    <div class="flex items-center gap-sm">
+      <span class="material-symbols-outlined text-primary">{{ section.icon }}</span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{{ section.title }}</h2>
+    </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-md">
-      <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
-        <div class="flex items-center gap-sm mb-sm">
-          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
-          <h3 class="font-body-md font-semibold text-on-surface">Revenue</h3>
-        </div>
-        <div class="relative h-64">
-          <canvas id="revenue-chart" aria-label="Revenue chart" role="img"></canvas>
-        </div>
-      </div>
-
-      <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
-        <div class="flex items-center gap-sm mb-sm">
-          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">login</span>
-          <h3 class="font-body-md font-semibold text-on-surface">Daily Logins</h3>
-        </div>
-        <div class="relative h-64">
-          <canvas id="login-chart" aria-label="Daily logins chart" role="img"></canvas>
-        </div>
-      </div>
-
-      <div class="lg:col-span-2 bg-surface-container-lowest rounded-xl p-lg shadow-sm">
-        <div class="flex items-center gap-sm mb-sm">
-          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">search</span>
-          <h3 class="font-body-md font-semibold text-on-surface">Slot Searches</h3>
-        </div>
-        <div class="relative h-64">
-          <canvas id="search-chart" aria-label="Slot searches chart" role="img"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-md mt-md">
-      <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm">
-        <div class="flex items-center gap-sm mb-sm">
-          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">map</span>
-          <h3 class="font-body-md font-semibold text-on-surface">Applied Slots by Region</h3>
-        </div>
-        <div class="relative h-64">
-          <canvas id="region-chart" aria-label="Applied slots by region" role="img"></canvas>
-        </div>
-      </div>
-
-      <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm flex flex-col">
-        <div class="flex items-center justify-between mb-sm gap-2">
-          <div class="flex items-center gap-sm shrink-0">
-            <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">location_on</span>
-            <h3 class="font-body-md font-semibold text-on-surface">Applied Slots by District</h3>
+      {% for c in section.charts %}
+      <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm flex flex-col {% if c.id == 'top_organizations' %}lg:col-span-2{% endif %}" data-chart="{{ c.id }}">
+        <div class="flex items-center justify-between gap-sm mb-sm">
+          <div class="flex items-center gap-sm min-w-0">
+            <span class="material-symbols-outlined text-primary shrink-0" style="font-variation-settings: 'FILL' 1;">{{ c.icon }}</span>
+            <h3 class="font-body-md font-semibold text-on-surface truncate">{{ c.title }}</h3>
           </div>
-          <select id="district-region-filter" class="w-[150px] bg-surface-container-low rounded-lg px-2 py-1 text-sm outline-none">
-            <option value="">All Regions</option>
-          </select>
+          {% if c.regions %}
+          <div class="ipt-field-box max-w-[190px]">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">map</span></span>
+            <select data-region-filter aria-label="Filter {{ c.title }} by region"><option value="">All regions</option></select>
+          </div>
+          {% endif %}
         </div>
-        <div class="relative h-64 flex-1">
-          <canvas id="district-chart" aria-label="Applied slots by district" role="img"></canvas>
+        {% if c.note %}<p class="font-metadata text-metadata text-on-surface-variant mb-xs">{{ c.note }}</p>{% endif %}
+        <div class="relative h-64" data-canvas-wrap><canvas aria-label="{{ c.title }}" role="img"></canvas></div>
+        <div class="hidden h-64 flex flex-col items-center justify-center text-center gap-xs text-on-surface-variant" data-empty>
+          <span class="material-symbols-outlined text-[36px] text-outline" aria-hidden="true">bar_chart</span>
+          <p class="font-body-md">{% if c.ranged %}No data in this period.{% else %}Nothing to show yet.{% endif %}</p>
+          {% if c.ranged and range != 'all' %}<a href="?range=all" class="font-metadata text-metadata text-primary font-semibold hover:underline">Try all time</a>{% endif %}
         </div>
       </div>
+      {% endfor %}
     </div>
   </section>
+  {% endfor %}
 
+  <!-- Signup funnel -->
+  <section class="bg-surface-container-lowest rounded-xl p-lg shadow-sm" id="signup-funnel">
+    <div class="flex flex-wrap items-center gap-sm mb-xs">
+      <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">filter_alt</span>
+      <h3 class="font-body-md font-semibold text-on-surface">Signup funnel (last {{ data.funnel_days }} days)</h3>
+    </div>
+    <p class="font-metadata text-metadata text-on-surface-variant mb-md">Page views, not unique visitors: no cookies or IP addresses are stored, so someone who reloads counts again. Known crawlers are excluded. These counters are kept for 45 days.</p>
+    <ol class="flex flex-col gap-sm">
+      {% for step in data.funnel %}
+      <li class="grid grid-cols-1 sm:grid-cols-[220px_1fr_150px] items-center gap-xs sm:gap-md">
+        <span class="font-body-md text-on-surface">{{ forloop.counter }}. {{ step.label }}</span>
+        <div class="h-3 rounded-full bg-surface-container overflow-hidden" role="img" aria-label="{{ step.label }}: {{ step.of_first|default:0 }}% of welcome page views">
+          <div class="h-full rounded-full bg-primary" style="width: {{ step.of_first|default:0 }}%"></div>
+        </div>
+        <span class="font-metadata text-metadata text-on-surface-variant sm:text-right tabular-nums">
+          <strong class="text-on-surface">{{ step.total }}</strong>
+          {% if step.of_previous is not None %}&middot; {{ step.of_previous }}% of previous{% endif %}
+        </span>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
 </div>
 
-
-{{ data.revenue_series|json_script:"revenue-data" }}
-{{ data.login_series|json_script:"login-data" }}
-{{ data.search_series|json_script:"search-data" }}
-{{ data.applied_by_region|json_script:"region-data" }}
-{{ data.applied_by_district|json_script:"district-data" }}
+{{ data.charts.all|json_script:"charts-data" }}
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script>
-  (function () {
-    "use strict";
-    if (typeof Chart === "undefined") return;
-
-    function readSeries(id) {
-      var el = document.getElementById(id);
-      if (!el) return [];
-      try { return JSON.parse(el.textContent); } catch (e) { return []; }
-    }
-    function labels(series) { return series.map(function (s) { return s.date.slice(5); }); }
-    function values(series) { return series.map(function (s) { return s.value; }); }
-
-    var fontFamily = "'Inter', sans-serif";
-    Chart.defaults.font.family = fontFamily;
-    Chart.defaults.color = "#464555";
-
-    var revenue = readSeries("revenue-data");
-    var login = readSeries("login-data");
-    
-    var search = readSeries("search-data");
-    var appliedRegion = readSeries("region-data");
-    var appliedDistrict = readSeries("district-data");
-
-    if (appliedRegion.length) {
-      new Chart(document.getElementById("region-chart"), {
-        type: "bar",
-        data: {
-          labels: appliedRegion.map(function(item) { return item.name; }),
-          datasets: [{
-            label: "Applied Slots",
-            data: appliedRegion.map(function(item) { return item.count; }),
-            backgroundColor: "rgba(53, 37, 205, 0.75)",
-            hoverBackgroundColor: "#3525cd",
-            borderRadius: 4
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-        }
-      });
-    }
-
-    if (appliedDistrict.length) {
-      var districtChartEl = document.getElementById("district-chart");
-      var districtFilter = document.getElementById("district-region-filter");
-      
-      // Populate filter
-      appliedRegion.forEach(function(r) {
-        var opt = document.createElement("option");
-        opt.value = r.id;
-        opt.textContent = r.name;
-        districtFilter.appendChild(opt);
-      });
-
-      var distChart = new Chart(districtChartEl, {
-        type: "bar",
-        data: {
-          labels: appliedDistrict.map(function(item) { return item.name; }),
-          datasets: [{
-            label: "Applied Slots",
-            data: appliedDistrict.map(function(item) { return item.count; }),
-            backgroundColor: "rgba(96, 99, 238, 0.75)",
-            hoverBackgroundColor: "#6063ee",
-            borderRadius: 4
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-        }
-      });
-
-      districtFilter.addEventListener("change", function() {
-        var regionId = this.value;
-        var filteredData = appliedDistrict.filter(function(d) {
-          return !regionId || d.region_id === regionId;
-        });
-        
-        distChart.data.labels = filteredData.map(function(item) { return item.name; });
-        distChart.data.datasets[0].data = filteredData.map(function(item) { return item.count; });
-        distChart.update();
-      });
-    }
-
-
-    if (revenue.length) {
-      new Chart(document.getElementById("revenue-chart"), {
-        type: "bar",
-        data: {
-          labels: labels(revenue),
-          datasets: [{
-            label: "Fees collected (TZS)",
-            data: values(revenue),
-            backgroundColor: "rgba(53, 37, 205, 0.75)",
-            hoverBackgroundColor: "#3525cd",
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { beginAtZero: true, ticks: { callback: function (v) { return v >= 1000 ? (v / 1000) + "k" : v; } } }
-          }
-        }
-      });
-    }
-
-    if (login.length) {
-      new Chart(document.getElementById("login-chart"), {
-        type: "line",
-        data: {
-          labels: labels(login),
-          datasets: [{
-            label: "Logins",
-            data: values(login),
-            borderColor: "#3525cd",
-            backgroundColor: "rgba(53, 37, 205, 0.12)",
-            fill: true, tension: 0.35, pointRadius: 2
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-        }
-      });
-    }
-
-    if (search.length) {
-      new Chart(document.getElementById("search-chart"), {
-        type: "line",
-        data: {
-          labels: labels(search),
-          datasets: [{
-            label: "Searches",
-            data: values(search),
-            borderColor: "#6063ee",
-            backgroundColor: "rgba(96, 99, 238, 0.12)",
-            fill: true, tension: 0.35, pointRadius: 2
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-        }
-      });
-    }
-  })();
-</script>
+{% load static %}
+<script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
+<script src="{% static 'js/metrics-charts.js' %}"></script>
 {% endblock %}

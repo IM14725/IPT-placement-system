@@ -10,3 +10,7 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_STORE_EAGER_RESULT = True
 
+# Admin MFA (hardware key) is skipped in local dev, where WebAuthn needs a real domain/key.
+# Set ADMIN_MFA_ENFORCED=True in backend/.env to exercise the full flow locally.
+ADMIN_MFA_ENFORCED = env.bool("ADMIN_MFA_ENFORCED", default=False)
+

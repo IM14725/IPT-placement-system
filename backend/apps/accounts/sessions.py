@@ -1,7 +1,9 @@
 """Server-side session policy.
 
-* Hard 10-minute lifetime (``SESSION_COOKIE_AGE``), measured from login and enforced here and
-  by the session row's own expiry, so it holds when the browser is closed or offline.
+* 10-minute idle lifetime (``SESSION_COOKIE_AGE``), enforced here and by the session row's own
+  expiry, so it holds when the browser is closed or offline. Real user activity (the page
+  reports mouse/keyboard/touch movement to ``session_extend``) restarts the 10 minutes; polling
+  never does. A hard ceiling from login (``SESSION_ABSOLUTE_MAX_SECONDS``) still applies.
 * One live session per account: logging in on a new device destroys the previous session
   row (``User.current_session_key``) and pushes a ``session_revoked`` event to the old tabs.
 * Logout destroys the session on the server; authenticated responses are never cached.
@@ -19,6 +21,7 @@ from django.db import transaction
 from django.utils.cache import add_never_cache_headers
 
 LOGIN_AT_KEY = "login_at"
+ACTIVITY_AT_KEY = "active_at"
 
 
 def _publish_revoked(user_id, reason):
@@ -75,10 +78,21 @@ def rotate_session_key(request):
 
 
 def seconds_remaining(request):
+    """Time left before the session ends: the idle window or the hard ceiling, whichever is first."""
     login_at = request.session.get(LOGIN_AT_KEY)
     if login_at is None:
         return 0
-    return max(0, int(settings.SESSION_COOKIE_AGE - (time.time() - login_at)))
+    now = time.time()
+    active_at = request.session.get(ACTIVITY_AT_KEY, login_at)
+    idle_left = settings.SESSION_COOKIE_AGE - (now - active_at)
+    ceiling_left = settings.SESSION_ABSOLUTE_MAX_SECONDS - (now - login_at)
+    return max(0, int(min(idle_left, ceiling_left)))
+
+
+def touch(request):
+    """Restart the idle window. Only called for real user activity, never for background polling."""
+    request.session[ACTIVITY_AT_KEY] = int(time.time())
+    request.session.set_expiry(settings.SESSION_COOKIE_AGE)
 
 
 def _on_login(sender, request, user, **kwargs):
@@ -91,6 +105,7 @@ def _on_login(sender, request, user, **kwargs):
         request.session.save()
     new_key = request.session.session_key
     request.session[LOGIN_AT_KEY] = int(time.time())
+    request.session[ACTIVITY_AT_KEY] = request.session[LOGIN_AT_KEY]
     request.session.set_expiry(settings.SESSION_COOKIE_AGE)
 
     revoked_other = False
@@ -173,7 +188,13 @@ class SessionPolicyMiddleware:
         if user is not None and user.is_authenticated:
             key = request.session.session_key
             login_at = request.session.get(LOGIN_AT_KEY)
-            expired = login_at is None or (time.time() - login_at) > settings.SESSION_COOKIE_AGE
+            now = time.time()
+            active_at = request.session.get(ACTIVITY_AT_KEY, login_at)
+            expired = (
+                login_at is None
+                or (now - active_at) > settings.SESSION_COOKIE_AGE
+                or (now - login_at) > settings.SESSION_ABSOLUTE_MAX_SECONDS
+            )
             superseded = user.current_session_key != key
             if expired or superseded:
                 logout(request)

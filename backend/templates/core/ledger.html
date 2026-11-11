@@ -45,23 +45,23 @@
   <form method="get" class="bg-surface-container-lowest p-md rounded-xl shadow-sm flex flex-wrap gap-md items-end">
     <div class="flex-1 min-w-[200px]">
       <label class="block font-metadata text-on-surface-variant mb-1">Search</label>
-      <input type="text" name="q" value="{{ q }}" placeholder="Reference, student, organization, amount..." class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input type="text" name="q" value="{{ q }}" placeholder="Reference, student, organization, amount..."></div>
     </div>
     <div>
       <label class="block font-metadata text-on-surface-variant mb-1">Status</label>
-      <select name="status" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">flag</span></span><select name="status">
         <option value="">All</option>
         <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Paid</option>
         <option value="unpaid" {% if status_filter == 'unpaid' %}selected{% endif %}>Unpaid</option>
-      </select>
+      </select></div>
     </div>
     <div>
       <label class="block font-metadata text-on-surface-variant mb-1">From Date</label>
-      <input type="date" name="start_date" value="{{ start_date|default:'' }}" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">calendar_today</span></span><input type="date" name="start_date" value="{{ start_date|default:'' }}"></div>
     </div>
     <div>
       <label class="block font-metadata text-on-surface-variant mb-1">To Date</label>
-      <input type="date" name="end_date" value="{{ end_date|default:'' }}" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">calendar_today</span></span><input type="date" name="end_date" value="{{ end_date|default:'' }}"></div>
     </div>
     <div>
       <button type="submit" class="bg-primary text-on-primary px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors h-[42px] flex items-center justify-center">Filter</button>

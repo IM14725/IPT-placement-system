@@ -1,0 +1,30 @@
+{% load form_tags %}
+{% comment %}
+  One form field in the platform's standard style: label, icon-chip box, help text and errors.
+  Usage: {% include "includes/form_field.html" with field=form.email %}
+  Optional: label_class, wrapper_class, icon (overrides the automatic icon).
+{% endcomment %}
+{% with kind=field|widget_kind %}
+<div class="flex flex-col gap-xs {{ wrapper_class }}">
+  {% if kind == "checkbox" %}
+    <label class="flex items-center gap-sm cursor-pointer font-body-md text-on-surface" for="{{ field.id_for_label }}">{{ field }} <span>{{ field.label }}</span></label>
+  {% else %}
+    <label class="{{ label_class|default:'font-body-md text-body-md font-semibold text-on-surface' }}" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="text-error" aria-hidden="true">*</span>{% endif %}</label>
+    {% if kind == "file" %}
+      <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
+        <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">{{ icon|default:"upload_file" }}</span></span>
+        <div class="ipt-file-wrap">{{ field }}</div>
+      </div>
+    {% elif kind == "radio" %}
+      {{ field }}
+    {% else %}
+      <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
+        <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">{% if icon %}{{ icon }}{% else %}{{ field|field_icon }}{% endif %}</span></span>
+        {{ field }}
+      </div>
+    {% endif %}
+  {% endif %}
+  {% if field.help_text %}<p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ field.help_text }}</p>{% endif %}
+  {% for err in field.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ err }}</p>{% endfor %}
+</div>
+{% endwith %}

@@ -10,11 +10,7 @@
     {% csrf_token %}
     {% if form.non_field_errors %}<div class="md:col-span-2 rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-on-error-container">{{ form.non_field_errors.0 }}</div>{% endif %}
     {% for field in form %}
-      <div class="flex flex-col gap-xs {% if field.name == 'super_admin' %}md:col-span-2{% endif %}">
-        <label class="font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% for err in field.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ err }}</p>{% endfor %}
-      </div>
+      {% if field.name == 'super_admin' %}{% include "includes/form_field.html" with field=field wrapper_class="md:col-span-2" %}{% else %}{% include "includes/form_field.html" with field=field %}{% endif %}
     {% endfor %}
     <div class="md:col-span-2 flex justify-end"><button class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg" type="submit">Create administrator</button></div>
   </form>

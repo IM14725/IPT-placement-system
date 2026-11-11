@@ -191,6 +191,28 @@ def test_user_files_report(student, organization):
     assert report.status == Report.Status.OPEN
 
 
+def test_reporter_sees_own_reports_with_status_but_not_admin_notes(student, organization):
+    mine = Report.objects.create(
+        reporter=student.user, subject="Asked me for money", description="d",
+        status=Report.Status.RESOLVED, admin_notes="INTERNAL-ONLY",
+    )
+    Report.objects.create(reporter=organization.user, subject="Someone else's report", description="d")
+    client = Client()
+    client.force_login(student.user)
+    html = client.get(reverse("report-submit")).content.decode()
+    assert mine.subject in html and "Resolved" in html
+    assert "INTERNAL-ONLY" not in html
+    assert "Someone else&#x27;s report" not in html and "Someone else's report" not in html
+
+
+def test_students_and_organizations_have_a_report_link_in_the_menu(student, organization):
+    for user, url in ((student.user, "student-dashboard"), (organization.user, "organization-dashboard")):
+        client = Client()
+        client.force_login(user)
+        resp = client.get(reverse(url), follow=True)
+        assert f'href="{reverse("report-submit")}"' in resp.content.decode()
+
+
 def test_anonymous_cannot_file_report(db):
     resp = Client().post(reverse("report-submit"), {"category": "FRAUD", "subject": "x", "description": "y"})
     assert resp.status_code == 302

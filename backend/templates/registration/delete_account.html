@@ -41,17 +41,13 @@
         {% trans "To confirm, type your email address:" %}
         <span class="font-semibold text-error">{{ user.email }}</span>
       </label>
-      <input
-        type="email"
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">mail</span></span><input type="email"
         name="confirm_email"
         id="confirm_email"
         autocomplete="off"
         placeholder="{{ user.email }}"
         required
-        class="w-full rounded-xl border border-outline bg-surface px-md py-sm
-               font-body-md text-body-md text-on-surface placeholder-on-surface-variant/50
-               focus:outline-none focus:ring-2 focus:ring-error focus:border-error transition"
-      >
+></div>
       <p class="font-body-sm text-body-sm text-on-surface-variant">
         {% trans "We need to verify your identity before deleting your account." %}
       </p>

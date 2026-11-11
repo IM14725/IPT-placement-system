@@ -35,6 +35,8 @@
                     {% elif field.name == 'industry' %}factory
                     {% elif field.name == 'email' %}mail
                     {% elif field.name == 'phone' %}call
+                    {% elif field.name == 'brela_number' %}app_registration
+                    {% elif field.name == 'tin' %}receipt_long
                     {% elif field.name == 'description' %}description
                     {% elif field.name == 'region' %}map
                     {% elif field.name == 'district' %}location_on
@@ -96,14 +98,14 @@
                 <div class="flex flex-col sm:flex-row gap-xs sm:items-center">
                   <form method="post" action="{% url 'organization-member-role' m.id %}" class="flex items-center gap-xs">
                     {% csrf_token %}
-                    <select name="role" class="ipt-select text-metadata" aria-label="{% trans 'Role' %}">
+                    <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">badge</span></span><select name="role"  aria-label="{% trans 'Role' %}">
                       {% for value, label in assignable_roles %}<option value="{{ value }}" {% if m.role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
-                    </select>
+                    </select></div>
                     <button type="submit" class="px-sm py-1.5 rounded-lg bg-surface-container text-on-surface text-metadata font-semibold">{% trans "Set role" %}</button>
                   </form>
                   <form method="post" action="{% url 'organization-remove-member' m.id %}" class="flex items-center gap-xs" onsubmit="return confirm('Revoke this member\'s access? Their history is kept.');">
                     {% csrf_token %}
-                    <input name="reason" required maxlength="200" placeholder="{% trans 'Reason for removal' %}" class="px-sm py-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-metadata">
+                    <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input name="reason" required maxlength="200" placeholder="{% trans 'Reason for removal' %}"></div>
                     <button type="submit" class="text-error hover:bg-error-container/40 p-1.5 rounded-lg transition-colors" title="{% trans 'Remove access' %}">
                       <span class="material-symbols-outlined text-[20px]">person_remove</span>
                     </button>

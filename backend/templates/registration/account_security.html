@@ -22,8 +22,8 @@
     <p class="break-all font-body-md">{{ user.email }}</p>
     <form method="post" action="{% url 'change-email' %}" class="grid grid-cols-1 md:grid-cols-2 gap-sm items-end">
       {% csrf_token %}
-      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{{ email_form.email.label }}{{ email_form.email }}</label>
-      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{{ email_form.current_password.label }}{{ email_form.current_password }}</label>
+      {% include "includes/form_field.html" with field=email_form.email label_class="font-metadata text-metadata text-on-surface-variant" %}
+      {% include "includes/form_field.html" with field=email_form.current_password label_class="font-metadata text-metadata text-on-surface-variant" %}
       <button type="submit" class="md:col-span-2 justify-self-start bg-primary text-on-primary font-semibold px-md py-2 rounded-lg">Send code to new email</button>
     </form>
   </section>
@@ -37,8 +37,8 @@
     {% if user.is_student %}<p class="font-metadata text-metadata text-on-surface-variant">Students must verify their phone before they can submit an IPT application.</p>{% endif %}
     <form method="post" action="{% url 'change-phone' %}" class="grid grid-cols-1 md:grid-cols-2 gap-sm items-end">
       {% csrf_token %}
-      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{{ phone_form.phone.label }} (use your current number to verify it){{ phone_form.phone }}</label>
-      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{{ phone_form.current_password.label }}{{ phone_form.current_password }}</label>
+      {% include "includes/form_field.html" with field=phone_form.phone label_class="font-metadata text-metadata text-on-surface-variant" %}
+      {% include "includes/form_field.html" with field=phone_form.current_password label_class="font-metadata text-metadata text-on-surface-variant" %}
       <button type="submit" class="md:col-span-2 justify-self-start bg-primary text-on-primary font-semibold px-md py-2 rounded-lg">Send SMS code</button>
     </form>
   </section>

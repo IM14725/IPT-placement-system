@@ -33,7 +33,14 @@ def organization_email_taken(email):
 
 
 def create_organization(
-    user, name, organization_type=OrganizationType.COMPANY, email="", phone="", position=""
+    user,
+    name,
+    organization_type=OrganizationType.COMPANY,
+    email="",
+    phone="",
+    position="",
+    brela_number="",
+    tin="",
 ):
     """Create the organization and its first member, who becomes the Manager (Owner).
 
@@ -47,6 +54,8 @@ def create_organization(
         email=(email or "").strip().lower() or getattr(user, "email", "") or "",
         phone=phone or getattr(user, "phone", "") or "",
         industry="",
+        brela_number=brela_number or "",
+        tin=tin or "",
     )
     member, _ = OrganizationMember.objects.get_or_create(
         organization=org,

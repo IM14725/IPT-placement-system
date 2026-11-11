@@ -22,7 +22,7 @@
     <div class="xl:col-span-2 bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
       <form method="get" class="p-md bg-surface-container-low border-b border-surface-container-highest flex gap-sm">
         <input type="hidden" name="status" value="{{ status }}">
-        <input name="q" value="{{ q }}" placeholder="Search by name or abbreviation" class="flex-1 px-sm py-2 bg-surface-container-lowest rounded-lg border border-outline-variant font-body-md text-body-md outline-none focus:ring-2 focus:ring-primary">
+        <div class="ipt-field-box flex-1"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input name="q" value="{{ q }}" placeholder="Search by name or abbreviation"></div>
         <button class="px-md py-2 bg-surface-container hover:bg-surface-container-high rounded-full font-metadata text-metadata" type="submit">Search</button>
       </form>
       <div class="overflow-x-auto">
@@ -61,10 +61,10 @@
                     {% if uni.verification_status == 'PENDING' %}
                       <form method="post" class="flex items-center gap-xs" onsubmit="return confirm('Merge into the selected university? This record will be deleted.');">{% csrf_token %}
                         <input type="hidden" name="id" value="{{ uni.id }}">
-                        <select name="target" required class="px-xs py-1 rounded-lg border border-outline-variant bg-surface-container-lowest text-metadata font-metadata max-w-[11rem]">
+                        <div class="ipt-field-box max-w-[11rem]"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><select name="target" required>
                           <option value="">Merge into…</option>
                           {% for a in approved %}<option value="{{ a.id }}">{{ a.name }}</option>{% endfor %}
-                        </select>
+                        </select></div>
                         <button name="action" value="merge" class="px-sm py-1 rounded-full bg-surface-container font-metadata text-metadata" type="submit">Merge</button>
                       </form>
                     {% endif %}
@@ -86,11 +86,7 @@
         {% csrf_token %}
         <input type="hidden" name="action" value="create">
         {% for field in form %}
-          <div class="flex flex-col gap-xs">
-            <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}<p class="text-error font-metadata text-metadata">{{ field.errors.0 }}</p>{% endif %}
-          </div>
+          {% include "includes/form_field.html" with field=field label_class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" %}
         {% endfor %}
         <button class="mt-xs bg-primary text-on-primary rounded-full px-md py-2 font-body-md" type="submit">Add university</button>
       </form>

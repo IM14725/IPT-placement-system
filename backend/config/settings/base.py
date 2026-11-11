@@ -161,7 +161,8 @@ AUTH_USER_MODEL = "accounts.User"
 
 # Sessions: a hard 10-minute lifetime enforced on the server (apps/accounts/sessions.py),
 # one live session per account, HttpOnly + SameSite cookies. Nothing is kept in JS storage.
-SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE", default=600)
+SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE", default=600)  # idle window, restarted by activity
+SESSION_ABSOLUTE_MAX_SECONDS = env.int("SESSION_ABSOLUTE_MAX_SECONDS", default=3 * 60 * 60)  # hard ceiling from login
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"  # Lax: the payment gateway returns users via top-level GET
 SESSION_SAVE_EVERY_REQUEST = False
@@ -196,6 +197,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {"NAME": "apps.accounts.validators.BreachedPasswordValidator"},
 ]
 
 LANGUAGE_CODE = "en-us"
@@ -260,6 +262,16 @@ CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300
 
+# Public welcome page: a trust counter only appears once it reaches its minimum, so an
+# early-stage platform never advertises tiny numbers.
+PUBLIC_STATS_MIN = {
+    "organizations": 10,
+    "slots": 20,
+    "universities": 5,
+    "students": 100,
+    "regions": 3,
+}
+
 # Redis-backed hot-key cache (apps/core/cache.py) — reduces DB hits when many
 # students search the same slots at once. Disabled in tests via conftest.
 CACHE_ENABLED = env("CACHE_ENABLED", default=True)
@@ -270,6 +282,8 @@ REGIONS_CACHE_TTL = env("REGIONS_CACHE_TTL", default=3600)
 VERIFICATION_CACHE_TTL = env("VERIFICATION_CACHE_TTL", default=300)
 
 # Token-bucket rate limiting (apps/core/rate_limit.py). Disabled in tests.
+# Keyless bot check (honeypot + signed form timestamp) on login and register; see apps/accounts/antibot.py.
+ANTIBOT_ENABLED = env.bool("ANTIBOT_ENABLED", default=True)
 RATE_LIMIT_ENABLED = env("RATE_LIMIT_ENABLED", default=True)
 
 # Beat schedule: expire pending applications past their 3-hour payment deadline.

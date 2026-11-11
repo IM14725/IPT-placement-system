@@ -21,7 +21,7 @@
       <input type="hidden" name="kind" value="{{ kind }}">
       <input type="hidden" name="id" value="{{ obj_id }}">
       <input type="hidden" name="next" value="{{ next_url }}">
-      <input name="reason" required maxlength="500" placeholder="Reason for suspension (recorded in the audit log)" class="w-full px-sm py-2 bg-surface-container-lowest rounded-lg border border-outline-variant font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 outline-none focus:ring-2 focus:ring-primary">
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input name="reason" required maxlength="500" placeholder="Reason for suspension (recorded in the audit log)"></div>
       <button class="w-full py-3 px-md bg-[#fff4e5] hover:bg-[#ffe9cc] text-[#a16207] rounded-lg text-body-md font-medium transition-all flex items-center justify-center gap-xs" name="action" value="suspend" type="submit">
         <span class="material-symbols-outlined text-[20px]">block</span>
         Suspend Account

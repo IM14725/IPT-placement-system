@@ -2,8 +2,37 @@
 <html lang="{% get_current_language as CUR_LANG %}{{ CUR_LANG }}" class="bg-background">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#3525cd">
+  <script>
+    /* Apply the saved/system theme before first paint to avoid a light flash. */
+    (function () {
+      var m = "system";
+      try { m = localStorage.getItem("ipt-theme") || "system"; } catch (e) {}
+      var dark = m === "dark" || (m !== "light" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.classList.toggle("dark", dark);
+      document.documentElement.setAttribute("data-theme", m);
+    })();
+  </script>
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
   <title>{% block title %}IPT Marketplace{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{% trans 'Find verified Industrial Practical Training (IPT) slots in Tanzania, or recruit pre-verified students. Secure, mobile-money payments.' %}{% endblock %}">
+  <meta name="robots" content="{% block robots %}noindex, nofollow{% endblock %}">
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="IPT Marketplace">
+  <meta property="og:title" content="{% block meta_title %}IPT Marketplace{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{% trans 'Find verified Industrial Practical Training (IPT) slots in Tanzania, or recruit pre-verified students. Secure, mobile-money payments.' %}{% endblock %}">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/og-image.png' %}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="{% get_current_language as OG_LANG %}{% if OG_LANG == 'sw' %}sw_TZ{% else %}en_US{% endif %}">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
@@ -16,21 +45,54 @@
       theme: {
         extend: {
           colors: {
-            "on-tertiary-fixed-variant": "#7b2f00", "outline": "#777587", "on-primary-fixed-variant": "#3323cc",
-            "on-secondary": "#ffffff", "on-primary": "#ffffff", "tertiary-fixed": "#ffdbcc", "on-secondary-fixed": "#07006c",
-            "inverse-surface": "#2e3132", "inverse-on-surface": "#f0f1f2", "error": "#ba1a1a", "on-surface": "#191c1d",
-            "background": "#f8f9fa", "surface-container-lowest": "#ffffff", "surface-tint": "#4d44e3",
-            "secondary": "#4648d4", "surface-container-highest": "#e1e3e4", "on-primary-container": "#dad7ff",
-            "on-error-container": "#93000a", "tertiary": "#7e3000", "on-secondary-container": "#fffbff",
-            "primary": "#3525cd", "on-primary-fixed": "#0f0069", "primary-container": "#4f46e5", "on-error": "#ffffff",
-            "tertiary-fixed-dim": "#ffb695", "surface-container-low": "#f3f4f5", "surface-bright": "#f8f9fa",
-            "secondary-container": "#6063ee", "secondary-fixed-dim": "#c0c1ff", "on-background": "#191c1d",
-            "surface-dim": "#d9dadb", "surface": "#f8f9fa", "primary-fixed": "#e2dfff", "primary-fixed-dim": "#c3c0ff",
-            "surface-container": "#edeeef", "secondary-fixed": "#e1e0ff", "outline-variant": "#c7c4d8",
-            "on-secondary-fixed-variant": "#2f2ebe", "surface-variant": "#e1e3e4", "on-tertiary-fixed": "#351000",
-            "inverse-primary": "#c3c0ff", "on-tertiary": "#ffffff", "on-surface-variant": "#464555",
-            "on-tertiary-container": "#ffd2be", "error-container": "#ffdad6", "surface-container-high": "#e7e8e9",
-            "tertiary-container": "#a44100"
+            "on-tertiary-fixed-variant": "rgb(var(--c-on-tertiary-fixed-variant) / <alpha-value>)",
+            "outline": "rgb(var(--c-outline) / <alpha-value>)",
+            "on-primary-fixed-variant": "rgb(var(--c-on-primary-fixed-variant) / <alpha-value>)",
+            "on-secondary": "rgb(var(--c-on-secondary) / <alpha-value>)",
+            "on-primary": "rgb(var(--c-on-primary) / <alpha-value>)",
+            "tertiary-fixed": "rgb(var(--c-tertiary-fixed) / <alpha-value>)",
+            "on-secondary-fixed": "rgb(var(--c-on-secondary-fixed) / <alpha-value>)",
+            "inverse-surface": "rgb(var(--c-inverse-surface) / <alpha-value>)",
+            "inverse-on-surface": "rgb(var(--c-inverse-on-surface) / <alpha-value>)",
+            "error": "rgb(var(--c-error) / <alpha-value>)",
+            "on-surface": "rgb(var(--c-on-surface) / <alpha-value>)",
+            "background": "rgb(var(--c-background) / <alpha-value>)",
+            "surface-container-lowest": "rgb(var(--c-surface-container-lowest) / <alpha-value>)",
+            "surface-tint": "rgb(var(--c-surface-tint) / <alpha-value>)",
+            "secondary": "rgb(var(--c-secondary) / <alpha-value>)",
+            "surface-container-highest": "rgb(var(--c-surface-container-highest) / <alpha-value>)",
+            "on-primary-container": "rgb(var(--c-on-primary-container) / <alpha-value>)",
+            "on-error-container": "rgb(var(--c-on-error-container) / <alpha-value>)",
+            "tertiary": "rgb(var(--c-tertiary) / <alpha-value>)",
+            "on-secondary-container": "rgb(var(--c-on-secondary-container) / <alpha-value>)",
+            "primary": "rgb(var(--c-primary) / <alpha-value>)",
+            "on-primary-fixed": "rgb(var(--c-on-primary-fixed) / <alpha-value>)",
+            "primary-container": "rgb(var(--c-primary-container) / <alpha-value>)",
+            "on-error": "rgb(var(--c-on-error) / <alpha-value>)",
+            "tertiary-fixed-dim": "rgb(var(--c-tertiary-fixed-dim) / <alpha-value>)",
+            "surface-container-low": "rgb(var(--c-surface-container-low) / <alpha-value>)",
+            "surface-bright": "rgb(var(--c-surface-bright) / <alpha-value>)",
+            "secondary-container": "rgb(var(--c-secondary-container) / <alpha-value>)",
+            "secondary-fixed-dim": "rgb(var(--c-secondary-fixed-dim) / <alpha-value>)",
+            "on-background": "rgb(var(--c-on-background) / <alpha-value>)",
+            "surface-dim": "rgb(var(--c-surface-dim) / <alpha-value>)",
+            "surface": "rgb(var(--c-surface) / <alpha-value>)",
+            "primary-fixed": "rgb(var(--c-primary-fixed) / <alpha-value>)",
+            "primary-fixed-dim": "rgb(var(--c-primary-fixed-dim) / <alpha-value>)",
+            "surface-container": "rgb(var(--c-surface-container) / <alpha-value>)",
+            "secondary-fixed": "rgb(var(--c-secondary-fixed) / <alpha-value>)",
+            "outline-variant": "rgb(var(--c-outline-variant) / <alpha-value>)",
+            "on-secondary-fixed-variant": "rgb(var(--c-on-secondary-fixed-variant) / <alpha-value>)",
+            "surface-variant": "rgb(var(--c-surface-variant) / <alpha-value>)",
+            "on-tertiary-fixed": "rgb(var(--c-on-tertiary-fixed) / <alpha-value>)",
+            "inverse-primary": "rgb(var(--c-inverse-primary) / <alpha-value>)",
+            "on-tertiary": "rgb(var(--c-on-tertiary) / <alpha-value>)",
+            "on-surface-variant": "rgb(var(--c-on-surface-variant) / <alpha-value>)",
+            "on-tertiary-container": "rgb(var(--c-on-tertiary-container) / <alpha-value>)",
+            "error-container": "rgb(var(--c-error-container) / <alpha-value>)",
+            "surface-container-high": "rgb(var(--c-surface-container-high) / <alpha-value>)",
+            "tertiary-container": "rgb(var(--c-tertiary-container) / <alpha-value>)",
+            "brand": "rgb(var(--c-brand) / <alpha-value>)"
           },
           borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
           spacing: { base: "4px", xs: "8px", md: "24px", gutter: "24px", "container-max": "1280px", lg: "32px", xl: "48px", sm: "16px" },
@@ -62,97 +124,97 @@
     #ipt-form-loading {
       position: fixed; inset: 0; z-index: 200;
       display: none; align-items: center; justify-content: center;
-      background: rgba(248, 249, 250, 0.65);
+      background: rgb(var(--c-background) / 0.65);
       backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
     }
     #ipt-form-loading .ipt-loading-box {
       display: flex; flex-direction: column; align-items: center; gap: 16px;
-      padding: 32px; border-radius: 16px; background: #ffffff;
+      padding: 32px; border-radius: 16px; background: rgb(var(--c-surface-container-lowest));
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
     }
     #ipt-form-loading .ipt-spinner {
       width: 44px; height: 44px; border-radius: 50%;
-      border: 4px solid #c3c0ff; border-top-color: #3525cd;
+      border: 4px solid rgb(var(--c-primary-fixed-dim)); border-top-color: rgb(var(--c-primary));
       animation: ipt-spin 0.9s linear infinite;
     }
     @keyframes ipt-spin { to { transform: rotate(360deg); } }
     #ipt-form-loading .ipt-loading-text {
       font-family: "Inter", sans-serif; font-size: 13px; line-height: 18px;
-      color: #464555; text-align: center;
+      color: rgb(var(--c-on-surface-variant)); text-align: center;
     }
 
     /* IPT field component: distinct icon chip, input area, and description */
-    .ipt-field-box { display: flex; align-items: stretch; border: 1px solid #c7c4d8; border-radius: 0.5rem; background: #ffffff; overflow: hidden; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
-    .ipt-field-box:focus-within { border-color: #3525cd; box-shadow: 0 0 0 2px rgba(53, 37, 205, 0.3); }
-    .ipt-field-icon { display: flex; align-items: center; justify-content: center; width: 46px; flex: none; background: #edeeef; color: #464555; border-right: 1px solid #c7c4d8; }
-    .ipt-field-box > input { flex: 1; min-width: 0; border: none !important; outline: none !important; background: transparent !important; box-shadow: none !important; padding: 10px 12px; color: #191c1d; font-family: "Inter", sans-serif; font-size: 14px; line-height: 20px; }
-    .ipt-field-box > input::placeholder { color: #777587; }
+    .ipt-field-box { display: flex; align-items: stretch; border: 1px solid rgb(var(--c-outline-variant)); border-radius: 0.5rem; background: rgb(var(--c-surface-container-lowest)); overflow: hidden; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+    .ipt-field-box:focus-within { border-color: rgb(var(--c-primary)); box-shadow: 0 0 0 2px rgb(var(--c-primary) / 0.3); }
+    .ipt-field-icon { display: flex; align-items: center; justify-content: center; width: 46px; flex: none; background: rgb(var(--c-surface-container)); color: rgb(var(--c-on-surface-variant)); border-right: 1px solid rgb(var(--c-outline-variant)); }
+    .ipt-field-box > input { flex: 1; min-width: 0; border: none !important; outline: none !important; background: transparent !important; box-shadow: none !important; padding: 10px 12px; color: rgb(var(--c-on-surface)); font-family: "Inter", sans-serif; font-size: 14px; line-height: 20px; }
+    .ipt-field-box > input::placeholder { color: rgb(var(--c-outline)); }
     .ipt-field-box > select {
       flex: 1; min-width: 0; margin: 0;
       border: none !important; outline: none !important;
       background-color: transparent !important; box-shadow: none !important;
-      padding: 10px 38px 10px 12px; color: #191c1d;
+      padding: 10px 38px 10px 12px; color: rgb(var(--c-on-surface));
       font-family: "Inter", sans-serif; font-size: 14px; line-height: 20px;
       appearance: none; -webkit-appearance: none; cursor: pointer;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23464555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat: no-repeat; background-position: right 10px center; background-size: 18px;
     }
-    .ipt-field-box > select:disabled { color: #777587; cursor: not-allowed; }
-    .ipt-field-box > select option { color: #191c1d; background: #ffffff; }
+    .ipt-field-box > select:disabled { color: rgb(var(--c-outline)); cursor: not-allowed; }
+    .ipt-field-box > select option { color: rgb(var(--c-on-surface)); background: rgb(var(--c-surface-container-lowest)); }
     .ipt-field-box > textarea {
       flex: 1; min-width: 0; border: none !important; outline: none !important;
       background: transparent !important; box-shadow: none !important;
-      padding: 10px 12px; color: #191c1d; font-family: "Inter", sans-serif;
+      padding: 10px 12px; color: rgb(var(--c-on-surface)); font-family: "Inter", sans-serif;
       font-size: 14px; line-height: 20px; resize: vertical;
     }
     .ipt-field-box > .ipt-file-wrap { flex: 1; min-width: 0; padding: 6px 12px; display: flex; align-items: center; }
     .ipt-field-box > .ipt-combobox { flex: 1; min-width: 0; position: relative; display: flex; align-items: stretch; }
-    .ipt-field-box > .ipt-combobox > input { flex: 1; min-width: 0; border: none !important; outline: none !important; background: transparent !important; box-shadow: none !important; padding: 10px 12px; color: #191c1d; font-family: "Inter", sans-serif; font-size: 14px; line-height: 20px; }
-    .ipt-field-box > .ipt-combobox > input::placeholder { color: #777587; }
+    .ipt-field-box > .ipt-combobox > input { flex: 1; min-width: 0; border: none !important; outline: none !important; background: transparent !important; box-shadow: none !important; padding: 10px 12px; color: rgb(var(--c-on-surface)); font-family: "Inter", sans-serif; font-size: 14px; line-height: 20px; }
+    .ipt-field-box > .ipt-combobox > input::placeholder { color: rgb(var(--c-outline)); }
     .ipt-field-box.ipt-has-combobox { overflow: visible; }
     /* Sidebar menu */
-    .side-link { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; color: #464555; font-size: 14px; line-height: 20px; font-weight: 500; transition: background 0.15s ease, color 0.15s ease; }
-    .side-link:hover { background: #edeeef; color: #191c1d; }
-    .side-link.active { background: #e2dfff; color: #3525cd; font-weight: 600; }
+    .side-link { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; color: rgb(var(--c-on-surface-variant)); font-size: 14px; line-height: 20px; font-weight: 500; transition: background 0.15s ease, color 0.15s ease; }
+    .side-link:hover { background: rgb(var(--c-surface-container)); color: rgb(var(--c-on-surface)); }
+    .side-link.active { background: rgb(var(--c-primary-fixed)); color: rgb(var(--c-primary)); font-weight: 600; }
     .side-link .material-symbols-outlined { font-size: 20px; }
-    .side-heading { padding: 14px 12px 4px; font-size: 11px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: #777587; font-weight: 600; }
+    .side-heading { padding: 14px 12px 4px; font-size: 11px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(var(--c-outline)); font-weight: 600; }
     @media (prefers-reduced-motion: reduce) { #app-sidebar, #sidebar-backdrop { transition: none !important; } }
     /* Active nav link indicator */
     .nav-link.active { background: rgba(255, 255, 255, 0.2); color: #fff !important; }
     .nav-link.active:hover { background: rgba(255, 255, 255, 0.3); }
     .ipt-field-box.ipt-has-combobox > .ipt-field-icon { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; }
-    .ipt-file-input { width: 100%; color: #464555; font-family: "Inter", sans-serif; font-size: 13px; line-height: 20px; cursor: pointer; }
-    .ipt-file-input::file-selector-button { margin-right: 10px; border: none; background: #3525cd; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-family: "Inter", sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
-    .ipt-file-input::file-selector-button:hover { background: #4f46e5; }
-    .ipt-field-action { display: flex; align-items: center; justify-content: center; padding: 0 10px; color: #464555; border-left: 1px solid #c7c4d8; background: #ffffff; cursor: pointer; flex: none; transition: color 0.15s ease, background 0.15s ease; }
-    .ipt-field-action:hover { color: #191c1d; background: #f3f4f5; }
-    .ipt-field-box.is-error { border-color: #ba1a1a; box-shadow: 0 0 0 2px rgba(186, 26, 26, 0.3); }
-    .ipt-field-desc { display: flex; align-items: center; gap: 6px; margin-top: 6px; color: #464555; font-size: 12px; line-height: 16px; font-family: "Inter", sans-serif; }
+    .ipt-file-input { width: 100%; color: rgb(var(--c-on-surface-variant)); font-family: "Inter", sans-serif; font-size: 13px; line-height: 20px; cursor: pointer; }
+    .ipt-file-input::file-selector-button { margin-right: 10px; border: none; background: rgb(var(--c-primary)); color: rgb(var(--c-on-primary)); padding: 6px 12px; border-radius: 6px; font-family: "Inter", sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+    .ipt-file-input::file-selector-button:hover { background: rgb(var(--c-primary-container)); }
+    .ipt-field-action { display: flex; align-items: center; justify-content: center; padding: 0 10px; color: rgb(var(--c-on-surface-variant)); border-left: 1px solid rgb(var(--c-outline-variant)); background: rgb(var(--c-surface-container-lowest)); cursor: pointer; flex: none; transition: color 0.15s ease, background 0.15s ease; }
+    .ipt-field-action:hover { color: rgb(var(--c-on-surface)); background: rgb(var(--c-surface-container-low)); }
+    .ipt-field-box.is-error { border-color: rgb(var(--c-error)); box-shadow: 0 0 0 2px rgb(var(--c-error) / 0.3); }
+    .ipt-field-desc { display: flex; align-items: center; gap: 6px; margin-top: 6px; color: rgb(var(--c-on-surface-variant)); font-size: 12px; line-height: 16px; font-family: "Inter", sans-serif; }
     .ipt-field-desc .material-symbols-outlined { font-size: 14px; }
-    .ipt-field-error { display: flex; align-items: center; gap: 6px; margin-top: 6px; color: #ba1a1a; font-size: 12px; line-height: 16px; font-family: "Inter", sans-serif; }
+    .ipt-field-error { display: flex; align-items: center; gap: 6px; margin-top: 6px; color: rgb(var(--c-error)); font-size: 12px; line-height: 16px; font-family: "Inter", sans-serif; }
     .ipt-field-error .material-symbols-outlined { font-size: 14px; }
 
     /* Media upload preview: confirm the selected file before submitting */
-    .ipt-media-preview { display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 10px 12px; border: 1px solid #c7c4d8; border-radius: 0.5rem; background: #f3f4f5; }
+    .ipt-media-preview { display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 10px 12px; border: 1px solid rgb(var(--c-outline-variant)); border-radius: 0.5rem; background: rgb(var(--c-surface-container-low)); }
     .ipt-media-preview.hidden { display: none; }
-    .ipt-media-thumb { width: 56px; height: 56px; flex: none; border-radius: 0.5rem; overflow: hidden; background: #e1e3e4; display: flex; align-items: center; justify-content: center; }
+    .ipt-media-thumb { width: 56px; height: 56px; flex: none; border-radius: 0.5rem; overflow: hidden; background: rgb(var(--c-surface-container-highest)); display: flex; align-items: center; justify-content: center; }
     .ipt-media-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .ipt-media-icon { color: #ba1a1a; font-size: 30px; }
-    .ipt-media-icon:not(.pdf) { color: #3525cd; }
+    .ipt-media-icon { color: rgb(var(--c-error)); font-size: 30px; }
+    .ipt-media-icon:not(.pdf) { color: rgb(var(--c-primary)); }
     .ipt-media-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-    .ipt-media-name { color: #191c1d; font-size: 13px; line-height: 18px; font-weight: 600; font-family: "Inter", sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ipt-media-name { color: rgb(var(--c-on-surface)); font-size: 13px; line-height: 18px; font-weight: 600; font-family: "Inter", sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .ipt-media-sub { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .ipt-media-size { color: #464555; font-size: 12px; line-height: 16px; font-family: "Inter", sans-serif; }
-    .ipt-media-badge { display: inline-flex; align-items: center; gap: 4px; color: #1b5e20; background: #e8f5e9; font-size: 11px; line-height: 16px; font-family: "Inter", sans-serif; font-weight: 500; padding: 1px 8px; border-radius: 9999px; }
+    .ipt-media-size { color: rgb(var(--c-on-surface-variant)); font-size: 12px; line-height: 16px; font-family: "Inter", sans-serif; }
+    .ipt-media-badge { display: inline-flex; align-items: center; gap: 4px; color: rgb(var(--c-ok-fg)); background: rgb(var(--c-ok-bg)); font-size: 11px; line-height: 16px; font-family: "Inter", sans-serif; font-weight: 500; padding: 1px 8px; border-radius: 9999px; }
     .ipt-media-badge .material-symbols-outlined { font-size: 12px; }
-    .ipt-media-remove { flex: none; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: none; background: transparent; color: #464555; border-radius: 9999px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
-    .ipt-media-remove:hover { background: #e1e3e4; color: #ba1a1a; }
+    .ipt-media-remove { flex: none; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: none; background: transparent; color: rgb(var(--c-on-surface-variant)); border-radius: 9999px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
+    .ipt-media-remove:hover { background: rgb(var(--c-surface-container-highest)); color: rgb(var(--c-error)); }
     .ipt-media-remove .material-symbols-outlined { font-size: 20px; }
 
     /* Select wrapper with trailing caret for filter bars */
     .ipt-filter-select { position: relative; display: flex; align-items: center; }
     .ipt-filter-select > select { position: relative; z-index: 1; }
-    .ipt-filter-caret { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; color: #464555; pointer-events: none; font-size: 18px; }
+    .ipt-filter-caret { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; color: rgb(var(--c-on-surface-variant)); pointer-events: none; font-size: 18px; }
 
     /* Page transition for auth screens */
     @keyframes auth-fade-up {
@@ -162,33 +224,34 @@
     .auth-card { animation: auth-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .auth-card .auth-card-panel { animation: auth-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both; }
   </style>
+  <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
-<body class="bg-background min-h-screen text-on-surface font-body-md">
-  <nav id="topbar" class="fixed top-0 inset-x-0 z-50 bg-primary text-white shadow-lg shadow-primary/20">
-    <div class="max-w-[1280px] mx-auto px-md h-16 flex items-center justify-between gap-md">
+<body class="bg-background min-h-screen text-on-surface font-body-md{% if user.is_authenticated %} has-sidebar{% endif %}">
+  <nav id="topbar" class="fixed top-0 inset-x-0 z-50 bg-brand text-white shadow-lg shadow-brand/20">
+    <div class="max-w-[1280px] mx-auto px-3 sm:px-md h-16 flex items-center justify-between gap-2 sm:gap-md">
       <div class="flex items-center gap-sm min-w-0">
         {% if user.is_authenticated %}
           {% if user.is_student %}
-            <a href="{% url 'student-dashboard' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight shrink-0 whitespace-nowrap">
+            <a href="{% url 'student-dashboard' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-white tracking-tight shrink-0 whitespace-nowrap">
           {% elif user.is_organization %}
-            <a href="{% url 'organization-dashboard' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight shrink-0 whitespace-nowrap">
+            <a href="{% url 'organization-dashboard' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-white tracking-tight shrink-0 whitespace-nowrap">
           {% else %}
-            <a href="{% url 'platform-verifications' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight shrink-0 whitespace-nowrap">
+            <a href="{% url 'platform-verifications' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-white tracking-tight shrink-0 whitespace-nowrap">
           {% endif %}
         {% else %}
-          <a href="{% url 'home' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-on-primary tracking-tight shrink-0 whitespace-nowrap">
+          <a href="{% url 'home' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-white tracking-tight shrink-0 whitespace-nowrap">
         {% endif %}
           <img src="{% static 'images/logo.png' %}" alt="IPT Marketplace" class="h-8 w-auto rounded shrink-0">
           <span class="hidden sm:block">IPT Marketplace</span>
         </a>
       </div>
-      <div class="flex items-center gap-sm text-body-md">
+      <div class="flex items-center gap-1.5 sm:gap-sm text-body-md shrink-0">
         <form action="{% url 'set_language' %}" method="post" class="flex items-center">
           {% csrf_token %}
           <input type="hidden" name="next" value="{{ request.path }}">
           <label class="sr-only" for="language-switcher">{% trans "Language" %}</label>
           <select name="language" id="language-switcher" onchange="this.form.submit()"
-                  class="bg-white/10 text-white text-metadata rounded-lg pl-sm pr-xs py-1.5 cursor-pointer border border-white/25 focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none">
+                  class="bg-white/10 text-white text-metadata rounded-lg pl-2 sm:pl-sm pr-1 sm:pr-xs py-1.5 max-w-[84px] sm:max-w-none cursor-pointer border border-white/25 focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none">
             {% get_current_language as CURRENT_LANGUAGE %}
             {% get_available_languages as AVAILABLE_LANGUAGES %}
             {% get_language_info_list for AVAILABLE_LANGUAGES as langs %}
@@ -197,14 +260,18 @@
             {% endfor %}
           </select>
         </form>
+        <button type="button" id="theme-toggle" aria-label="{% trans 'Theme' %}" title="{% trans 'Theme' %}"
+                class="shrink-0 w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/40">
+          <span class="material-symbols-outlined" id="theme-toggle-icon">contrast</span>
+        </button>
         {% if user.is_authenticated %}
           <a href="{{ nav_user.url }}" class="hidden sm:flex items-center gap-2 pl-sm pr-md py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors" title="{% trans 'View your profile' %}">
             {% if nav_user.photo %}
               <img src="{{ nav_user.photo }}" alt="{% trans 'Profile' %}" class="w-7 h-7 rounded-full object-cover ring-2 ring-white/40">
             {% else %}
-              <span class="w-7 h-7 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-metadata">{{ nav_user.name|slice:":1"|upper }}</span>
+              <span class="w-7 h-7 rounded-full bg-primary-fixed text-white-fixed flex items-center justify-center font-bold text-metadata">{{ nav_user.name|slice:":1"|upper }}</span>
             {% endif %}
-            <span class="text-on-primary text-metadata font-semibold max-w-[140px] truncate">{{ nav_user.name }}</span>
+            <span class="text-white text-metadata font-semibold max-w-[140px] truncate">{{ nav_user.name }}</span>
           </a>
           <button type="button" id="sidebar-toggle" aria-controls="app-sidebar" aria-expanded="false"
                   data-label-open="{% trans 'Open menu' %}" data-label-close="{% trans 'Close menu' %}" aria-label="{% trans 'Open menu' %}"
@@ -212,8 +279,8 @@
             <span class="material-symbols-outlined" id="sidebar-toggle-icon">menu</span>
           </button>
         {% else %}
-          <a class="text-on-primary/80 hover:text-on-primary px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'login' %}">{% trans "Login" %}</a>
-          <a class="bg-surface-container-lowest text-primary px-md py-1.5 rounded-full font-semibold text-metadata uppercase tracking-wider hover:bg-primary-fixed transition-colors" href="{% url 'register' %}">{% trans "Register" %}</a>
+          <a class="text-white/80 hover:text-white px-2 sm:px-sm py-1.5 rounded-lg hover:bg-white/10 transition-colors" href="{% url 'login' %}">{% trans "Login" %}</a>
+          <a class="bg-surface-container-lowest text-primary px-3 sm:px-md py-1.5 rounded-full font-semibold text-metadata uppercase tracking-wider hover:bg-primary-fixed transition-colors" href="{% url 'register' %}">{% trans "Register" %}</a>
         {% endif %}
       </div>
     </div>
@@ -224,83 +291,57 @@
     <div class="fixed top-16 inset-x-0 z-40 bg-error text-on-error text-center text-metadata font-semibold py-1">EMERGENCY (break-glass) session: every action is logged and security is notified.</div>
   {% endif %}
   <div id="sidebar-backdrop" class="fixed inset-x-0 top-16 bottom-0 z-30 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200"></div>
-  <aside id="app-sidebar" aria-label="{% trans 'Main menu' %}" inert
-         class="fixed left-0 top-16 bottom-0 z-40 w-72 max-w-[85vw] bg-surface-container-lowest border-r border-outline-variant shadow-2xl flex flex-col -translate-x-full transition-transform duration-200 ease-out">
+  <aside id="app-sidebar" aria-label="{% trans 'Main menu' %}"
+         class="fixed left-0 top-16 bottom-0 z-40 bg-surface-container-lowest border-r border-outline-variant shadow-2xl flex flex-col">
     <nav class="flex-1 overflow-y-auto p-sm flex flex-col gap-1" aria-label="{% trans 'Main menu' %}">
       {% if user.is_student %}
-        <a class="side-link {% is_active request 'student-dashboard' 'student-profile' 'student-documents' %}" href="{% url 'student-dashboard' %}"><span class="material-symbols-outlined">dashboard</span>{% trans "Dashboard" %}</a>
-        <a class="side-link {% is_active request 'student-marketplace' %}" href="{% url 'student-marketplace' %}"><span class="material-symbols-outlined">search</span>{% trans "Find a Slot" %}</a>
-        <a class="side-link {% is_active request 'student-applications' 'student-payment' %}" href="{% url 'student-applications' %}"><span class="material-symbols-outlined">assignment</span>{% trans "My Applications" %}</a>
-        <a class="side-link {% is_active request 'student-profile' %}" href="{% url 'student-profile' %}"><span class="material-symbols-outlined">person</span>{% trans "Profile" %}</a>
+        <a class="side-link {% is_active request 'student-dashboard' 'student-profile' 'student-documents' %}" href="{% url 'student-dashboard' %}"><span class="material-symbols-outlined">dashboard</span><span class="side-label">{% trans "Dashboard" %}</span></a>
+        <a class="side-link {% is_active request 'student-marketplace' %}" href="{% url 'student-marketplace' %}"><span class="material-symbols-outlined">search</span><span class="side-label">{% trans "Find a Slot" %}</span></a>
+        <a class="side-link {% is_active request 'student-applications' 'student-payment' %}" href="{% url 'student-applications' %}"><span class="material-symbols-outlined">assignment</span><span class="side-label">{% trans "My Applications" %}</span></a>
+        <a class="side-link {% is_active request 'student-profile' %}" href="{% url 'student-profile' %}"><span class="material-symbols-outlined">person</span><span class="side-label">{% trans "Profile" %}</span></a>
+        <a class="side-link {% is_active request 'report-submit' %}" href="{% url 'report-submit' %}"><span class="material-symbols-outlined">flag</span><span class="side-label">{% trans "Report a problem" %}</span></a>
       {% elif user.is_organization %}
-        <a class="side-link {% is_active request 'organization-dashboard' 'organization-profile' %}" href="{% url 'organization-dashboard' %}"><span class="material-symbols-outlined">dashboard</span>{% trans "Dashboard" %}</a>
-        <a class="side-link {% is_active request 'organization-slots' 'organization-slot-new' 'organization-slot-edit' 'organization-applicants' 'organization-applicant-documents' %}" href="{% url 'organization-slots' %}"><span class="material-symbols-outlined">work</span>{% trans "Slots" %}</a>
-        <a class="side-link {% is_active request 'organization-profile' %}" href="{% url 'organization-profile' %}"><span class="material-symbols-outlined">apartment</span>{% trans "Organization profile" %}</a>
+        <a class="side-link {% is_active request 'organization-dashboard' 'organization-profile' %}" href="{% url 'organization-dashboard' %}"><span class="material-symbols-outlined">dashboard</span><span class="side-label">{% trans "Dashboard" %}</span></a>
+        <a class="side-link {% is_active request 'organization-slots' 'organization-slot-new' 'organization-slot-edit' 'organization-applicants' 'organization-applicant-documents' %}" href="{% url 'organization-slots' %}"><span class="material-symbols-outlined">work</span><span class="side-label">{% trans "Slots" %}</span></a>
+        <a class="side-link {% is_active request 'organization-profile' %}" href="{% url 'organization-profile' %}"><span class="material-symbols-outlined">apartment</span><span class="side-label">{% trans "Organization profile" %}</span></a>
+        <a class="side-link {% is_active request 'report-submit' %}" href="{% url 'report-submit' %}"><span class="material-symbols-outlined">flag</span><span class="side-label">{% trans "Report a problem" %}</span></a>
       {% else %}
-        <p class="side-heading">{% trans "Review" %}</p>
-        <a class="side-link {% is_active request 'platform-verifications' 'platform-student-verification' 'platform-organization-verification' %}" href="{% url 'platform-verifications' %}"><span class="material-symbols-outlined">fact_check</span>{% trans "Queue" %}</a>
-        <a class="side-link {% is_active request 'platform-directory' %}" href="{% url 'platform-directory' %}"><span class="material-symbols-outlined">groups</span>{% trans "Directory" %}</a>
-        <a class="side-link {% is_active request 'platform-slots' %}" href="{% url 'platform-slots' %}"><span class="material-symbols-outlined">work</span>{% trans "Slots" %}</a>
-        <a class="side-link {% is_active request 'platform-universities' %}" href="{% url 'platform-universities' %}"><span class="material-symbols-outlined">school</span>{% trans "Universities" %}</a>
-        <a class="side-link {% is_active request 'platform-reports' %}" href="{% url 'platform-reports' %}"><span class="material-symbols-outlined">flag</span>{% trans "Reports" %}</a>
-        <p class="side-heading">{% trans "Finance &amp; insight" %}</p>
-        <a class="side-link {% is_active request 'platform-ledger' %}" href="{% url 'platform-ledger' %}"><span class="material-symbols-outlined">receipt_long</span>{% trans "Ledger" %}</a>
-        <a class="side-link {% is_active request 'platform-metrics' %}" href="{% url 'platform-metrics' %}"><span class="material-symbols-outlined">monitoring</span>{% trans "Metrics" %}</a>
-        <p class="side-heading">{% trans "System" %}</p>
-        <a class="side-link {% is_active request 'platform-templates' %}" href="{% url 'platform-templates' %}"><span class="material-symbols-outlined">mail</span>{% trans "Templates" %}</a>
-        <a class="side-link {% is_active request 'platform-audit-logs' %}" href="{% url 'platform-audit-logs' %}"><span class="material-symbols-outlined">history</span>{% trans "Audit" %}</a>
-        <a class="side-link {% is_active request 'platform-roles' %}" href="{% url 'platform-roles' %}"><span class="material-symbols-outlined">admin_panel_settings</span>{% trans "Roles" %}</a>
-        <a class="side-link {% is_active request 'platform-integrity' %}" href="{% url 'platform-integrity' %}"><span class="material-symbols-outlined">verified_user</span>{% trans "Integrity" %}</a>
-        <a class="side-link {% is_active request 'platform-settings' %}" href="{% url 'platform-settings' %}"><span class="material-symbols-outlined">settings</span>{% trans "Settings" %}</a>
-        <p class="side-heading">{% trans "Security" %}</p>
+        <p class="side-heading"><span class="side-label">{% trans "Review" %}</span></p>
+        <a class="side-link {% is_active request 'platform-verifications' 'platform-student-verification' 'platform-organization-verification' %}" href="{% url 'platform-verifications' %}"><span class="material-symbols-outlined">fact_check</span><span class="side-label">{% trans "Queue" %}</span></a>
+        <a class="side-link {% is_active request 'platform-directory' %}" href="{% url 'platform-directory' %}"><span class="material-symbols-outlined">groups</span><span class="side-label">{% trans "Directory" %}</span></a>
+        <a class="side-link {% is_active request 'platform-slots' %}" href="{% url 'platform-slots' %}"><span class="material-symbols-outlined">work</span><span class="side-label">{% trans "Slots" %}</span></a>
+        <a class="side-link {% is_active request 'platform-universities' %}" href="{% url 'platform-universities' %}"><span class="material-symbols-outlined">school</span><span class="side-label">{% trans "Universities" %}</span></a>
+        <a class="side-link {% is_active request 'platform-locations' %}" href="{% url 'platform-locations' %}"><span class="material-symbols-outlined">location_on</span><span class="side-label">{% trans "Locations" %}</span></a>
+        <a class="side-link {% is_active request 'platform-reports' %}" href="{% url 'platform-reports' %}"><span class="material-symbols-outlined">flag</span><span class="side-label">{% trans "Reports" %}</span></a>
+        <p class="side-heading"><span class="side-label">{% trans "Finance &amp; insight" %}</span></p>
+        <a class="side-link {% is_active request 'platform-ledger' %}" href="{% url 'platform-ledger' %}"><span class="material-symbols-outlined">receipt_long</span><span class="side-label">{% trans "Ledger" %}</span></a>
+        <a class="side-link {% is_active request 'platform-metrics' %}" href="{% url 'platform-metrics' %}"><span class="material-symbols-outlined">monitoring</span><span class="side-label">{% trans "Metrics" %}</span></a>
+        <p class="side-heading"><span class="side-label">{% trans "System" %}</span></p>
+        <a class="side-link {% is_active request 'platform-templates' %}" href="{% url 'platform-templates' %}"><span class="material-symbols-outlined">mail</span><span class="side-label">{% trans "Templates" %}</span></a>
+        <a class="side-link {% is_active request 'platform-audit-logs' %}" href="{% url 'platform-audit-logs' %}"><span class="material-symbols-outlined">history</span><span class="side-label">{% trans "Audit" %}</span></a>
+        <a class="side-link {% is_active request 'platform-roles' %}" href="{% url 'platform-roles' %}"><span class="material-symbols-outlined">admin_panel_settings</span><span class="side-label">{% trans "Roles" %}</span></a>
+        <a class="side-link {% is_active request 'platform-integrity' %}" href="{% url 'platform-integrity' %}"><span class="material-symbols-outlined">verified_user</span><span class="side-label">{% trans "Integrity" %}</span></a>
+        <a class="side-link {% is_active request 'platform-settings' %}" href="{% url 'platform-settings' %}"><span class="material-symbols-outlined">settings</span><span class="side-label">{% trans "Settings" %}</span></a>
+        <p class="side-heading"><span class="side-label">{% trans "Security" %}</span></p>
         {% if user.is_super_admin %}
-        <a class="side-link {% is_active request 'platform-admins' 'platform-admin-new' 'platform-admin-detail' %}" href="{% url 'platform-admins' %}"><span class="material-symbols-outlined">manage_accounts</span>{% trans "Administrators" %}</a>
-        <a class="side-link {% is_active request 'platform-break-glass' %}" href="{% url 'platform-break-glass' %}"><span class="material-symbols-outlined">emergency</span>{% trans "Break-glass" %}</a>
+        <a class="side-link {% is_active request 'platform-admins' 'platform-admin-new' 'platform-admin-detail' %}" href="{% url 'platform-admins' %}"><span class="material-symbols-outlined">manage_accounts</span><span class="side-label">{% trans "Administrators" %}</span></a>
+        <a class="side-link {% is_active request 'platform-break-glass' %}" href="{% url 'platform-break-glass' %}"><span class="material-symbols-outlined">emergency</span><span class="side-label">{% trans "Break-glass" %}</span></a>
         {% endif %}
-        <a class="side-link {% is_active request 'platform-recovery' %}" href="{% url 'platform-recovery' %}"><span class="material-symbols-outlined">key</span>{% trans "Recovery requests" %}</a>
-        <a class="side-link {% is_active request 'mfa-settings' %}" href="{% url 'mfa-settings' %}"><span class="material-symbols-outlined">passkey</span>{% trans "My MFA" %}</a>
+        <a class="side-link {% is_active request 'platform-recovery' %}" href="{% url 'platform-recovery' %}"><span class="material-symbols-outlined">key</span><span class="side-label">{% trans "Recovery requests" %}</span></a>
+        <a class="side-link {% is_active request 'mfa-settings' %}" href="{% url 'mfa-settings' %}"><span class="material-symbols-outlined">passkey</span><span class="side-label">{% trans "My MFA" %}</span></a>
       {% endif %}
-      <p class="side-heading">{% trans "Account" %}</p>
-      <a class="side-link {% is_active request 'account-security' 'verify-contact' 'change-password' %}" href="{% url 'account-security' %}"><span class="material-symbols-outlined">shield_person</span>{% trans "Account &amp; security" %}</a>
+      <p class="side-heading"><span class="side-label">{% trans "Account" %}</span></p>
+      <a class="side-link {% is_active request 'account-security' 'verify-contact' 'change-password' %}" href="{% url 'account-security' %}"><span class="material-symbols-outlined">shield_person</span><span class="side-label">{% trans "Account &amp; security" %}</span></a>
     </nav>
     <div class="shrink-0 p-sm border-t border-outline-variant">
       <a href="{% url 'logout' %}" class="w-full flex items-center justify-center gap-xs px-md py-2.5 rounded-lg border border-error/40 text-error font-semibold hover:bg-error/10 transition-colors">
-        <span class="material-symbols-outlined text-[20px]">logout</span>{% trans "Logout" %}
+        <span class="material-symbols-outlined text-[20px]">logout</span><span class="side-label">{% trans "Logout" %}</span>
       </a>
     </div>
   </aside>
-  <script>
-    (function () {
-      var btn = document.getElementById("sidebar-toggle");
-      var side = document.getElementById("app-sidebar");
-      var back = document.getElementById("sidebar-backdrop");
-      var icon = document.getElementById("sidebar-toggle-icon");
-      if (!btn || !side || !back) return;
-
-      function setOpen(open) {
-        side.classList.toggle("-translate-x-full", !open);
-        back.classList.toggle("opacity-0", !open);
-        back.classList.toggle("pointer-events-none", !open);
-        if (open) { side.removeAttribute("inert"); } else { side.setAttribute("inert", ""); }
-        btn.setAttribute("aria-expanded", open ? "true" : "false");
-        btn.setAttribute("aria-label", open ? btn.dataset.labelClose : btn.dataset.labelOpen);
-        icon.textContent = open ? "close" : "menu";
-      }
-
-      btn.addEventListener("click", function () {
-        setOpen(btn.getAttribute("aria-expanded") !== "true");
-      });
-      back.addEventListener("click", function () { setOpen(false); });
-      document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && btn.getAttribute("aria-expanded") === "true") {
-          setOpen(false);
-          btn.focus();
-        }
-      });
-    })();
-  </script>
   {% endif %}
 
+  <div id="app-shell">
   {% if tc_update_banner %}
   <div id="tc-banner" class="w-full bg-[#fff8e1] border-b border-[#f9a825] px-md py-sm flex items-center justify-between gap-md">
     <div class="flex items-center gap-xs max-w-[1280px] mx-auto w-full">
@@ -326,7 +367,7 @@
   </script>
   {% endif %}
 
-  <main class="max-w-[1280px] mx-auto px-md pt-24 pb-md">
+  <main class="max-w-[1280px] mx-auto px-3 sm:px-md pt-24 pb-md">
     {% if messages %}
       <div class="mb-md space-y-sm">
         {% for message in messages %}
@@ -345,7 +386,7 @@
   </main>
 
   <footer class="w-full bg-surface-container py-xl mt-xl border-t border-outline-variant/30">
-    <div class="max-w-[1280px] mx-auto px-md flex flex-col gap-lg text-on-surface-variant text-metadata">
+    <div class="max-w-[1280px] mx-auto px-3 sm:px-md flex flex-col gap-lg text-on-surface-variant text-metadata">
       
       <!-- Footer Sections -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-xl w-full">
@@ -389,7 +430,7 @@
 
       <div class="flex flex-col sm:flex-row items-center justify-between gap-sm pt-md border-t border-outline-variant/20">
         <span>&copy; {% now "Y" %} IPT Marketplace. {% trans "All rights reserved." %}</span>
-        <div class="flex items-center gap-md">
+        <div class="flex flex-wrap items-center justify-center gap-x-md gap-y-1">
           <a href="{% url 'legal-terms' %}" class="hover:text-primary transition-colors">{% trans "Terms &amp; Conditions" %}</a>
           <span class="text-outline-variant">&bull;</span>
           <a href="{% url 'legal-privacy' %}" class="hover:text-primary transition-colors">{% trans "Privacy Policy" %}</a>
@@ -405,12 +446,31 @@
       </div>
     </div>
   </footer>
+  </div>
 
-  <div id="toast-container" class="fixed bottom-md right-md z-[100] flex flex-col gap-sm items-end w-80"></div>
+  {% if not user.is_authenticated %}
+  {% trans "Hello IPT Marketplace, I need help with..." as wa_text %}
+  <a href="https://wa.me/255756322833?text={{ wa_text|urlencode }}" target="_blank" rel="noopener noreferrer"
+     class="no-print fixed left-3 bottom-3 sm:left-md sm:bottom-md z-[90] w-14 h-14 rounded-full bg-[#25D366] text-white shadow-lg flex items-center justify-center hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#25D366]"
+     aria-label="{% trans 'Chat with us on WhatsApp' %}" title="{% trans 'Chat with us on WhatsApp' %}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+  </a>
+  {% endif %}
+
+  <div id="toast-container" class="fixed bottom-3 left-3 right-3 sm:bottom-md sm:right-md sm:left-auto z-[100] flex flex-col gap-sm items-end sm:w-80"></div>
 
    <script src="{% static 'js/app.js' %}"></script>
    <script src="{% static 'js/media-preview.js' %}"></script>
    <script src="{% static 'js/form-loading.js' %}"></script>
+   <script>
+     window.IPT = window.IPT || {};
+     window.IPT.i18n = {
+       phoneLength: "{% filter escapejs %}{% trans 'Enter 9 digits after +255, e.g. 0712 345 678.' %}{% endfilter %}",
+       phoneMobile: "{% filter escapejs %}{% trans 'Mobile numbers start with 06 or 07.' %}{% endfilter %}"
+     };
+   </script>
+   <script src="{% static 'js/phone-input.js' %}"></script>
+   <script src="{% static 'js/responsive.js' %}"></script>
   {% if user.is_authenticated %}
     <script>
       window.IPT = window.IPT || {};
@@ -422,18 +482,18 @@
     <script src="{% static 'js/session-guard.js' %}"></script>
 
     <!-- Inactivity Timer Modal -->
-    <div id="inactivity-modal" class="fixed top-4 left-4 z-[100] hidden bg-error-container text-on-error-container p-4 rounded-xl shadow-2xl max-w-xs border border-error/30 flex flex-col gap-2 transition-all">
+    <div id="inactivity-modal" class="fixed top-20 left-3 right-3 sm:right-auto sm:top-4 sm:left-4 z-[100] hidden bg-error-container text-on-error-container p-4 rounded-xl shadow-2xl max-w-xs border border-error/30 flex flex-col gap-2 transition-all">
       <div class="flex items-center gap-2 font-semibold">
         <span class="material-symbols-outlined text-[20px]">timer</span>
         <span>Session Expiring</span>
       </div>
-      <p class="text-sm">You have been inactive. You will be logged out in <span id="inactivity-countdown" class="font-bold text-error"></span> seconds to protect your account.</p>
+      <p class="text-sm">You have been inactive. You will be logged out in <span id="inactivity-countdown" class="font-bold text-error"></span> seconds to protect your account. Move or click to stay signed in.</p>
     </div>
 
     <script>
       (function() {
         let idleTime = 0;
-        const MAX_IDLE_TIME = 120; // 2 minutes
+        const MAX_IDLE_TIME = 600; // 10 minutes, same as the server's idle window
         const WARNING_TIME = 30; // Show warning 30 seconds before logout
         const modal = document.getElementById('inactivity-modal');
         const countdownEl = document.getElementById('inactivity-countdown');

@@ -11,8 +11,12 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
 
+from apps.accounts.tasks import DECOY_USER_ID
 from apps.accounts.forms import (
     ForgotPasswordForm,
     LoginForm,
@@ -33,6 +37,7 @@ logger = logging.getLogger("security")
 # Post-registration auto-login handoff: the task id is bound to the browser session
 # that submitted the form, and the signed finalize token is single-use and short-lived.
 AUTH_TASK_SESSION_KEY = "auth_task_id"
+DECOY_EMAIL_SESSION_KEY = "register_typed_email"
 AUTH_FINALIZE_SESSION_KEY = "auth_finalize_token"
 AUTH_FINALIZE_SALT = "accounts.finalize-auth"
 AUTH_FINALIZE_MAX_AGE = 60
@@ -53,7 +58,12 @@ def _register_denied(request, result):
         None,
         f"Too many registration attempts. Please try again in {max(1, int(result.retry_after))} seconds.",
     )
-    response = render(request, "registration/register.html", {"form": form}, status=429)
+    response = render(
+        request,
+        "registration/register.html",
+        {"form": form, "accept_terms": bool(request.POST.get("accept_terms"))},
+        status=429,
+    )
     response["Retry-After"] = str(max(1, int(result.retry_after)))
     return response
 
@@ -67,19 +77,104 @@ def _login_ip_key(request):
     return f"ip:{client_ip(request) or 'unknown'}"
 
 
-def _login_denied(request, result):
-    form = LoginForm(request.POST or None)
-    form.add_error(
-        None,
-        f"Too many login attempts. Please try again in {max(1, int(result.retry_after))} seconds.",
+def _login_blocked(request, form, seconds, message):
+    """429 login page with a live countdown to when the user may try again."""
+    seconds = max(1, int(seconds))
+    response = render(
+        request,
+        "registration/login.html",
+        {
+            "form": form,
+            "lockout_seconds": seconds,
+            "lockout_clock": f"{seconds // 60}:{seconds % 60:02d}",
+            "lockout_message": message,
+        },
+        status=429,
     )
-    response = render(request, "registration/login.html", {"form": form}, status=429)
-    response["Retry-After"] = str(max(1, int(result.retry_after)))
+    response["Retry-After"] = str(seconds)
     return response
 
 
+def _login_denied(request, result):
+    # The rate limiter runs before the lockout check; never show a shorter wait than the lock.
+    email = (request.POST.get("email") or "").strip().lower()
+    locked_for = lockout.lock_remaining("login", email) if email else 0
+    if locked_for > result.retry_after:
+        seconds, message = locked_for, "Too many failed attempts."
+    else:
+        seconds, message = result.retry_after, "Too many login attempts."
+    return _login_blocked(request, LoginForm(request.POST or None), seconds, message)
+
+
+def _search_filters(request):
+    return {name: request.GET.get(name, "") for name in ("region", "district", "industry", "level")}
+
+
+def _count_region_search(request, filters):
+    """Remember which regions people look for (a per-day counter, no identifiers) so the welcome page can lead with them."""
+    from apps.accounts.public import record_region_search
+    from apps.core.funnel import is_bot
+
+    if (filters["region"] or filters["district"]) and not is_bot(request):
+        record_region_search(filters["region"], filters["district"])
+
+
 def home(request):
-    return render(request, "home.html")
+    from apps.accounts.public import get_public_home
+    from apps.core.cache import get_districts, get_regions
+    from apps.core.education import EducationLevel
+    from apps.core.funnel import track
+
+    if request.method == "GET" and not request.user.is_authenticated:
+        track("home", request)
+    context = get_public_home(**_search_filters(request))
+    _count_region_search(request, context["filters"])
+    selected_region = context["filters"]["region"]
+    context.update(
+        {
+            "regions": get_regions(),
+            # Server-rendered so the district list also works without JavaScript.
+            "districts": get_districts(selected_region) if selected_region else [],
+            "levels": EducationLevel.choices,
+        }
+    )
+    return render(request, "home.html", context)
+
+
+# ?role=student / ?role=organization on /auth/register/ (the welcome page's two entry buttons)
+ROLE_PARAMS = {"student": UserRole.STUDENT, "organization": UserRole.ORGANIZATION}
+
+FUNNEL_BEACON_BUCKET = dict(capacity=20, refill_per_second=1 / 6, scope="funnel-beacon")
+
+
+def _funnel_ip_key(request):
+    return f"ip:{request.META.get('REMOTE_ADDR', 'unknown')}"
+
+
+@token_bucket(key_fn=_funnel_ip_key, methods=["POST"], **FUNNEL_BEACON_BUCKET)
+@require_POST
+@csrf_exempt  # a bare counter bump from the wizard; whitelisted step names, rate limited, carries no data
+def funnel_event(request):
+    from apps.core.funnel import BROWSER_STEPS, track
+
+    step = request.POST.get("step", "")
+    if step not in BROWSER_STEPS:
+        return HttpResponse(status=400)
+    track(step, request)
+    return HttpResponse(status=204)
+
+
+@token_bucket(capacity=30, refill_per_second=1 / 2, scope="public-slots", key_fn=_funnel_ip_key, methods=["GET"])
+@require_GET
+def public_slots_fragment(request):
+    """HTML for the welcome page's slot cards, used to refresh them in place while searching."""
+    from apps.accounts.public import get_public_home
+
+    context = get_public_home(**_search_filters(request))
+    _count_region_search(request, context["filters"])
+    response = render(request, "includes/public_slots.html", context)
+    response["X-Robots-Tag"] = "noindex"
+    return response
 
 
 @token_bucket(
@@ -107,6 +202,9 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             from apps.accounts.tasks import process_registration_task
+            from apps.core.funnel import track
+
+            track("register_submit", request)
 
             # Only a salted hash crosses the Celery broker, never the raw password.
             form_data = {
@@ -117,11 +215,16 @@ def register(request):
                 "organization_email": form.cleaned_data.get("organization_email"),
                 "organization_phone": form.cleaned_data.get("organization_phone"),
                 "position": form.cleaned_data.get("position"),
+                "brela_number": form.cleaned_data.get("brela_number"),
+                "tin": form.cleaned_data.get("tin"),
                 "first_name": form.cleaned_data.get("first_name"),
                 "last_name": form.cleaned_data.get("last_name"),
                 "phone": form.cleaned_data.get("phone"),
+                "login_url": request.build_absolute_uri(reverse("login")),
+                "reset_url": request.build_absolute_uri(reverse("forgot-password")),
             }
-            
+            request.session[DECOY_EMAIL_SESSION_KEY] = form_data["email"]
+
             task = process_registration_task.delay(form_data)
             request.session[AUTH_TASK_SESSION_KEY] = task.id
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -130,8 +233,21 @@ def register(request):
                 return resp
             return render(request, "registration/processing.html", {"task_id": task.id, "action": "register"})
     else:
-        form = RegisterForm()
-    return render(request, "registration/register.html", {"form": form})
+        from apps.core.funnel import track
+
+        track("register_view", request)
+        role = ROLE_PARAMS.get((request.GET.get("role") or "").strip().lower())
+        form = RegisterForm(initial={"role": role} if role else None)
+        preselected = bool(role)
+    return render(
+        request,
+        "registration/register.html",
+        {
+            "form": form,
+            "accept_terms": bool(request.POST.get("accept_terms")),
+            "preselected_role": request.method != "POST" and preselected,
+        },
+    )
 
 
 @token_bucket(
@@ -168,25 +284,27 @@ def user_login(request):
             email = form.cleaned_data["email"].strip().lower()
             remaining = lockout.lock_remaining("login", email)
             if remaining:
-                minutes = max(1, -(-remaining // 60))
-                form.add_error(
-                    None,
-                    f"Too many failed attempts. Please try again in {minutes} minute(s).",
-                )
-                response = render(request, "registration/login.html", {"form": form}, status=429)
-                response["Retry-After"] = str(remaining)
-                return response
+                return _login_blocked(request, form, remaining, "Too many failed attempts.")
             # Authenticated inline: the raw password must never be queued on the broker.
             user = authenticate(
                 request, username=email, password=form.cleaned_data["password"]
             )
             if user is None:
-                lockout.register_failure(
+                locked = lockout.register_failure(
                     "login", email, settings.LOGIN_LOCKOUT_ATTEMPTS, settings.LOGIN_LOCKOUT_SECONDS
                 )
+                if locked:
+                    # This was the failure that tripped the lock: start the countdown now.
+                    return _login_blocked(
+                        request,
+                        form,
+                        lockout.lock_remaining("login", email) or settings.LOGIN_LOCKOUT_SECONDS,
+                        "Too many failed attempts.",
+                    )
                 form.add_error(None, "Invalid email or password.")
             else:
                 lockout.clear("login", email)
+                _cancel_pending_recovery(request, user)
                 response, error = _start_session(request, user)
                 if response is not None:
                     return response
@@ -194,6 +312,17 @@ def user_login(request):
     else:
         form = LoginForm()
     return render(request, "registration/login.html", {"form": form})
+
+
+def _cancel_pending_recovery(request, user):
+    """The user remembered their password: a reset code requested earlier must stop working."""
+    from apps.accounts import otp
+    from apps.accounts.models import OtpPurpose
+    from apps.accounts.views_otp import RESET_CHANNEL_KEY, RESET_EMAIL_KEY
+
+    otp.invalidate_pending(user, OtpPurpose.RECOVERY)
+    for key in (RESET_EMAIL_KEY, RESET_CHANNEL_KEY, "pwd_reset_verified_user_id"):
+        request.session.pop(key, None)
 
 
 def _needs_email_verification(user):
@@ -251,6 +380,18 @@ def session_status(request):
 
     if not request.user.is_authenticated:
         return JsonResponse({"valid": False}, status=401)
+    return JsonResponse({"valid": True, "expires_in": seconds_remaining(request)})
+
+
+@require_POST
+@never_cache
+def session_extend(request):
+    """The page saw real activity (movement, keys, touch): restart the 10-minute idle window."""
+    from apps.accounts.sessions import seconds_remaining, touch
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"valid": False}, status=401)
+    touch(request)
     return JsonResponse({"valid": True, "expires_in": seconds_remaining(request)})
 
 
@@ -458,6 +599,11 @@ def finalize_auth(request):
             user_id = TimestampSigner(salt=AUTH_FINALIZE_SALT).unsign(
                 token, max_age=AUTH_FINALIZE_MAX_AGE
             )
+            if user_id == DECOY_USER_ID:
+                # The address already has an account: show the same code page, but no code will work.
+                from apps.accounts.views_otp import begin_decoy_verification
+
+                return begin_decoy_verification(request)
             user = User.objects.get(id=user_id, is_active=True)
         except (BadSignature, User.DoesNotExist):
             messages.error(request, 'Authentication failed. Please try again.')

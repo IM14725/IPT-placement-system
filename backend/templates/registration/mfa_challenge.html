@@ -20,7 +20,7 @@
     <form method="post" class="flex flex-col gap-xs border-t border-outline-variant pt-md">
       {% csrf_token %}<input type="hidden" name="method" value="totp"><input type="hidden" name="next" value="{{ next }}">
       <label class="font-body-md font-semibold text-on-surface" for="totp-code">Authenticator app code</label>
-      <input id="totp-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code" class="w-full px-sm py-3 rounded-lg border border-outline-variant bg-surface-container-lowest">
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">pin</span></span><input id="totp-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code"></div>
       <button class="bg-surface-container text-on-surface font-semibold py-2 rounded-lg" type="submit">Verify code</button>
     </form>
   {% endif %}
@@ -30,7 +30,7 @@
       <summary class="cursor-pointer text-primary font-semibold">Lost your device? Use a recovery code</summary>
       <form method="post" class="flex flex-col gap-xs mt-sm">
         {% csrf_token %}<input type="hidden" name="method" value="recovery"><input type="hidden" name="next" value="{{ next }}">
-        <input name="code" autocomplete="off" placeholder="xxxx-xxxx-xxxx" class="w-full px-sm py-3 rounded-lg border border-outline-variant bg-surface-container-lowest">
+        <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">pin</span></span><input name="code" autocomplete="off" placeholder="xxxx-xxxx-xxxx"></div>
         <p class="font-metadata text-metadata text-on-surface-variant">Each code works once. You will be asked to generate a new set afterwards.</p>
         <button class="bg-surface-container text-on-surface font-semibold py-2 rounded-lg" type="submit">Use recovery code</button>
       </form>

@@ -10,7 +10,7 @@
   <form method="post" class="flex flex-col gap-sm">
     {% csrf_token %}
     <label class="font-semibold" for="rec-email">Your administrator email</label>
-    <input id="rec-email" type="email" name="email" required class="w-full px-sm py-3 rounded-lg border border-outline-variant bg-surface-container-lowest">
+    <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">mail</span></span><input id="rec-email" type="email" name="email" required></div>
     <button class="bg-primary text-on-primary font-semibold py-3 rounded-lg" type="submit">Request recovery</button>
   </form>
   <a class="text-center text-primary font-semibold hover:underline" href="{% url 'login' %}">Back to sign in</a>

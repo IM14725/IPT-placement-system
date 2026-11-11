@@ -160,7 +160,7 @@
         {% csrf_token %}
         <div class="flex flex-col gap-base">
           <label class="text-body-md font-medium text-on-surface" for="review-notes">Internal Notes / Rejection Reason</label>
-          <textarea class="w-full bg-surface rounded-lg p-sm text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary transition-all resize-none shadow-inner" id="review-notes" name="reason" placeholder="Enter notes here..." rows="4"></textarea>
+          <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><textarea id="review-notes" name="reason" placeholder="Enter notes here..." rows="4"></textarea></div>
           <p class="text-metadata text-on-surface-variant flex items-start gap-xs">
             <span class="material-symbols-outlined text-[16px]">info</span>
             If rejected, these notes will be sent to the student along with a request to re-upload documents.

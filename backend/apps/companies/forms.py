@@ -13,6 +13,7 @@ from apps.core.skill_fields import normalize_skills, skills_to_text
 from apps.documents.models import Document
 from apps.locations.models import District, Ward
 from apps.slots.models import Slot
+from apps.companies.identifiers import normalize_brela, normalize_tin
 
 FIELD_CLASS = (
     "w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md "
@@ -38,6 +39,8 @@ class OrganizationProfileForm(forms.ModelForm):
             "industry",
             "email",
             "phone",
+            "brela_number",
+            "tin",
             "description",
             "region",
             "district",
@@ -47,12 +50,16 @@ class OrganizationProfileForm(forms.ModelForm):
         labels = {
             "name": _("Organization Name"),
             "street": _("Address / Street"),
+            "brela_number": _("BRELA registration number"),
+            "tin": _("TIN (Taxpayer Identification Number)"),
         }
         widgets = {
             "name": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "industry": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "email": forms.EmailInput(attrs={"class": FIELD_CLASS, "placeholder": "info@organization.co.tz"}),
             "phone": forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "2557XXXXXXXX"}),
+            "brela_number": forms.TextInput(attrs={"class": FIELD_CLASS}),
+            "tin": forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "123-456-789", "inputmode": "numeric"}),
             "description": forms.Textarea(attrs={"class": FIELD_CLASS, "rows": 3}),
             "region": forms.Select(attrs={"class": "ipt-select", "id": "id_region"}),
             "district": forms.Select(attrs={"class": "ipt-select", "id": "id_district"}),
@@ -80,6 +87,12 @@ class OrganizationProfileForm(forms.ModelForm):
             self.fields["ward"].queryset = Ward.objects.filter(district_id=self.instance.district_id)
         else:
             self.fields["ward"].queryset = Ward.objects.none()
+
+    def clean_brela_number(self):
+        return normalize_brela(self.cleaned_data.get("brela_number"))
+
+    def clean_tin(self):
+        return normalize_tin(self.cleaned_data.get("tin"))
 
     def clean_organization_type(self):
         val = self.cleaned_data.get("organization_type")

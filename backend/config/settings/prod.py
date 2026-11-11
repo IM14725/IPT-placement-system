@@ -38,6 +38,9 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 X_FRAME_OPTIONS = "DENY"
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+# Admin MFA and the Super Admin hardware key are always on in production (not env-overridable).
+ADMIN_MFA_ENFORCED = True
+SUPER_ADMIN_REQUIRE_FIDO2 = True
 RATE_LIMIT_FAIL_CLOSED = env.bool("RATE_LIMIT_FAIL_CLOSED", default=True)
 
 if _DATABASE_URL:

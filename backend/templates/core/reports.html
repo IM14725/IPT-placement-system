@@ -35,10 +35,10 @@
         <form method="post" class="flex flex-col md:flex-row gap-sm md:items-end border-t border-surface-container pt-sm">
           {% csrf_token %}
           <input type="hidden" name="id" value="{{ r.id }}">
-          <textarea name="admin_notes" rows="2" placeholder="Internal notes" class="flex-1 px-sm py-2 bg-surface-container-lowest rounded-lg border border-outline-variant font-body-md text-body-md outline-none focus:ring-2 focus:ring-primary">{{ r.admin_notes }}</textarea>
-          <select name="status" class="px-sm py-2 rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md text-body-md">
+          <div class="ipt-field-box flex-1"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">tag</span></span><textarea name="admin_notes" rows="2" placeholder="Internal notes">{{ r.admin_notes }}</textarea></div>
+          <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">flag</span></span><select name="status">
             {% for value, label, count in tabs %}<option value="{{ value }}" {% if r.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
-          </select>
+          </select></div>
           <button class="px-md py-2 bg-primary text-on-primary rounded-full font-body-md" type="submit">Save</button>
         </form>
         {% if r.handled_by %}<p class="text-metadata font-metadata text-on-surface-variant">Last handled by {{ r.handled_by.email }} on {{ r.handled_at|date:"j M Y, H:i" }}</p>{% endif %}

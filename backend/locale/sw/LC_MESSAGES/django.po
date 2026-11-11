@@ -794,3 +794,567 @@ msgstr "Viwanda"
 
 msgid "No companies awaiting verification."
 msgstr "Hakuna kampuni zinazosubiri uthibitisho."
+
+# --- welcome / login / register round (Kiswahili for review by a native speaker) ---
+
+msgid "IPT Marketplace — Student & Organization Matching"
+msgstr "IPT Marketplace — Kuunganisha Wanafunzi na Mashirika"
+
+msgid "IPT Marketplace — Industrial Practical Training in Tanzania"
+msgstr "IPT Marketplace — Mafunzo kwa Vitendo ya Viwandani Tanzania"
+
+msgid "A secure marketplace for students to find verified IPT slots and organizations to manage talent efficiently."
+msgstr "Soko salama kwa wanafunzi kupata nafasi za IPT zilizothibitishwa na kwa mashirika kusimamia vipaji kwa ufanisi."
+
+msgid "Platform numbers"
+msgstr "Takwimu za jukwaa"
+
+msgid "Verified organizations"
+msgstr "Mashirika yaliyothibitishwa"
+
+msgid "Universities"
+msgstr "Vyuo vikuu"
+
+msgid "Students registered"
+msgstr "Wanafunzi waliosajiliwa"
+
+msgid "Regions with openings"
+msgstr "Mikoa yenye nafasi"
+
+msgid "Open now"
+msgstr "Zimefunguliwa sasa"
+
+msgid "Latest training slots"
+msgstr "Nafasi za mafunzo za hivi karibuni"
+
+msgid "See all slots"
+msgstr "Ona nafasi zote"
+
+msgid "Login to apply"
+msgstr "Ingia ili uombe"
+
+msgid "How it works"
+msgstr "Jinsi inavyofanya kazi"
+
+msgid "From sign-up to placement"
+msgstr "Kuanzia kujisajili hadi kupata nafasi"
+
+msgid "Choose your role"
+msgstr "Chagua aina ya akaunti"
+
+msgid "Organizations"
+msgstr "Mashirika"
+
+msgid "Simple, transparent fee"
+msgstr "Ada rahisi na ya wazi"
+
+msgid "Students pay a one-time application fee by mobile money. Your application becomes visible to the organization only after your payment is confirmed."
+msgstr "Wanafunzi hulipa ada ya maombi mara moja kwa pesa za simu. Ombi lako linaonekana kwa shirika baada tu ya malipo yako kuthibitishwa."
+
+msgid "Your seat is held for 3 hours. If payment is not completed in that time, the seat is released to other students."
+msgstr "Nafasi yako huhifadhiwa kwa saa 3. Malipo yasipokamilika ndani ya muda huo, nafasi hutolewa kwa wanafunzi wengine."
+
+msgid "Pay with"
+msgstr "Lipa kwa"
+
+msgid "For Organizations"
+msgstr "Kwa Mashirika"
+
+msgid "Built on trust. We enforce strict document verification protocols for both students and organizations to ensure a safe and professional ecosystem."
+msgstr "Imejengwa juu ya uaminifu. Tunatekeleza taratibu kali za kuthibitisha nyaraka kwa wanafunzi na mashirika ili kuhakikisha mfumo salama na wa kitaalamu."
+
+msgid "Ready to start your training journey?"
+msgstr "Uko tayari kuanza safari yako ya mafunzo?"
+
+msgid "Create a free account in about two minutes."
+msgstr "Fungua akaunti bila malipo ndani ya dakika mbili hivi."
+
+msgid "Register and confirm your email and phone number."
+msgstr "Jisajili na uthibitishe barua pepe na namba yako ya simu."
+
+msgid "Verify your documents"
+msgstr "Thibitisha nyaraka zako"
+
+msgid "Upload your student ID and details so organizations can trust you."
+msgstr "Pakia kitambulisho chako cha mwanafunzi na taarifa zako ili mashirika yakuamini."
+
+msgid "Find a slot and apply"
+msgstr "Tafuta nafasi na uombe"
+
+msgid "Browse verified training slots by region and field, then apply."
+msgstr "Vinjari nafasi za mafunzo zilizothibitishwa kwa mkoa na fani, kisha uombe."
+
+msgid "Pay the application fee"
+msgstr "Lipa ada ya maombi"
+
+msgid "Pay by mobile money within 3 hours to confirm your seat."
+msgstr "Lipa kwa pesa za simu ndani ya saa 3 ili kuthibitisha nafasi yako."
+
+msgid "Get reviewed and notified"
+msgstr "Pitiwa na upate taarifa"
+
+msgid "The organization reviews your application and you are alerted by SMS and email."
+msgstr "Shirika hupitia ombi lako nawe unaarifiwa kwa SMS na barua pepe."
+
+msgid "Register your organization"
+msgstr "Sajili shirika lako"
+
+msgid "Create the account and add your official contact details."
+msgstr "Fungua akaunti na uweke taarifa rasmi za mawasiliano."
+
+msgid "Get verified"
+msgstr "Thibitishwa"
+
+msgid "Our team reviews your organization so students know you are genuine."
+msgstr "Timu yetu hukagua shirika lako ili wanafunzi wajue ni halali."
+
+msgid "Post training slots"
+msgstr "Weka nafasi za mafunzo"
+
+msgid "Describe the role, location, level and number of seats you offer."
+msgstr "Elezea kazi, eneo, ngazi na idadi ya nafasi unazotoa."
+
+msgid "Review applicants"
+msgstr "Pitia waombaji"
+
+msgid "See pre-verified students who have completed their application."
+msgstr "Ona wanafunzi waliothibitishwa awali ambao wamekamilisha maombi yao."
+
+msgid "Accept and stay in touch"
+msgstr "Kubali na endelea kuwasiliana"
+
+msgid "Confirm your choices and keep in touch through instant alerts."
+msgstr "Thibitisha chaguo lako na uendelee kuwasiliana kupitia arifa za papo hapo."
+
+msgid "Connect students with organizations for <br class=\"hidden sm:block\"> <span class=\"text-primary\">Industrial Practical Training.</span>"
+msgstr "Unganisha wanafunzi na mashirika kwa <br class=\"hidden sm:block\"> <span class=\"text-primary\">Mafunzo kwa Vitendo ya Viwandani.</span>"
+
+msgid "Open slots · %(seats)s seats"
+msgstr "Nafasi wazi · %(seats)s zinapatikana"
+
+msgid "%(n)s seat left"
+msgid_plural "%(n)s seats left"
+msgstr[0] "Nafasi %(n)s imebaki"
+msgstr[1] "Nafasi %(n)s zimebaki"
+
+msgid "One application fee: TZS %(fee)s"
+msgstr "Ada moja ya maombi: TZS %(fee)s"
+
+msgid "Fees are non-refundable. Read the <a href=\"%(url)s#payments\" class=\"text-primary font-semibold hover:underline\">payments and refund policy</a> before you apply."
+msgstr "Ada hazirudishwi. Soma <a href=\"%(url)s#payments\" class=\"text-primary font-semibold hover:underline\">sera ya malipo na marejesho</a> kabla ya kuomba."
+
+msgid "Create a free IPT Marketplace account as a student or an organization."
+msgstr "Fungua akaunti ya bure ya IPT Marketplace kama mwanafunzi au shirika."
+
+msgid "Designed by semauya."
+msgstr "Imesanifiwa na semauya."
+
+msgid "Join the marketplace as a student or organization."
+msgstr "Jiunge na soko kama mwanafunzi au shirika."
+
+msgid "Role"
+msgstr "Aina"
+
+msgid "Details"
+msgstr "Taarifa"
+
+msgid "Continue"
+msgstr "Endelea"
+
+msgid "Organization name"
+msgstr "Jina la shirika"
+
+msgid "Use the registered name of your organization."
+msgstr "Tumia jina rasmi lililosajiliwa la shirika lako."
+
+msgid "Official organization email"
+msgstr "Barua pepe rasmi ya shirika"
+
+msgid "The organization's contact identity. You sign in with your own personal email below."
+msgstr "Mawasiliano rasmi ya shirika. Unaingia kwa barua pepe yako binafsi hapa chini."
+
+msgid "Organization phone number"
+msgstr "Namba ya simu ya shirika"
+
+msgid "Your position in the organization"
+msgstr "Wadhifa wako katika shirika"
+
+msgid "e.g. Human Resources Manager, Director, Training Coordinator. You become the organization's Manager."
+msgstr "mf. Meneja Rasilimali Watu, Mkurugenzi, Mratibu wa Mafunzo. Unakuwa Meneja wa shirika."
+
+msgid "Optional. Type it the way you dial it, e.g. 0712 345 678."
+msgstr "Si lazima. Andika kama unavyopiga, mf. 0712 345 678."
+
+msgid "Back"
+msgstr "Rudi"
+
+msgid "Show password"
+msgstr "Onyesha nenosiri"
+
+msgid "You must accept the Terms & Conditions to create an account."
+msgstr "Lazima ukubali Masharti na Vigezo ili kufungua akaunti."
+
+msgid "Weak"
+msgstr "Dhaifu"
+
+msgid "Fair"
+msgstr "Wastani"
+
+msgid "Good"
+msgstr "Nzuri"
+
+msgid "Strong"
+msgstr "Imara"
+
+msgid "Step __N__ of 3"
+msgstr "Hatua __N__ kati ya 3"
+
+msgid "Choose whether you are a student or an organization."
+msgstr "Chagua kama wewe ni mwanafunzi au shirika."
+
+msgid "This field is required."
+msgstr "Sehemu hii inahitajika."
+
+msgid "Enter a valid email address."
+msgstr "Weka barua pepe sahihi."
+
+msgid "Your own phone number is required."
+msgstr "Namba yako ya simu inahitajika."
+
+msgid "The organization phone number is required."
+msgstr "Namba ya simu ya shirika inahitajika."
+
+msgid "Use at least 8 characters."
+msgstr "Tumia angalau herufi 8."
+
+msgid "Passwords do not match."
+msgstr "Manenosiri hayalingani."
+
+msgid "\n              I have read and agree to the\n              <a href=\"%(terms_link)s\" target=\"_blank\"\n                 class=\"text-primary font-semibold hover:underline\"\n                 onclick=\"event.stopPropagation()\">Terms &amp; Conditions</a>\n              and the\n              <a href=\"%(privacy_link)s\" target=\"_blank\"\n                 class=\"text-primary font-semibold hover:underline\"\n                 onclick=\"event.stopPropagation()\">Privacy Policy</a>\n              of the IPT Marketplace.\n            "
+msgstr "\n              Nimesoma na nakubaliana na\n              <a href=\"%(terms_link)s\" target=\"_blank\"\n                 class=\"text-primary font-semibold hover:underline\"\n                 onclick=\"event.stopPropagation()\">Masharti na Vigezo</a>\n              na\n              <a href=\"%(privacy_link)s\" target=\"_blank\"\n                 class=\"text-primary font-semibold hover:underline\"\n                 onclick=\"event.stopPropagation()\">Sera ya Faragha</a>\n              ya IPT Marketplace.\n            "
+
+msgid "Log in to IPT Marketplace to manage your Industrial Practical Training applications."
+msgstr "Ingia kwenye IPT Marketplace kusimamia maombi yako ya Mafunzo kwa Vitendo."
+
+msgid "Verified students, verified organizations"
+msgstr "Wanafunzi waliothibitishwa, mashirika yaliyothibitishwa"
+
+msgid "Try again in"
+msgstr "Jaribu tena baada ya"
+
+msgid "You can try again now."
+msgstr "Sasa unaweza kujaribu tena."
+
+msgid "Find verified Industrial Practical Training (IPT) slots in Tanzania, or recruit pre-verified students. Secure, mobile-money payments."
+msgstr "Pata nafasi za Mafunzo kwa Vitendo (IPT) zilizothibitishwa nchini Tanzania, au waajiri wanafunzi waliothibitishwa awali. Malipo salama kwa pesa za simu."
+
+msgid "Theme"
+msgstr "Mandhari"
+
+msgid "Open menu"
+msgstr "Fungua menyu"
+
+msgid "Close menu"
+msgstr "Funga menyu"
+
+msgid "Main menu"
+msgstr "Menyu kuu"
+
+msgid "Report a problem"
+msgstr "Ripoti tatizo"
+
+msgid "Organization profile"
+msgstr "Wasifu wa shirika"
+
+msgid "Review"
+msgstr "Mapitio"
+
+msgid "Locations"
+msgstr "Maeneo"
+
+msgid "Reports"
+msgstr "Ripoti"
+
+msgid "Finance &amp; insight"
+msgstr "Fedha &amp; uchambuzi"
+
+msgid "System"
+msgstr "Mfumo"
+
+msgid "Security"
+msgstr "Usalama"
+
+msgid "Administrators"
+msgstr "Wasimamizi"
+
+msgid "Break-glass"
+msgstr "Dharura (break-glass)"
+
+msgid "Recovery requests"
+msgstr "Maombi ya kurejesha"
+
+msgid "My MFA"
+msgstr "MFA yangu"
+
+msgid "Account &amp; security"
+msgstr "Akaunti &amp; usalama"
+
+msgid "Contact Us"
+msgstr "Wasiliana Nasi"
+
+msgid "Follow Us"
+msgstr "Tufuate"
+
+msgid "All rights reserved."
+msgstr "Haki zote zimehifadhiwa."
+
+msgid "Terms &amp; Conditions"
+msgstr "Masharti &amp; Vigezo"
+
+msgid "Privacy Policy"
+msgstr "Sera ya Faragha"
+
+msgid "Enter 9 digits after +255, e.g. 0712 345 678."
+msgstr "Weka tarakimu 9 baada ya +255, mf. 0712 345 678."
+
+msgid "Mobile numbers start with 06 or 07."
+msgstr "Namba za simu za mkononi huanza na 06 au 07."
+
+msgid "Phone number must start with 255 (Tanzania country code)."
+msgstr "Namba ya simu lazima ianze na 255 (msimbo wa Tanzania)."
+
+msgid "Phone number must be 12 digits (255 + 9-digit number)."
+msgstr "Namba ya simu lazima iwe na tarakimu 12 (255 + namba ya tarakimu 9)."
+
+msgid "Phone number must start with 2556 or 2557."
+msgstr "Namba ya simu lazima ianze na 2556 au 2557."
+
+msgid "Phone number must be 255 followed by 9 digits."
+msgstr "Namba ya simu lazima iwe 255 ikifuatiwa na tarakimu 9."
+
+msgid "At least 8 characters"
+msgstr "Angalau herufi 8"
+
+msgid "Repeat your password"
+msgstr "Rudia nenosiri lako"
+
+msgid "Student"
+msgstr "Mwanafunzi"
+
+msgid "Organization"
+msgstr "Shirika"
+
+msgid "e.g. Amani Logistics Ltd"
+msgstr "mf. Amani Logistics Ltd"
+
+msgid "e.g. Human Resources Manager"
+msgstr "mf. Meneja Rasilimali Watu"
+
+msgid "An account with this email already exists."
+msgstr "Akaunti yenye barua pepe hii tayari ipo."
+
+msgid "This phone number is already associated with an account. Please use another phone number."
+msgstr "Namba hii ya simu tayari inatumika kwenye akaunti. Tafadhali tumia namba nyingine."
+
+msgid "First name is required."
+msgstr "Jina la kwanza linahitajika."
+
+msgid "Last name is required."
+msgstr "Jina la mwisho linahitajika."
+
+msgid "Organization name is required."
+msgstr "Jina la shirika linahitajika."
+
+msgid "An organization with this name is already registered."
+msgstr "Shirika lenye jina hili tayari limesajiliwa."
+
+msgid "The official organization email is required."
+msgstr "Barua pepe rasmi ya shirika inahitajika."
+
+msgid "An organization with this official email is already registered."
+msgstr "Shirika lenye barua pepe rasmi hii tayari limesajiliwa."
+
+msgid "Your position in the organization is required."
+msgstr "Wadhifa wako katika shirika unahitajika."
+
+msgid "Your password"
+msgstr "Nenosiri lako"
+
+# --- welcome / login / register round (Kiswahili for review by a native speaker) ---
+
+msgid "Use your company email domain if you have one. Gmail and similar addresses are accepted, but we check those organizations more carefully."
+msgstr "Tumia barua pepe ya kampuni yako ikiwa unayo. Anwani za Gmail na zinazofanana zinakubaliwa, lakini mashirika hayo tunayakagua kwa umakini zaidi."
+
+msgid "BRELA registration number"
+msgstr "Namba ya usajili ya BRELA"
+
+msgid "optional"
+msgstr "si lazima"
+
+msgid "Helps us verify your organization faster. You can also add it later in your profile."
+msgstr "Inatusaidia kuthibitisha shirika lako haraka. Unaweza pia kuiongeza baadaye kwenye wasifu wako."
+
+msgid "TIN (Taxpayer Identification Number)"
+msgstr "TIN (Namba ya Mlipakodi)"
+
+msgid "9 digits from TRA, for example 123-456-789."
+msgstr "Tarakimu 9 kutoka TRA, mfano 123-456-789."
+
+msgid "A TIN has 9 digits, for example 123-456-789."
+msgstr "TIN ina tarakimu 9, mfano 123-456-789."
+
+msgid "This phone number can't be used. Try another number or contact support."
+msgstr "Namba hii ya simu haiwezi kutumika. Jaribu namba nyingine au wasiliana na msaada."
+
+msgid "This password has appeared in known data leaks. Please choose a different one."
+msgstr "Nenosiri hili limeonekana kwenye uvujaji wa data unaojulikana. Tafadhali chagua jingine."
+
+msgid "Your password can't be one that is known from data leaks."
+msgstr "Nenosiri lako haliwezi kuwa moja linalojulikana kutoka kwenye uvujaji wa data."
+
+msgid "We couldn't verify this request. Please reload the page and try again."
+msgstr "Hatukuweza kuthibitisha ombi hili. Tafadhali pakia ukurasa upya na ujaribu tena."
+
+msgid "Enter the registration number exactly as it appears on your BRELA certificate."
+msgstr "Weka namba ya usajili kama inavyoonekana kwenye cheti chako cha BRELA."
+
+# --- welcome / login / register round (Kiswahili for review by a native speaker) ---
+
+msgid "I'm a student"
+msgstr "Mimi ni mwanafunzi"
+
+msgid "I'm an organization"
+msgstr "Mimi ni shirika"
+
+msgid "FAQ"
+msgstr "Maswali"
+
+msgid "Frequently asked questions"
+msgstr "Maswali yanayoulizwa mara kwa mara"
+
+msgid "Does it cost anything to sign up?"
+msgstr "Je, kujisajili kuna gharama?"
+
+msgid "Can I get my fee back?"
+msgstr "Je, naweza kurudishiwa ada yangu?"
+
+msgid "Is my information safe?"
+msgstr "Je, taarifa zangu ziko salama?"
+
+msgid "Who can use IPT Marketplace?"
+msgstr "Nani anaweza kutumia IPT Marketplace?"
+
+msgid "Students at Tanzanian universities and colleges who are looking for an Industrial Practical Training placement, and organizations that offer training slots."
+msgstr "Wanafunzi wa vyuo vikuu na vyuo vya Tanzania wanaotafuta nafasi ya Mafunzo kwa Vitendo ya Viwandani, na mashirika yanayotoa nafasi za mafunzo."
+
+msgid "How do I pay?"
+msgstr "Nalipaje?"
+
+msgid "By mobile money (M-Pesa, Mixx by Yas or Airtel Money) from your application page, within 3 hours of applying."
+msgstr "Kwa pesa za simu (M-Pesa, Mixx by Yas au Airtel Money) kupitia ukurasa wa ombi lako, ndani ya saa 3 baada ya kuomba."
+
+msgid "What if I do not pay within 3 hours?"
+msgstr "Nisipolipa ndani ya saa 3 itakuwaje?"
+
+msgid "Your seat is released so that other students can apply for it."
+msgstr "Nafasi yako hutolewa ili wanafunzi wengine waweze kuiomba."
+
+msgid "Why do I need to verify my documents?"
+msgstr "Kwa nini nahitaji kuthibitisha nyaraka zangu?"
+
+msgid "Verification keeps the marketplace trustworthy. Students upload their student ID and details, and organizations submit their registration documents. Our team reviews them before approval."
+msgstr "Uthibitisho unafanya soko liaminike. Wanafunzi hupakia kitambulisho na taarifa zao, na mashirika huwasilisha nyaraka zao za usajili. Timu yetu huzipitia kabla ya kuidhinisha."
+
+msgid "When does an organization see my application?"
+msgstr "Shirika linaona ombi langu lini?"
+
+msgid "Only after your application fee is confirmed. This way organizations review serious, verified candidates."
+msgstr "Baada tu ya ada yako ya maombi kuthibitishwa. Hivyo mashirika hupitia waombaji makini na waliothibitishwa."
+
+msgid "Who can I contact for help?"
+msgstr "Naweza kuwasiliana na nani kupata msaada?"
+
+msgid "Use the WhatsApp button on this page, call 0787 196 911 or 0756 322 833, or email semauyatech@gmail.com."
+msgstr "Tumia kitufe cha WhatsApp kwenye ukurasa huu, piga 0787 196 911 au 0756 322 833, au tuma barua pepe kwa semauyatech@gmail.com."
+
+msgid "Creating an account is free. Students pay an application fee of TZS %(fee)s for each application."
+msgstr "Kufungua akaunti ni bure. Wanafunzi hulipa ada ya maombi ya TZS %(fee)s kwa kila ombi."
+
+msgid "Fees are non-refundable. Please read the <a href=\"%(url)s#payments\" class=\"text-primary font-semibold hover:underline\">payments and refund policy</a> in our Terms before you apply."
+msgstr "Ada hazirudishwi. Tafadhali soma <a href=\"%(url)s#payments\" class=\"text-primary font-semibold hover:underline\">sera ya malipo na marejesho</a> kwenye Masharti yetu kabla ya kuomba."
+
+msgid "Your documents are stored securely and only seen by our verification team. For your protection you are signed out after 10 minutes of inactivity. Read our <a href=\"%(url)s\" class=\"text-primary font-semibold hover:underline\">Privacy Policy</a> for details."
+msgstr "Nyaraka zako huhifadhiwa kwa usalama na huonekana na timu yetu ya uthibitisho pekee. Kwa ulinzi wako, unatolewa kwenye akaunti baada ya dakika 10 za kutotumia. Soma <a href=\"%(url)s\" class=\"text-primary font-semibold hover:underline\">Sera ya Faragha</a> kwa maelezo zaidi."
+
+msgid "Registering as"
+msgstr "Unajisajili kama"
+
+msgid "Change"
+msgstr "Badilisha"
+
+msgid "Hello IPT Marketplace, I need help with..."
+msgstr "Habari IPT Marketplace, nahitaji msaada kuhusu..."
+
+msgid "Chat with us on WhatsApp"
+msgstr "Ongea nasi kwenye WhatsApp"
+
+# --- welcome / login / register round (Kiswahili for review by a native speaker) ---
+
+msgid "Find a training slot"
+msgstr "Tafuta nafasi ya mafunzo"
+
+msgid "All districts"
+msgstr "Wilaya zote"
+
+msgid "Loading…"
+msgstr "Inapakia…"
+
+msgid "We could not load the slots. Please try again."
+msgstr "Hatukuweza kupakia nafasi. Tafadhali jaribu tena."
+
+msgid "All regions"
+msgstr "Mikoa yote"
+
+msgid "Industry / field"
+msgstr "Sekta / fani"
+
+msgid "e.g. Technology"
+msgstr "mf. Teknolojia"
+
+msgid "Education level"
+msgstr "Ngazi ya elimu"
+
+msgid "Any level"
+msgstr "Ngazi yoyote"
+
+msgid "Search"
+msgstr "Tafuta"
+
+msgid "Clear"
+msgstr "Futa"
+
+msgid "No open slots match your search."
+msgstr "Hakuna nafasi wazi zinazolingana na utafutaji wako."
+
+msgid "There are no open slots right now."
+msgstr "Hakuna nafasi wazi kwa sasa."
+
+msgid "Try another region or district, or clear the filters."
+msgstr "Jaribu mkoa au wilaya nyingine, au futa vichujio."
+
+msgid "Check back soon, or create your account now so you are ready to apply."
+msgstr "Rudi baadaye, au fungua akaunti yako sasa ili uwe tayari kuomba."
+
+msgid "%(n)s open slot"
+msgid_plural "%(n)s open slots"
+msgstr[0] "Nafasi %(n)s iko wazi"
+msgstr[1] "Nafasi %(n)s ziko wazi"
+
+msgid "showing %(shown)s"
+msgstr "zinazoonyeshwa ni %(shown)s"
+
+msgid "starting with %(region)s, the most searched region"
+msgstr "kuanzia %(region)s, mkoa unaotafutwa zaidi"
+
+msgid "Register to see all %(total)s slots"
+msgstr "Jisajili kuona nafasi zote %(total)s"

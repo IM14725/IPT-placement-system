@@ -2,128 +2,199 @@
 {% block title %}Notification Templates{% endblock %}
 {% block content %}
 <div class="flex flex-col gap-lg">
-  <div class="flex items-end justify-between w-full">
-    <div class="flex flex-col gap-xs">
-      <h1 class="font-display text-display text-on-surface">Notification Templates</h1>
-      <p class="font-body-lg text-body-lg text-on-surface-variant">Manage the content for automated system messages across Email and SMS channels.</p>
-    </div>
+  <div class="flex flex-col gap-xs">
+    <h1 class="font-display text-display text-on-surface">Notification Templates</h1>
+    <p class="font-body-lg text-body-lg text-on-surface-variant">Customise the text of the automated email and SMS messages. Each template belongs to one system message; if you delete it, the built-in wording is used again.</p>
   </div>
 
   <div class="flex flex-col lg:flex-row gap-lg min-h-[600px]">
+    <!-- Template list -->
     <div class="lg:w-1/3 flex flex-col bg-surface-container-lowest shadow-sm rounded-xl overflow-hidden flex-shrink-0">
-      <div class="p-md bg-surface-container-low flex items-center justify-between">
-        <div class="relative w-full">
-          <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
-          <input id="template-search" class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md py-sm pl-xl pr-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/50" placeholder="Search templates..." type="text" oninput="filterTemplates(this.value)">
+      <div class="p-md bg-surface-container-low flex flex-col gap-sm">
+        <div class="ipt-field-box">
+          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span>
+          <input id="template-search" type="search" placeholder="Search templates" oninput="filterTemplates(this.value)" autocomplete="off">
         </div>
+        {% if free_events %}
+          <a href="?new=1" class="bg-primary text-on-primary hover:opacity-90 px-md py-sm rounded-lg font-body-md font-semibold flex items-center justify-center gap-xs transition-opacity">
+            <span class="material-symbols-outlined text-[18px]">add</span>New template
+          </a>
+        {% else %}
+          <p class="font-metadata text-metadata text-on-surface-variant text-center">Every system message already has a template.</p>
+        {% endif %}
       </div>
       <div class="flex-1 overflow-y-auto" id="template-list">
         {% for t in templates %}
-          <a class="w-full text-left p-md hover:bg-surface-container-low cursor-pointer transition-colors border-l-4 {% if selected and selected.pk == t.pk %}border-primary bg-primary/5{% else %}border-transparent{% endif %} relative overflow-hidden group block" href="{% url 'platform-templates' %}?key={{ t.key }}">
-            <div class="flex items-center justify-between mb-xs">
+          <a href="?key={{ t.key }}" class="block w-full text-left p-md hover:bg-surface-container-low transition-colors border-l-4 {% if mode == 'edit' and selected and selected.pk == t.pk %}border-primary bg-primary/5{% else %}border-transparent{% endif %}">
+            <div class="flex items-center justify-between gap-sm mb-xs">
               <span class="font-headline-md text-headline-md text-on-surface">{{ t.name }}</span>
-              <div class="{% if t.channel == 'EMAIL' %}bg-secondary/10{% else %}bg-tertiary/10{% endif %} px-sm py-[2px] rounded-full flex items-center gap-xs">
-                <span class="material-symbols-outlined text-[14px] {% if t.channel == 'EMAIL' %}text-secondary{% else %}text-tertiary{% endif %}">{% if t.channel == 'EMAIL' %}mail{% else %}sms{% endif %}</span>
-                <span class="font-label-caps text-label-caps {% if t.channel == 'EMAIL' %}text-secondary{% else %}text-tertiary{% endif %} uppercase">{{ t.get_channel_display }}</span>
-              </div>
+              <span class="shrink-0 px-sm py-[2px] rounded-full flex items-center gap-xs {% if t.channel == 'EMAIL' %}bg-secondary/10 text-secondary{% else %}bg-tertiary/10 text-tertiary{% endif %}">
+                <span class="material-symbols-outlined text-[14px]">{% if t.channel == 'EMAIL' %}mail{% else %}sms{% endif %}</span>
+                <span class="font-label-caps text-label-caps uppercase">{{ t.get_channel_display }}</span>
+              </span>
             </div>
-            <p class="font-body-md text-body-md text-on-surface-variant mb-sm">{{ t.description }}</p>
-            <div class="flex items-center justify-between text-on-surface-variant/70">
-              <span class="font-metadata text-metadata">Updated: {{ t.updated_at|date:"M j, Y" }}</span>
-              <span class="font-metadata text-metadata text-primary group-hover:underline">Edit</span>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-xs">{{ t.description }}</p>
+            <div class="flex items-center justify-between text-on-surface-variant/70 font-metadata text-metadata">
+              <span>Updated {{ t.updated_at|date:"M j, Y" }}{% if not t.is_active %} &middot; <strong class="text-error">Inactive</strong>{% endif %}</span>
+              <span class="text-primary">Edit</span>
             </div>
           </a>
+        {% empty %}
+          <p class="p-md font-body-md text-on-surface-variant">No templates yet.</p>
         {% endfor %}
       </div>
     </div>
 
-    <div class="flex-1 bg-surface-container-lowest shadow-sm rounded-xl overflow-hidden flex flex-col relative">
-      <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-      {% if selected %}
-        <form method="post" class="flex flex-col flex-1">
-          {% csrf_token %}
-          <input type="hidden" name="key" value="{{ selected.key }}">
-          <div class="p-md bg-surface-container flex items-center justify-between relative z-10">
-            <div>
-              <h2 class="font-headline-lg text-headline-lg text-on-surface mb-xs">{{ selected.name }}</h2>
-              <div class="flex items-center gap-md">
-                <span class="font-metadata text-metadata text-on-surface-variant">Trigger: <span class="font-bold text-on-surface">{{ selected.trigger_label|default:"—" }}</span></span>
-                <span class="font-metadata text-metadata text-on-surface-variant">•</span>
-                <span class="font-metadata text-metadata text-on-surface-variant">Channel: <span class="font-bold text-on-surface">{{ selected.get_channel_display }}</span></span>
+    <!-- Editor -->
+    <div class="flex-1 bg-surface-container-lowest shadow-sm rounded-xl overflow-hidden flex flex-col">
+      {% if mode == 'edit' or mode == 'new' %}
+        {% if mode == 'new' %}
+          {% if not event %}
+            <div class="flex-1 flex flex-col items-center justify-center p-lg text-center">
+              <p class="font-body-md text-on-surface-variant">Every system message already has a template.</p>
+              <a href="{% url 'platform-templates' %}" class="text-primary font-semibold hover:underline mt-sm">Back to the templates</a>
+            </div>
+          {% else %}
+          <form method="get" id="new-picker" class="p-md bg-surface-container grid grid-cols-1 md:grid-cols-2 gap-md">
+            <input type="hidden" name="new" value="1">
+            <div class="flex flex-col gap-xs">
+              <label class="font-body-md font-semibold text-on-surface" for="pick-event">System message</label>
+              <div class="ipt-field-box">
+                <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">bolt</span></span>
+                <select id="pick-event" name="event" onchange="this.form.submit()">
+                  {% for e in free_events %}<option value="{{ e.key }}"{% if e.key == event.key %} selected{% endif %}>{{ e.label }}</option>{% endfor %}
+                </select>
+              </div>
+              <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>Sent when: {{ event.trigger|lower }}.</p>
+            </div>
+            <div class="flex flex-col gap-xs">
+              <label class="font-body-md font-semibold text-on-surface" for="pick-copy">Start from</label>
+              <div class="ipt-field-box">
+                <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">content_copy</span></span>
+                <select id="pick-copy" name="copy" onchange="this.form.submit()">
+                  <option value="">The built-in wording</option>
+                  {% for t in templates %}<option value="{{ t.key }}"{% if t.key == copy_from %} selected{% endif %}>Copy of: {{ t.name }}</option>{% endfor %}
+                </select>
               </div>
             </div>
-            <div class="flex gap-sm">
-              <a href="{% url 'platform-templates' %}" class="bg-surface-container-lowest text-primary hover:bg-primary/5 px-md py-sm rounded-lg font-body-md text-body-md font-medium transition-all shadow-sm">Discard</a>
-              <button class="bg-primary text-on-primary hover:bg-primary/90 px-md py-sm rounded-lg font-body-md text-body-md font-medium transition-all shadow-sm flex items-center gap-xs" type="submit">
-                <span class="material-symbols-outlined text-[18px]">save</span>
-                Save Changes
+          </form>
+          {% endif %}
+        {% endif %}
+
+        {% if event or mode == 'edit' %}
+        <form method="post" class="flex flex-col flex-1" id="template-form">
+          {% csrf_token %}
+          <input type="hidden" name="key" value="{% if mode == 'new' %}{{ event.key }}{% else %}{{ selected.key }}{% endif %}">
+          <div class="p-md bg-surface-container flex flex-wrap items-center justify-between gap-sm">
+            <div>
+              <h2 class="font-headline-lg text-headline-lg text-on-surface">{% if mode == 'new' %}New template{% else %}{{ selected.name }}{% endif %}</h2>
+              <div class="flex items-center gap-sm font-metadata text-metadata text-on-surface-variant">
+                <span>{% if is_email %}Email{% else %}SMS{% endif %}</span>
+                {% if event %}<span>&bull;</span><span>Sent when: {{ event.trigger|lower }}</span>{% endif %}
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-sm">
+              <button type="submit" name="action" value="test" class="border border-outline-variant text-on-surface hover:bg-surface-container-high px-md py-sm rounded-lg font-body-md font-medium flex items-center gap-xs">
+                <span class="material-symbols-outlined text-[18px]">send</span>Send me a test
+              </button>
+              {% if mode == 'edit' %}
+                {% if free_events %}
+                <a href="?new=1&amp;copy={{ selected.key }}" class="border border-outline-variant text-on-surface hover:bg-surface-container-high px-md py-sm rounded-lg font-body-md font-medium flex items-center gap-xs">
+                  <span class="material-symbols-outlined text-[18px]">content_copy</span>Duplicate
+                </a>
+                {% endif %}
+                <button type="submit" name="action" value="delete" formnovalidate onclick="return confirm('Delete this template? The built-in wording will be used instead.')"
+                        class="border border-error/50 text-error hover:bg-error/10 px-md py-sm rounded-lg font-body-md font-medium flex items-center gap-xs">
+                  <span class="material-symbols-outlined text-[18px]">delete</span>Delete
+                </button>
+              {% endif %}
+              <button type="submit" name="action" value="{% if mode == 'new' %}create{% else %}save{% endif %}" class="bg-primary text-on-primary hover:opacity-90 px-md py-sm rounded-lg font-body-md font-medium shadow-sm flex items-center gap-xs">
+                <span class="material-symbols-outlined text-[18px]">save</span>{% if mode == 'new' %}Create template{% else %}Save changes{% endif %}
               </button>
             </div>
           </div>
-          <div class="flex-1 overflow-y-auto p-lg flex flex-col xl:flex-row gap-lg relative z-10">
+
+          {% if errors %}
+          <div class="mx-md mt-md rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-body-md text-on-error-container" role="alert">
+            <ul class="list-disc pl-md flex flex-col gap-1">{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          </div>
+          {% endif %}
+
+          <div class="flex-1 p-lg flex flex-col xl:flex-row gap-lg">
             <div class="xl:w-1/2 flex flex-col gap-md">
-              <div class="flex items-center gap-md">
-                <div class="flex flex-col gap-xs flex-1">
-                  <label class="font-headline-md text-headline-md text-on-surface" for="id_channel">Channel</label>
-                  <select id="id_channel" name="channel" class="w-full bg-surface text-on-surface font-body-md text-body-md p-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-surface-variant">
-                    <option value="EMAIL" {% if selected.channel == 'EMAIL' %}selected{% endif %}>Email</option>
-                    <option value="SMS" {% if selected.channel == 'SMS' %}selected{% endif %}>SMS</option>
-                  </select>
-                </div>
-                <div class="flex flex-col gap-xs flex-1">
-                  <label class="font-headline-md text-headline-md text-on-surface" for="id_trigger">Trigger Label</label>
-                  <input id="id_trigger" name="trigger_label" class="w-full bg-surface text-on-surface font-body-md text-body-md p-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-surface-variant" type="text" value="{{ selected.trigger_label }}">
-                </div>
-              </div>
-              <div class="flex flex-col gap-xs">
-                <label class="font-headline-md text-headline-md text-on-surface" for="id_name">Name</label>
-                <input id="id_name" name="name" class="w-full bg-surface text-on-surface font-body-md text-body-md p-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-surface-variant" type="text" value="{{ selected.name }}">
-              </div>
-              <div class="flex flex-col gap-xs">
-                <label class="font-headline-md text-headline-md text-on-surface" for="id_subject">Subject</label>
-                <input id="id_subject" name="subject" class="w-full bg-surface text-on-surface font-body-md text-body-md p-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-surface-variant" type="text" value="{{ selected.subject }}" oninput="updatePreview()">
-              </div>
-              <div class="flex flex-col gap-xs flex-1">
-                <div class="flex items-center justify-between">
-                  <label class="font-headline-md text-headline-md text-on-surface" for="id_body">Message Body</label>
-                  <div class="flex items-center gap-sm bg-surface-container-low px-sm py-1 rounded-md">
-                    <span class="font-metadata text-metadata text-on-surface-variant">Insert Variable:</span>
-                    <select class="bg-transparent font-metadata text-metadata text-primary focus:outline-none cursor-pointer" onchange="insertVar(this)">
-                      <option value="{student_name}">{student_name}</option>
-                      <option value="{organization_name}">{organization_name}</option>
-                      <option value="{slot_title}">{slot_title}</option>
-                      <option value="{app_id}">{app_id}</option>
-                      <option value="{reason}">{reason}</option>
-                    </select>
+              <div class="grid grid-cols-1 gap-md">
+                <div class="flex flex-col gap-xs">
+                  <label class="font-body-md font-semibold text-on-surface" for="id_name">Name</label>
+                  <div class="ipt-field-box">
+                    <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">badge</span></span>
+                    <input id="id_name" name="name" type="text" maxlength="200" value="{{ values.name }}" required>
                   </div>
                 </div>
-                <textarea id="id_body" name="body" class="w-full flex-1 min-h-[280px] bg-surface text-on-surface font-body-md text-body-md p-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none border border-surface-variant leading-relaxed font-mono" oninput="updatePreview()">{{ selected.body }}</textarea>
+                <div class="flex flex-col gap-xs">
+                  <label class="font-body-md font-semibold text-on-surface" for="id_trigger">Trigger label</label>
+                  <div class="ipt-field-box">
+                    <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">bolt</span></span>
+                    <input id="id_trigger" name="trigger_label" type="text" maxlength="200" value="{{ values.trigger_label }}">
+                  </div>
+                </div>
               </div>
+
+              {% if is_email %}
               <div class="flex flex-col gap-xs">
-                <label class="font-headline-md text-headline-md text-on-surface" for="id_desc">Description</label>
-                <input id="id_desc" name="description" class="w-full bg-surface text-on-surface font-body-md text-body-md p-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border border-surface-variant" type="text" value="{{ selected.description }}">
+                <label class="font-body-md font-semibold text-on-surface" for="id_subject">Subject</label>
+                <div class="ipt-field-box">
+                  <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">title</span></span>
+                  <input id="id_subject" name="subject" type="text" maxlength="200" value="{{ values.subject }}">
+                </div>
+              </div>
+              {% endif %}
+
+              <div class="flex flex-col gap-xs flex-1">
+                <label class="font-body-md font-semibold text-on-surface" for="id_body">Message body</label>
+                {% if variables %}
+                <div class="flex flex-wrap items-center gap-xs" aria-label="Insert a variable">
+                  <span class="font-metadata text-metadata text-on-surface-variant">Insert:</span>
+                  {% for name, sample in variables %}
+                    <button type="button" data-var="{{ name }}" title="Example: {{ sample|truncatechars:40 }}"
+                            class="px-sm py-[2px] rounded-full bg-primary-fixed text-on-primary-fixed font-metadata text-metadata hover:opacity-80">{{ '{' }}{{ name }}{{ '}' }}</button>
+                  {% endfor %}
+                </div>
+                {% endif %}
+                <div class="ipt-field-box">
+                  <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">notes</span></span>
+                  <textarea id="id_body" name="body" rows="10" class="min-h-[240px]" required>{{ values.body }}</textarea>
+                </div>
+                {% if not is_email %}
+                <p class="ipt-field-desc" id="sms-count" data-segment="{{ sms_segment }}"><span class="material-symbols-outlined">sms</span><span data-count-text></span></p>
+                {% endif %}
+              </div>
+
+              <div class="flex flex-col gap-xs">
+                <label class="font-body-md font-semibold text-on-surface" for="id_desc">Description</label>
+                <div class="ipt-field-box">
+                  <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">description</span></span>
+                  <input id="id_desc" name="description" type="text" value="{{ values.description }}">
+                </div>
               </div>
               <label class="flex items-center gap-sm cursor-pointer">
-                <input type="checkbox" name="is_active" {% if selected.is_active %}checked{% endif %} class="w-4 h-4 accent-[#3525cd]">
-                <span class="font-body-md text-on-surface">Active</span>
+                <input type="checkbox" name="is_active" {% if values.is_active %}checked{% endif %} class="w-4 h-4 accent-[#3525cd]">
+                <span class="font-body-md text-on-surface">Active (when off, the built-in wording is used)</span>
               </label>
             </div>
+
             <div class="xl:w-1/2 flex flex-col gap-md">
-              <label class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs">
-                <span class="material-symbols-outlined text-on-surface-variant text-[20px]">preview</span>
-                Live Preview
-              </label>
+              <span class="font-body-md font-semibold text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-on-surface-variant text-[20px]">preview</span>Live preview with sample values</span>
               <div class="bg-surface-container-low rounded-xl p-md flex-1 flex flex-col">
-                <div class="bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden flex-1 flex flex-col border border-surface-variant/50">
-                  <div class="p-md bg-surface-container-low border-b border-surface-variant/50 flex flex-col gap-sm">
+                <div class="bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden flex-1 flex flex-col border border-outline-variant/50">
+                  <div class="p-md bg-surface-container-low border-b border-outline-variant/50 flex flex-col gap-xs">
                     <div class="flex items-center gap-sm">
                       <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">IPT</div>
                       <div>
-                        <div class="font-body-md text-body-md font-bold text-on-surface">IPT Marketplace</div>
-                        <div class="font-metadata text-metadata text-on-surface-variant">to <span id="preview-to">student@university.edu</span></div>
+                        <div class="font-body-md font-bold text-on-surface">IPT Marketplace</div>
+                        <div class="font-metadata text-metadata text-on-surface-variant">{% if is_email %}to student@university.ac.tz{% else %}SMS to the student{% endif %}</div>
                       </div>
                     </div>
-                    <div class="font-headline-md text-headline-md text-on-surface mt-sm" id="preview-subject"></div>
+                    {% if is_email %}<div class="font-headline-md text-headline-md text-on-surface mt-xs" id="preview-subject"></div>{% endif %}
                   </div>
                   <div class="p-lg bg-surface-container-lowest font-body-lg text-body-lg text-on-surface whitespace-pre-wrap flex-1" id="preview-body"></div>
                 </div>
@@ -131,10 +202,13 @@
             </div>
           </div>
         </form>
+        {{ samples|json_script:"samples-data" }}
+        {% endif %}
       {% else %}
-        <div class="flex-1 flex flex-col items-center justify-center p-lg">
+        <div class="flex-1 flex flex-col items-center justify-center p-lg text-center">
           <span class="material-symbols-outlined text-[48px] text-outline-variant mb-sm">email</span>
-          <p class="font-body-md text-on-surface-variant">Select a template to edit, or create one.</p>
+          <p class="font-body-md text-on-surface-variant">No templates yet.</p>
+          {% if free_events %}<a href="?new=1" class="text-primary font-semibold hover:underline mt-sm">Create the first one</a>{% endif %}
         </div>
       {% endif %}
     </div>
@@ -144,32 +218,45 @@
 {% block scripts %}
 <script>
   function filterTemplates(value) {
-    const term = value.toLowerCase();
-    document.querySelectorAll('#template-list > a').forEach(item => {
-      item.style.display = item.textContent.toLowerCase().includes(term) ? '' : 'none';
+    var term = value.toLowerCase();
+    document.querySelectorAll('#template-list > a').forEach(function (item) {
+      item.style.display = item.textContent.toLowerCase().indexOf(term) !== -1 ? '' : 'none';
     });
   }
-  function insertVar(select) {
-    const ta = document.getElementById('id_body');
-    const start = ta.selectionStart, end = ta.selectionEnd;
-    ta.value = ta.value.slice(0, start) + select.value + ta.value.slice(end);
-    ta.focus();
-    updatePreview();
-  }
-  function substitute(text) {
-    const samples = {
-      student_name: 'Alex Johnson', organization_name: 'Acme Industrial Solutions',
-      slot_title: 'Software Engineering Intern', app_id: '42',
-      reason: 'Transcript appears tampered', login_url: 'https://ipt-marketplace.com/login',
-      support_email: 'support@ipt-marketplace.com', amount: '15,000', currency: 'TZS',
-      reference_id: 'IPT-ABC123', paid_at: '2024-10-24 14:30'
-    };
-    return (text || '').replace(/\{(\w+)\}/g, (m, k) => samples[k] ?? m);
-  }
-  function updatePreview() {
-    document.getElementById('preview-subject').textContent = substitute(document.getElementById('id_subject').value);
-    document.getElementById('preview-body').textContent = substitute(document.getElementById('id_body').value);
-  }
-  updatePreview();
+  (function () {
+    var form = document.getElementById('template-form');
+    if (!form) return;
+    var samplesEl = document.getElementById('samples-data');
+    var samples = samplesEl ? JSON.parse(samplesEl.textContent) : {};
+    var subject = document.getElementById('id_subject');
+    var body = document.getElementById('id_body');
+    var last = body;
+    [subject, body].forEach(function (el) { if (el) el.addEventListener('focus', function () { last = el; }); });
+
+    function substitute(text) {
+      return (text || '').replace(/\{(\w+)\}/g, function (m, k) { return Object.prototype.hasOwnProperty.call(samples, k) ? samples[k] : m; });
+    }
+    function update() {
+      var ps = document.getElementById('preview-subject');
+      if (ps && subject) ps.textContent = substitute(subject.value);
+      document.getElementById('preview-body').textContent = substitute(body.value);
+      var counter = document.getElementById('sms-count');
+      if (counter) {
+        var n = substitute(body.value).length, seg = parseInt(counter.dataset.segment, 10);
+        counter.querySelector('[data-count-text]').textContent = n + ' characters (about ' + Math.max(1, Math.ceil(n / seg)) + ' SMS with sample values)';
+      }
+    }
+    form.querySelectorAll('[data-var]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var el = last || body, token = '{' + btn.dataset.var + '}';
+        var s = el.selectionStart == null ? el.value.length : el.selectionStart, e = el.selectionEnd == null ? s : el.selectionEnd;
+        el.value = el.value.slice(0, s) + token + el.value.slice(e);
+        el.focus(); el.setSelectionRange(s + token.length, s + token.length);
+        update();
+      });
+    });
+    [subject, body].forEach(function (el) { if (el) el.addEventListener('input', update); });
+    update();
+  })();
 </script>
 {% endblock %}

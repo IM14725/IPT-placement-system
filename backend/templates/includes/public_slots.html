@@ -1,0 +1,53 @@
+{% load i18n %}
+{# Result of the public slot search: used on the welcome page and returned as an HTML fragment by /slots/public/. #}
+<p class="font-metadata text-metadata text-on-surface-variant mb-sm" aria-live="polite" data-result-summary>
+  {% if total %}
+    {% blocktrans count n=total %}{{ n }} open slot{% plural %}{{ n }} open slots{% endblocktrans %}
+    {% if total > rows|length %}&middot; {% blocktrans with shown=rows|length %}showing {{ shown }}{% endblocktrans %}{% endif %}
+    {% if popular_region %}&middot; {% blocktrans with region=popular_region %}starting with {{ region }}, the most searched region{% endblocktrans %}{% endif %}
+  {% endif %}
+</p>
+{% if rows %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
+  {% for slot in rows %}
+  <article class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-md flex flex-col gap-sm shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+    <div class="flex items-start justify-between gap-sm">
+      <h3 class="font-headline-md text-headline-md text-on-surface">{{ slot.title }}</h3>
+      {% if slot.stipend %}
+      <span class="shrink-0 rounded-full px-sm py-0.5 bg-[#e8f5e9] text-[#1b5e20] font-metadata text-metadata font-semibold">{% trans "Stipend" %}</span>
+      {% endif %}
+    </div>
+    <ul class="flex flex-col gap-xs font-body-md text-body-md text-on-surface-variant">
+      <li class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline" aria-hidden="true">work</span>{{ slot.industry }}</li>
+      <li class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline" aria-hidden="true">location_on</span>{{ slot.district }}, {{ slot.region }}</li>
+      {% if slot.level_label %}
+      <li class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline" aria-hidden="true">school</span>{{ slot.level_label }}</li>
+      {% endif %}
+    </ul>
+    <div class="flex items-center justify-between mt-auto pt-sm border-t border-outline-variant/60">
+      <span class="font-metadata text-metadata font-semibold text-primary">
+        {% blocktrans count n=slot.seats_left %}{{ n }} seat left{% plural %}{{ n }} seats left{% endblocktrans %}
+      </span>
+      <a href="{% url 'login' %}" class="font-metadata text-metadata text-on-surface-variant hover:text-primary flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]" aria-hidden="true">lock</span>{% trans "Login to apply" %}
+      </a>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% if total > rows|length %}
+<p class="mt-md text-center font-body-md text-body-md text-on-surface-variant">
+  <a href="{% url 'register' %}" class="text-primary font-semibold hover:underline">{% blocktrans with total=total %}Register to see all {{ total }} slots{% endblocktrans %}</a>
+</p>
+{% endif %}
+{% else %}
+<div class="rounded-2xl border border-dashed border-outline-variant p-lg text-center flex flex-col items-center gap-xs">
+  <span class="material-symbols-outlined text-[36px] text-outline" aria-hidden="true">search_off</span>
+  <p class="font-body-lg text-body-lg font-semibold text-on-surface">
+    {% if filtered %}{% trans "No open slots match your search." %}{% else %}{% trans "There are no open slots right now." %}{% endif %}
+  </p>
+  <p class="font-body-md text-body-md text-on-surface-variant">
+    {% if filtered %}{% trans "Try another region or district, or clear the filters." %}{% else %}{% trans "Check back soon, or create your account now so you are ready to apply." %}{% endif %}
+  </p>
+</div>
+{% endif %}
