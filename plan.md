@@ -534,3 +534,11 @@ URLs: Django `http://127.0.0.1:8000` · admin `http://127.0.0.1:8000/admin/` · 
 - Hidden always: not OPEN, past deadline, unapproved or suspended organization, and full slots (PENDING + PAID >= capacity).
 - Kiswahili: "showing %(shown)s" and "starting with %(region)s, the most searched region" (needs native review). `django.mo` rebuilt with the scratchpad compile script.
 - Tests: `apps/accounts/test_public.py` (29 pass).
+
+## Login speed (3+ s -> well under 1 s)
+
+Measured on the dev machine (Windows): `localhost` makes Redis/Postgres try IPv6 first and wait ~5 s (Redis) / ~1 s (Postgres) before falling back to IPv4; PBKDF2 at 1.5M iterations took ~3.6 s per password check.
+- Redis, Celery and DB defaults now use `127.0.0.1` (`config/settings/base.py`, `realtime/app/core/config.py`, local `backend/.env`); the Redis pool has `socket_connect_timeout=1`, `socket_timeout=3`. Update your own `.env` the same way.
+- `PASSWORD_HASHERS`: `apps.accounts.hashers.IPTArgon2PasswordHasher` first (Argon2id, 19 MiB, t=2, p=1, ~0.06 s), then Django's Argon2, PBKDF2 and PBKDF2-SHA1 so old hashes verify and are re-hashed on the owner's next login (that one login is still slow). `argon2-cffi` added to `requirements.txt`.
+- `apps/core/ajax.py` `AjaxRedirectMiddleware`: AJAX form POSTs that redirect get 200 + `X-Redirect-To`; `form-loading.js` navigates once. Before, the dashboard rendered twice after login (fetch followed the 302, then the script navigated again).
+- Tests: `apps/accounts/test_login_speed.py`. Full suite 347 passed in 2.5 minutes (it took ~22 minutes before, mostly password hashing in tests).

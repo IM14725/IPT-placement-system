@@ -13,11 +13,11 @@ class Settings(BaseSettings):
 
     django_env: str = "dev"
     database_url: str = (
-        "postgresql+asyncpg://ipt:ipt_dev_password@localhost:5432/ipt_marketplace"
+        "postgresql+asyncpg://ipt:ipt_dev_password@127.0.0.1:5432/ipt_marketplace"
     )
-    redis_url: str = "redis://localhost:6379/0"
-    broker_url: str = "redis://localhost:6379/1"
-    result_url: str = "redis://localhost:6379/2"
+    redis_url: str = "redis://127.0.0.1:6379/0"
+    broker_url: str = "redis://127.0.0.1:6379/1"
+    result_url: str = "redis://127.0.0.1:6379/2"
     gateway_webhook_secret: str = "dev-webhook-secret"
     mock_gateway_webhook_secret: str = "dev-mock-webhook-secret"
     enable_mock_gateway: bool = False

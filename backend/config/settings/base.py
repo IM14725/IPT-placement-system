@@ -102,6 +102,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "apps.core.security.SecurityHeadersMiddleware",
+    "apps.core.ajax.AjaxRedirectMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     # Activates the per-user/site language for every request (EN / Kiswahili).
     "django.middleware.locale.LocaleMiddleware",
@@ -150,7 +151,7 @@ DATABASES = {
         "NAME": env("DB_NAME", default="ipt_marketplace"),
         "USER": env("DB_USER", default="ipt"),
         "PASSWORD": env("DB_PASSWORD", default="ipt_dev_password"),
-        "HOST": env("DB_HOST", default="localhost"),
+        "HOST": env("DB_HOST", default="127.0.0.1"),
         "PORT": env("DB_PORT", default="5432"),
         "CONN_MAX_AGE": 0 if env("DB_POOL", default=False) else 60,
         "OPTIONS": {"pool": True} if env("DB_POOL", default=False) else {},
@@ -191,6 +192,15 @@ LOGIN_LOCKOUT_SECONDS = env.int("LOGIN_LOCKOUT_SECONDS", default=300)
 
 LOGIN_URL = "/auth/login/"
 LOGIN_REDIRECT_URL = "/"
+
+# Argon2id first: ~0.1s to verify. PBKDF2 at Django's default 1.5M iterations took 3+ seconds per login on
+# the dev machine. Older PBKDF2 hashes still verify and are re-hashed to Argon2 on the owner's next login.
+PASSWORD_HASHERS = [
+    "apps.accounts.hashers.IPTArgon2PasswordHasher",
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -256,9 +266,9 @@ WARDS_DATA_FILE = BASE_DIR.parent / "data" / "tanzania_wards.json"
 INSTITUTIONS_DATA_FILE = BASE_DIR.parent / "data" / "tanzania_institutions.json"
 
 # Celery / Redis
-REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/1")
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/2")
+REDIS_URL = env("REDIS_URL", default="redis://127.0.0.1:6379/0")
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://127.0.0.1:6379/1")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://127.0.0.1:6379/2")
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300
 

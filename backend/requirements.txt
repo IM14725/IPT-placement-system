@@ -20,6 +20,9 @@ pydantic-settings==2.15.0
 python-multipart==0.0.32
 selcom_apigw_client==1.0.1
 
+# Password hashing (Argon2id is fast to verify yet memory-hard; PBKDF2 hashes keep working and upgrade on login)
+argon2-cffi==25.1.0
+
 # Admin MFA
 PyOTP==2.10.0
 segno==1.6.6

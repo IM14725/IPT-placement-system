@@ -77,6 +77,12 @@
         headers: { "X-Requested-With": "XMLHttpRequest" },
       })
         .then(function (resp) {
+          // The server answers a redirect with 200 + X-Redirect-To so the destination loads once.
+          var redirectTo = resp.headers.get("X-Redirect-To");
+          if (redirectTo) {
+            window.location.href = redirectTo;
+            return;
+          }
           // Check for Celery task dispatch (HTTP 202 Accepted)
           if (resp.status === 202 && resp.headers.get("X-Task-Id")) {
             var taskId = resp.headers.get("X-Task-Id");

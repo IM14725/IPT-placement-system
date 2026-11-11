@@ -11,7 +11,7 @@ _pool = None
 def get_redis():
     global _pool
     if _pool is None:
-        _pool = redis.ConnectionPool.from_url(settings.REDIS_URL)
+        _pool = redis.ConnectionPool.from_url(settings.REDIS_URL, socket_connect_timeout=1, socket_timeout=3)
     return redis.Redis(connection_pool=_pool)
 
 
