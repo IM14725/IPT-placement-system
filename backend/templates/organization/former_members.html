@@ -4,7 +4,7 @@
 {% block content %}
 <div class="flex flex-col gap-lg">
   <div class="flex flex-col gap-xs">
-    <a href="{% url 'organization-profile' %}" class="text-primary font-semibold hover:underline flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">arrow_back</span>{% trans "Team accounts" %}</a>
+    <a href="{% url 'organization-profile' %}#team" class="text-primary font-semibold hover:underline flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">arrow_back</span>{% trans "Team accounts" %}</a>
     <h1 class="font-display text-display text-on-surface">{% trans "Former Members" %}</h1>
     <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
       {% blocktrans trimmed with name=organization.name %}People whose access to {{ name }} was revoked. Their accounts and everything they did are kept: opportunities, applications, documents and decisions stay with the organization, and their actions remain attributed to them in the activity log.{% endblocktrans %}

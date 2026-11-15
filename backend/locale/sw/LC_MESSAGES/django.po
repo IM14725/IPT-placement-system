@@ -3467,6 +3467,9 @@ msgstr "Picha ya wasifu lazima iwe chini ya MB 2."
 msgid "Profile saved."
 msgstr "Wasifu umehifadhiwa."
 
+msgid "Profile, team & security"
+msgstr "Wasifu, timu & usalama"
+
 msgid "Prohibited Conduct"
 msgstr "Mienendo Iliyokatazwa"
 
@@ -4240,6 +4243,9 @@ msgstr "Waambie wanafunzi kuhusu shirika lako na mahali ulipo, na usimamie jinsi
 
 msgid "Tell students about your organization and where you are located."
 msgstr "Waambie wanafunzi kuhusu shirika lako na unapokuwa."
+
+msgid "Tell students about your organization, manage your team accounts, and control how you sign in."
+msgstr "Waambie wanafunzi kuhusu shirika lako, simamia akaunti za timu yako, na dhibiti jinsi unavyoingia."
 
 msgid "Tell the platform team about a misleading opportunity, a payment issue, abuse or anything else that looks wrong. We review every report."
 msgstr "Mwambie timu ya jukwaa kuhusu fursa ya kupotosha, tatizo la malipo, matumizi mabaya au jambo lingine lolote linaloonekana si sahihi. Tunapitia kila ripoti."

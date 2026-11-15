@@ -196,6 +196,14 @@ def test_organization_profile_and_security_share_one_page(org):
     body = c.get(reverse("organization-profile")).content.decode()
     assert 'data-tab="profile"' in body and 'data-tab="security"' in body
     assert 'action="/auth/account/email/"' in body and 'action="/auth/change-password/"' in body
+    # Three tabs, each panel holding only its own part.
+    assert 'data-tab="team"' in body
+    panels = {n: body[body.index(f'data-panel="{n}"'):] for n in ("profile", "team", "security")}
+    profile = panels["profile"][: panels["profile"].index('data-panel="team"')]
+    team = panels["team"][: panels["team"].index('data-panel="security"')]
+    assert "Organization Information" in profile and "Organization Team Accounts" not in profile
+    assert "Organization Team Accounts" in team and "Organization Information" not in team
+    assert "/auth/change-password/" not in profile and "/auth/change-password/" not in team
 
 
 def _profile_post(places, phone):

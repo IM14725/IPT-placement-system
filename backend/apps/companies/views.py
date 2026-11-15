@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.http import FileResponse, HttpResponseForbidden, HttpResponseGone
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.functional import lazy
 
 from apps.applications.models import ApplicantNote, Application, ApplicationStatus
 from apps.applications.services import (
@@ -62,6 +63,10 @@ from apps.core.rate_limit import token_bucket
 from apps.core.security import safe_json_dumps
 from apps.documents.models import Document
 from apps.slots.models import Slot, SlotStatus
+
+
+# Team-account actions return to the profile page's "Team accounts" tab.
+TEAM_TAB_URL = lazy(lambda: reverse("organization-profile") + "#team", str)()
 
 
 def _get_organization(request, require_complete=True):
@@ -135,6 +140,7 @@ def dashboard(request):
 @login_required
 @org_permission_required(ORG_VIEW)
 def profile(request):
+    # Tabs: #profile (default), #team (team accounts), #security (sign-in details); see profile.html.
     if not request.user.is_organization:
         return HttpResponseForbidden(gettext("Organization account required."))
     instance = _get_organization(request, require_complete=False)
@@ -239,7 +245,7 @@ def add_member(request):
         for field_errors in form.errors.values():
             for err in field_errors:
                 messages.error(request, err)
-    return redirect("organization-profile")
+    return redirect(TEAM_TAB_URL)
 
 
 @login_required
@@ -261,7 +267,7 @@ def remove_member(request, member_id):
         )
     except ValidationError as exc:
         messages.error(request, exc.message if hasattr(exc, "message") else "; ".join(exc.messages))
-    return redirect("organization-profile")
+    return redirect(TEAM_TAB_URL)
 
 
 @login_required
@@ -278,7 +284,7 @@ def change_member_role_view(request, member_id):
         messages.success(request, gettext("Role updated. The member must sign in again to use it."))
     except ValidationError as exc:
         messages.error(request, exc.message if hasattr(exc, "message") else "; ".join(exc.messages))
-    return redirect("organization-profile")
+    return redirect(TEAM_TAB_URL)
 
 
 @login_required
