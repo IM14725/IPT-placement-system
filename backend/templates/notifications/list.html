@@ -39,8 +39,8 @@
     </div>
   </div>
 
-  <form method="get" class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col sm:flex-row gap-sm sm:items-end">
-    <div class="flex flex-col gap-xs flex-1">
+  <form method="get" class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-row gap-xs sm:gap-sm items-end">
+    <div class="flex flex-col gap-xs flex-1 min-w-0">
       <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="notif-status">{% trans "Show" %}</label>
       <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">mark_email_unread</span></span>
         <select id="notif-status" name="status" onchange="this.form.submit()">
@@ -49,7 +49,7 @@
           <option value="read" {% if status == 'read' %}selected{% endif %}>{% trans "Read" %} ({{ read_total }})</option>
         </select></div>
     </div>
-    <div class="flex flex-col gap-xs flex-1">
+    <div class="flex flex-col gap-xs flex-1 min-w-0">
       <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="notif-type">{% trans "Type" %}</label>
       <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">category</span></span>
         <select id="notif-type" name="type" onchange="this.form.submit()">
@@ -65,7 +65,7 @@
   {% if notifications %}
     <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
       {% for n in notifications %}
-        <div class="p-md flex items-start gap-sm {% if not forloop.last %}border-b border-surface-container{% endif %} {% if not n.is_read %}bg-primary/5{% endif %}">
+        <div class="p-md grid grid-cols-[2.5rem_1fr] sm:grid-cols-[2.5rem_1fr_auto] gap-x-sm gap-y-0 items-start {% if not forloop.last %}border-b border-surface-container{% endif %} {% if not n.is_read %}bg-primary/5{% endif %}">
           <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 {% if n.is_read %}bg-surface-container text-on-surface-variant{% else %}bg-primary/10 text-primary{% endif %}">
             <span class="material-symbols-outlined text-[20px]">{% if n.type == 'ACCEPTANCE' %}celebration{% elif n.type == 'PAYMENT' %}payments{% elif n.type == 'SLOT_ALERT' %}notifications_active{% elif n.type == 'REVIEW' %}star{% elif n.type == 'SYSTEM' %}info{% else %}assignment{% endif %}</span>
           </div>
@@ -78,7 +78,7 @@
             <p class="font-body-md text-body-md text-on-surface-variant break-words">{{ n.body }}</p>
             <span class="font-metadata text-metadata text-outline">{{ n.created_at|timesince }} {% trans "ago" %}</span>
           </div>
-          <div class="flex items-center gap-1 shrink-0">
+          <div class="flex items-center gap-1 shrink-0 col-span-2 sm:col-span-1 justify-self-end -mt-1 sm:mt-0">
             {% if n.link %}
               <a href="{% url 'notification-open' n.id %}" class="p-2 rounded-lg text-primary hover:bg-primary/10 transition-colors" title="{% trans 'Open' %}" aria-label="{% trans 'Open' %}"><span class="material-symbols-outlined text-[20px]">open_in_new</span></a>
             {% endif %}

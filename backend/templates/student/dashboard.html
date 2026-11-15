@@ -106,30 +106,33 @@
       {% if applications %}<a href="{% url 'student-applications' %}" class="font-body-md text-body-md text-primary font-semibold hover:underline whitespace-nowrap">{% trans "View all" %}</a>{% endif %}
     </div>
     {% if applications %}
-      <div class="flex flex-col gap-sm">
+      <div class="flex flex-col gap-xs md:gap-sm">
         {% for app in applications %}
-          <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-sm">
-              <div class="flex flex-col min-w-0">
-                <span class="font-headline-md text-headline-md text-on-surface break-words">{{ app.slot.title }}</span>
-                <span class="font-body-md text-body-md text-on-surface-variant">{{ app.slot.organization.name }} · {{ app.slot.district }}</span>
-              </div>
-              <div class="shrink-0">
+          <div class="bg-surface-container-lowest rounded-xl p-sm md:p-md shadow-sm flex flex-col gap-1">
+            <div class="flex items-center gap-xs flex-wrap">
+              <span class="font-headline-md text-[16px] leading-6 text-on-surface break-words">{{ app.slot.title }}</span>
+              {% include "includes/application_badge.html" %}
+            </div>
+            <p class="font-metadata text-metadata text-on-surface-variant break-words">{{ app.slot.organization.name }} · {{ app.slot.district }}{% if app.slot.stipend_available and app.slot.stipend_amount %} · {% blocktrans trimmed with stipend_amount=app.slot.stipend_amount|floatformat:0 %}TZS {{ stipend_amount }}/month{% endblocktrans %}{% endif %}</p>
+            <div class="flex items-center justify-between gap-xs flex-wrap">
+              <div class="min-w-0">{% include "includes/application_progress.html" with compact=True %}</div>
+              <div class="shrink-0 flex items-center gap-xs">
                 {% if app.status == 'PENDING' and app.payment and not app.payment.is_paid %}
-                  <a href="{% url 'student-payment' app.payment.id %}" class="bg-primary text-on-primary px-md py-2 rounded-lg font-semibold text-body-md inline-flex items-center gap-xs hover:bg-primary-container transition-colors">
-                    <span class="material-symbols-outlined text-[18px]">payments</span>{% trans "Pay Now" %}
+                  <a href="{% url 'student-payment' app.payment.id %}" class="bg-primary text-on-primary px-sm py-1.5 rounded-lg font-semibold text-body-md inline-flex items-center gap-xs hover:bg-primary-container transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">payments</span>{% trans "Pay Now" %}
                     {% if app.payment_deadline %}· <span class="tabular-nums" data-countdown="{{ app.payment_deadline|date:'c' }}" data-expired="{% trans 'Expired' %}">{{ app.payment_deadline|timeuntil }}</span>{% endif %}
                   </a>
                 {% elif app.is_accepted %}
-                  <a href="{% url 'student-checklist' app.id %}" class="px-md py-2 rounded-lg font-semibold text-body-md inline-flex items-center gap-xs bg-[rgb(var(--c-ok-bg))] text-[rgb(var(--c-ok-fg))] hover:opacity-90 transition-opacity">
-                    <span class="material-symbols-outlined text-[18px]">celebration</span>{% trans "Accepted: next steps" %}
+                  <a href="{% url 'student-checklist' app.id %}" class="px-sm py-1.5 rounded-lg font-semibold text-body-md inline-flex items-center gap-xs bg-[rgb(var(--c-ok-bg))] text-[rgb(var(--c-ok-fg))] hover:opacity-90 transition-opacity">
+                    <span class="material-symbols-outlined text-[16px]">celebration</span>{% trans "Accepted: next steps" %}
                   </a>
                 {% elif app.status == 'UNPAID' %}
                   <a href="{% url 'student-apply' app.slot.id %}" class="text-error font-semibold text-body-md hover:underline">{% trans "Re-book Slot" %}</a>
+                {% elif app.status == 'PAID' and app.is_cancellable and app.cancel_deadline %}
+                  <span class="font-metadata text-metadata text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">hourglass_top</span><span class="tabular-nums font-semibold" data-countdown="{{ app.cancel_deadline|date:'c' }}" data-expired="{% trans 'window closed' %}">{{ app.cancel_deadline|timeuntil }}</span></span>
                 {% endif %}
               </div>
             </div>
-            {% include "includes/application_progress.html" %}
           </div>
         {% endfor %}
       </div>

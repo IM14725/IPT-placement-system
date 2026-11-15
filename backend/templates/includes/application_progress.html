@@ -1,6 +1,25 @@
 {% load i18n %}
-{# Applied -> Paid -> Waiting for acceptance -> Accepted. Needs: app. There is no "rejected" step. #}
-{% if app.status == 'UNPAID' or app.status == 'CANCELLED' %}
+{# Applied -> Paid -> Waiting for acceptance -> Accepted. Needs: app. Optional: compact (one thin row). There is no "rejected" step. #}
+{% if compact %}
+  {% if app.status == 'UNPAID' or app.status == 'CANCELLED' %}
+    <div class="flex items-center gap-1 font-metadata text-metadata text-error">
+      <span class="material-symbols-outlined text-[14px]">{% if app.status == 'UNPAID' %}timer_off{% else %}cancel{% endif %}</span>
+      {% if app.status == 'UNPAID' %}{% trans "Seat released: payment time ran out." %}{% else %}{% trans "You cancelled this application." %}{% endif %}
+    </div>
+  {% else %}
+    <ol class="flex items-center flex-nowrap gap-x-1 whitespace-nowrap overflow-hidden" aria-label="{% trans 'Application progress' %}">
+      {% for step in app.progress_steps %}
+        <li class="flex items-center gap-1 font-metadata text-[11px] leading-4 {% if step.done or step.current %}text-on-surface font-semibold{% else %}text-on-surface-variant{% endif %}">
+          {% if not forloop.first %}<span class="w-2 h-[2px] {% if step.done or step.current %}bg-[rgb(var(--c-ok-fg))]{% else %}bg-surface-container-high{% endif %}" aria-hidden="true"></span>{% endif %}
+          <span class="w-4 h-4 rounded-full flex items-center justify-center shrink-0
+            {% if step.done %}bg-[rgb(var(--c-ok-fg))] text-[rgb(var(--c-ok-bg))]{% elif step.current %}bg-primary text-on-primary{% else %}border border-outline text-outline{% endif %}">
+            <span class="material-symbols-outlined text-[11px]">{% if step.done %}check{% elif step.current %}hourglass_top{% else %}circle{% endif %}</span>
+          </span>{{ step.short|default:step.label }}
+        </li>
+      {% endfor %}
+    </ol>
+  {% endif %}
+{% elif app.status == 'UNPAID' or app.status == 'CANCELLED' %}
   <div class="flex items-center gap-xs font-metadata text-metadata text-error">
     <span class="material-symbols-outlined text-[16px]">{% if app.status == 'UNPAID' %}timer_off{% else %}cancel{% endif %}</span>
     {% if app.status == 'UNPAID' %}{% trans "Payment time ran out and the seat was released. Re-book to try again." %}{% else %}{% trans "You cancelled this application." %}{% endif %}

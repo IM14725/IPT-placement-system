@@ -113,7 +113,7 @@ class Application(TimeStampedModel):
             {"key": "applied", "label": _("Applied"), "done": True},
             {"key": "paid", "label": _("Paid"), "done": paid,
              "current": self.status == ApplicationStatus.PENDING},
-            {"key": "review", "label": _("Waiting for acceptance"), "done": paid and self.is_accepted,
+            {"key": "review", "label": _("Waiting for acceptance"), "short": _("Waiting"), "done": paid and self.is_accepted,
              "current": paid and not self.is_accepted},
             {"key": "accepted", "label": _("Accepted"), "done": paid and self.is_accepted},
         ]

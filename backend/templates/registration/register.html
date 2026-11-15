@@ -74,25 +74,30 @@
         <!-- Wizard progress -->
         <div class="flex flex-col gap-xs" data-wiz-progress>
           <ol class="flex items-center">
-            <li data-wiz-dot="1" class="flex items-center flex-1 gap-xs min-w-0">
-              <span data-dot class="w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center font-metadata text-metadata font-bold">1</span>
+            <li data-wiz-dot="role" class="flex items-center flex-1 gap-xs min-w-0">
+              <span data-dot class="w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center font-metadata text-metadata font-bold"></span>
               <span data-dot-label class="hidden sm:inline font-metadata text-metadata truncate">{% trans "Role" %}</span>
               <span data-dot-line class="flex-1 h-0.5 mx-xs bg-outline-variant"></span>
             </li>
-            <li data-wiz-dot="2" class="flex items-center flex-1 gap-xs min-w-0">
-              <span data-dot class="w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center font-metadata text-metadata font-bold">2</span>
-              <span data-dot-label class="hidden sm:inline font-metadata text-metadata truncate">{% trans "Details" %}</span>
+            <li data-wiz-dot="org" class="flex items-center flex-1 gap-xs min-w-0">
+              <span data-dot class="w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center font-metadata text-metadata font-bold"></span>
+              <span data-dot-label class="hidden sm:inline font-metadata text-metadata truncate">{% trans "Organization" %}</span>
               <span data-dot-line class="flex-1 h-0.5 mx-xs bg-outline-variant"></span>
             </li>
-            <li data-wiz-dot="3" class="flex items-center gap-xs min-w-0">
-              <span data-dot class="w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center font-metadata text-metadata font-bold">3</span>
+            <li data-wiz-dot="personal" class="flex items-center flex-1 gap-xs min-w-0">
+              <span data-dot class="w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center font-metadata text-metadata font-bold"></span>
+              <span data-dot-label class="hidden sm:inline font-metadata text-metadata truncate">{% trans "Personal" %}</span>
+              <span data-dot-line class="flex-1 h-0.5 mx-xs bg-outline-variant"></span>
+            </li>
+            <li data-wiz-dot="password" class="flex items-center gap-xs min-w-0">
+              <span data-dot class="w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center font-metadata text-metadata font-bold"></span>
               <span data-dot-label class="hidden sm:inline font-metadata text-metadata truncate">{% trans "Password" %}</span>
             </li>
           </ol>
           <p class="font-metadata text-metadata text-on-surface-variant" data-wiz-status aria-live="polite"></p>
         </div>
 
-        <div data-step="1" class="flex flex-col gap-md">
+        <div data-step="role" class="flex flex-col gap-md">
         <!-- Role selector cards -->
         <div class="flex flex-col gap-xs">
           <span class="font-body-md text-body-md font-semibold text-on-surface">{% trans "I am a..." %}</span>
@@ -113,11 +118,72 @@
           <div class="flex gap-sm mt-xs" data-wiz-nav><button type="button" data-wiz-next class="flex-1 bg-secondary text-on-secondary font-body-lg text-body-lg font-medium py-3 rounded-lg shadow-md hover:shadow-lg hover:bg-secondary-container transition-all flex items-center justify-center gap-xs"><span>{% trans "Continue" %}</span><span class="material-symbols-outlined text-[20px]">arrow_forward</span></button></div>
         </div>
 
-        <div data-step="2" class="hidden flex flex-col gap-md">
+        <div data-step="org" class="hidden flex flex-col gap-md">
           <p class="flex items-center justify-between gap-sm rounded-lg bg-surface-container px-sm py-xs font-body-md text-body-md text-on-surface-variant">
             <span>{% trans "Registering as" %} <strong class="text-on-surface" data-role-label></strong></span>
-            <button type="button" data-wiz-back class="text-primary font-semibold hover:underline">{% trans "Change" %}</button>
+            <button type="button" data-wiz-role class="text-primary font-semibold hover:underline">{% trans "Change" %}</button>
           </p>
+          <p class="font-body-md text-body-md text-on-surface-variant">{% trans "First, tell us about the organization. Your own personal details come on the next step." %}</p>
+        <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.organization_name.id_for_label }}">{% trans "Organization name" %}</label>
+          <div class="ipt-field-box {% if form.organization_name.errors %}is-error{% endif %}">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">apartment</span></span>
+            {{ form.organization_name }}
+          </div>
+          <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Use the registered name of your organization." %}</p>
+          {% if form.organization_name.errors %}
+            <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.organization_name.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="flex flex-col gap-md">
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.organization_email.id_for_label }}">{% trans "Official organization email" %}</label>
+            <div class="ipt-field-box {% if form.organization_email.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">alternate_email</span></span>
+              {{ form.organization_email }}
+            </div>
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "The organization's contact identity. You sign in with your own personal email, which you enter on the next step." %}</p>
+            <p id="org-email-free-note" class="ipt-field-desc hidden" style="color:#a16207"><span class="material-symbols-outlined">warning</span>{% trans "Use your company email domain if you have one. Gmail and similar addresses are accepted, but we check those organizations more carefully." %}</p>
+            {% if form.organization_email.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.organization_email.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.organization_phone.id_for_label }}">{% trans "Organization phone number" %}</label>
+            <div class="ipt-field-box {% if form.organization_phone.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">call</span></span>
+              {{ form.organization_phone }}
+            </div>
+            {% if form.organization_phone.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.organization_phone.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.brela_number.id_for_label }}">{% trans "BRELA registration number" %} <span class="text-on-surface-variant font-normal">({% trans "optional" %})</span></label>
+            <div class="ipt-field-box {% if form.brela_number.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">app_registration</span></span>
+              {{ form.brela_number }}
+            </div>
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Helps us verify your organization faster. You can also add it later in your profile." %}</p>
+            {% if form.brela_number.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.brela_number.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="flex flex-col gap-xs">
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.tin.id_for_label }}">{% trans "TIN (Taxpayer Identification Number)" %} <span class="text-on-surface-variant font-normal">({% trans "optional" %})</span></label>
+            <div class="ipt-field-box {% if form.tin.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">receipt_long</span></span>
+              {{ form.tin }}
+            </div>
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "9 digits from TRA, for example 123-456-789." %}</p>
+            {% if form.tin.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.tin.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+
+          <div class="flex gap-sm mt-xs" data-wiz-nav><button type="button" data-wiz-back class="px-md py-3 rounded-lg border border-outline-variant text-on-surface font-body-md font-semibold hover:bg-surface-container transition-colors">{% trans "Back" %}</button><button type="button" data-wiz-next class="flex-1 bg-secondary text-on-secondary font-body-lg text-body-lg font-medium py-3 rounded-lg shadow-md hover:shadow-lg hover:bg-secondary-container transition-all flex items-center justify-center gap-xs"><span>{% trans "Continue" %}</span><span class="material-symbols-outlined text-[20px]">arrow_forward</span></button></div>
+        </div>
+
+        <div data-step="personal" class="hidden flex flex-col gap-md">
+          <p class="flex items-center justify-between gap-sm rounded-lg bg-surface-container px-sm py-xs font-body-md text-body-md text-on-surface-variant">
+            <span>{% trans "Registering as" %} <strong class="text-on-surface" data-role-label></strong></span>
+            <button type="button" data-wiz-role class="text-primary font-semibold hover:underline">{% trans "Change" %}</button>
+          </p>
+          <p class="font-body-md text-body-md text-on-surface-variant" data-personal-hint>{% trans "Now your personal details. You sign in with your own email and a password." %}</p>
         <div class="flex flex-col gap-xs">
           <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.email.id_for_label }}">{% trans "Email address" %}</label>
           <div class="ipt-field-box {% if form.email.errors %}is-error{% endif %}">
@@ -153,56 +219,7 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-xs" data-organization-name style="display:none">
-            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.organization_name.id_for_label }}">{% trans "Organization name" %}</label>
-          <div class="ipt-field-box {% if form.organization_name.errors %}is-error{% endif %}">
-            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">apartment</span></span>
-            {{ form.organization_name }}
-          </div>
-          <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Use the registered name of your organization." %}</p>
-          {% if form.organization_name.errors %}
-            <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.organization_name.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <div class="flex flex-col gap-md" data-organization-only style="display:none">
-          <div class="flex flex-col gap-xs">
-            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.organization_email.id_for_label }}">{% trans "Official organization email" %}</label>
-            <div class="ipt-field-box {% if form.organization_email.errors %}is-error{% endif %}">
-              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">alternate_email</span></span>
-              {{ form.organization_email }}
-            </div>
-            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "The organization's contact identity. You sign in with your own personal email below." %}</p>
-            <p id="org-email-free-note" class="ipt-field-desc hidden" style="color:#a16207"><span class="material-symbols-outlined">warning</span>{% trans "Use your company email domain if you have one. Gmail and similar addresses are accepted, but we check those organizations more carefully." %}</p>
-            {% if form.organization_email.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.organization_email.errors.0 }}</p>{% endif %}
-          </div>
-          <div class="flex flex-col gap-xs">
-            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.organization_phone.id_for_label }}">{% trans "Organization phone number" %}</label>
-            <div class="ipt-field-box {% if form.organization_phone.errors %}is-error{% endif %}">
-              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">call</span></span>
-              {{ form.organization_phone }}
-            </div>
-            {% if form.organization_phone.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.organization_phone.errors.0 }}</p>{% endif %}
-          </div>
-          <div class="flex flex-col gap-xs">
-            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.brela_number.id_for_label }}">{% trans "BRELA registration number" %} <span class="text-on-surface-variant font-normal">({% trans "optional" %})</span></label>
-            <div class="ipt-field-box {% if form.brela_number.errors %}is-error{% endif %}">
-              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">app_registration</span></span>
-              {{ form.brela_number }}
-            </div>
-            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Helps us verify your organization faster. You can also add it later in your profile." %}</p>
-            {% if form.brela_number.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.brela_number.errors.0 }}</p>{% endif %}
-          </div>
-          <div class="flex flex-col gap-xs">
-            <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.tin.id_for_label }}">{% trans "TIN (Taxpayer Identification Number)" %} <span class="text-on-surface-variant font-normal">({% trans "optional" %})</span></label>
-            <div class="ipt-field-box {% if form.tin.errors %}is-error{% endif %}">
-              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">receipt_long</span></span>
-              {{ form.tin }}
-            </div>
-            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "9 digits from TRA, for example 123-456-789." %}</p>
-            {% if form.tin.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.tin.errors.0 }}</p>{% endif %}
-          </div>
-          <div class="flex flex-col gap-xs">
+        <div class="flex flex-col gap-xs" data-organization-only style="display:none">
             <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.position.id_for_label }}">{% trans "Your position in the organization" %}</label>
             <div class="ipt-field-box {% if form.position.errors %}is-error{% endif %}">
               <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">work</span></span>
@@ -210,7 +227,6 @@
             </div>
             <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "e.g. Human Resources Manager, Director, Training Coordinator. You become the organization's Manager." %}</p>
             {% if form.position.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.position.errors.0 }}</p>{% endif %}
-          </div>
         </div>
 
         <div class="flex flex-col gap-xs">
@@ -228,7 +244,7 @@
           <div class="flex gap-sm mt-xs" data-wiz-nav><button type="button" data-wiz-back class="px-md py-3 rounded-lg border border-outline-variant text-on-surface font-body-md font-semibold hover:bg-surface-container transition-colors">{% trans "Back" %}</button><button type="button" data-wiz-next class="flex-1 bg-secondary text-on-secondary font-body-lg text-body-lg font-medium py-3 rounded-lg shadow-md hover:shadow-lg hover:bg-secondary-container transition-all flex items-center justify-center gap-xs"><span>{% trans "Continue" %}</span><span class="material-symbols-outlined text-[20px]">arrow_forward</span></button></div>
         </div>
 
-        <div data-step="3" class="hidden flex flex-col gap-md">
+        <div data-step="password" class="hidden flex flex-col gap-md">
         <div class="flex flex-col gap-xs">
           <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.password1.id_for_label }}">{% trans "Password" %}</label>
           <div class="ipt-field-box {% if form.password1.errors %}is-error{% endif %}">
@@ -325,7 +341,7 @@
     fair: "{% filter escapejs %}{% trans 'Fair' %}{% endfilter %}",
     good: "{% filter escapejs %}{% trans 'Good' %}{% endfilter %}",
     strong: "{% filter escapejs %}{% trans 'Strong' %}{% endfilter %}",
-    stepOf: "{% filter escapejs %}{% trans 'Step __N__ of 3' %}{% endfilter %}",
+    stepOf: "{% filter escapejs %}{% trans 'Step __N__ of __T__' %}{% endfilter %}",
     pickRole: "{% filter escapejs %}{% trans 'Choose whether you are a student or an organization.' %}{% endfilter %}",
     required: "{% filter escapejs %}{% trans 'This field is required.' %}{% endfilter %}",
     email: "{% filter escapejs %}{% trans 'Enter a valid email address.' %}{% endfilter %}",
@@ -345,15 +361,19 @@
   }
 
 
-  // ── 3-step wizard (browser-side checks per step; the server still validates everything on submit) ──
+  // ── Wizard: students get 3 steps (role, personal, password); organizations get 4
+  //    (role, organization, personal, password). Browser-side checks per step; the server
+  //    still validates everything on submit. ──
   function initWizard(form) {
-    const steps = Array.from(form.querySelectorAll('[data-step]'));
-    if (!steps.length) return;
+    const stepEls = {};
+    form.querySelectorAll('[data-step]').forEach(el => { stepEls[el.dataset.step] = el; });
+    if (!stepEls.role) return;
     const status = form.querySelector('[data-wiz-status]');
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-    let current = 1;
+    let current = 'role';
 
     function isOrg() { return form.querySelector('input[name="role"]:checked')?.value === 'ORGANIZATION'; }
+    function active() { return isOrg() ? ['role', 'org', 'personal', 'password'] : ['role', 'personal', 'password']; }
     function val(name) { return (form.querySelector('[name="' + name + '"]')?.value || '').trim(); }
     function visible(name) { return form.querySelector('#id_' + name); }
 
@@ -382,7 +402,7 @@
     function check(step) {
       let first = null;
       function bad(input, msg) { if (!input) return; setError(input, msg); first = first || input; }
-      if (step === 1) {
+      if (step === 'role') {
         const picked = form.querySelector('input[name="role"]:checked');
         const holder = form.querySelector('#role-cards');
         holder.parentElement.querySelectorAll('[data-wiz-error]').forEach(el => el.remove());
@@ -394,7 +414,16 @@
           holder.insertAdjacentElement('afterend', p);
           first = holder.querySelector('input');
         }
-      } else if (step === 2) {
+      } else if (step === 'org') {
+        if (!val('organization_name')) bad(visible('organization_name'), RI.required);
+        const oe = visible('organization_email');
+        if (!emailRe.test(oe.value.trim())) bad(oe, oe.value.trim() ? RI.email : RI.required);
+        const op = visible('organization_phone');
+        const opErr = window.IPT.phone ? window.IPT.phone.validate(op) : '';
+        if (opErr) bad(op, opErr); else if (!val('organization_phone')) bad(op, RI.orgPhoneNeeded);
+        const tin = visible('tin');
+        if (tin.value.trim() && tin.value.replace(/[\s.\-]/g, '').match(/^\d{9}$/) === null) bad(tin, RI.tin);
+      } else if (step === 'personal') {
         const email = visible('email');
         if (!emailRe.test(email.value.trim())) bad(email, email.value.trim() ? RI.email : RI.required);
         ['first_name', 'last_name'].forEach(n => { const el = visible(n); if (!el.value.trim()) bad(el, RI.required); });
@@ -402,18 +431,8 @@
         const phoneErr = window.IPT.phone ? window.IPT.phone.validate(phone) : '';
         if (phoneErr) bad(phone, phoneErr);
         else if (isOrg() && !val('phone')) bad(phone, RI.phoneNeeded);
-        if (isOrg()) {
-          if (!val('organization_name')) bad(visible('organization_name'), RI.required);
-          const oe = visible('organization_email');
-          if (!emailRe.test(oe.value.trim())) bad(oe, oe.value.trim() ? RI.email : RI.required);
-          const op = visible('organization_phone');
-          const opErr = window.IPT.phone ? window.IPT.phone.validate(op) : '';
-          if (opErr) bad(op, opErr); else if (!val('organization_phone')) bad(op, RI.orgPhoneNeeded);
-          if (!val('position')) bad(visible('position'), RI.required);
-          const tin = visible('tin');
-          if (tin.value.trim() && tin.value.replace(/[\s.\-]/g, '').match(/^\d{9}$/) === null) bad(tin, RI.tin);
-        }
-      } else if (step === 3) {
+        if (isOrg() && !val('position')) bad(visible('position'), RI.required);
+      } else if (step === 'password') {
         const p1 = visible('password1'), p2 = visible('password2');
         if (p1.value.length < 8) bad(p1, RI.pwShort);
         if (p2.value !== p1.value) bad(p2, RI.pwMismatch);
@@ -441,54 +460,65 @@
       } catch (e) { /* analytics must never get in the way */ }
     }
 
-    function show(n, focus) {
-      current = n;
-      const roleLabel = form.querySelector('[data-role-label]');
+    function show(name, focus) {
+      current = name;
+      const list = active();
+      const n = list.indexOf(name) + 1;
       const picked = form.querySelector('input[name="role"]:checked');
-      if (roleLabel) roleLabel.textContent = picked ? picked.closest('label').querySelector('.font-semibold').textContent.trim() : '';
-      steps.forEach((el, i) => el.classList.toggle('hidden', i + 1 !== n));
+      const labelText = picked ? picked.closest('label').querySelector('.font-semibold').textContent.trim() : '';
+      form.querySelectorAll('[data-role-label]').forEach(el => { el.textContent = labelText; });
+      Object.keys(stepEls).forEach(k => stepEls[k].classList.toggle('hidden', k !== name));
       form.querySelectorAll('[data-wiz-dot]').forEach(li => {
-        const i = Number(li.dataset.wizDot);
+        const idx = list.indexOf(li.dataset.wizDot) + 1;
+        li.classList.toggle('hidden', idx === 0);   // students have no "Organization" step
+        if (idx === 0) return;
         const dot = li.querySelector('[data-dot]'), line = li.querySelector('[data-dot-line]'), label = li.querySelector('[data-dot-label]');
-        const done = i < n, now = i === n;
+        const done = idx < n, now = idx === n;
         dot.className = 'w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center font-metadata text-metadata font-bold ' +
           (done || now ? 'bg-secondary text-on-secondary border-secondary' : 'border-outline-variant text-on-surface-variant');
-        dot.textContent = done ? '✓' : String(i);
+        dot.textContent = done ? '✓' : String(idx);
         if (now) dot.setAttribute('aria-current', 'step'); else dot.removeAttribute('aria-current');
         if (line) line.className = 'flex-1 h-0.5 mx-xs ' + (done ? 'bg-secondary' : 'bg-outline-variant');
         if (label) label.className = 'hidden sm:inline font-metadata text-metadata truncate ' + (done || now ? 'text-on-surface font-semibold' : 'text-on-surface-variant');
       });
-      if (status) status.textContent = RI.stepOf.replace('__N__', n);
+      if (status) status.textContent = RI.stepOf.replace('__N__', n).replace('__T__', list.length);
       if (focus) {
         form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        const f = steps[n - 1].querySelector('input:not([type="hidden"]):not(.sr-only), select');
-        if (f && n > 1) f.focus({ preventScroll: true });
+        const f = stepEls[name].querySelector('input:not([type="hidden"]):not(.sr-only), select');
+        if (f && name !== 'role') f.focus({ preventScroll: true });
       }
     }
 
     function next() {
       const bad = check(current);
       if (bad) { bad.focus && bad.focus({ preventScroll: false }); return; }
-      show(Math.min(current + 1, steps.length), true);
-      if (current === 2) report('register_step2'); else if (current === 3) report('register_step3');
+      const list = active();
+      const to = list[Math.min(list.indexOf(current) + 1, list.length - 1)];
+      show(to, true);
+      if (current === 'password') report('register_step3'); else report('register_step2');
+    }
+    function back() {
+      const list = active();
+      show(list[Math.max(list.indexOf(current) - 1, 0)], true);
     }
 
     form.querySelectorAll('[data-wiz-next]').forEach(b => b.addEventListener('click', next));
-    form.querySelectorAll('[data-wiz-back]').forEach(b => b.addEventListener('click', () => show(Math.max(current - 1, 1), true)));
-    // Enter inside steps 1-2 means "Continue", never "submit".
+    form.querySelectorAll('[data-wiz-back]').forEach(b => b.addEventListener('click', back));
+    form.querySelectorAll('[data-wiz-role]').forEach(b => b.addEventListener('click', () => show('role', true)));
+    // Enter before the password step means "Continue", never "submit".
     // Capture phase + stopImmediatePropagation: form-loading.js would otherwise still POST the form.
     form.addEventListener('submit', e => {
-      if (current < steps.length) { e.preventDefault(); e.stopImmediatePropagation(); next(); return; }
-      const bad = check(3);
+      if (current !== 'password') { e.preventDefault(); e.stopImmediatePropagation(); next(); return; }
+      const bad = check('password');
       if (bad) { e.preventDefault(); e.stopImmediatePropagation(); bad.focus(); }
     }, true);
 
     // Re-rendered after a server error: open the first step that has a problem.
-    let start = 1;
-    for (let i = 0; i < steps.length; i++) { if (steps[i].querySelector('.is-error')) { start = i + 1; break; } }
+    let start = 'role';
+    for (const k of active()) { if (stepEls[k].querySelector('.is-error')) { start = k; break; } }
     // Arrived from "I'm a student / I'm an organization": the role is already chosen, so begin at step 2.
-    if (start === 1 && form.dataset.preselected && form.querySelector('input[name="role"]:checked')) {
-      show(2, false);
+    if (start === 'role' && form.dataset.preselected && form.querySelector('input[name="role"]:checked')) {
+      show(active()[1], false);
       report('register_step2');
       return;
     }

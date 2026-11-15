@@ -3814,6 +3814,9 @@ msgstr "Nafasi imeachiliwa"
 msgid "Seat released in"
 msgstr "Nafasi itaachiliwa baada ya"
 
+msgid "Seat released: payment time ran out."
+msgstr "Nafasi imeachiliwa: muda wa malipo uliisha."
+
 msgid "Seats are held as soon as a student applies, and released if the fee is not paid in 3 hours. You cannot go below the seats already taken."
 msgstr "Nafasi hushikiliwa mara tu mwanafunzi anapoomba, na huachiliwa ada isipolipwa ndani ya saa 3. Huwezi kwenda chini ya nafasi zilizokwisha chukuliwa."
 

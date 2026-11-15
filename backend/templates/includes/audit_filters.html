@@ -2,7 +2,7 @@
 Shared audit filter form. Context: f (GET params), actions, modules (optional),
 organizations (platform only), export_label.
 {% endcomment %}
-<form method="get" class="p-md bg-surface-container-low grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-sm border-b border-surface-container-highest">
+<form method="get" class="p-md bg-surface-container-low grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-xs sm:gap-sm border-b border-surface-container-highest">
   {% if organizations %}
     <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{% trans "Organization" %}
       <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">apartment</span></span><select name="organization">
@@ -43,10 +43,10 @@ organizations (platform only), export_label.
     </select></div>
   </label>
   {% endif %}
-  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant md:col-span-2">{% trans "Keyword" %}
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant col-span-2">{% trans "Keyword" %}
     <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input name="q" value="{{ f.q|default:'' }}" placeholder="{% trans 'Search anything…' %}"></div>
   </label>
-  <div class="flex items-end gap-sm">
+  <div class="flex items-end gap-sm col-span-2 md:col-span-1">
     <button type="submit" class="px-md py-2 bg-primary text-on-primary rounded-lg font-semibold">{% trans "Search" %}</button>
     <a href="?" class="px-md py-2 bg-surface-container rounded-lg font-semibold text-on-surface">{% trans "Reset" %}</a>
     <button type="submit" name="export" value="csv" class="px-md py-2 bg-surface-container rounded-lg font-semibold text-on-surface" title="{% trans 'Exports are recorded in the audit log' %}">{% trans "Export CSV" %}</button>

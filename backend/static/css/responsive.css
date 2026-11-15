@@ -194,3 +194,29 @@ html.dark #sidebar-backdrop { background: rgba(0, 0, 0, 0.6); }
 @media (max-width: 767px) {
   .ipt-filterbar .ipt-field-icon { width: 38px; }
 }
+
+/* ---------- Phones: denser spacing everywhere (static/css/responsive.css) ----------
+   The design tokens (24-48 px paddings and gaps) are generous on a 1280 px desktop but cost a phone screen of
+   scrolling per page. Under 768 px every page inside <main> uses tighter paddings, gaps and heading sizes. */
+@media (max-width: 767px) {
+  main { padding-top: 78px !important; padding-bottom: 16px !important; }
+  main .p-lg { padding: 16px !important; }
+  main .p-md { padding: 14px !important; }
+  main .p-sm { padding: 12px !important; }
+  main .px-md { padding-left: 14px !important; padding-right: 14px !important; }
+  main .py-md { padding-top: 12px !important; padding-bottom: 12px !important; }
+  main .py-xl, main .pt-xl { padding-top: 20px !important; }
+  main .py-xl, main .pb-xl { padding-bottom: 20px !important; }
+  main .gap-lg { gap: 16px !important; }
+  main .gap-md { gap: 12px !important; }
+  main .gap-sm { gap: 10px !important; }
+  main .mb-lg { margin-bottom: 16px !important; }
+  main .mb-md { margin-bottom: 12px !important; }
+  main .mt-lg { margin-top: 16px !important; }
+  main .mt-md { margin-top: 12px !important; }
+  main .space-y-lg > * + * { margin-top: 16px !important; }
+  main .space-y-md > * + * { margin-top: 12px !important; }
+  main .text-display { font-size: 26px !important; line-height: 32px !important; }
+  main .text-headline-lg { font-size: 22px !important; line-height: 28px !important; }
+  main .text-headline-md { font-size: 18px !important; line-height: 24px !important; }
+}
