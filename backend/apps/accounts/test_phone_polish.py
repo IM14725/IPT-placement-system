@@ -158,3 +158,46 @@ def test_login_and_register_have_a_single_h1_and_no_forced_card_height_on_phones
         assert body.count("<h1") == 1, url
         assert "lg:min-h-[640px]" in body and " min-h-[640px]" not in body.replace("lg:min-h-[640px]", ""), url
         assert "items-start lg:items-center" in body, url  # form sits at the top of the card on phones
+
+
+# ── 10. every visible form control has a label ───────────────────────────────────
+
+class _Labels(__import__("html.parser", fromlist=["HTMLParser"]).HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.label_for, self.controls, self._in_label, self._hidden = set(), [], 0, 0
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        if a.get("aria-hidden") == "true" or "hidden" in a:
+            self._hidden += 1 if tag in ("div", "section", "details", "span", "p") else 0
+        if tag == "label":
+            self._in_label += 1
+            if a.get("for"):
+                self.label_for.add(a["for"])
+        elif tag in ("input", "select", "textarea") and a.get("type") not in ("hidden", "submit", "button"):
+            self.controls.append((a, bool(self._in_label), bool(self._hidden)))
+
+    def handle_endtag(self, tag):
+        if tag == "label" and self._in_label:
+            self._in_label -= 1
+
+
+def _unlabeled(html):
+    p = _Labels()
+    p.feed(html)
+    return [
+        a.get("name") or a.get("id")
+        for a, in_label, hidden in p.controls
+        if not (in_label or a.get("id") in p.label_for or a.get("aria-label") or a.get("aria-labelledby"))
+        and a.get("name") != "website"  # the anti-bot trap is hidden from everyone on purpose
+        and "sr-only" not in (a.get("class") or "")
+    ]
+
+
+@pytest.mark.django_db
+def test_profile_forms_have_no_unlabeled_controls(places, org):
+    student_page = _client(_student(places).user).get(reverse("student-profile")).content.decode()
+    org_page = _client(org.user).get(reverse("organization-profile")).content.decode()
+    assert _unlabeled(student_page) == []
+    assert _unlabeled(org_page) == []
