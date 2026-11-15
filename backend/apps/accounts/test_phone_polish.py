@@ -39,3 +39,18 @@ def test_profile_pages_have_no_second_account_card(places, org):
     body = _client(org.user).get(reverse("organization-profile")).content.decode()
     assert "verified_user" not in body
     assert "Organization Documents" in body  # the rest of that column stays
+
+
+# ── 3. section headings line up with the fields below them ───────────────────────
+
+@pytest.mark.django_db
+def test_form_card_headings_put_the_icon_inline_so_text_aligns_with_labels(places, org):
+    import re
+
+    for client, url, title in (
+        (_client(_student(places).user), reverse("student-profile"), "Academic Information"),
+        (_client(org.user), reverse("organization-profile"), "Organization Information"),
+    ):
+        body = client.get(url).content.decode()
+        heading = re.search(r"<h2[^>]*>(.*?)</h2>", body[body.index(title) - 400 : body.index(title) + 100], re.S)
+        assert heading and "material-symbols-outlined" in heading.group(1) and title in heading.group(1), url

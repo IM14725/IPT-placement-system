@@ -14,12 +14,9 @@
     <div class="lg:col-span-7 flex flex-col gap-lg">
       <div class="bg-surface-container-lowest rounded-xl p-lg shadow-md flex flex-col gap-md relative overflow-hidden auth-card">
         <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mt-16 -mr-16 pointer-events-none"></div>
-        <div class="flex items-center gap-xs relative z-10">
-          <span class="material-symbols-outlined text-primary">business_center</span>
-          <div class="flex flex-col">
-            <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Organization Information" %}</h2>
-            <p class="font-body-md font-body-md text-on-surface-variant">{% trans "Your account is active — keep your details up to date." %}</p>
-          </div>
+        <div class="flex flex-col gap-xs relative z-10">
+          <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary">business_center</span>{% trans "Organization Information" %}</h2>
+          <p class="font-body-md font-body-md text-on-surface-variant">{% trans "Your account is active — keep your details up to date." %}</p>
         </div>
         <form method="post" class="flex flex-col gap-md z-10">
           {% csrf_token %}
