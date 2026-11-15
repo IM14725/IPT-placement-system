@@ -88,6 +88,7 @@ class StudentProfileForm(forms.ModelForm):
             "ward",
             "skills",
         )
+        labels = {"gpa": _("GPA")}
         widgets = {
             "student_id": forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "e.g. 2022-04-01234"}),
             "gender": forms.Select(attrs={"class": "ipt-select"}),

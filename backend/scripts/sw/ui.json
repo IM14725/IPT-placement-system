@@ -816,5 +816,18 @@
  "Use a JPG, PNG or WebP image.": "Tumia picha ya JPG, PNG au WebP.",
  "Save your organization profile before adding a logo.": "Hifadhi wasifu wa shirika lako kabla ya kuongeza nembo.",
  "Organization logo or picture (JPG, PNG or WebP, max 2MB).": "Nembo au picha ya shirika (JPG, PNG au WebP, upeo wa MB 2).",
- "Student ID": "Namba ya mwanafunzi"
+ "Student ID": "Namba ya mwanafunzi",
+ "Personal details": "Taarifa binafsi",
+ "Phone, student ID and gender": "Simu, namba ya mwanafunzi na jinsia",
+ "Academic": "Masomo",
+ "University, course, level and GPA": "Chuo, kozi, ngazi na GPA",
+ "Location": "Mahali",
+ "Region, district and ward": "Mkoa, wilaya na kata",
+ "Photos": "Picha",
+ "Profile photo and ID card": "Picha ya wasifu na kitambulisho",
+ "Optional": "Hiari",
+ "Organization details": "Taarifa za shirika",
+ "Name, contact and registration numbers": "Jina, mawasiliano na namba za usajili",
+ "Region, district and street": "Mkoa, wilaya na mtaa",
+ "Documents still needed": "Nyaraka bado zinahitajika"
 }

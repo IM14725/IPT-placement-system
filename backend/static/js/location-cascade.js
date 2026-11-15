@@ -31,14 +31,14 @@
 
   function setDistrictState(disabled, placeholder) {
     districtSelect.innerHTML = "";
-    districtSelect.appendChild(buildOption("", placeholder, !disabled, disabled));
+    districtSelect.appendChild(buildOption("", placeholder, true, disabled));  // selected, so a disabled list still reads "Select district"
     districtSelect.disabled = disabled;
   }
 
   function setWardState(disabled, placeholder) {
     if (!wardSelect) return;
     wardSelect.innerHTML = "";
-    wardSelect.appendChild(buildOption("", placeholder, !disabled, disabled));
+    wardSelect.appendChild(buildOption("", placeholder, true, disabled));
     wardSelect.disabled = disabled;
   }
 

@@ -20,109 +20,131 @@
           <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary">school</span>{% trans "Academic Information" %}</h2>
           <p class="font-body-md font-body-md text-on-surface-variant">{% trans "Your account is active — keep your details up to date." %}</p>
         </div>
-        <form method="post" enctype="multipart/form-data" class="flex flex-col gap-md z-10">
+        <form method="post" enctype="multipart/form-data" class="flex flex-col gap-sm z-10">
           {% csrf_token %}
           {% if form.non_field_errors %}
             <div class="rounded-lg bg-error-container/30 border-l-2 border-error p-sm text-body-md text-on-error-container">{{ form.non_field_errors }}</div>
           {% endif %}
-          {% with photo=form.profile_photo %}
-          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-md p-md bg-surface-container-low rounded-xl">
-            <div class="relative shrink-0">
-              {% if profile and profile.profile_photo %}
-                <img src="{{ profile.profile_photo|thumb:160 }}" width="80" height="80" alt="{% trans 'Profile photo' %}" class="ipt-img w-20 h-20 rounded-full object-cover ring-2 ring-primary/30 shadow-sm">
-              {% else %}
-                <div class="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
-                  <span class="material-symbols-outlined text-[32px]">person</span>
-                </div>
-              {% endif %}
-              <span class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-container-low">
-                <span class="material-symbols-outlined text-[16px]">camera_alt</span>
-              </span>
+
+          {# Personal details #}
+          <details class="ipt-section" open>
+            <summary class="ipt-section-summary">
+              <span class="material-symbols-outlined text-primary">person</span>
+              <span class="flex-1 min-w-0"><span class="block font-body-md text-body-md font-semibold text-on-surface">{% trans "Personal details" %}</span><span class="block font-metadata text-metadata text-on-surface-variant">{% trans "Phone, student ID and gender" %}</span></span>
+              <span class="material-symbols-outlined ipt-section-chev">expand_more</span>
+            </summary>
+            <div class="ipt-section-body grid grid-cols-1 md:grid-cols-2 gap-md">
+              {% include "includes/profile_field.html" with field=form.phone %}
+              {% include "includes/profile_field.html" with field=form.student_id %}
+              {% include "includes/profile_field.html" with field=form.gender %}
             </div>
-            <div class="flex flex-col gap-xs flex-1 min-w-0">
-              <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ photo.id_for_label }}">{% trans photo.label %}</label>
-              <div class="ipt-field-box {% if photo.errors %}is-error{% endif %}">
-                <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">person</span></span>
-                <div class="ipt-file-wrap">
-                  {{ photo }}
-                </div>
-              </div>
-              {% if photo.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ photo.errors.0 }}</p>{% endif %}
-              {% if photo.help_text %}<p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ photo.help_text }}</p>{% endif %}
-            </div>
-          </div>
-          {% endwith %}
-          {% with idcard=form.id_card_photo %}
-          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-md p-md bg-surface-container-low rounded-xl">
-            <div class="relative shrink-0">
-              {% if profile and profile.id_card_photo %}
-                <img src="{{ profile.id_card_photo|thumb:160 }}" width="80" height="80" alt="{% trans 'ID card' %}" class="ipt-img w-20 h-20 rounded-xl object-cover ring-2 ring-primary/30 shadow-sm">
-              {% else %}
-                <div class="w-20 h-20 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant">
-                  <span class="material-symbols-outlined text-[32px]">badge</span>
-                </div>
-              {% endif %}
-            </div>
-            <div class="flex flex-col gap-xs flex-1 min-w-0">
-              <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ idcard.id_for_label }}">{% trans idcard.label %}</label>
-              <div class="ipt-field-box {% if idcard.errors %}is-error{% endif %}">
-                <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">badge</span></span>
-                <div class="ipt-file-wrap">
-                  {{ idcard }}
-                </div>
-              </div>
-              {% if idcard.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ idcard.errors.0 }}</p>{% endif %}
-              {% if idcard.help_text %}<p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ idcard.help_text }}</p>{% endif %}
-            </div>
-          </div>
-          {% endwith %}
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
-            {% for field in form %}
-              {% if field.name == 'university_not_listed' %}
+          </details>
+
+          {# Academic #}
+          <details class="ipt-section" open>
+            <summary class="ipt-section-summary">
+              <span class="material-symbols-outlined text-primary">school</span>
+              <span class="flex-1 min-w-0"><span class="block font-body-md text-body-md font-semibold text-on-surface">{% trans "Academic" %}</span><span class="block font-metadata text-metadata text-on-surface-variant">{% trans "University, course, level and GPA" %}</span></span>
+              <span class="material-symbols-outlined ipt-section-chev">expand_more</span>
+            </summary>
+            <div class="ipt-section-body grid grid-cols-1 md:grid-cols-2 gap-md">
+              {% include "includes/profile_field.html" with field=form.university %}
               <div class="flex flex-col gap-xs md:col-span-2" id="university-not-listed-row">
                 <label class="flex items-center gap-sm font-body-md text-body-md text-on-surface cursor-pointer">
-                  {{ field }}
-                  <span>{% trans field.label %}</span>
+                  {{ form.university_not_listed }}
+                  <span>{% trans form.university_not_listed.label %}</span>
                 </label>
                 <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Tick this if you cannot find your university above. Platform admins will review and add it." %}</p>
               </div>
-              {% elif field.name == 'university_suggestion' %}
               <div class="flex flex-col gap-xs md:col-span-2" id="university-suggestion-row" {% if not form.university_not_listed.value %}hidden{% endif %}>
-                <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}</label>
-                <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
+                <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ form.university_suggestion.id_for_label }}">{% trans form.university_suggestion.label %}</label>
+                <div class="ipt-field-box {% if form.university_suggestion.errors %}is-error{% endif %}">
                   <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">add_business</span></span>
-                  {{ field }}
+                  {{ form.university_suggestion }}
                 </div>
-                {% if field.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ field.errors.0 }}</p>{% endif %}
+                {% if form.university_suggestion.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.university_suggestion.errors.0 }}</p>{% endif %}
               </div>
-              {% elif field.name != 'profile_photo' and field.name != 'id_card_photo' %}
-              <div class="flex flex-col gap-xs">
-                <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}{% if field.field.required %} *{% endif %}</label>
-                <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
-                  <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">
-                    {% if field.name == 'phone' %}call
-                    {% elif field.name == 'graduation_year' %}event
-                    {% elif field.name == 'student_id' %}badge
-                    {% elif field.name == 'gender' %}person_outline
-                    {% elif field.name == 'university' %}school
-                    {% elif field.name == 'course' %}menu_book
-                    {% elif field.name == 'academic_year' %}tag
-                    {% elif field.name == 'education_level' %}workspace_premium
-                    {% elif field.name == 'gpa' %}star
-                    {% elif field.name == 'region' %}map
-                    {% elif field.name == 'district' %}location_on
-                    {% elif field.name == 'ward' %}my_location
-                    {% elif field.name == 'skills' %}code
-                    {% else %}edit{% endif %}
-                  </span></span>
-                  {{ field }}
+              {% include "includes/profile_field.html" with field=form.course %}
+              {% include "includes/profile_field.html" with field=form.academic_year %}
+              {% include "includes/profile_field.html" with field=form.graduation_year %}
+              {% include "includes/profile_field.html" with field=form.education_level %}
+              {% include "includes/profile_field.html" with field=form.gpa %}
+            </div>
+          </details>
+
+          {# Location #}
+          <details class="ipt-section" open>
+            <summary class="ipt-section-summary">
+              <span class="material-symbols-outlined text-primary">map</span>
+              <span class="flex-1 min-w-0"><span class="block font-body-md text-body-md font-semibold text-on-surface">{% trans "Location" %}</span><span class="block font-metadata text-metadata text-on-surface-variant">{% trans "Region, district and ward" %}</span></span>
+              <span class="material-symbols-outlined ipt-section-chev">expand_more</span>
+            </summary>
+            <div class="ipt-section-body grid grid-cols-1 md:grid-cols-2 gap-md">
+              {% include "includes/profile_field.html" with field=form.region %}
+              {% include "includes/profile_field.html" with field=form.district %}
+              {% include "includes/profile_field.html" with field=form.ward %}
+            </div>
+          </details>
+
+          {# Photos (optional, closed until needed) #}
+          <details class="ipt-section">
+            <summary class="ipt-section-summary">
+              <span class="material-symbols-outlined text-primary">camera_alt</span>
+              <span class="flex-1 min-w-0"><span class="block font-body-md text-body-md font-semibold text-on-surface">{% trans "Photos" %}</span><span class="block font-metadata text-metadata text-on-surface-variant">{% trans "Profile photo and ID card" %}</span></span>
+              <span class="material-symbols-outlined ipt-section-chev">expand_more</span>
+            </summary>
+            <div class="ipt-section-body flex flex-col gap-md">
+              {% with photo=form.profile_photo %}
+              <div class="flex items-start gap-sm">
+                {% if profile and profile.profile_photo %}
+                  <img src="{{ profile.profile_photo|thumb:96 }}" width="48" height="48" alt="{% trans 'Profile photo' %}" class="ipt-img ipt-section-thumb rounded-full ring-2 ring-primary/30">
+                {% else %}
+                  <div class="ipt-section-thumb rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[24px]">person</span></div>
+                {% endif %}
+                <div class="flex flex-col gap-xs flex-1 min-w-0">
+                  <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ photo.id_for_label }}">{% trans photo.label %}</label>
+                  <div class="ipt-field-box {% if photo.errors %}is-error{% endif %}">
+                    <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">person</span></span>
+                    <div class="ipt-file-wrap">{{ photo }}</div>
+                  </div>
+                  {% if photo.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ photo.errors.0 }}</p>{% endif %}
+                  {% if photo.help_text %}<p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ photo.help_text }}</p>{% endif %}
                 </div>
-                {% if field.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ field.errors.0 }}</p>{% endif %}
-                {% if field.help_text %}<p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ field.help_text }}</p>{% endif %}
               </div>
-              {% endif %}
-            {% endfor %}
-          </div>
+              {% endwith %}
+              {% with idcard=form.id_card_photo %}
+              <div class="flex items-start gap-sm">
+                {% if profile and profile.id_card_photo %}
+                  <img src="{{ profile.id_card_photo|thumb:96 }}" width="48" height="48" alt="{% trans 'ID card' %}" class="ipt-img ipt-section-thumb rounded-lg ring-2 ring-primary/30">
+                {% else %}
+                  <div class="ipt-section-thumb rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[24px]">badge</span></div>
+                {% endif %}
+                <div class="flex flex-col gap-xs flex-1 min-w-0">
+                  <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ idcard.id_for_label }}">{% trans idcard.label %}</label>
+                  <div class="ipt-field-box {% if idcard.errors %}is-error{% endif %}">
+                    <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">badge</span></span>
+                    <div class="ipt-file-wrap">{{ idcard }}</div>
+                  </div>
+                  {% if idcard.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ idcard.errors.0 }}</p>{% endif %}
+                  {% if idcard.help_text %}<p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ idcard.help_text }}</p>{% endif %}
+                </div>
+              </div>
+              {% endwith %}
+            </div>
+          </details>
+
+          {# Skills (optional, closed until needed) #}
+          <details class="ipt-section">
+            <summary class="ipt-section-summary">
+              <span class="material-symbols-outlined text-primary">code</span>
+              <span class="flex-1 min-w-0"><span class="block font-body-md text-body-md font-semibold text-on-surface">{% trans "Skills" %}</span><span class="block font-metadata text-metadata text-on-surface-variant">{% trans "Optional" %}</span></span>
+              <span class="material-symbols-outlined ipt-section-chev">expand_more</span>
+            </summary>
+            <div class="ipt-section-body grid grid-cols-1 gap-md">
+              {% include "includes/profile_field.html" with field=form.skills %}
+            </div>
+          </details>
+
           <div class="flex justify-end mt-sm">
             <button class="bg-primary text-on-primary hover:bg-primary/90 font-body-lg text-body-lg rounded-full px-xl py-3 shadow-sm hover:shadow-md transition-all active:scale-[0.98] flex items-center gap-xs" type="submit">
               <span class="material-symbols-outlined text-[20px]">save</span>
@@ -141,6 +163,7 @@
 {% endblock %}
 {% block scripts %}
 <script src="{% static 'js/tabs.js' %}"></script>
+<script src="{% static 'js/form-sections.js' %}"></script>
 <script>
   window.IPT = window.IPT || {};
   window.IPT.regions = {{ regions_json|safe }};

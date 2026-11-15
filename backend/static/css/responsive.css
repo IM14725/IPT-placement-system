@@ -267,3 +267,15 @@ html.dark #sidebar-backdrop { background: rgba(0, 0, 0, 0.6); }
     content: ""; position: absolute; left: -4px; right: -4px; top: 50%; height: 40px; transform: translateY(-50%);
   }
 }
+
+/* ---------- Collapsible form sections (static/js/form-sections.js) ---------- */
+.ipt-section { border: 1px solid rgb(var(--c-outline-variant)); border-radius: 12px; background: rgb(var(--c-surface-container-low)); }
+.ipt-section + .ipt-section { margin-top: 0; }
+.ipt-section-summary { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 14px; cursor: pointer; list-style: none; border-radius: 12px; }
+.ipt-section-summary::-webkit-details-marker { display: none; }
+.ipt-section-summary:hover { background: rgb(var(--c-surface-container)); }
+.ipt-section-summary:focus-visible { outline: 2px solid rgb(var(--c-primary)); outline-offset: 2px; }
+.ipt-section-chev { transition: transform 0.15s ease; color: rgb(var(--c-on-surface-variant)); }
+.ipt-section[open] > .ipt-section-summary .ipt-section-chev { transform: rotate(180deg); }
+.ipt-section-body { padding: 4px 14px 16px; }
+.ipt-section-thumb { width: 48px; height: 48px; flex: none; object-fit: cover; }

@@ -104,3 +104,46 @@ def test_no_text_smaller_than_12px_in_templates_or_theme():
     inline = re.compile(r"font-size:\s*(?:[0-9]|1[01])px")
     for name in ("templates/base.html",):
         assert not inline.search((root / name).read_text(encoding="utf-8")), name
+
+
+# ── 8. profile pages: collapsible sections, GPA label, location placeholders ───────
+
+@pytest.mark.django_db
+def test_student_profile_is_split_into_sections_and_loses_no_field(places):
+    import re
+
+    from apps.students.forms import StudentProfileForm
+
+    student = _student(places)
+    body = _client(student.user).get(reverse("student-profile")).content.decode()
+    sections = re.findall(r'<details class="ipt-section"( open)?>', body)
+    assert len(sections) == 5
+    assert sections.count(" open") == 3  # personal, academic and location start open; photos and skills closed
+    for title in ("Personal details", "Academic", "Location", "Photos", "Skills"):
+        assert title in body, title
+    # Every form field is still rendered exactly where the user can reach it.
+    for name in StudentProfileForm(user=student.user).fields:
+        assert f'name="{name}"' in body, name
+    assert "GPA" in body
+    assert "Gpa" not in body
+    assert "form-sections.js" in body
+
+
+@pytest.mark.django_db
+def test_organization_profile_is_split_into_sections_and_loses_no_field(org):
+    from apps.companies.forms import OrganizationProfileForm
+
+    body = _client(org.user).get(reverse("organization-profile")).content.decode()
+    assert body.count('<details class="ipt-section"') == 3  # details, location, documents
+    for name in OrganizationProfileForm().fields:
+        assert f'name="{name}"' in body, name
+    assert "Organization details" in body and "Organization Documents" in body
+
+
+def test_location_dropdowns_show_their_placeholder_while_disabled():
+    from pathlib import Path
+
+    js = (Path(__file__).resolve().parents[2] / "static" / "js" / "location-cascade.js").read_text(encoding="utf-8")
+    # The placeholder option is always selected; before this a disabled list rendered blank.
+    assert 'buildOption("", placeholder, true, disabled)' in js
+    assert "!disabled, disabled" not in js

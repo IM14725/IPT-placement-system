@@ -1104,6 +1104,9 @@ msgstr "Kuhusu shirika"
 msgid "About this placement"
 msgstr "Kuhusu uwekaji huu"
 
+msgid "Academic"
+msgstr "Masomo"
+
 msgid "Academic Discipline"
 msgstr "Fani ya Masomo"
 
@@ -2028,6 +2031,9 @@ msgstr "Nyaraka imepakiwa. Itakaguliwa na msimamizi wa jukwaa."
 msgid "Documents"
 msgstr "Nyaraka"
 
+msgid "Documents still needed"
+msgstr "Nyaraka bado zinahitajika"
+
 msgid "Does it cost anything to sign up?"
 msgstr "Je, kujisajili kuna gharama?"
 
@@ -2625,6 +2631,9 @@ msgstr "Inapakia..."
 msgid "Loading…"
 msgstr "Inapakia…"
 
+msgid "Location"
+msgstr "Mahali"
+
 msgid "Location Details"
 msgstr "Maelezo ya Mahali"
 
@@ -2824,6 +2833,9 @@ msgstr "Jina"
 
 msgid "Name or email"
 msgstr "Jina au barua pepe"
+
+msgid "Name, contact and registration numbers"
+msgstr "Jina, mawasiliano na namba za usajili"
 
 msgid "Name, email, course, university"
 msgstr "Jina, barua pepe, kozi, chuo"
@@ -3086,6 +3098,9 @@ msgstr "Nafasi zilizo wazi"
 msgid "Open slots · %(seats)s seats"
 msgstr "Nafasi wazi · %(seats)s zinapatikana"
 
+msgid "Optional"
+msgstr "Hiari"
+
 msgid "Optional - use 2556 or 2557 followed by 8 digits, e.g. 255712345678."
 msgstr "Si lazima - tumia 2556 au 2557 ikifuatiwa na tarakimu 8, mfano 255712345678."
 
@@ -3163,6 +3178,9 @@ msgstr "Kumbukumbu ya ukaguzi ya shirika"
 
 msgid "Organization contact"
 msgstr "Mawasiliano ya shirika"
+
+msgid "Organization details"
+msgstr "Taarifa za shirika"
 
 msgid "Organization document uploaded for review."
 msgstr "Nyaraka ya shirika imepakiwa kwa ukaguzi."
@@ -3377,6 +3395,9 @@ msgstr "Binafsi"
 msgid "Personal data will be retained for up to 7 years as required by PDPA retention obligations and Tanzanian financial regulations."
 msgstr "Taarifa binafsi zitahifadhiwa kwa hadi miaka 7 kama inavyotakiwa na wajibu wa uhifadhi wa PDPA na kanuni za kifedha za Tanzania."
 
+msgid "Personal details"
+msgstr "Taarifa binafsi"
+
 msgid "PhD"
 msgstr "Udaktari"
 
@@ -3400,6 +3421,12 @@ msgstr "Namba ya simu lazima ianze na 2556 au 2557."
 
 msgid "Phone number verified"
 msgstr "Namba ya simu imethibitishwa"
+
+msgid "Phone, student ID and gender"
+msgstr "Simu, namba ya mwanafunzi na jinsia"
+
+msgid "Photos"
+msgstr "Picha"
 
 msgid "Placement:"
 msgstr "Uwekaji:"
@@ -3493,6 +3520,9 @@ msgstr "Ukamilifu wa wasifu"
 
 msgid "Profile photo"
 msgstr "Picha ya wasifu"
+
+msgid "Profile photo and ID card"
+msgstr "Picha ya wasifu na kitambulisho"
 
 msgid "Profile photo must be under 2MB."
 msgstr "Picha ya wasifu lazima iwe chini ya MB 2."
@@ -3603,6 +3633,12 @@ msgstr "Mkoa na wilaya"
 
 msgid "Region and district of residence."
 msgstr "Mkoa na wilaya ya makazi."
+
+msgid "Region, district and street"
+msgstr "Mkoa, wilaya na mtaa"
+
+msgid "Region, district and ward"
+msgstr "Mkoa, wilaya na kata"
 
 msgid "Regions with openings"
 msgstr "Mikoa yenye nafasi"
@@ -4579,6 +4615,9 @@ msgstr "Msimamizi wa Chuo"
 
 msgid "University name is too long."
 msgstr "Jina la chuo ni refu mno."
+
+msgid "University, course, level and GPA"
+msgstr "Chuo, kozi, ngazi na GPA"
 
 msgid "University/institution, course, year of study, GPA."
 msgstr "Chuo/taasisi, kozi, mwaka wa masomo, GPA."

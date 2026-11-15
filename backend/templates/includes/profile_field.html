@@ -1,0 +1,9 @@
+{% load i18n %}{% comment %}One labelled form field with its icon, error and help text. Expects: field. Optional: wide (spans both columns).{% endcomment %}<div class="flex flex-col gap-xs{% if wide %} md:col-span-2{% endif %}">
+  <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}{% if field.field.required %} *{% endif %}</label>
+  <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
+    <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">{% if field.name == 'phone' %}call{% elif field.name == 'graduation_year' %}event{% elif field.name == 'student_id' %}badge{% elif field.name == 'gender' %}person_outline{% elif field.name == 'university' %}school{% elif field.name == 'course' %}menu_book{% elif field.name == 'academic_year' %}tag{% elif field.name == 'education_level' %}workspace_premium{% elif field.name == 'gpa' %}star{% elif field.name == 'region' %}map{% elif field.name == 'district' %}location_on{% elif field.name == 'ward' %}my_location{% elif field.name == 'skills' %}code{% elif field.name == 'name' %}badge{% elif field.name == 'organization_type' %}apartment{% elif field.name == 'industry' %}factory{% elif field.name == 'email' %}mail{% elif field.name == 'brela_number' %}app_registration{% elif field.name == 'tin' %}receipt_long{% elif field.name == 'description' %}description{% elif field.name == 'street' %}home{% else %}edit{% endif %}</span></span>
+    {{ field }}
+  </div>
+  {% if field.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ field.errors.0 }}</p>{% endif %}
+  {% if field.help_text %}<p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ field.help_text }}</p>{% endif %}
+</div>
