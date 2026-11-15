@@ -74,7 +74,7 @@
                 </button>
               </form>
             {% elif app.status == 'PAID' and not app.can_cancel %}
-              <span class="text-[11px] text-error italic">{% trans "Cancellation used" %}</span>
+              <span class="text-[12px] text-error italic">{% trans "Cancellation used" %}</span>
             {% endif %}
           {% elif app.status == 'UNPAID' %}
             <a href="{% url 'student-apply' app.slot.id %}" class="bg-[#DC2626]/10 text-[#991B1B] font-metadata text-metadata px-sm py-2 rounded-lg hover:shadow-sm transition-all flex items-center gap-1 justify-center">
@@ -88,7 +88,7 @@
             <span class="material-symbols-outlined text-[16px] transition-transform group-open:rotate-90">chevron_right</span>{% trans "Details" %}
           </summary>
           <div class="flex flex-col gap-xs pt-xs">
-            <p class="font-metadata text-[11px] leading-4 text-on-surface-variant flex flex-wrap gap-x-sm gap-y-0">
+            <p class="font-metadata text-[12px] leading-4 text-on-surface-variant flex flex-wrap gap-x-sm gap-y-0">
           <span>{% trans "Applied" %} {{ app.created_at|date:"j M Y, H:i" }}</span>
           {% if app.payment and app.payment.is_paid and app.payment.paid_at %}<span>{% trans "Paid" %} {{ app.payment.paid_at|date:"j M Y, H:i" }}</span>{% endif %}
           {% if app.is_accepted %}<span>{% trans "Accepted" %} {{ app.updated_at|date:"j M Y, H:i" }}</span>{% endif %}

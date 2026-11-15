@@ -153,7 +153,7 @@
     .side-link:hover { background: rgb(var(--c-surface-container)); color: rgb(var(--c-on-surface)); }
     .side-link.active { background: rgb(var(--c-primary-fixed)); color: rgb(var(--c-primary)); font-weight: 600; }
     .side-link .material-symbols-outlined { font-size: 20px; }
-    .side-heading { padding: 14px 12px 4px; font-size: 11px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(var(--c-outline)); font-weight: 600; }
+    .side-heading { padding: 14px 12px 4px; font-size: 12px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(var(--c-outline)); font-weight: 600; }
     @media (prefers-reduced-motion: reduce) { #app-sidebar, #sidebar-backdrop { transition: none !important; } }
     /* Active nav link indicator */
     .nav-link.active { background: rgba(255, 255, 255, 0.2); color: #fff !important; }
@@ -181,7 +181,7 @@
     .ipt-media-name { color: rgb(var(--c-on-surface)); font-size: 13px; line-height: 18px; font-weight: 600; font-family: "Inter", sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .ipt-media-sub { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .ipt-media-size { color: rgb(var(--c-on-surface-variant)); font-size: 12px; line-height: 16px; font-family: "Inter", sans-serif; }
-    .ipt-media-badge { display: inline-flex; align-items: center; gap: 4px; color: rgb(var(--c-ok-fg)); background: rgb(var(--c-ok-bg)); font-size: 11px; line-height: 16px; font-family: "Inter", sans-serif; font-weight: 500; padding: 1px 8px; border-radius: 9999px; }
+    .ipt-media-badge { display: inline-flex; align-items: center; gap: 4px; color: rgb(var(--c-ok-fg)); background: rgb(var(--c-ok-bg)); font-size: 12px; line-height: 16px; font-family: "Inter", sans-serif; font-weight: 500; padding: 1px 8px; border-radius: 9999px; }
     .ipt-media-badge .material-symbols-outlined { font-size: 12px; }
     .ipt-media-remove { flex: none; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: none; background: transparent; color: rgb(var(--c-on-surface-variant)); border-radius: 9999px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
     .ipt-media-remove:hover { background: rgb(var(--c-surface-container-highest)); color: rgb(var(--c-error)); }
@@ -258,7 +258,7 @@
                     aria-label="{% trans 'Notifications' %}" title="{% trans 'Notifications' %}"
                     class="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/40">
               <span class="material-symbols-outlined">notifications</span>
-              <span id="notif-badge" class="hidden absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-error text-on-error text-[10px] leading-[18px] font-bold text-center" aria-live="polite"></span>
+              <span id="notif-badge" class="hidden absolute top-1 right-1 min-w-[20px] h-[20px] px-1 rounded-full bg-error text-on-error text-[12px] leading-[18px] font-bold text-center" aria-live="polite"></span>
             </button>
             <div id="notif-panel" class="hidden absolute right-0 mt-2 w-[min(22rem,calc(100vw-1.5rem))] bg-surface-container-lowest text-on-surface rounded-xl shadow-2xl border border-outline-variant overflow-hidden z-[60]">
               <div class="flex items-center justify-between gap-sm px-md py-sm border-b border-outline-variant">

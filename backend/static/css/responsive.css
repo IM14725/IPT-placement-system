@@ -65,7 +65,7 @@ body.sb-open #app-sidebar { transform: none; }
   }
   table.rt td::before {
     content: attr(data-label); flex: none; max-width: 45%; text-align: left;
-    font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
     color: rgb(var(--c-outline));
   }
   table.rt td[data-label=""]::before, table.rt td:not([data-label])::before { display: none; }

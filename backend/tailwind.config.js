@@ -62,7 +62,7 @@ module.exports = {
         "headline-md": ["20px", { lineHeight: "28px" }], "headline-lg": ["28px", { lineHeight: "34px" }],
         "display": ["36px", { lineHeight: "44px", letterSpacing: "-0.02em" }],
         "body-lg": ["16px", { lineHeight: "24px" }], "body-md": ["14px", { lineHeight: "20px" }],
-        "metadata": ["12px", { lineHeight: "16px" }], "label-caps": ["11px", { lineHeight: "12px", letterSpacing: "0.05em" }]
+        "metadata": ["12px", { lineHeight: "16px" }], "label-caps": ["12px", { lineHeight: "16px", letterSpacing: "0.05em" }]
       },
       keyframes: {
         spin: { to: { transform: "rotate(360deg)" } }

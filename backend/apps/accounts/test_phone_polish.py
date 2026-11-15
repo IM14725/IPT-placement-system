@@ -87,3 +87,20 @@ def test_phone_css_sets_a_40px_tap_target_for_links_and_buttons():
         assert selector in block, selector
     assert block.count("min-height: 40px") >= 2
     assert "content: \"\"" in block  # the invisible tap area for inline links
+
+
+# ── 7. no text under 12 px ────────────────────────────────────────────────────────
+
+def test_no_text_smaller_than_12px_in_templates_or_theme():
+    import re
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[2]
+    config = (root / "tailwind.config.js").read_text(encoding="utf-8")
+    assert '"label-caps": ["12px"' in config  # the size behind badges and small caps labels
+    small = re.compile(r"text-\[(?:[0-9]|1[01])px\]")
+    offenders = [str(p.relative_to(root)) for p in (root / "templates").rglob("*.html") if small.search(p.read_text(encoding="utf-8"))]
+    assert not offenders, offenders
+    inline = re.compile(r"font-size:\s*(?:[0-9]|1[01])px")
+    for name in ("templates/base.html",):
+        assert not inline.search((root / name).read_text(encoding="utf-8")), name
