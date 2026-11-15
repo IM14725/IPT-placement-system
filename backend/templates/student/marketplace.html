@@ -30,14 +30,14 @@
       <div class="min-w-0 flex flex-col gap-xs">
         <label class="hidden md:block font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="filter-region">{% trans "Region" %}</label>
         <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">map</span></span><select id="filter-region" aria-label="{% trans 'Region' %}">
-            <option value="">{% trans "All Regions" %}</option>
+            <option value="">{% trans "Region" %}</option>
             {% for r in regions %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}
           </select></div>
       </div>
       <div class="min-w-0 flex flex-col gap-xs">
         <label class="hidden md:block font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="filter-district">{% trans "District" %}</label>
         <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">location_on</span></span><select id="filter-district" aria-label="{% trans 'District' %}">
-            <option value="">{% trans "All Districts" %}</option>
+            <option value="">{% trans "District" %}</option>
           </select></div>
       </div>
     </div>

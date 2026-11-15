@@ -8,6 +8,8 @@
 
   var region = document.getElementById("filter-region");
   var district = document.getElementById("filter-district");
+  // The "any district" option text comes from the (translated) template, so JS-built lists match it.
+  var ANY_DISTRICT = district && district.options.length ? district.options[0].textContent : "District";
   var department = document.getElementById("filter-department");
   var organization = document.getElementById("filter-organization");
   var educationLevel = document.getElementById("filter-education-level");
@@ -349,7 +351,7 @@
 
   region.addEventListener("change", function () {
     if (!region.value) {
-      setDistrictDisabled(false, "All districts");
+      setDistrictDisabled(false, ANY_DISTRICT);
       load();
       return;
     }
@@ -358,7 +360,7 @@
       .then(function (r) { return r.json(); })
       .then(function (data) {
         district.disabled = false;
-        district.innerHTML = '<option value="">All districts</option>';
+        district.innerHTML = '<option value="">' + ANY_DISTRICT + "</option>";
         data.districts.forEach(function (d) {
           var opt = document.createElement("option");
           opt.value = d.id;
@@ -405,7 +407,7 @@
     fetch("/api/locations/districts/?region=" + region.value, { credentials: "same-origin" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        district.innerHTML = '<option value="">All districts</option>';
+        district.innerHTML = '<option value="">' + ANY_DISTRICT + "</option>";
         data.districts.forEach(function (d) {
           var opt = document.createElement("option");
           opt.value = d.id;

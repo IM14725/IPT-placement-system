@@ -64,3 +64,12 @@ def test_student_dashboard_stat_labels_are_single_words(places):
     assert "Applications sent" not in body
     for label in ("Applied", "Paid", "Accepted"):
         assert f">{label}</span>" in body
+
+
+# ── 5. Find a Slot: Region / District filters use short labels that fit side by side ──
+
+@pytest.mark.django_db
+def test_marketplace_region_district_filters_use_short_labels(places):
+    body = _client(_student(places).user).get(reverse("student-marketplace")).content.decode()
+    assert '<option value="">Region</option>' in body and '<option value="">District</option>' in body
+    assert "All Regions" not in body and "All Districts" not in body

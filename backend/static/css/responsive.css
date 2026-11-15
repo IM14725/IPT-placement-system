@@ -192,7 +192,9 @@ html.dark #sidebar-backdrop { background: rgba(0, 0, 0, 0.6); }
 .ipt-chip:hover { background: rgb(var(--c-primary-fixed-dim)); }
 /* Phones: a slimmer icon chip so Region / District side by side keep room for their text. */
 @media (max-width: 767px) {
-  .ipt-filterbar .ipt-field-icon { width: 38px; }
+  .ipt-filterbar .ipt-field-icon { width: 34px; }
+  /* Region / District side by side: smaller text so "District" and long region names are not clipped. */
+  .ipt-filterbar .ipt-field-box select { font-size: 14px; padding-left: 8px; padding-right: 22px; text-overflow: ellipsis; }
 }
 
 /* ---------- Phones: denser spacing everywhere (static/css/responsive.css) ----------
