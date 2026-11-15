@@ -200,6 +200,9 @@ html.dark #sidebar-backdrop { background: rgba(0, 0, 0, 0.6); }
    scrolling per page. Under 768 px every page inside <main> uses tighter paddings, gaps and heading sizes. */
 @media (max-width: 767px) {
   main { padding-top: 78px !important; padding-bottom: 16px !important; }
+  /* Decorative blurred circles stick out of their cards. With overflow-x hidden on <html> the page could still be
+     scrolled sideways by script (focusing a field, an open dropdown) and the content jumped left. clip cannot scroll. */
+  main { overflow-x: clip; }
   main .p-lg { padding: 16px !important; }
   main .p-md { padding: 14px !important; }
   main .p-sm { padding: 12px !important; }

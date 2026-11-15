@@ -2242,6 +2242,9 @@ msgstr "Jina la kwanza"
 msgid "First name is required."
 msgstr "Jina la kwanza linahitajika."
 
+msgid "First, tell us about the organization. Your own personal details come on the next step."
+msgstr "Kwanza, tuambie kuhusu shirika. Taarifa zako binafsi zinafuata kwenye hatua inayofuata."
+
 msgid "Fix"
 msgstr "Rekebisha"
 
@@ -3005,6 +3008,9 @@ msgstr "Arifa &amp; vikumbusho"
 msgid "Notify me"
 msgstr "Niarifu"
 
+msgid "Now your personal details. You sign in with your own email and a password."
+msgstr "Sasa taarifa zako binafsi. Unaingia kwa barua pepe yako mwenyewe na nenosiri."
+
 msgid "Offer a monthly stipend to interns."
 msgstr "Toa posho ya mwezi kwa wanafunzi wanaofanya mazoezi."
 
@@ -3331,6 +3337,9 @@ msgstr "Asilimia zinalinganisha kila hatua na ile iliyotangulia. Waliotazama ni 
 
 msgid "Permanently Delete My Account"
 msgstr "Futa Akaunti Yangu Kabisa"
+
+msgid "Personal"
+msgstr "Binafsi"
 
 msgid "Personal data will be retained for up to 7 years as required by PDPA retention obligations and Tanzanian financial regulations."
 msgstr "Taarifa binafsi zitahifadhiwa kwa hadi miaka 7 kama inavyotakiwa na wajibu wa uhifadhi wa PDPA na kanuni za kifedha za Tanzania."
@@ -4079,6 +4088,9 @@ msgstr "Hali"
 msgid "Step __N__ of 3"
 msgstr "Hatua __N__ kati ya 3"
 
+msgid "Step __N__ of __T__"
+msgstr "Hatua __N__ kati ya __T__"
+
 msgid "Stipend"
 msgstr "Posho"
 
@@ -4318,6 +4330,9 @@ msgstr "Shirika hupitia ombi lako nawe unaarifiwa kwa SMS na barua pepe."
 
 msgid "The organization's contact identity. You sign in with your own personal email below."
 msgstr "Mawasiliano rasmi ya shirika. Unaingia kwa barua pepe yako binafsi hapa chini."
+
+msgid "The organization's contact identity. You sign in with your own personal email, which you enter on the next step."
+msgstr "Utambulisho wa mawasiliano wa shirika. Unaingia kwa barua pepe yako binafsi, utakayoiweka kwenye hatua inayofuata."
 
 msgid "The placement cannot start before applications close."
 msgstr "Uwekaji hauwezi kuanza kabla maombi hayajafungwa."

@@ -129,9 +129,19 @@ def test_robots_and_sitemap(client, db):
     assert "/auth/register/" in body
 
 
-def test_register_page_is_a_three_step_wizard_with_phone_input(client, db):
+def test_register_page_is_a_wizard_with_separate_organization_and_personal_steps(client, db):
+    """Students use role -> personal -> password; organizations add an organization-details step
+    between role and personal, so organization and personal details never share a screen."""
     html = client.get("/auth/register/").content.decode()
-    assert html.count("data-step=") == 3
+    for step in ("role", "org", "personal", "password"):
+        assert html.count(f'data-step="{step}"') == 1
+    assert html.count("data-step=") == 4
+    org = html[html.index('data-step="org"') : html.index('data-step="personal"')]
+    personal = html[html.index('data-step="personal"') : html.index('data-step="password"')]
+    for field in ("organization_name", "organization_email", "organization_phone", "brela_number", "tin"):
+        assert f'name="{field}"' in org and f'name="{field}"' not in personal
+    for field in ("email", "first_name", "last_name", "phone", "position"):
+        assert f'name="{field}"' in personal and f'name="{field}"' not in org
     assert "data-wiz-next" in html and "data-wiz-back" in html
     assert "phone-input.js" in html
 

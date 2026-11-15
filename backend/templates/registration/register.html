@@ -505,6 +505,8 @@
     form.querySelectorAll('[data-wiz-next]').forEach(b => b.addEventListener('click', next));
     form.querySelectorAll('[data-wiz-back]').forEach(b => b.addEventListener('click', back));
     form.querySelectorAll('[data-wiz-role]').forEach(b => b.addEventListener('click', () => show('role', true)));
+    // Picking a role changes how many steps there are (3 for students, 4 for organizations): redraw the progress bar.
+    form.querySelectorAll('input[name="role"]').forEach(r => r.addEventListener('change', () => show(current, false)));
     // Enter before the password step means "Continue", never "submit".
     // Capture phase + stopImmediatePropagation: form-loading.js would otherwise still POST the form.
     form.addEventListener('submit', e => {
@@ -529,11 +531,9 @@
   // form-loading.js swaps in a re-rendered form (its elements are brand new).
   function initRegisterForm(form) {
     if (!form) return;
-    const organizationNameEl = form.querySelector('[data-organization-name]');
     const phoneSuffix = form.querySelector('[data-phone-suffix]');
     function syncNameFields() {
       const isOrg = form.querySelector('input[name="role"]:checked')?.value === 'ORGANIZATION';
-      if (organizationNameEl) organizationNameEl.style.display = isOrg ? '' : 'none';
       form.querySelectorAll('[data-organization-only]').forEach(el => { el.style.display = isOrg ? '' : 'none'; });
       if (phoneSuffix) phoneSuffix.textContent = isOrg ? '(your own number)' : '';
     }
