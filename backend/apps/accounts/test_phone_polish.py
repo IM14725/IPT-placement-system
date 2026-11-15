@@ -147,3 +147,14 @@ def test_location_dropdowns_show_their_placeholder_while_disabled():
     # The placeholder option is always selected; before this a disabled list rendered blank.
     assert 'buildOption("", placeholder, true, disabled)' in js
     assert "!disabled, disabled" not in js
+
+
+# ── 9. login / register: one H1 and no empty band above the form on phones ─────────
+
+@pytest.mark.django_db
+def test_login_and_register_have_a_single_h1_and_no_forced_card_height_on_phones(client):
+    for url in ("/auth/login/", "/auth/register/", "/auth/register/?role=student", "/auth/forgot-password/"):
+        body = client.get(url).content.decode()
+        assert body.count("<h1") == 1, url
+        assert "lg:min-h-[640px]" in body and " min-h-[640px]" not in body.replace("lg:min-h-[640px]", ""), url
+        assert "items-start lg:items-center" in body, url  # form sits at the top of the card on phones

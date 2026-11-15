@@ -5,7 +5,7 @@
 {% block robots %}index, follow{% endblock %}
 {% block meta_description %}{% trans "Create a free IPT Marketplace account as a student or an organization." %}{% endblock %}
 {% block content %}
-<div class="w-full max-w-[1080px] mx-auto my-md auth-card bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden flex flex-col lg:flex-row min-h-[640px]">
+<div class="w-full max-w-[1080px] mx-auto my-md auth-card bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden flex flex-col lg:flex-row lg:min-h-[640px]">
   <!-- Brand panel -->
   <div class="relative hidden lg:flex lg:w-[44%] auth-card-panel bg-secondary text-on-secondary flex-col justify-between p-xl overflow-hidden">
     <div class="absolute -right-16 -bottom-16 w-72 h-72 bg-secondary-fixed rounded-full opacity-20 pointer-events-none"></div>
@@ -45,18 +45,13 @@
   </div>
 
   <!-- Form panel -->
-  <div class="relative flex-1 flex items-center justify-center p-lg lg:p-xl">
+  <div class="relative flex-1 flex items-start lg:items-center justify-center p-lg lg:p-xl">
     <div class="w-full max-w-md flex flex-col gap-lg">
-      <div class="flex flex-col items-center text-center gap-xs lg:hidden">
-        <div class="w-16 h-16 rounded-full bg-secondary-container/20 flex items-center justify-center mb-xs">
+      <div class="flex flex-col items-center lg:items-start text-center lg:text-left gap-xs">
+        <div class="lg:hidden w-16 h-16 rounded-full bg-secondary-container/20 flex items-center justify-center mb-xs">
           <span class="material-symbols-outlined text-secondary text-[32px]">person_add</span>
         </div>
-        <h1 class="font-headline-lg text-headline-lg text-on-surface">{% trans "Create your account" %}</h1>
-        <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Join the marketplace as a student or organization." %}</p>
-      </div>
-
-      <div class="hidden lg:flex flex-col gap-xs">
-        <span class="font-label-caps text-label-caps text-secondary uppercase tracking-widest">{% trans "Register" %}</span>
+        <span class="hidden lg:block font-label-caps text-label-caps text-secondary uppercase tracking-widest">{% trans "Register" %}</span>
         <h1 class="font-headline-lg text-headline-lg text-on-surface">{% trans "Create your account" %}</h1>
         <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Join the marketplace as a student or organization." %}</p>
       </div>
