@@ -13,7 +13,7 @@ Uses: user, profile (students), organization + my_membership + can_edit_profile 
       {% if organization and can_edit_profile %}
         <form method="post" action="{% url 'organization-upload-logo' %}" enctype="multipart/form-data">
           {% csrf_token %}
-          <label class="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-container-lowest cursor-pointer shadow-md hover:bg-primary/90 transition-colors" title="{% trans 'Change logo' %}">
+          <label class="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-container-lowest cursor-pointer shadow-md hover:bg-primary/90 transition-colors" title="{% trans 'Change logo' %}">
             <span class="material-symbols-outlined text-[18px]">camera_alt</span>
             <span class="sr-only">{% trans "Change logo" %}</span>
             <input type="file" name="logo" accept="image/jpeg,image/png,image/webp" class="sr-only" onchange="this.form.submit()">
@@ -26,7 +26,7 @@ Uses: user, profile (students), organization + my_membership + can_edit_profile 
       {% else %}
         <div class="w-24 h-24 rounded-full bg-primary/10 text-primary flex items-center justify-center font-headline-lg text-headline-lg font-bold" aria-hidden="true">{% if user.first_name or user.last_name %}{{ user.first_name|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper }}{% else %}{{ user.email|slice:":2"|upper }}{% endif %}</div>
       {% endif %}
-      <a href="#id_profile_photo" class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-container-lowest shadow-md hover:bg-primary/90 transition-colors" title="{% trans 'Change photo' %}">
+      <a href="#id_profile_photo" class="absolute -bottom-1 -right-1 w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-container-lowest shadow-md hover:bg-primary/90 transition-colors" title="{% trans 'Change photo' %}">
         <span class="material-symbols-outlined text-[18px]">camera_alt</span>
         <span class="sr-only">{% trans "Change photo" %}</span>
       </a>

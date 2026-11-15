@@ -73,3 +73,17 @@ def test_marketplace_region_district_filters_use_short_labels(places):
     body = _client(_student(places).user).get(reverse("student-marketplace")).content.decode()
     assert '<option value="">Region</option>' in body and '<option value="">District</option>' in body
     assert "All Regions" not in body and "All Districts" not in body
+
+
+# ── 6. tap targets are at least 40 px on phones ────────────────────────────────────
+
+def test_phone_css_sets_a_40px_tap_target_for_links_and_buttons():
+    from pathlib import Path
+
+    css = (Path(__file__).resolve().parents[2] / "static" / "css" / "responsive.css").read_text(encoding="utf-8")
+    block = css[css.index("every tap target is at least 40 px high") :]
+    assert "@media (max-width: 767px)" in block
+    for selector in ("footer a", "#topbar a", "main button", "main summary", "main select", ".ipt-file-input"):
+        assert selector in block, selector
+    assert block.count("min-height: 40px") >= 2
+    assert "content: \"\"" in block  # the invisible tap area for inline links

@@ -246,11 +246,24 @@ html.dark #sidebar-backdrop { background: rgba(0, 0, 0, 0.6); }
   border-left: 2px solid rgb(var(--c-outline-variant));
 }
 .side-group.is-open .side-sub { display: flex; }
-.side-sub-link { min-height: 38px !important; padding: 6px 10px !important; font-size: 13px !important; }
+.side-sub-link { min-height: 40px !important; padding: 6px 10px !important; font-size: 13px !important; }
 .side-sub-link .material-symbols-outlined { font-size: 18px !important; }
 @media (min-width: 768px) {
   /* Icon rail: the sections of the current page show as icons under its icon; open the rail for the labels. */
   body:not(.sb-open) #app-sidebar .side-toggle { display: none; }
   body:not(.sb-open) #app-sidebar .side-sub { margin: 0; padding: 0; border-left: 0; }
-  body:not(.sb-open) #app-sidebar .side-sub-link { padding: 8px 0 !important; min-height: 38px !important; }
+  body:not(.sb-open) #app-sidebar .side-sub-link { padding: 8px 0 !important; min-height: 40px !important; }
+}
+
+/* ---------- Phones: every tap target is at least 40 px high ----------
+   Links and buttons that are their own row/chip grow to 40 px. Small text links that sit inside a sentence keep
+   their look: an invisible ::after enlarges only the tap area (it never changes the layout). */
+@media (max-width: 767px) {
+  footer a:not(.hidden), #topbar a:not(.flex):not(.hidden) { display: inline-flex; align-items: center; }
+  footer a, #topbar a, #topbar button, #topbar select { min-height: 40px; }
+  main a.flex, main a.inline-flex, main a.rounded-full, main button, main summary, main select, main .ipt-file-input { min-height: 40px; }
+  main a:not(.flex):not(.inline-flex):not(.block):not(.absolute):not(.fixed):not(.sticky):not(.rounded-full):not([class*="w-full"]) { position: relative; }
+  main a:not(.flex):not(.inline-flex):not(.block):not(.absolute):not(.fixed):not(.sticky):not(.rounded-full):not([class*="w-full"])::after {
+    content: ""; position: absolute; left: -4px; right: -4px; top: 50%; height: 40px; transform: translateY(-50%);
+  }
 }
