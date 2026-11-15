@@ -15,3 +15,27 @@ def test_whatsapp_button_is_bottom_right_on_phones_and_absent_on_form_pages(clie
         body = client.get(url).content.decode()
         assert "wa.me/255756322833?text=" not in body, url  # the floating button, not the footer link
         assert "WhatsApp: +255 756 322 833" in body, url  # the footer link stays
+
+
+# ── 2. the old "Account" card is gone; the header carries what it showed ──────────
+
+from django.urls import reverse  # noqa: E402
+
+from apps.students.test_dashboard_features import _client, _reset_redis_state, _student, org, places  # noqa: E402,F401
+
+
+@pytest.mark.django_db
+def test_profile_pages_have_no_second_account_card(places, org):
+    student = _student(places)
+    student.student_id = "2022-04-01234"
+    student.gender = "F"
+    student.save()
+    body = _client(student.user).get(reverse("student-profile")).content.decode()
+    assert 'data-account-header' in body
+    assert "verified_user" not in body and ">Active<" not in body  # the old card's icon and badge
+    header = body[body.index("data-account-header") : body.index("</section>", body.index("data-account-header"))]
+    assert "2022-04-01234" in header and "Student ID" in header  # moved into the header
+
+    body = _client(org.user).get(reverse("organization-profile")).content.decode()
+    assert "verified_user" not in body
+    assert "Organization Documents" in body  # the rest of that column stays

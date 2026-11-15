@@ -12,7 +12,7 @@
 
   <div data-panel="profile" class="flex flex-col gap-lg">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg w-full items-start">
-    <div class="lg:col-span-8 flex flex-col gap-lg">
+    <div class="lg:col-span-12 flex flex-col gap-lg">
       <div class="bg-surface-container-lowest rounded-xl p-lg shadow-md flex flex-col gap-md relative overflow-hidden auth-card">
         <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mt-16 -mr-16 pointer-events-none"></div>
         <div class="absolute bottom-0 left-0 w-24 h-24 bg-secondary/5 rounded-full blur-xl -mb-12 -ml-12 pointer-events-none"></div>
@@ -136,54 +136,6 @@
       </div>
     </div>
 
-    <div class="lg:col-span-4 flex flex-col gap-lg">
-      <div class="bg-surface-container-lowest rounded-xl shadow-md p-md relative overflow-hidden">
-        <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-xl pointer-events-none"></div>
-        <div class="flex items-center gap-xs mb-md relative z-10">
-          <span class="material-symbols-outlined text-outline">verified_user</span>
-          <h3 class="font-headline-md text-headline-md text-on-surface">{% trans "Account" %}</h3>
-        </div>
-        <div class="flex flex-col items-center justify-center py-md z-10 relative">
-          {% if profile and profile.profile_photo %}
-            <img src="{{ profile.profile_photo|thumb:128 }}" width="64" height="64" alt="{% trans 'Profile photo' %}" class="ipt-img w-16 h-16 rounded-full object-cover mb-sm shadow-sm ring-4 ring-[#e8f5e9]/40">
-          {% else %}
-            <div class="w-16 h-16 rounded-full bg-[#e8f5e9] flex items-center justify-center mb-sm shadow-sm ring-4 ring-[#e8f5e9]/40">
-              <span class="material-symbols-outlined text-[#1b5e20] text-[32px]">check_circle</span>
-            </div>
-          {% endif %}
-          <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#1b5e20] bg-[#e8f5e9]">{% trans "Active" %}</span>
-        </div>
-        <div class="h-[1px] w-full bg-surface-container-high my-sm"></div>
-        <div class="flex flex-col gap-sm">
-          <div class="flex items-center gap-xs">
-            <span class="material-symbols-outlined text-[16px] text-on-surface-variant">mail</span>
-            <span class="font-body-md text-body-md text-on-surface truncate">{{ user.email }}</span>
-          </div>
-          {% if profile.student_id %}
-            <div class="flex items-center gap-xs">
-              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">badge</span>
-              <span class="font-body-md text-body-md text-on-surface truncate">ID: {{ profile.student_id }}</span>
-            </div>
-          {% endif %}
-          {% if profile.gender %}
-            <div class="flex items-center gap-xs">
-              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">person_outline</span>
-              <span class="font-body-md text-body-md text-on-surface">{{ profile.get_gender_display }}</span>
-            </div>
-          {% endif %}
-          {% if user.phone %}
-            <div class="flex items-center gap-xs">
-              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">call</span>
-              <span class="font-body-md text-body-md text-on-surface">{{ user.phone }}</span>
-            </div>
-          {% endif %}
-          <div class="flex items-center gap-xs">
-            <span class="material-symbols-outlined text-[16px] text-on-surface-variant">calendar_month</span>
-            <span class="font-body-md text-body-md text-on-surface">{% blocktrans trimmed with date_joined=user.date_joined|date:"M Y" %}Joined {{ date_joined }}{% endblocktrans %}</span>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
   </div>
 

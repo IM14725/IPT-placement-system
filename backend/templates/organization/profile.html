@@ -133,43 +133,6 @@
           </div>
         {% endif %}
       </div>
-      {% if organization %}
-        <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm">
-          <div class="flex items-center gap-xs mb-md">
-            <span class="material-symbols-outlined text-outline">verified_user</span>
-            <h3 class="font-headline-md font-headline-md text-on-surface">{% trans "Account" %}</h3>
-          </div>
-          <div class="flex items-center gap-xs">
-            {% if organization.is_approved %}
-              <span class="material-symbols-outlined text-[#1b5e20] text-[20px]">verified</span>
-              <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#1b5e20] bg-[#e8f5e9]">{% trans "Verified" %}</span>
-            {% elif organization.verification_status == 'REJECTED' %}
-              <span class="material-symbols-outlined text-error text-[20px]">cancel</span>
-              <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-on-error bg-error-container">{% trans "Rejected" %}</span>
-            {% else %}
-              <span class="material-symbols-outlined text-[#a16207] text-[20px]">pending</span>
-              <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#a16207] bg-[#fff4e5]">{% trans "Pending Verification" %}</span>
-            {% endif %}
-          </div>
-          <div class="h-[1px] w-full bg-surface-container-high my-sm"></div>
-          <div class="flex flex-col gap-sm">
-            <div class="flex items-center gap-xs">
-              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">mail</span>
-              <span class="font-body-md text-body-md text-on-surface truncate">{{ user.email }}</span>
-            </div>
-            {% if user.phone %}
-              <div class="flex items-center gap-xs">
-                <span class="material-symbols-outlined text-[16px] text-on-surface-variant">call</span>
-                <span class="font-body-md text-body-md text-on-surface">{{ user.phone }}</span>
-              </div>
-            {% endif %}
-            <div class="flex items-center gap-xs">
-              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">calendar_month</span>
-              <span class="font-body-md text-body-md text-on-surface">{% trans "Joined" %} {{ user.date_joined|date:"M Y" }}</span>
-            </div>
-          </div>
-        </div>
-      {% endif %}
     </div>
   </div>
   </div>

@@ -84,6 +84,12 @@ Uses: user, profile (students), organization + my_membership + can_edit_profile 
       </div>
     </div>
 
+    {% if user.is_student and profile and profile.student_id or user.is_student and profile and profile.gender %}
+      <p class="font-body-md text-body-md text-on-surface flex items-center justify-center gap-md flex-wrap">
+        {% if profile.student_id %}<span class="inline-flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-on-surface-variant">badge</span>{% trans "Student ID" %}: {{ profile.student_id }}</span>{% endif %}
+        {% if profile.gender %}<span class="inline-flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-on-surface-variant">person_outline</span>{{ profile.get_gender_display }}</span>{% endif %}
+      </p>
+    {% endif %}
     <p class="font-metadata text-metadata text-on-surface-variant flex items-center justify-center gap-xs flex-wrap">
       <span class="material-symbols-outlined text-[16px]">calendar_month</span>{% trans "Joined" %} {{ user.date_joined|date:"j M Y" }}
       {% if user.is_organization and organization and organization.logo and can_edit_profile %}

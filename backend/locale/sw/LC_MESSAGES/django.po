@@ -4169,6 +4169,9 @@ msgstr "Mwanafunzi Anaghairi (kabla ya idhini)"
 msgid "Student Dashboard"
 msgstr "Dashibodi ya Mwanafunzi"
 
+msgid "Student ID"
+msgstr "Namba ya mwanafunzi"
+
 msgid "Student ID Card"
 msgstr "Kadi ya Utambulisho ya Mwanafunzi"
 
