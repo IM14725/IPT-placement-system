@@ -54,3 +54,13 @@ def test_form_card_headings_put_the_icon_inline_so_text_aligns_with_labels(place
         body = client.get(url).content.decode()
         heading = re.search(r"<h2[^>]*>(.*?)</h2>", body[body.index(title) - 400 : body.index(title) + 100], re.S)
         assert heading and "material-symbols-outlined" in heading.group(1) and title in heading.group(1), url
+
+
+# ── 4. dashboard stat labels are single words (no mid-word break on a 360 px screen) ──
+
+@pytest.mark.django_db
+def test_student_dashboard_stat_labels_are_single_words(places):
+    body = _client(_student(places).user).get(reverse("student-dashboard")).content.decode()
+    assert "Applications sent" not in body
+    for label in ("Applied", "Paid", "Accepted"):
+        assert f">{label}</span>" in body
