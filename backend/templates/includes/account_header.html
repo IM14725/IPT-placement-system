@@ -1,0 +1,98 @@
+{% load i18n media_tags %}
+{% comment %}"Your account" card at the top of the student and organization profile pages, picture centred.
+Uses: user, profile (students), organization + my_membership + can_edit_profile (organizations).{% endcomment %}
+<section class="bg-surface-container-lowest rounded-xl shadow-md p-md sm:p-lg flex flex-col items-center text-center gap-md" aria-label="{% trans 'Your account' %}" data-account-header>
+  {# Picture #}
+  <div class="relative shrink-0 mx-auto w-24 h-24">
+    {% if user.is_organization %}
+      {% if organization and organization.logo %}
+        <img src="{{ organization.logo|thumb:192 }}" width="96" height="96" alt="{% trans 'Organization logo' %}" class="ipt-img w-24 h-24 rounded-2xl object-cover ring-2 ring-primary/30 shadow-sm">
+      {% else %}
+        <div class="w-24 h-24 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-headline-lg text-headline-lg font-bold" aria-hidden="true">{% if organization %}{{ organization.name|slice:":2"|upper }}{% else %}{{ user.email|slice:":2"|upper }}{% endif %}</div>
+      {% endif %}
+      {% if organization and can_edit_profile %}
+        <form method="post" action="{% url 'organization-upload-logo' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <label class="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-container-lowest cursor-pointer shadow-md hover:bg-primary/90 transition-colors" title="{% trans 'Change logo' %}">
+            <span class="material-symbols-outlined text-[18px]">camera_alt</span>
+            <span class="sr-only">{% trans "Change logo" %}</span>
+            <input type="file" name="logo" accept="image/jpeg,image/png,image/webp" class="sr-only" onchange="this.form.submit()">
+          </label>
+        </form>
+      {% endif %}
+    {% else %}
+      {% if profile and profile.profile_photo %}
+        <img src="{{ profile.profile_photo|thumb:192 }}" width="96" height="96" alt="{% trans 'Profile photo' %}" class="ipt-img w-24 h-24 rounded-full object-cover ring-2 ring-primary/30 shadow-sm">
+      {% else %}
+        <div class="w-24 h-24 rounded-full bg-primary/10 text-primary flex items-center justify-center font-headline-lg text-headline-lg font-bold" aria-hidden="true">{% if user.first_name or user.last_name %}{{ user.first_name|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper }}{% else %}{{ user.email|slice:":2"|upper }}{% endif %}</div>
+      {% endif %}
+      <a href="#id_profile_photo" class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-container-lowest shadow-md hover:bg-primary/90 transition-colors" title="{% trans 'Change photo' %}">
+        <span class="material-symbols-outlined text-[18px]">camera_alt</span>
+        <span class="sr-only">{% trans "Change photo" %}</span>
+      </a>
+    {% endif %}
+  </div>
+
+  <div class="flex flex-col gap-sm min-w-0 w-full items-center">
+    {# Name + who is signed in #}
+    <div class="flex flex-col items-center gap-xs min-w-0">
+      <span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">{% trans "Your account" %}</span>
+      <div class="flex items-center justify-center gap-xs flex-wrap">
+        <h2 class="font-headline-md text-headline-md text-on-surface break-words">{% if user.is_organization and organization %}{{ organization.name }}{% else %}{{ user.full_name|default:user.email }}{% endif %}</h2>
+        {% if user.is_organization and organization %}
+          {% if organization.is_approved %}
+            <span class="inline-flex items-center gap-1 font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#1b5e20] bg-[#e8f5e9]"><span class="material-symbols-outlined text-[16px]">verified</span>{% trans "Organization verified" %}</span>
+          {% elif organization.verification_status == 'REJECTED' %}
+            <span class="inline-flex items-center gap-1 font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-on-error bg-error-container"><span class="material-symbols-outlined text-[16px]">cancel</span>{% trans "Organization rejected" %}</span>
+          {% else %}
+            <span class="inline-flex items-center gap-1 font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#a16207] bg-[#fff4e5]"><span class="material-symbols-outlined text-[16px]">pending</span>{% trans "Organization pending verification" %}</span>
+          {% endif %}
+        {% endif %}
+      </div>
+      {% if user.is_organization %}
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {% trans "Signed in as" %} <strong class="text-on-surface">{{ user.full_name|default:user.email }}</strong>{% if my_membership %} · {{ my_membership.get_role_display }}{% if my_membership.position %} · {{ my_membership.position }}{% endif %}{% endif %}
+        </p>
+      {% else %}
+        <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Student account" %}</p>
+      {% endif %}
+    </div>
+
+    {# Contact + verification #}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-xs w-full max-w-2xl text-left">
+      <div class="flex items-center gap-xs flex-wrap min-w-0 p-sm rounded-lg bg-surface-container-low">
+        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">mail</span>
+        <span class="font-body-md text-body-md text-on-surface break-all">{{ user.email }}</span>
+        {% if user.email_verified %}
+          <span class="inline-flex items-center gap-1 font-metadata text-metadata font-semibold px-2 py-0.5 rounded-full text-[#1b5e20] bg-[#e8f5e9]"><span class="material-symbols-outlined text-[14px]">check_circle</span>{% trans "Verified" %}</span>
+        {% else %}
+          <span class="inline-flex items-center gap-1 font-metadata text-metadata font-semibold px-2 py-0.5 rounded-full text-[#a16207] bg-[#fff4e5]"><span class="material-symbols-outlined text-[14px]">warning</span>{% trans "Not verified" %}</span>
+        {% endif %}
+      </div>
+      <div class="flex items-center gap-xs flex-wrap min-w-0 p-sm rounded-lg bg-surface-container-low">
+        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">call</span>
+        {% if user.phone %}
+          <span class="font-body-md text-body-md text-on-surface">{{ user.phone }}</span>
+          {% if user.phone_verified %}
+            <span class="inline-flex items-center gap-1 font-metadata text-metadata font-semibold px-2 py-0.5 rounded-full text-[#1b5e20] bg-[#e8f5e9]"><span class="material-symbols-outlined text-[14px]">check_circle</span>{% trans "Verified" %}</span>
+          {% else %}
+            <span class="inline-flex items-center gap-1 font-metadata text-metadata font-semibold px-2 py-0.5 rounded-full text-[#a16207] bg-[#fff4e5]"><span class="material-symbols-outlined text-[14px]">warning</span>{% trans "Not verified" %}</span>
+          {% endif %}
+        {% else %}
+          <span class="font-body-md text-body-md text-on-surface-variant">{% trans "No phone number added" %}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <p class="font-metadata text-metadata text-on-surface-variant flex items-center justify-center gap-xs flex-wrap">
+      <span class="material-symbols-outlined text-[16px]">calendar_month</span>{% trans "Joined" %} {{ user.date_joined|date:"j M Y" }}
+      {% if user.is_organization and organization and organization.logo and can_edit_profile %}
+        <span aria-hidden="true">·</span>
+        <form method="post" action="{% url 'organization-upload-logo' %}" class="inline">
+          {% csrf_token %}
+          <button type="submit" name="action" value="remove" class="text-primary font-semibold hover:underline">{% trans "Remove logo" %}</button>
+        </form>
+      {% endif %}
+    </p>
+  </div>
+</section>

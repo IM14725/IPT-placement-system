@@ -310,8 +310,28 @@
         <a class="side-link {% is_active request 'student-marketplace' %}" href="{% url 'student-marketplace' %}"><span class="material-symbols-outlined">search</span><span class="side-label">{% trans "Find a Slot" %}</span></a>
         <a class="side-link {% is_active request 'student-saved-slots' %}" href="{% url 'student-saved-slots' %}"><span class="material-symbols-outlined">bookmark</span><span class="side-label">{% trans "Saved slots" %}</span></a>
         <a class="side-link {% is_active request 'student-applications' 'student-payment' 'student-checklist' 'student-review' %}" href="{% url 'student-applications' %}"><span class="material-symbols-outlined">assignment</span><span class="side-label">{% trans "My Applications" %}</span></a>
-        <a class="side-link {% is_active request 'notifications' %}" href="{% url 'notifications' %}"><span class="material-symbols-outlined">notifications</span><span class="side-label">{% trans "Notifications &amp; alerts" %}</span></a>
-        <a class="side-link {% is_active request 'student-profile' 'verify-contact' 'change-password' %}" href="{% url 'student-profile' %}"><span class="material-symbols-outlined">person</span><span class="side-label">{% trans "Profile &amp; security" %}</span></a>
+        {% is_active request 'notifications' as grp_notif %}
+        <div class="side-group{% if grp_notif %} is-open{% endif %}" data-side-group>
+          <div class="side-group-row">
+            <a class="side-link {{ grp_notif }}" href="{% url 'notifications' %}"><span class="material-symbols-outlined">notifications</span><span class="side-label">{% trans "Notifications &amp; alerts" %}</span></a>
+            <button type="button" class="side-toggle" data-side-toggle aria-expanded="{% if grp_notif %}true{% else %}false{% endif %}" aria-label="{% trans 'Show sections' %}"><span class="material-symbols-outlined">expand_more</span></button>
+          </div>
+          <div class="side-sub">
+            <a class="side-link side-sub-link" href="{% url 'notifications' %}#notifications" data-sub-match="#notifications" data-sub-default><span class="material-symbols-outlined">notifications</span><span class="side-label">{% trans 'Notifications' %}</span></a>
+            <a class="side-link side-sub-link" href="{% url 'notifications' %}#alerts" data-sub-match="#alerts"><span class="material-symbols-outlined">notifications_active</span><span class="side-label">{% trans 'Slot alerts' %}</span></a>
+          </div>
+        </div>
+        {% is_active request 'student-profile' 'verify-contact' 'change-password' as grp_prof %}
+        <div class="side-group{% if grp_prof %} is-open{% endif %}" data-side-group>
+          <div class="side-group-row">
+            <a class="side-link {{ grp_prof }}" href="{% url 'student-profile' %}"><span class="material-symbols-outlined">person</span><span class="side-label">{% trans "Profile &amp; security" %}</span></a>
+            <button type="button" class="side-toggle" data-side-toggle aria-expanded="{% if grp_prof %}true{% else %}false{% endif %}" aria-label="{% trans 'Show sections' %}"><span class="material-symbols-outlined">expand_more</span></button>
+          </div>
+          <div class="side-sub">
+            <a class="side-link side-sub-link" href="{% url 'student-profile' %}#profile" data-sub-match="#profile" data-sub-default><span class="material-symbols-outlined">badge</span><span class="side-label">{% trans 'Profile' %}</span></a>
+            <a class="side-link side-sub-link" href="{% url 'student-profile' %}#security" data-sub-match="#security"><span class="material-symbols-outlined">shield_person</span><span class="side-label">{% trans 'Account &amp; security' %}</span></a>
+          </div>
+        </div>
         <a class="side-link {% is_active request 'report-submit' %}" href="{% url 'report-submit' %}"><span class="material-symbols-outlined">flag</span><span class="side-label">{% trans "Report a problem" %}</span></a>
       {% elif user.is_organization %}
         <a class="side-link {% is_active request 'organization-dashboard' 'organization-profile' %}" href="{% url 'organization-dashboard' %}"><span class="material-symbols-outlined">dashboard</span><span class="side-label">{% trans "Dashboard" %}</span></a>
@@ -322,12 +342,43 @@
         {% if nav_org.audit %}<a class="side-link {% is_active request 'organization-activity' %}" href="{% url 'organization-activity' %}"><span class="material-symbols-outlined">history</span><span class="side-label">{% trans "Team activity" %}</span></a>{% endif %}
         <a class="side-link {% is_active request 'organization-reviews' %}" href="{% url 'organization-reviews' %}"><span class="material-symbols-outlined">star</span><span class="side-label">{% trans "Ratings" %}</span></a>
         <a class="side-link {% is_active request 'notifications' %}" href="{% url 'notifications' %}"><span class="material-symbols-outlined">notifications</span><span class="side-label">{% trans "Notifications" %}</span></a>
-        <a class="side-link {% is_active request 'organization-profile' 'verify-contact' 'change-password' %}" href="{% url 'organization-profile' %}"><span class="material-symbols-outlined">apartment</span><span class="side-label">{% trans "Profile &amp; security" %}</span></a>
+        {% is_active request 'organization-profile' 'verify-contact' 'change-password' as grp_oprof %}
+        <div class="side-group{% if grp_oprof %} is-open{% endif %}" data-side-group>
+          <div class="side-group-row">
+            <a class="side-link {{ grp_oprof }}" href="{% url 'organization-profile' %}"><span class="material-symbols-outlined">apartment</span><span class="side-label">{% trans "Profile &amp; security" %}</span></a>
+            <button type="button" class="side-toggle" data-side-toggle aria-expanded="{% if grp_oprof %}true{% else %}false{% endif %}" aria-label="{% trans 'Show sections' %}"><span class="material-symbols-outlined">expand_more</span></button>
+          </div>
+          <div class="side-sub">
+            <a class="side-link side-sub-link" href="{% url 'organization-profile' %}#profile" data-sub-match="#profile" data-sub-default><span class="material-symbols-outlined">apartment</span><span class="side-label">{% trans 'Organization profile' %}</span></a>
+            <a class="side-link side-sub-link" href="{% url 'organization-profile' %}#team" data-sub-match="#team"><span class="material-symbols-outlined">groups</span><span class="side-label">{% trans 'Team accounts' %}</span></a>
+            <a class="side-link side-sub-link" href="{% url 'organization-profile' %}#security" data-sub-match="#security"><span class="material-symbols-outlined">shield_person</span><span class="side-label">{% trans 'Account &amp; security' %}</span></a>
+          </div>
+        </div>
         <a class="side-link {% is_active request 'report-submit' %}" href="{% url 'report-submit' %}"><span class="material-symbols-outlined">flag</span><span class="side-label">{% trans "Report a problem" %}</span></a>
       {% else %}
         <p class="side-heading"><span class="side-label">{% trans "Review" %}</span></p>
-        <a class="side-link {% is_active request 'platform-verifications' 'platform-student-verification' 'platform-organization-verification' %}" href="{% url 'platform-verifications' %}"><span class="material-symbols-outlined">fact_check</span><span class="side-label">{% trans "Queue" %}</span></a>
-        <a class="side-link {% is_active request 'platform-directory' %}" href="{% url 'platform-directory' %}"><span class="material-symbols-outlined">groups</span><span class="side-label">{% trans "Directory" %}</span></a>
+        {% is_active request 'platform-verifications' 'platform-student-verification' 'platform-organization-verification' as grp_queue %}
+        <div class="side-group{% if grp_queue %} is-open{% endif %}" data-side-group>
+          <div class="side-group-row">
+            <a class="side-link {{ grp_queue }}" href="{% url 'platform-verifications' %}"><span class="material-symbols-outlined">fact_check</span><span class="side-label">{% trans "Queue" %}</span></a>
+            <button type="button" class="side-toggle" data-side-toggle aria-expanded="{% if grp_queue %}true{% else %}false{% endif %}" aria-label="{% trans 'Show sections' %}"><span class="material-symbols-outlined">expand_more</span></button>
+          </div>
+          <div class="side-sub">
+            <a class="side-link side-sub-link" href="{% url 'platform-verifications' %}#students" data-sub-match="#students" data-sub-default><span class="material-symbols-outlined">badge</span><span class="side-label">{% trans 'Incomplete Profiles' %}</span></a>
+            <a class="side-link side-sub-link" href="{% url 'platform-verifications' %}#organizations" data-sub-match="#organizations"><span class="material-symbols-outlined">apartment</span><span class="side-label">{% trans 'Organizations' %}</span></a>
+          </div>
+        </div>
+        {% is_active request 'platform-directory' as grp_dir %}
+        <div class="side-group{% if grp_dir %} is-open{% endif %}" data-side-group>
+          <div class="side-group-row">
+            <a class="side-link {{ grp_dir }}" href="{% url 'platform-directory' %}"><span class="material-symbols-outlined">groups</span><span class="side-label">{% trans "Directory" %}</span></a>
+            <button type="button" class="side-toggle" data-side-toggle aria-expanded="{% if grp_dir %}true{% else %}false{% endif %}" aria-label="{% trans 'Show sections' %}"><span class="material-symbols-outlined">expand_more</span></button>
+          </div>
+          <div class="side-sub">
+            <a class="side-link side-sub-link" href="{% url 'platform-directory' %}?tab=students" data-sub-match="?tab=students" data-sub-default><span class="material-symbols-outlined">school</span><span class="side-label">{% trans 'Students' %}</span></a>
+            <a class="side-link side-sub-link" href="{% url 'platform-directory' %}?tab=organizations" data-sub-match="?tab=organizations"><span class="material-symbols-outlined">apartment</span><span class="side-label">{% trans 'Organizations' %}</span></a>
+          </div>
+        </div>
         <a class="side-link {% is_active request 'platform-slots' %}" href="{% url 'platform-slots' %}"><span class="material-symbols-outlined">work</span><span class="side-label">{% trans "Slots" %}</span></a>
         <a class="side-link {% is_active request 'platform-universities' %}" href="{% url 'platform-universities' %}"><span class="material-symbols-outlined">school</span><span class="side-label">{% trans "Universities" %}</span></a>
         <a class="side-link {% is_active request 'platform-locations' %}" href="{% url 'platform-locations' %}"><span class="material-symbols-outlined">location_on</span><span class="side-label">{% trans "Locations" %}</span></a>
@@ -504,6 +555,7 @@
    </script>
    <script src="{% static 'js/phone-input.js' %}"></script>
    <script src="{% static 'js/responsive.js' %}"></script>
+   <script src="{% static 'js/side-groups.js' %}"></script>
    <script src="{% static 'js/filterbar.js' %}"></script>
    <script src="{% static 'js/list-filter.js' %}"></script>
   {% if user.is_authenticated %}

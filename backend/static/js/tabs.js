@@ -1,4 +1,5 @@
-/* Tabs on one page. Markup:
+/* Sections of one page, chosen with the address hash. The links live in the side drawer (side-groups.js);
+   [data-tab] buttons are optional. Markup:
      <div data-tabs data-default="profile">
        <div role="tablist">
          <button type="button" data-tab="profile">...</button> <button type="button" data-tab="security">...</button>
@@ -21,7 +22,7 @@
     var tabs = root.querySelectorAll("[data-tab]");
     var panels = root.querySelectorAll("[data-panel]");
     var names = Array.prototype.map.call(panels, function (p) { return p.getAttribute("data-panel"); });
-    if (!tabs.length || !names.length) return;
+    if (!names.length) return;
 
     each(panels, function (panel) { panel.setAttribute("role", "tabpanel"); });
 
@@ -40,6 +41,10 @@
         ACTIVE.forEach(function (c) { tab.classList.toggle(c, on); });
         INACTIVE.forEach(function (c) { tab.classList.toggle(c, !on); });
       });
+      // The side drawer (side-groups.js) highlights the matching section link.
+      window.IPT = window.IPT || {};
+      window.IPT.activeTab = name;
+      try { document.dispatchEvent(new CustomEvent("ipt:tab", { detail: name })); } catch (e) { /* old browser */ }
       return name;
     }
 

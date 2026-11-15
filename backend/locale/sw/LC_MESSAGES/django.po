@@ -1614,8 +1614,14 @@ msgstr "Cheti"
 msgid "Change"
 msgstr "Badilisha"
 
+msgid "Change logo"
+msgstr "Badilisha nembo"
+
 msgid "Change password"
 msgstr "Badilisha nenosiri"
+
+msgid "Change photo"
+msgstr "Badilisha picha"
 
 msgid "Changed your mind? You can still cancel"
 msgstr "Umebadili mawazo? Bado unaweza kughairi"
@@ -2457,6 +2463,9 @@ msgstr "Katika wilaya yako"
 msgid "In your region"
 msgstr "Katika mkoa wako"
 
+msgid "Incomplete Profiles"
+msgstr "Wasifu Usiokamilika"
+
 msgid "Incorrect code. The change was not saved."
 msgstr "Msimbo si sahihi. Mabadiliko hayakuhifadhiwa."
 
@@ -2642,6 +2651,12 @@ msgstr "Ingia"
 
 msgid "Login to apply"
 msgstr "Ingia ili uombe"
+
+msgid "Logo removed."
+msgstr "Nembo imeondolewa."
+
+msgid "Logo updated."
+msgstr "Nembo imesasishwa."
 
 msgid "Logout"
 msgstr "Toka"
@@ -2921,6 +2936,9 @@ msgstr "Hakuna nafasi wazi zinazolingana na utafutaji wako."
 msgid "No paid applicants yet. They appear here as soon as a student pays the application fee."
 msgstr "Bado hakuna waombaji waliolipa. Wataonekana hapa mara tu mwanafunzi atakapolipa ada ya maombi."
 
+msgid "No phone number added"
+msgstr "Hakuna namba ya simu iliyoongezwa"
+
 msgid "No ratings yet"
 msgstr "Bado hakuna ukadiriaji"
 
@@ -3152,6 +3170,12 @@ msgstr "Nyaraka ya shirika imepakiwa kwa ukaguzi."
 msgid "Organization involved (optional)"
 msgstr "Shirika linalohusika (si lazima)"
 
+msgid "Organization logo"
+msgstr "Nembo ya shirika"
+
+msgid "Organization logo or picture (JPG, PNG or WebP, max 2MB)."
+msgstr "Nembo au picha ya shirika (JPG, PNG au WebP, upeo wa MB 2)."
+
 msgid "Organization name"
 msgstr "Jina la shirika"
 
@@ -3161,6 +3185,9 @@ msgstr "Jina la shirika linahitajika."
 msgid "Organization name, industry, description, registered address."
 msgstr "Jina la shirika, tasnia, maelezo, anwani iliyosajiliwa."
 
+msgid "Organization pending verification"
+msgstr "Shirika linasubiri uthibitisho"
+
 msgid "Organization phone number"
 msgstr "Namba ya simu ya shirika"
 
@@ -3169,6 +3196,12 @@ msgstr "Wasifu wa shirika"
 
 msgid "Organization profile saved."
 msgstr "Wasifu wa shirika umehifadhiwa."
+
+msgid "Organization rejected"
+msgstr "Shirika limekataliwa"
+
+msgid "Organization verified"
+msgstr "Shirika limethibitishwa"
 
 msgid "Organizations"
 msgstr "Mashirika"
@@ -3625,6 +3658,9 @@ msgstr "Ondoa kichujio"
 msgid "Remove from saved"
 msgstr "Ondoa kwenye zilizohifadhiwa"
 
+msgid "Remove logo"
+msgstr "Ondoa nembo"
+
 msgid "Removed"
 msgstr "Ameondolewa"
 
@@ -3783,6 +3819,9 @@ msgstr "Hifadhi kiolezo"
 
 msgid "Save the acceptance messages you send often (reporting day, what to bring) and pick one when you accept applicants, one by one or many at once."
 msgstr "Hifadhi ujumbe wa kukubali unaotuma mara kwa mara (siku ya kuripoti, cha kuleta) kisha uchague mmoja unapokubali waombaji, mmoja mmoja au wengi kwa mara moja."
+
+msgid "Save your organization profile before adding a logo."
+msgstr "Hifadhi wasifu wa shirika lako kabla ya kuongeza nembo."
 
 msgid "Save your organization profile before adding team accounts."
 msgstr "Hifadhi wasifu wa shirika lako kabla ya kuongeza akaunti za timu."
@@ -3957,6 +3996,9 @@ msgstr "Onyesha"
 msgid "Show password"
 msgstr "Onyesha nenosiri"
 
+msgid "Show sections"
+msgstr "Onyesha sehemu"
+
 msgid "Shown on the organization's page without your name."
 msgstr "Inaonyeshwa kwenye ukurasa wa shirika bila jina lako."
 
@@ -3965,6 +4007,9 @@ msgstr "Ingia"
 
 msgid "Sign out"
 msgstr "Toka"
+
+msgid "Signed in as"
+msgstr "Umeingia kama"
 
 msgid "Signed-in sessions last 10 minutes and only one device can be signed in at a time. This session ends in about %(seconds)s seconds."
 msgstr "Vipindi vya kuingia hudumu dakika 10 na kifaa kimoja tu kinaweza kuwa kimeingia kwa wakati mmoja. Kipindi hiki kitaisha baada ya takriban sekunde %(seconds)s."
@@ -4135,6 +4180,9 @@ msgstr "Wasifu wa Mwanafunzi"
 
 msgid "Student accepted for"
 msgstr "Mwanafunzi aliyekubaliwa kwa"
+
+msgid "Student account"
+msgstr "Akaunti ya mwanafunzi"
 
 msgid "Student account and POST required."
 msgstr "Akaunti ya mwanafunzi na ombi la POST vinahitajika."
@@ -4318,6 +4366,9 @@ msgstr "Arifa zifuatazo zinahitajika kuendesha akaunti yako na haziwezi kuzimwa:
 
 msgid "The letter from your university requesting the placement (PDF/image/DOC, max 2MB)."
 msgstr "Barua kutoka chuo chikooomba uwekaji (PDF/picha/DOC, chini ya MB 2)."
+
+msgid "The logo must be under 2MB."
+msgstr "Nembo lazima iwe chini ya MB 2."
 
 msgid "The message can be at most 500 characters (it is also sent by SMS)."
 msgstr "Ujumbe unaweza kuwa na herufi 500 tu (pia hutumwa kwa SMS)."
@@ -4579,6 +4630,9 @@ msgstr "Nyaraka zilizopakiwa: Kitambulisho cha Mwanafunzi, Matrix ya Matokeo, CV
 
 msgid "Uploading malicious files, scripts, or documents designed to harm the Platform, other users, or third-party systems."
 msgstr "Kupakia faili, hati au nyaraka hasidi zilizobuniwa kudhuru Jukwaa, watumiaji wengine au mifumo ya wahusika wengine."
+
+msgid "Use a JPG, PNG or WebP image."
+msgstr "Tumia picha ya JPG, PNG au WebP."
 
 msgid "Use a different email"
 msgstr "Tumia barua pepe tofauti"
@@ -4974,6 +5028,9 @@ msgstr "Haki Zako Chini ya PDPA 2022"
 
 msgid "Your TCU qualification level (Level 4 Certificate to Level 10 PhD)."
 msgstr "Kiwango chako cha sifa cha TCU (Kiwango cha 4 Cheti hadi Kiwango cha 10 PhD)."
+
+msgid "Your account"
+msgstr "Akaunti yako"
 
 msgid "Your account deletion request has been received. Your account is now deactivated and will be deleted in accordance with the PDPA."
 msgstr "Ombi lako la kufuta akaunti limepokelewa. Akaunti yako sasa imezimwa na itafutwa kwa mujibu wa PDPA."

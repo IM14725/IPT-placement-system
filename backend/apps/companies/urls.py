@@ -11,6 +11,7 @@ urlpatterns = [
     path("team/former/", views.former_members, name="organization-former-members"),
     path("audit/", views.audit_logs, name="organization-audit-logs"),
     path("audit/<uuid:log_id>/", views.audit_detail, name="organization-audit-detail"),
+    path("profile/logo/", views.upload_logo, name="organization-upload-logo"),
     path("profile/upload/", views.upload_document, name="organization-upload-doc"),
     path("profile/upload/<uuid:doc_id>/delete/", views.delete_document, name="organization-delete-doc"),
     path("slots/", views.slot_list, name="organization-slots"),

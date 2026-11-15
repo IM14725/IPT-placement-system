@@ -203,6 +203,11 @@ html.dark #sidebar-backdrop { background: rgba(0, 0, 0, 0.6); }
   /* Decorative blurred circles stick out of their cards. With overflow-x hidden on <html> the page could still be
      scrolled sideways by script (focusing a field, an open dropdown) and the content jumped left. clip cannot scroll. */
   main { overflow-x: clip; }
+  /* No sideways panning of the page by touch, and grid/flex children may shrink below their content width
+     (a long select option or word must never make a card wider than the screen). */
+  html, body { touch-action: pan-y pinch-zoom; overscroll-behavior-x: none; }
+  main .grid > *, main form > *, main .flex > .flex-1 { min-width: 0; }
+  main input, main select, main textarea { max-width: 100%; }
   main .p-lg { padding: 16px !important; }
   main .p-md { padding: 14px !important; }
   main .p-sm { padding: 12px !important; }
@@ -222,4 +227,28 @@ html.dark #sidebar-backdrop { background: rgba(0, 0, 0, 0.6); }
   main .text-display { font-size: 26px !important; line-height: 32px !important; }
   main .text-headline-lg { font-size: 22px !important; line-height: 28px !important; }
   main .text-headline-md { font-size: 18px !important; line-height: 24px !important; }
+}
+
+/* ---------- Drawer sections (static/js/side-groups.js) ---------- */
+.side-group-row { display: flex; align-items: center; gap: 2px; }
+.side-group-row > .side-link { flex: 1; min-width: 0; }
+.side-toggle {
+  flex: none; width: 36px; height: 44px; display: flex; align-items: center; justify-content: center;
+  border: 0; background: transparent; border-radius: 10px; cursor: pointer; color: rgb(var(--c-on-surface-variant));
+}
+.side-toggle:hover { background: rgb(var(--c-surface-container)); color: rgb(var(--c-on-surface)); }
+.side-toggle .material-symbols-outlined { font-size: 20px; transition: transform 0.15s ease; }
+.side-group.is-open .side-toggle .material-symbols-outlined { transform: rotate(180deg); }
+.side-sub {
+  display: none; flex-direction: column; gap: 1px; margin: 0 0 4px 22px; padding-left: 8px;
+  border-left: 2px solid rgb(var(--c-outline-variant));
+}
+.side-group.is-open .side-sub { display: flex; }
+.side-sub-link { min-height: 38px !important; padding: 6px 10px !important; font-size: 13px !important; }
+.side-sub-link .material-symbols-outlined { font-size: 18px !important; }
+@media (min-width: 768px) {
+  /* Icon rail: the sections of the current page show as icons under its icon; open the rail for the labels. */
+  body:not(.sb-open) #app-sidebar .side-toggle { display: none; }
+  body:not(.sb-open) #app-sidebar .side-sub { margin: 0; padding: 0; border-left: 0; }
+  body:not(.sb-open) #app-sidebar .side-sub-link { padding: 8px 0 !important; min-height: 38px !important; }
 }

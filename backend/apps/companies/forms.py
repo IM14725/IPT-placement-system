@@ -326,3 +326,23 @@ class SlotForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+class OrganizationLogoForm(forms.Form):
+    """Organization logo / picture: JPG, PNG or WebP under 2 MB, checked by magic bytes (not the file name)."""
+
+    logo = forms.ImageField(required=True)
+
+    def clean_logo(self):
+        from django.conf import settings
+
+        from apps.documents.validators import detect_mime_and_ext
+
+        logo = self.cleaned_data["logo"]
+        if logo.size > settings.MAX_UPLOAD_SIZE:
+            raise forms.ValidationError(gettext("The logo must be under 2MB."))
+        logo.seek(0)
+        ext, _mime = detect_mime_and_ext(logo.read(8192))
+        logo.seek(0)
+        if ext not in {"jpg", "png", "webp"}:
+            raise forms.ValidationError(gettext("Use a JPG, PNG or WebP image."))
+        return logo

@@ -99,6 +99,11 @@ class Organization(TimeStampedModel):
     reviewed_at = models.DateTimeField(null=True, blank=True)
     suspended_at = models.DateTimeField(null=True, blank=True)
     suspension_reason = models.TextField(blank=True)
+    logo = models.ImageField(
+        upload_to="org_logos/",
+        blank=True,
+        help_text=_("Organization logo or picture (JPG, PNG or WebP, max 2MB)."),
+    )
 
     class Meta:
         verbose_name = _("Organization")

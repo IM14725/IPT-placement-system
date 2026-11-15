@@ -12,16 +12,7 @@
 
   <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-md">
-      <div class="flex gap-sm border-b border-outline-variant w-full lg:w-auto relative" role="tablist">
-        <a href="?tab=students{% for k, v in filters.items %}{% if v %}&{{ k }}={{ v }}{% endif %}{% endfor %}"
-           class="px-md py-sm text-body-md font-body-md {% if tab == 'students' %}text-primary border-b-2 border-primary -mb-[1px]{% else %}text-on-surface-variant hover:text-on-surface{% endif %} flex items-center gap-xs transition-colors">
-          Students
-        </a>
-        <a href="?tab=organizations{% for k, v in filters.items %}{% if v and k != 'university' and k != 'course' and k != 'year' and k != 'education_level' %}&{{ k }}={{ v }}{% endif %}{% endfor %}"
-           class="px-md py-sm text-body-md font-body-md {% if tab == 'organizations' %}text-primary border-b-2 border-primary -mb-[1px]{% else %}text-on-surface-variant hover:text-on-surface{% endif %} flex items-center gap-xs transition-colors">
-          Organizations
-        </a>
-      </div>
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% if tab == 'organizations' %}Organizations{% else %}Students{% endif %}</h2>
       <div class="flex items-center gap-sm">
         <a href="?tab={{ tab }}" class="px-md py-1.5 rounded-full text-metadata font-metadata {% if not filters.account %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %} transition-colors">Active</a>
         <a href="?tab={{ tab }}&account=suspended" class="px-md py-1.5 rounded-full text-metadata font-metadata {% if filters.account %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %} transition-colors">Suspended</a>

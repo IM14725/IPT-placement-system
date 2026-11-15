@@ -117,14 +117,18 @@
       });
       activeIndex = idx;
       if (idx >= 0 && items[idx]) {
-        items[idx].scrollIntoView({ block: "nearest" });
+        // Scroll only the list. scrollIntoView() also scrolls every ancestor, so on a phone it could move the
+        // whole page sideways when a suggestion was tapped.
+        var li = items[idx], top = li.offsetTop, bottom = top + li.offsetHeight;
+        if (top < dropdown.scrollTop) dropdown.scrollTop = top;
+        else if (bottom > dropdown.scrollTop + dropdown.clientHeight) dropdown.scrollTop = bottom - dropdown.clientHeight;
       }
     }
 
     function select(name) {
       input.value = name;
       dropdown.style.display = "none";
-      input.focus();
+      input.focus({ preventScroll: true });
     }
 
     function close() {

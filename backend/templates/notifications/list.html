@@ -7,10 +7,6 @@
   <div class="flex flex-col gap-xs">
     <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Notifications & alerts" %}</h1>
   </div>
-  <div role="tablist" class="flex gap-xs border-b border-outline-variant overflow-x-auto no-scrollbar -mt-sm">
-    <button type="button" role="tab" data-tab="notifications" class="px-md py-sm font-body-md text-body-md font-semibold border-b-2 border-transparent text-on-surface-variant whitespace-nowrap flex items-center gap-xs hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span>{% trans "Notifications" %}{% if unread_total %} <span class="px-2 py-0.5 rounded-full bg-primary text-on-primary font-metadata text-metadata font-bold">{{ unread_total }}</span>{% endif %}</button>
-    <button type="button" role="tab" data-tab="alerts" class="px-md py-sm font-body-md text-body-md font-semibold border-b-2 border-transparent text-on-surface-variant whitespace-nowrap flex items-center gap-xs hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">notifications_active</span>{% trans "Slot alerts" %} <span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-metadata text-metadata font-bold">{{ alerts|length }}</span></button>
-  </div>
   <div data-panel="alerts" hidden>{% include "notifications/_alerts_panel.html" %}</div>
   {% endif %}
   <div {% if show_alerts %}data-panel="notifications"{% endif %} class="flex flex-col gap-lg">

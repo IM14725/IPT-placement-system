@@ -145,7 +145,8 @@ def test_alerts_live_on_the_notifications_page(places, org):
     page = c.get(reverse("notifications"))
     body = page.content.decode()
     assert page.status_code == 200 and page.context["show_alerts"] and len(page.context["alerts"]) == 1
-    assert 'data-tab="notifications"' in body and 'data-tab="alerts"' in body and "Computer" in body
+    assert 'data-panel="notifications"' in body and 'data-panel="alerts"' in body and "Computer" in body
+    assert 'data-sub-match="#alerts"' in body and 'role="tablist"' not in body
 
     resp = c.post(reverse("student-alerts"), {"action": "toggle", "alert_id": str(alert.id)})
     assert resp.status_code == 302 and resp.url == back
@@ -180,7 +181,10 @@ def test_student_profile_and_security_share_one_page(places):
     page = c.get(reverse("student-profile"))
     body = page.content.decode()
     assert page.status_code == 200
-    assert 'data-tab="profile"' in body and 'data-tab="security"' in body
+    # Sections are chosen from the side drawer now (links ending in #profile / #security), not an in-page tab bar.
+    assert 'data-panel="profile"' in body and 'data-panel="security"' in body
+    assert 'data-sub-match="#profile"' in body and 'data-sub-match="#security"' in body
+    assert 'role="tablist"' not in body
     for action in ("/auth/account/email/", "/auth/account/phone/", "/auth/change-password/"):
         assert f'action="{action}"' in body
     # The profile form and the security forms must not clash: every security field id has its own prefix.
@@ -194,10 +198,13 @@ def test_organization_profile_and_security_share_one_page(org):
     c = _client(org.user)
     assert c.get("/auth/account/").url == reverse("organization-profile") + "#security"
     body = c.get(reverse("organization-profile")).content.decode()
-    assert 'data-tab="profile"' in body and 'data-tab="security"' in body
+    # Sections are chosen from the side drawer now (links ending in #profile / #security), not an in-page tab bar.
+    assert 'data-panel="profile"' in body and 'data-panel="security"' in body
+    assert 'data-sub-match="#profile"' in body and 'data-sub-match="#security"' in body
+    assert 'role="tablist"' not in body
     assert 'action="/auth/account/email/"' in body and 'action="/auth/change-password/"' in body
     # Three tabs, each panel holding only its own part.
-    assert 'data-tab="team"' in body
+    assert 'data-panel="team"' in body and 'data-sub-match="#team"' in body
     panels = {n: body[body.index(f'data-panel="{n}"'):] for n in ("profile", "team", "security")}
     profile = panels["profile"][: panels["profile"].index('data-panel="team"')]
     team = panels["team"][: panels["team"].index('data-panel="security"')]

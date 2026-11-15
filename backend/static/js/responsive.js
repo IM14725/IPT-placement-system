@@ -129,3 +129,20 @@
     }).observe(document.body, { childList: true, subtree: true });
   }
 })();
+
+/* Phones: the page never scrolls sideways. Focusing a field (or an open dropdown / wide element) could shift the
+   whole layout left; this puts it straight back. Vertical scroll is untouched. */
+(function () {
+  "use strict";
+  var phone = window.matchMedia("(max-width: 767px)");
+  function reset() {
+    if (!phone.matches) { return; }
+    var x = window.pageXOffset || document.documentElement.scrollLeft || 0;
+    if (x) { window.scrollTo(0, window.pageYOffset); }
+    if (document.body.scrollLeft) { document.body.scrollLeft = 0; }
+  }
+  window.addEventListener("scroll", reset, { passive: true });
+  window.addEventListener("resize", reset);
+  document.addEventListener("focusin", function () { setTimeout(reset, 0); setTimeout(reset, 300); }, true);
+  if (window.visualViewport) { window.visualViewport.addEventListener("scroll", reset); }
+})();

@@ -12,7 +12,7 @@ def test_base_template_forces_the_hidden_attribute_to_win():
 
 
 @pytest.mark.django_db
-def test_profile_tabs_markup_has_matching_tabs_and_panels(client):
+def test_profile_sections_have_matching_drawer_links_and_panels(client):
     from apps.accounts.models import User, UserRole
     from apps.students.models import StudentProfile
 
@@ -22,6 +22,7 @@ def test_profile_tabs_markup_has_matching_tabs_and_panels(client):
     StudentProfile.objects.create(user=user, course="CS")
     client.force_login(user)
     body = client.get("/student/profile/").content.decode()
+    # The sections are chosen from the side drawer: every panel has a drawer link that ends in its hash.
     for name in ("profile", "security"):
-        assert f'data-tab="{name}"' in body and f'data-panel="{name}"' in body
+        assert f'data-panel="{name}"' in body and f'data-sub-match="#{name}"' in body
     assert "js/tabs.js" in body

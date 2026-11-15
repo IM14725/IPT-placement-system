@@ -19,6 +19,7 @@ from apps.applications.services import (
 )
 from apps.companies.forms import (
     OrganizationDocumentUploadForm,
+    OrganizationLogoForm,
     OrganizationProfileForm,
     OrganizationMemberCreateForm,
     SlotForm,
@@ -176,6 +177,7 @@ def profile(request):
         else []
     )
     member_count = len(members)
+    my_membership = next((m for m in members if m.user_id == request.user.id), None)  # for the account header
     session_count = active_organization_session_count(instance) if instance else 0
     return render(
         request,
@@ -187,6 +189,7 @@ def profile(request):
             "upload_form": upload_form,
             "regions_json": safe_json_dumps(regions),
             "members": members,
+            "my_membership": my_membership,
             "member_count": member_count,
             "max_members": MAX_ORGANIZATION_ACCOUNTS,
             "can_add_member": bool(
@@ -402,6 +405,55 @@ def upload_document(request):
             messages.success(request, gettext("Organization document uploaded for review."))
         except ValidationError as exc:
             messages.error(request, exc.message)
+    return redirect("organization-profile")
+
+
+@login_required
+@org_permission_required(PROFILE_EDIT)
+@token_bucket(capacity=10, refill_per_second=1 / 30, scope="org-logo-upload", methods=["POST"])
+def upload_logo(request):
+    """Set (``logo`` file) or clear (``action=remove``) the organization's picture shown in the account header."""
+    if not request.user.is_organization or request.method != "POST":
+        return HttpResponseForbidden(gettext("Organization account and POST required."))
+    organization = _get_organization(request, require_complete=False)
+    if organization is None:
+        messages.error(request, gettext("Save your organization profile before adding a logo."))
+        return redirect("organization-profile")
+    if request.POST.get("action") == "remove":
+        if organization.logo:
+            organization.logo.delete(save=False)
+            organization.logo = ""
+            organization.save(update_fields=["logo", "updated_at"])
+            audit_event(
+                request,
+                action="Organization Logo Removed",
+                module="Organization Profile",
+                organization=organization,
+                target=organization,
+                description="Removed the organization logo",
+            )
+            messages.success(request, gettext("Logo removed."))
+        return redirect("organization-profile")
+    form = OrganizationLogoForm(request.POST, request.FILES)
+    if form.is_valid():
+        old = organization.logo
+        organization.logo = form.cleaned_data["logo"]
+        organization.save(update_fields=["logo", "updated_at"])
+        if old and old.name != organization.logo.name:
+            old.delete(save=False)  # drop the replaced file
+        audit_event(
+            request,
+            action="Organization Logo Updated",
+            module="Organization Profile",
+            organization=organization,
+            target=organization,
+            description="Updated the organization logo",
+        )
+        messages.success(request, gettext("Logo updated."))
+    else:
+        for errors in form.errors.values():
+            for error in errors:
+                messages.error(request, error)
     return redirect("organization-profile")
 
 

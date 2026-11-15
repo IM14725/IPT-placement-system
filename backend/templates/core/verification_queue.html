@@ -46,16 +46,8 @@
 
   <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-md">
-      <div aria-label="Verification Queues" class="flex gap-sm border-b border-outline-variant w-full lg:w-auto relative" role="tablist">
-        <button aria-selected="true" class="px-md py-sm text-body-md font-body-md text-primary border-b-2 border-primary -mb-[1px] flex items-center gap-xs transition-colors" onclick="switchTab('students')" role="tab">
-          {% trans "Incomplete Profiles" %}
-          <span class="bg-primary-container text-on-primary-container text-metadata font-metadata px-2 py-0.5 rounded-full">{{ student_pending }}</span>
-        </button>
-        <button aria-selected="false" class="px-md py-sm text-body-md font-body-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-xs" onclick="switchTab('organizations')" role="tab">
-          {% trans "Organizations" %}
-          <span class="bg-surface-variant text-on-surface-variant text-metadata font-metadata px-2 py-0.5 rounded-full">{{ organization_pending }}</span>
-        </button>
-      </div>
+      <h2 id="queue-title" class="font-headline-md text-headline-md text-on-surface"
+          data-students="{% trans "Incomplete Profiles" %} ({{ student_pending }})" data-organizations="{% trans "Organizations" %} ({{ organization_pending }})">{% trans "Incomplete Profiles" %} ({{ student_pending }})</h2>
       <div class="flex items-center gap-sm w-full lg:w-auto">
         <div class="ipt-field-box w-full lg:w-64"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input id="queue-search" type="search" placeholder="{% trans " autocomplete="off"></div>
       </div>
@@ -178,30 +170,24 @@
 {% endblock %}
 {% block scripts %}
 <script>
+  // Sections are chosen from the side drawer (links end in #students / #organizations).
   function switchTab(tabId) {
-    const tabs = ['students', 'organizations'];
-    tabs.forEach(tab => {
-      const btn = document.querySelector(`button[onclick="switchTab('${tab}')"]`);
+    ['students', 'organizations'].forEach(tab => {
       const content = document.getElementById(`tab-${tab}`);
       if (tab === tabId) {
-        btn.classList.add('text-primary', 'border-b-2', 'border-primary', '-mb-[1px]');
-        btn.classList.remove('text-on-surface-variant');
-        btn.setAttribute('aria-selected', 'true');
-        btn.querySelector('span').classList.add('bg-primary-container', 'text-on-primary-container');
-        btn.querySelector('span').classList.remove('bg-surface-variant', 'text-on-surface-variant');
         content.classList.remove('hidden');
         content.classList.add('animate-fade-in');
       } else {
-        btn.classList.remove('text-primary', 'border-b-2', 'border-primary', '-mb-[1px]');
-        btn.classList.add('text-on-surface-variant');
-        btn.setAttribute('aria-selected', 'false');
-        btn.querySelector('span').classList.remove('bg-primary-container', 'text-on-primary-container');
-        btn.querySelector('span').classList.add('bg-surface-variant', 'text-on-surface-variant');
         content.classList.add('hidden');
         content.classList.remove('animate-fade-in');
       }
     });
+    const title = document.getElementById('queue-title');
+    if (title) title.textContent = title.dataset[tabId] || title.textContent;
   }
+  function tabFromHash() { switchTab(location.hash === '#organizations' ? 'organizations' : 'students'); }
+  window.addEventListener('hashchange', tabFromHash);
+  tabFromHash();
   function filterQueue(value) {
     const term = value.toLowerCase();
     document.querySelectorAll('.queue-row').forEach(row => {

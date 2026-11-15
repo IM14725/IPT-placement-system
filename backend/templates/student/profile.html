@@ -8,10 +8,7 @@
     <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Profile & security" %}</h1>
     <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Manage your academic details, how organizations see you, and how you sign in." %}</p>
   </div>
-  <div role="tablist" class="flex gap-xs border-b border-outline-variant overflow-x-auto no-scrollbar -mt-sm">
-    <button type="button" role="tab" data-tab="profile" class="px-md py-sm font-body-md text-body-md font-semibold border-b-2 border-transparent text-on-surface-variant whitespace-nowrap flex items-center gap-xs hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">person</span>{% trans "Profile" %}</button>
-    <button type="button" role="tab" data-tab="security" class="px-md py-sm font-body-md text-body-md font-semibold border-b-2 border-transparent text-on-surface-variant whitespace-nowrap flex items-center gap-xs hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">shield_person</span>{% trans "Account & security" %}</button>
-  </div>
+  {% include "includes/account_header.html" %}
 
   <div data-panel="profile" class="flex flex-col gap-lg">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg w-full items-start">

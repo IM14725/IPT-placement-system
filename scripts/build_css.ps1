@@ -27,7 +27,7 @@ Push-Location $Backend
 try {
     $cliArgs = @("-c", "tailwind.config.js", "-i", "tailwind.input.css", "-o", "static/css/tailwind.css", "--minify")
     if ($Watch) { $cliArgs += "--watch" }
-    & $Exe @args
+    & $Exe @cliArgs
 } finally {
     Pop-Location
 }
