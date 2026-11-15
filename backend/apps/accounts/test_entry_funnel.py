@@ -76,13 +76,13 @@ def test_welcome_page_has_the_faq_with_the_live_fee(client, settings):
 
 @pytest.mark.django_db
 def test_whatsapp_button_shows_for_visitors_only(client):
-    html = client.get("/auth/login/").content.decode()
+    html = client.get("/").content.decode()  # not a form page: the button is hidden on login/register so it never covers a field
     assert "https://wa.me/255756322833?text=" in html
     user = User.objects.create_user(email="w@example.tz", password=STRONG, role=UserRole.STUDENT)
     user.email_verified = True
     user.save(update_fields=["email_verified"])
     client.force_login(user)
-    assert 'class="no-print fixed left-3' not in client.get("/auth/account/", follow=True).content.decode()
+    assert "https://wa.me/255756322833?text=" not in client.get("/auth/account/", follow=True).content.decode()
 
 
 @pytest.mark.django_db
