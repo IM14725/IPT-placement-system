@@ -1,3 +1,4 @@
+from django.utils.translation import gettext
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -220,7 +221,7 @@ class OrganizationMember(TimeStampedModel):
                 active_qs = active_qs.exclude(pk=self.pk)
             if active_qs.count() >= MAX_ORGANIZATION_ACCOUNTS:
                 raise ValidationError(
-                    f"An organization can have at most {MAX_ORGANIZATION_ACCOUNTS} active accounts."
+                    gettext('An organization can have at most %(MAX_ORGANIZATION_ACCOUNTS)s active accounts.') % {"MAX_ORGANIZATION_ACCOUNTS": MAX_ORGANIZATION_ACCOUNTS}
                 )
 
     def save(self, *args, **kwargs):
@@ -251,3 +252,30 @@ class OrganizationSession(TimeStampedModel):
 
     def __str__(self):
         return f"{self.organization.name} ({self.user.email}) [{self.session_key[:8]}]"
+
+
+MAX_ACCEPTANCE_TEMPLATES = 20
+
+
+class AcceptanceTemplate(TimeStampedModel):
+    """A reusable acceptance message an organization sends when it accepts applicants."""
+
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name="acceptance_templates"
+    )
+    name = models.CharField(max_length=120)
+    body = models.TextField(max_length=500)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta:
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization", "name"], name="uniq_org_acceptance_template_name"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.organization_id})"

@@ -1,3 +1,6 @@
+from datetime import timedelta
+
+from django.utils import timezone
 from rest_framework import serializers
 
 from apps.core.education import education_level_label
@@ -16,6 +19,8 @@ class SlotSerializer(serializers.ModelSerializer):
     education_level_display = serializers.SerializerMethodField()
     academic_year_display = serializers.SerializerMethodField()
     deadline_passed = serializers.BooleanField(read_only=True)
+    placement_label = serializers.CharField(read_only=True)
+    is_new = serializers.SerializerMethodField()
 
     class Meta:
         model = Slot
@@ -39,6 +44,7 @@ class SlotSerializer(serializers.ModelSerializer):
             "academic_year_display",
             "application_deadline",
             "deadline_passed",
+            "is_new",
             "capacity",
             "booked_count",
             "available_count",
@@ -46,7 +52,13 @@ class SlotSerializer(serializers.ModelSerializer):
             "stipend_amount",
             "skills_required",
             "status",
+            "start_date",
+            "duration_weeks",
+            "placement_label",
         )
+
+    def get_is_new(self, obj):
+        return obj.created_at >= timezone.now() - timedelta(days=7)
 
     def get_region(self, obj):
         return {

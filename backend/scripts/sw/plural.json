@@ -1,0 +1,130 @@
+[
+ {
+  "msgid": "%(n)s unread notification",
+  "msgid_plural": "%(n)s unread notifications",
+  "msgstr": [
+   "arifa %(n)s ambayo haijasomwa",
+   "arifa %(n)s ambazo hazijasomwa"
+  ]
+ },
+ {
+  "msgid": "%(n)s applicant",
+  "msgid_plural": "%(n)s applicants",
+  "msgstr": [
+   "mwombaji %(n)s",
+   "waombaji %(n)s"
+  ]
+ },
+ {
+  "msgid": "%(n)s active slot",
+  "msgid_plural": "%(n)s active slots",
+  "msgstr": [
+   "nafasi %(n)s hai",
+   "nafasi %(n)s hai"
+  ]
+ },
+ {
+  "msgid": "%(n)s day left",
+  "msgid_plural": "%(n)s days left",
+  "msgstr": [
+   "siku %(n)s imebaki",
+   "siku %(n)s zimebaki"
+  ]
+ },
+ {
+  "msgid": "%(n)s review",
+  "msgid_plural": "%(n)s reviews",
+  "msgstr": [
+   "maoni %(n)s",
+   "maoni %(n)s"
+  ]
+ },
+ {
+  "msgid": "%(n)s student already holds a seat on this slot. If you change the stipend, location, qualification, start date or duration, they will be notified.",
+  "msgid_plural": "%(n)s students already hold a seat on this slot. If you change the stipend, location, qualification, start date or duration, they will be notified.",
+  "msgstr": [
+   "Mwanafunzi %(n)s tayari ana nafasi kwenye nafasi hii. Ukibadilisha posho, eneo, sifa, tarehe ya kuanza au muda, ataarifiwa.",
+   "Wanafunzi %(n)s tayari wana nafasi kwenye nafasi hii. Ukibadilisha posho, eneo, sifa, tarehe ya kuanza au muda, wataarifiwa."
+  ]
+ },
+ {
+  "msgid": "%(n)s student has a seat on this slot and will be told about these changes:",
+  "msgid_plural": "%(n)s students have a seat on this slot and will be told about these changes:",
+  "msgstr": [
+   "Mwanafunzi %(n)s ana nafasi kwenye nafasi hii na ataambiwa kuhusu mabadiliko haya:",
+   "Wanafunzi %(n)s wana nafasi kwenye nafasi hii na wataambiwa kuhusu mabadiliko haya:"
+  ]
+ },
+ {
+  "msgid": "%(n)s week",
+  "msgid_plural": "%(n)s weeks",
+  "msgstr": [
+   "wiki %(n)s",
+   "wiki %(n)s"
+  ]
+ },
+ {
+  "msgid": "%(n)d paid applicant is waiting for your acceptance: %(slot)s",
+  "msgid_plural": "%(n)d paid applicants are waiting for your acceptance: %(slot)s",
+  "msgstr": [
+   "Mwombaji %(n)d aliyelipa anasubiri ukubali wako: %(slot)s",
+   "Waombaji %(n)d waliolipa wanasubiri ukubali wako: %(slot)s"
+  ]
+ },
+ {
+  "msgid": "in %(d)d day",
+  "msgid_plural": "in %(d)d days",
+  "msgstr": [
+   "baada ya siku %(d)d",
+   "baada ya siku %(d)d"
+  ]
+ },
+ {
+  "msgid": "%(slot)s closes %(when)s with %(n)d seat still empty",
+  "msgid_plural": "%(slot)s closes %(when)s with %(n)d seats still empty",
+  "msgstr": [
+   "%(slot)s inafungwa %(when)s ikiwa na kiti %(n)d bado kiko wazi",
+   "%(slot)s inafungwa %(when)s ikiwa na viti %(n)d bado viko wazi"
+  ]
+ },
+ {
+  "msgid": "%(booked)s seat is already booked or paid for, so the capacity cannot be lower than %(booked)s.",
+  "msgid_plural": "%(booked)s seats are already booked or paid for, so the capacity cannot be lower than %(booked)s.",
+  "msgstr": [
+   "Kiti %(booked)s tayari kimehifadhiwa au kimelipiwa, kwa hiyo uwezo hauwezi kuwa chini ya %(booked)s.",
+   "Viti %(booked)s tayari vimehifadhiwa au vimelipiwa, kwa hiyo uwezo hauwezi kuwa chini ya %(booked)s."
+  ]
+ },
+ {
+  "msgid": "Slot updated. %(n)s student was notified of the change.",
+  "msgid_plural": "Slot updated. %(n)s students were notified of the change.",
+  "msgstr": [
+   "Nafasi imesasishwa. Mwanafunzi %(n)s amearifiwa kuhusu mabadiliko.",
+   "Nafasi imesasishwa. Wanafunzi %(n)s wamearifiwa kuhusu mabadiliko."
+  ]
+ },
+ {
+  "msgid": "%(n)d minute left",
+  "msgid_plural": "%(n)d minutes left",
+  "msgstr": [
+   "dakika %(n)d imebaki",
+   "dakika %(n)d zimebaki"
+  ]
+ },
+ {
+  "msgid": "%(n)d day left",
+  "msgid_plural": "%(n)d days left",
+  "msgstr": [
+   "siku %(n)d imebaki",
+   "siku %(n)d zimebaki"
+  ]
+ },
+ {
+  "msgid": "%(n)d hour left",
+  "msgid_plural": "%(n)d hours left",
+  "msgstr": [
+   "saa %(n)d imebaki",
+   "saa %(n)d zimebaki"
+  ]
+ }
+]

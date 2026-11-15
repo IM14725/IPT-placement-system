@@ -234,15 +234,20 @@ def test_apply_sets_letter_sha256(client, slot):
     from apps.payments.models import Payment
 
     student = make_student("s4@x.tz")
-    # Applying needs a verified phone (IAM): this test is about the letter hash.
+    # Applying needs a verified phone (IAM) and a complete profile (course, region, district):
+    # this test is about the letter hash.
     User.objects.filter(pk=student.user_id).update(phone_verified=True)
+    type(student).objects.filter(pk=student.pk).update(
+        region=slot.district.region, district=slot.district
+    )
     client.force_login(student.user)
     resp = client.post(
         reverse("student-apply", args=[slot.id]),
         {
             "application_letter": SimpleUploadedFile(
                 "intro.pdf", b"%PDF-1.4 letter", content_type="application/pdf"
-            )
+            ),
+            "accept_rules": "on",
         },
     )
     assert resp.status_code == 302

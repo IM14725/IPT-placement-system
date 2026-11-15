@@ -1,16 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Choose recovery method{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Choose recovery method" %}{% endblock %}
 {% block content %}
 <div class="w-full max-w-md mx-auto my-xl auth-card bg-surface-container-lowest rounded-2xl shadow-xl p-lg lg:p-xl flex flex-col gap-md">
   <div class="flex flex-col gap-xs">
-    <h1 class="font-headline-lg text-headline-lg text-on-surface">How should we send your code?</h1>
-    <p class="font-body-md text-body-md text-on-surface-variant">Choose where to receive your 6-digit recovery code. It is only sent to a contact method already verified on your account.</p>
+    <h1 class="font-headline-lg text-headline-lg text-on-surface">{% trans "How should we send your code?" %}</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Choose where to receive your 6-digit recovery code. It is only sent to a contact method already verified on your account." %}</p>
   </div>
 
   <form method="post" class="flex flex-col gap-md" novalidate>
     {% csrf_token %}
     <fieldset class="flex flex-col gap-xs">
-      <legend class="sr-only">Recovery method</legend>
+      <legend class="sr-only">{% trans "Recovery method" %}</legend>
       {% for radio in form.channel %}
         <label class="flex items-center gap-xs rounded-lg border border-outline-variant px-sm py-3 font-body-md text-body-md text-on-surface cursor-pointer">
           {{ radio.tag }} {{ radio.choice_label }}
@@ -20,9 +21,9 @@
         <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.channel.errors.0 }}</p>
       {% endif %}
     </fieldset>
-    <button class="w-full bg-primary text-on-primary font-body-lg text-body-lg font-medium py-3 rounded-lg shadow-md hover:bg-primary-container transition-all" type="submit">Send code</button>
+    <button class="w-full bg-primary text-on-primary font-body-lg text-body-lg font-medium py-3 rounded-lg shadow-md hover:bg-primary-container transition-all" type="submit">{% trans "Send code" %}</button>
   </form>
 
-  <a class="text-center font-metadata text-metadata text-primary font-semibold hover:underline" href="{% url 'forgot-password' %}">Use a different email</a>
+  <a class="text-center font-metadata text-metadata text-primary font-semibold hover:underline" href="{% url 'forgot-password' %}">{% trans "Use a different email" %}</a>
 </div>
 {% endblock %}

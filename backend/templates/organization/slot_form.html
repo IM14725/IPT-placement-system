@@ -9,23 +9,39 @@
       <h1 class="font-display text-display text-on-surface mb-xs tracking-tight">{% if editing %}{% trans "Edit Slot" %}{% else %}{% trans "Post a New Slot" %}{% endif %}</h1>
       <p class="font-body-md font-body-md text-on-surface-variant">{% trans "Create a new opportunity for emerging talent." %}</p>
     </div>
-    <form method="post" class="flex flex-col gap-lg" novalidate>
+    <form method="post" action="{{ form_action|default:'' }}" class="flex flex-col gap-lg" novalidate>
       {% csrf_token %}
       {% if form.non_field_errors %}
         <div class="rounded-lg bg-error-container/30 border-l-2 border-error p-sm text-body-md text-on-error-container">{{ form.non_field_errors }}</div>
+      {% endif %}
+      {% if editing and holder_count and not pending_changes %}
+        <div class="rounded-lg bg-surface-container-low border-l-2 border-primary p-sm text-body-md text-on-surface-variant flex items-start gap-xs">
+          <span class="material-symbols-outlined text-primary text-[20px]">info</span>
+          <p>{% blocktrans count n=holder_count %}{{ n }} student already holds a seat on this slot. If you change the stipend, location, qualification, start date or duration, they will be notified.{% plural %}{{ n }} students already hold a seat on this slot. If you change the stipend, location, qualification, start date or duration, they will be notified.{% endblocktrans %}</p>
+        </div>
+      {% endif %}
+      {% if pending_changes %}
+        <input type="hidden" name="confirm_changes" value="1">
+        <div class="rounded-lg bg-[#fef3c7] border border-[#fde047] p-md text-body-md text-[#854d0e] flex flex-col gap-xs" role="alert">
+          <p class="font-semibold flex items-center gap-xs"><span class="material-symbols-outlined">warning</span>{% blocktrans count n=holder_count %}{{ n }} student has a seat on this slot and will be told about these changes:{% plural %}{{ n }} students have a seat on this slot and will be told about these changes:{% endblocktrans %}</p>
+          <ul class="list-disc pl-md">
+            {% for label, change in pending_changes.items %}<li><strong>{{ label }}:</strong> {{ change.0 }} &rarr; {{ change.1 }}</li>{% endfor %}
+          </ul>
+          <p>{% trans "Check the details below, then press the button again to save and send the notification." %}</p>
+        </div>
       {% endif %}
       {% for field in form %}
         {% if field.name == 'stipend_available' %}
         <div class="flex items-start gap-sm p-md rounded-xl border border-outline-variant bg-surface-container-lowest {% if field.errors %}border-error{% endif %}">
           <div class="flex items-center gap-sm flex-1">
             {{ field }}
-            <label class="font-body-md font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            <label class="font-body-md font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}</label>
           </div>
-          <p class="ipt-field-desc flex-1"><span class="material-symbols-outlined">info</span>Offer a monthly stipend to interns.</p>
+          <p class="ipt-field-desc flex-1"><span class="material-symbols-outlined">info</span>{% trans "Offer a monthly stipend to interns." %}</p>
         </div>
         {% elif field.name == 'stipend_amount' %}
         <div class="flex flex-col gap-xs" data-stipend-row>
-          <label class="font-body-md font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          <label class="font-body-md font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}</label>
           <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
             <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">payments</span></span>
             {{ field }}
@@ -34,16 +50,20 @@
         </div>
         {% elif field.name != 'district' %}
         <div class="flex flex-col gap-xs">
-          <label class="font-body-md font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+          <label class="font-body-md font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}{% if field.field.required %} *{% endif %}</label>
           <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
             <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">
               {% if field.name == 'title' %}work
+              {% elif field.name == 'industry' %}factory
               {% elif field.name == 'description' %}description
               {% elif field.name == 'role_type' %}badge
               {% elif field.name == 'department' %}account_tree
               {% elif field.name == 'education_level' %}workspace_premium
               {% elif field.name == 'academic_year' %}tag
               {% elif field.name == 'application_deadline' %}event
+              {% elif field.name == 'start_date' %}event_available
+              {% elif field.name == 'duration_weeks' %}schedule
+              {% elif field.name == 'reporting_contact' %}badge
               {% elif field.name == 'capacity' %}groups
               {% elif field.name == 'stipend_amount' %}payments
               {% elif field.name == 'skills_required' %}psychology
@@ -51,6 +71,18 @@
             </span></span>
             {{ field }}
           </div>
+          {% if field.name == 'industry' %}
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ field.help_text }}</p>
+          {% endif %}
+          {% if field.name == 'start_date' or field.name == 'duration_weeks' %}
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Optional. Shown to students on the slot and in their acceptance letter." %}</p>
+          {% endif %}
+          {% if field.name == 'reporting_contact' %}
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Optional. Who to ask for and where to report. Only students you accept can see this." %}</p>
+          {% endif %}
+          {% if field.name == 'capacity' %}
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Seats are held as soon as a student applies, and released if the fee is not paid in 3 hours. You cannot go below the seats already taken." %}</p>
+          {% endif %}
           {% if field.name == 'skills_required' %}
             <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Separate skills with commas, e.g. Python, SQL, Communication." %}</p>
           {% endif %}
@@ -68,7 +100,7 @@
         <div class="absolute -right-16 -top-16 w-32 h-32 bg-secondary/10 rounded-full blur-2xl"></div>
         <div class="flex items-center gap-xs relative z-10">
           <span class="material-symbols-outlined text-primary">location_on</span>
-          <h3 class="font-headline-md text-headline-md text-on-surface">Location Details</h3>
+          <h3 class="font-headline-md text-headline-md text-on-surface">{% trans "Location Details" %}</h3>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-md relative z-10">
           <div class="flex flex-col gap-xs">
@@ -76,16 +108,16 @@
             <div class="ipt-field-box">
               <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">map</span></span>
               <select id="id_region" class="ipt-select" name="region">
-                <option value="">Select Region</option>
+                <option value="">{% trans "Select Region" %}</option>
               </select>
             </div>
           </div>
           <div class="flex flex-col gap-xs">
-            <label class="font-body-md text-body-md font-semibold text-on-surface" for="id_district">District *</label>
+            <label class="font-body-md text-body-md font-semibold text-on-surface" for="id_district">{% trans "District *" %}</label>
             <div class="ipt-field-box">
               <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">location_on</span></span>
               <select id="id_district" name="district" class="ipt-select">
-                <option value="">Select District</option>
+                <option value="">{% trans "Select District" %}</option>
               </select>
             </div>
           </div>
@@ -94,7 +126,7 @@
       <div class="pt-sm mt-sm flex justify-end gap-md items-center">
         <a href="{% url 'organization-slots' %}" class="font-label-caps text-label-caps text-primary hover:text-primary/80 transition-colors uppercase tracking-widest px-sm py-2">{% trans "Cancel" %}</a>
         <button class="bg-primary hover:bg-primary/90 text-on-primary font-body-lg text-body-lg px-xl py-3 rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-2" type="submit" data-loading>
-          <span data-label>{% if editing %}{% trans "Save Changes" %}{% else %}{% trans "Post Slot" %}{% endif %}</span>
+          <span data-label>{% if pending_changes %}{% trans "Save and notify students" %}{% elif editing %}{% trans "Save Changes" %}{% else %}{% trans "Post Slot" %}{% endif %}</span>
           <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
         </button>
       </div>

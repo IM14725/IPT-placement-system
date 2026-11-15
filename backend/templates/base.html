@@ -15,8 +15,58 @@
       document.documentElement.setAttribute("data-theme", m);
     })();
   </script>
-  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
-  <title>{% block title %}IPT Marketplace{% endblock %}</title>
+  {# Literal colours (not var()): painted before any stylesheet arrives, so slow networks never show a dark/white flash. Must match --c-background in theme.css. #}
+  <style>
+    html{background:#f8f9fa;color-scheme:light}html.dark{background:#111315;color-scheme:dark}
+    /* Skeleton loaders (plain CSS: usable before any stylesheet arrives). Literal colours match theme.css. */
+    @keyframes ipt-sk{to{transform:translateX(100%)}}
+    .ipt-sk{display:block;position:relative;overflow:hidden;border-radius:8px;background:#e3e5e8}
+    .ipt-sk::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);animation:ipt-sk 1.3s ease-in-out infinite}
+    html.dark .ipt-sk{background:#262b30}html.dark .ipt-sk::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent)}
+    .ipt-sk-card{display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:16px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+    html.dark .ipt-sk-card{background:#1a1d20}
+    @media (prefers-reduced-motion:reduce){.ipt-sk::after{animation:none}}
+    /* Full-screen first-paint shell, shown only while the stylesheets load (see script below). */
+    #ipt-skel{display:none}
+    html.ipt-pending #ipt-skel{display:block;position:fixed;inset:0;z-index:2147483000;overflow:hidden;background:#f8f9fa}
+    html.dark.ipt-pending #ipt-skel{background:#111315}
+    #ipt-skel .sk-bar{height:64px;background:#3525cd;display:flex;align-items:center;gap:12px;padding:0 16px}
+    #ipt-skel .sk-bar .ipt-sk{background:rgba(255,255,255,.25)}
+    #ipt-skel .sk-wrap{max-width:1280px;margin:0 auto;padding:24px 16px;display:grid;gap:16px}
+    #ipt-skel .sk-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+    /* Icon placeholders until the icon font is ready (never show the raw ligature words). */
+    html.ipt-icons-pending .material-symbols-outlined{color:transparent!important;background:rgba(120,120,135,.25) content-box;box-sizing:border-box;padding:.2em;border-radius:50%}
+    /* Photos: a quiet shimmer-grey box until the image arrives. */
+    img.ipt-img{background-color:#e3e5e8}html.dark img.ipt-img{background-color:#262b30}
+  </style>
+  <script>
+    /* Stylesheets load without blocking paint, so the skeleton shell can show on slow networks.
+       Failsafe: the page is always revealed after 12 s, even if a stylesheet never arrives. */
+    (function (d) {
+      var h = d.documentElement, left = 4, shown = false;
+      h.classList.add("ipt-pending", "ipt-icons-pending");
+      function reveal() {
+        if (shown) return;
+        shown = true;
+        h.classList.remove("ipt-pending");
+        var done = function () { h.classList.remove("ipt-icons-pending"); };
+        if (d.fonts && d.fonts.load) { d.fonts.load('24px "Material Symbols Outlined"', "menu").then(done, done); } else { done(); }
+      }
+      function counted() { if (--left <= 0) reveal(); }
+      window.iptCss = function (l) {
+        l.onload = l.onerror = null;
+        l.media = "all";
+        counted();
+      };
+      setTimeout(function () {
+        var rest = d.querySelectorAll('link[rel="stylesheet"][media="print"]');
+        for (var i = 0; i < rest.length; i++) { rest[i].media = "all"; }
+        reveal();
+      }, 12000);
+    })(document);
+  </script>
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}" media="print" fetchpriority="high" onload="iptCss(this)" onerror="iptCss(this)"><noscript><link rel="stylesheet" href="{% static 'css/theme.css' %}"></noscript>
+  <title>{% block title %}{% trans "IPT Marketplace" %}{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}{% trans 'Find verified Industrial Practical Training (IPT) slots in Tanzania, or recruit pre-verified students. Secure, mobile-money payments.' %}{% endblock %}">
   <meta name="robots" content="{% block robots %}noindex, nofollow{% endblock %}">
   <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
@@ -33,87 +83,13 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="{% get_current_language as OG_LANG %}{% if OG_LANG == 'sw' %}sw_TZ{% else %}en_US{% endif %}">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "on-tertiary-fixed-variant": "rgb(var(--c-on-tertiary-fixed-variant) / <alpha-value>)",
-            "outline": "rgb(var(--c-outline) / <alpha-value>)",
-            "on-primary-fixed-variant": "rgb(var(--c-on-primary-fixed-variant) / <alpha-value>)",
-            "on-secondary": "rgb(var(--c-on-secondary) / <alpha-value>)",
-            "on-primary": "rgb(var(--c-on-primary) / <alpha-value>)",
-            "tertiary-fixed": "rgb(var(--c-tertiary-fixed) / <alpha-value>)",
-            "on-secondary-fixed": "rgb(var(--c-on-secondary-fixed) / <alpha-value>)",
-            "inverse-surface": "rgb(var(--c-inverse-surface) / <alpha-value>)",
-            "inverse-on-surface": "rgb(var(--c-inverse-on-surface) / <alpha-value>)",
-            "error": "rgb(var(--c-error) / <alpha-value>)",
-            "on-surface": "rgb(var(--c-on-surface) / <alpha-value>)",
-            "background": "rgb(var(--c-background) / <alpha-value>)",
-            "surface-container-lowest": "rgb(var(--c-surface-container-lowest) / <alpha-value>)",
-            "surface-tint": "rgb(var(--c-surface-tint) / <alpha-value>)",
-            "secondary": "rgb(var(--c-secondary) / <alpha-value>)",
-            "surface-container-highest": "rgb(var(--c-surface-container-highest) / <alpha-value>)",
-            "on-primary-container": "rgb(var(--c-on-primary-container) / <alpha-value>)",
-            "on-error-container": "rgb(var(--c-on-error-container) / <alpha-value>)",
-            "tertiary": "rgb(var(--c-tertiary) / <alpha-value>)",
-            "on-secondary-container": "rgb(var(--c-on-secondary-container) / <alpha-value>)",
-            "primary": "rgb(var(--c-primary) / <alpha-value>)",
-            "on-primary-fixed": "rgb(var(--c-on-primary-fixed) / <alpha-value>)",
-            "primary-container": "rgb(var(--c-primary-container) / <alpha-value>)",
-            "on-error": "rgb(var(--c-on-error) / <alpha-value>)",
-            "tertiary-fixed-dim": "rgb(var(--c-tertiary-fixed-dim) / <alpha-value>)",
-            "surface-container-low": "rgb(var(--c-surface-container-low) / <alpha-value>)",
-            "surface-bright": "rgb(var(--c-surface-bright) / <alpha-value>)",
-            "secondary-container": "rgb(var(--c-secondary-container) / <alpha-value>)",
-            "secondary-fixed-dim": "rgb(var(--c-secondary-fixed-dim) / <alpha-value>)",
-            "on-background": "rgb(var(--c-on-background) / <alpha-value>)",
-            "surface-dim": "rgb(var(--c-surface-dim) / <alpha-value>)",
-            "surface": "rgb(var(--c-surface) / <alpha-value>)",
-            "primary-fixed": "rgb(var(--c-primary-fixed) / <alpha-value>)",
-            "primary-fixed-dim": "rgb(var(--c-primary-fixed-dim) / <alpha-value>)",
-            "surface-container": "rgb(var(--c-surface-container) / <alpha-value>)",
-            "secondary-fixed": "rgb(var(--c-secondary-fixed) / <alpha-value>)",
-            "outline-variant": "rgb(var(--c-outline-variant) / <alpha-value>)",
-            "on-secondary-fixed-variant": "rgb(var(--c-on-secondary-fixed-variant) / <alpha-value>)",
-            "surface-variant": "rgb(var(--c-surface-variant) / <alpha-value>)",
-            "on-tertiary-fixed": "rgb(var(--c-on-tertiary-fixed) / <alpha-value>)",
-            "inverse-primary": "rgb(var(--c-inverse-primary) / <alpha-value>)",
-            "on-tertiary": "rgb(var(--c-on-tertiary) / <alpha-value>)",
-            "on-surface-variant": "rgb(var(--c-on-surface-variant) / <alpha-value>)",
-            "on-tertiary-container": "rgb(var(--c-on-tertiary-container) / <alpha-value>)",
-            "error-container": "rgb(var(--c-error-container) / <alpha-value>)",
-            "surface-container-high": "rgb(var(--c-surface-container-high) / <alpha-value>)",
-            "tertiary-container": "rgb(var(--c-tertiary-container) / <alpha-value>)",
-            "brand": "rgb(var(--c-brand) / <alpha-value>)"
-          },
-          borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
-          spacing: { base: "4px", xs: "8px", md: "24px", gutter: "24px", "container-max": "1280px", lg: "32px", xl: "48px", sm: "16px" },
-           fontFamily: { "headline-md": ["Inter"], "body-md": ["Inter"], metadata: ["Inter"], display: ["Inter"], "label-caps": ["Inter"], "body-lg": ["Inter"], "headline-lg": ["Inter"] },
-          fontSize: {
-            "headline-md": ["20px", { lineHeight: "28px" }], "headline-lg": ["28px", { lineHeight: "34px" }],
-            "display": ["36px", { lineHeight: "44px", letterSpacing: "-0.02em" }],
-            "body-lg": ["16px", { lineHeight: "24px" }], "body-md": ["14px", { lineHeight: "20px" }],
-            "metadata": ["12px", { lineHeight: "16px" }], "label-caps": ["11px", { lineHeight: "12px", letterSpacing: "0.05em" }]
-          },
-          keyframes: {
-            spin: { to: { transform: "rotate(360deg)" } }
-          },
-          animation: {
-            spin: "spin 0.9s linear infinite",
-            pulse: "pulse 1.5s ease-in-out infinite"
-          }
-        }
-      }
-    }
-  </script>
+  {# Self-hosted fonts + compiled Tailwind (no third-party requests; see scripts/build_fonts.py and scripts/build_css.ps1). #}
+  <link rel="preload" href="{% static 'fonts/inter-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'fonts/material-symbols-outlined.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}" media="print" fetchpriority="high" onload="iptCss(this)" onerror="iptCss(this)"><noscript><link rel="stylesheet" href="{% static 'css/fonts.css' %}"></noscript>
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}" media="print" fetchpriority="high" onload="iptCss(this)" onerror="iptCss(this)"><noscript><link rel="stylesheet" href="{% static 'css/tailwind.css' %}"></noscript>
+  {# The hidden attribute must always win: Tailwind display classes (flex, grid) otherwise keep a "hidden" panel on screen. #}
+  <style>[hidden]{display:none !important}</style>
   <style>
     body { overscroll-behavior: none; }
     ::-webkit-scrollbar { display: none; }
@@ -224,9 +200,21 @@
     .auth-card { animation: auth-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .auth-card .auth-card-panel { animation: auth-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both; }
   </style>
-  <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+  <link rel="stylesheet" href="{% static 'css/responsive.css' %}" media="print" fetchpriority="high" onload="iptCss(this)" onerror="iptCss(this)"><noscript><link rel="stylesheet" href="{% static 'css/responsive.css' %}"></noscript>
 </head>
 <body class="bg-background min-h-screen text-on-surface font-body-md{% if user.is_authenticated %} has-sidebar{% endif %}">
+  <div id="ipt-skel" aria-hidden="true">
+    <div class="sk-bar"><span class="ipt-sk" style="width:32px;height:32px"></span><span class="ipt-sk" style="width:130px;height:16px"></span></div>
+    <div class="sk-wrap">
+      <span class="ipt-sk" style="width:min(320px,70%);height:30px"></span>
+      <span class="ipt-sk" style="width:min(480px,90%);height:14px"></span>
+      <div class="sk-grid">
+        <div class="ipt-sk-card"><span class="ipt-sk" style="height:14px;width:45%"></span><span class="ipt-sk" style="height:22px;width:75%"></span><span class="ipt-sk" style="height:14px"></span><span class="ipt-sk" style="height:14px;width:60%"></span></div>
+        <div class="ipt-sk-card"><span class="ipt-sk" style="height:14px;width:45%"></span><span class="ipt-sk" style="height:22px;width:75%"></span><span class="ipt-sk" style="height:14px"></span><span class="ipt-sk" style="height:14px;width:60%"></span></div>
+        <div class="ipt-sk-card"><span class="ipt-sk" style="height:14px;width:45%"></span><span class="ipt-sk" style="height:22px;width:75%"></span><span class="ipt-sk" style="height:14px"></span><span class="ipt-sk" style="height:14px;width:60%"></span></div>
+      </div>
+    </div>
+  </div>
   <nav id="topbar" class="fixed top-0 inset-x-0 z-50 bg-brand text-white shadow-lg shadow-brand/20">
     <div class="max-w-[1280px] mx-auto px-3 sm:px-md h-16 flex items-center justify-between gap-2 sm:gap-md">
       <div class="flex items-center gap-sm min-w-0">
@@ -241,8 +229,8 @@
         {% else %}
           <a href="{% url 'home' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-white tracking-tight shrink-0 whitespace-nowrap">
         {% endif %}
-          <img src="{% static 'images/logo.png' %}" alt="IPT Marketplace" class="h-8 w-auto rounded shrink-0">
-          <span class="hidden sm:block">IPT Marketplace</span>
+          <img src="{% static 'images/logo-96.webp' %}" width="32" height="32" alt="{% trans 'IPT Marketplace' %}" class="h-8 w-auto rounded shrink-0">
+          <span class="hidden sm:block">{% trans "IPT Marketplace" %}</span>
         </a>
       </div>
       <div class="flex items-center gap-1.5 sm:gap-sm text-body-md shrink-0">
@@ -265,9 +253,32 @@
           <span class="material-symbols-outlined" id="theme-toggle-icon">contrast</span>
         </button>
         {% if user.is_authenticated %}
+          <div class="relative shrink-0" id="notif-bell-wrap">
+            <button type="button" id="notif-bell" aria-haspopup="true" aria-expanded="false" aria-controls="notif-panel"
+                    aria-label="{% trans 'Notifications' %}" title="{% trans 'Notifications' %}"
+                    class="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/40">
+              <span class="material-symbols-outlined">notifications</span>
+              <span id="notif-badge" class="hidden absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-error text-on-error text-[10px] leading-[18px] font-bold text-center" aria-live="polite"></span>
+            </button>
+            <div id="notif-panel" class="hidden absolute right-0 mt-2 w-[min(22rem,calc(100vw-1.5rem))] bg-surface-container-lowest text-on-surface rounded-xl shadow-2xl border border-outline-variant overflow-hidden z-[60]">
+              <div class="flex items-center justify-between gap-sm px-md py-sm border-b border-outline-variant">
+                <span class="font-body-md text-body-md font-bold">{% trans "Notifications" %}</span>
+                <form method="post" action="{% url 'notifications-read-all' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  <button type="submit" class="font-metadata text-metadata text-primary font-semibold hover:underline">{% trans "Mark all as read" %}</button>
+                </form>
+              </div>
+              <div id="notif-items" class="max-h-80 overflow-y-auto"
+                   data-empty="{% trans 'You have no notifications yet.' %}" data-error="{% trans 'Could not load notifications.' %}">
+                <p class="px-md py-md font-body-md text-body-md text-on-surface-variant">{% trans "Loading..." %}</p>
+              </div>
+              <a href="{% url 'notifications' %}" class="block text-center px-md py-sm border-t border-outline-variant font-body-md text-body-md text-primary font-semibold hover:bg-primary/5 transition-colors">{% trans "View all notifications" %}</a>
+            </div>
+          </div>
           <a href="{{ nav_user.url }}" class="hidden sm:flex items-center gap-2 pl-sm pr-md py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors" title="{% trans 'View your profile' %}">
             {% if nav_user.photo %}
-              <img src="{{ nav_user.photo }}" alt="{% trans 'Profile' %}" class="w-7 h-7 rounded-full object-cover ring-2 ring-white/40">
+              <img src="{{ nav_user.photo }}" alt="{% trans 'Profile' %}" class="ipt-img w-7 h-7 rounded-full object-cover ring-2 ring-white/40">
             {% else %}
               <span class="w-7 h-7 rounded-full bg-primary-fixed text-white-fixed flex items-center justify-center font-bold text-metadata">{{ nav_user.name|slice:":1"|upper }}</span>
             {% endif %}
@@ -288,7 +299,7 @@
 
   {% if user.is_authenticated %}
   {% if emergency_session %}
-    <div class="fixed top-16 inset-x-0 z-40 bg-error text-on-error text-center text-metadata font-semibold py-1">EMERGENCY (break-glass) session: every action is logged and security is notified.</div>
+    <div class="fixed top-16 inset-x-0 z-40 bg-error text-on-error text-center text-metadata font-semibold py-1">{% trans "EMERGENCY (break-glass) session: every action is logged and security is notified." %}</div>
   {% endif %}
   <div id="sidebar-backdrop" class="fixed inset-x-0 top-16 bottom-0 z-30 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200"></div>
   <aside id="app-sidebar" aria-label="{% trans 'Main menu' %}"
@@ -297,13 +308,21 @@
       {% if user.is_student %}
         <a class="side-link {% is_active request 'student-dashboard' 'student-profile' 'student-documents' %}" href="{% url 'student-dashboard' %}"><span class="material-symbols-outlined">dashboard</span><span class="side-label">{% trans "Dashboard" %}</span></a>
         <a class="side-link {% is_active request 'student-marketplace' %}" href="{% url 'student-marketplace' %}"><span class="material-symbols-outlined">search</span><span class="side-label">{% trans "Find a Slot" %}</span></a>
-        <a class="side-link {% is_active request 'student-applications' 'student-payment' %}" href="{% url 'student-applications' %}"><span class="material-symbols-outlined">assignment</span><span class="side-label">{% trans "My Applications" %}</span></a>
-        <a class="side-link {% is_active request 'student-profile' %}" href="{% url 'student-profile' %}"><span class="material-symbols-outlined">person</span><span class="side-label">{% trans "Profile" %}</span></a>
+        <a class="side-link {% is_active request 'student-saved-slots' %}" href="{% url 'student-saved-slots' %}"><span class="material-symbols-outlined">bookmark</span><span class="side-label">{% trans "Saved slots" %}</span></a>
+        <a class="side-link {% is_active request 'student-applications' 'student-payment' 'student-checklist' 'student-review' %}" href="{% url 'student-applications' %}"><span class="material-symbols-outlined">assignment</span><span class="side-label">{% trans "My Applications" %}</span></a>
+        <a class="side-link {% is_active request 'notifications' %}" href="{% url 'notifications' %}"><span class="material-symbols-outlined">notifications</span><span class="side-label">{% trans "Notifications &amp; alerts" %}</span></a>
+        <a class="side-link {% is_active request 'student-profile' 'verify-contact' 'change-password' %}" href="{% url 'student-profile' %}"><span class="material-symbols-outlined">person</span><span class="side-label">{% trans "Profile &amp; security" %}</span></a>
         <a class="side-link {% is_active request 'report-submit' %}" href="{% url 'report-submit' %}"><span class="material-symbols-outlined">flag</span><span class="side-label">{% trans "Report a problem" %}</span></a>
       {% elif user.is_organization %}
         <a class="side-link {% is_active request 'organization-dashboard' 'organization-profile' %}" href="{% url 'organization-dashboard' %}"><span class="material-symbols-outlined">dashboard</span><span class="side-label">{% trans "Dashboard" %}</span></a>
         <a class="side-link {% is_active request 'organization-slots' 'organization-slot-new' 'organization-slot-edit' 'organization-applicants' 'organization-applicant-documents' %}" href="{% url 'organization-slots' %}"><span class="material-symbols-outlined">work</span><span class="side-label">{% trans "Slots" %}</span></a>
-        <a class="side-link {% is_active request 'organization-profile' %}" href="{% url 'organization-profile' %}"><span class="material-symbols-outlined">apartment</span><span class="side-label">{% trans "Organization profile" %}</span></a>
+        {% if nav_org.applicants %}<a class="side-link {% is_active request 'organization-all-applicants' 'organization-applicant-notes' %}" href="{% url 'organization-all-applicants' %}"><span class="material-symbols-outlined">groups</span><span class="side-label">{% trans "Applicants" %}</span></a>{% endif %}
+        {% if nav_org.accept %}<a class="side-link {% is_active request 'organization-templates' %}" href="{% url 'organization-templates' %}"><span class="material-symbols-outlined">chat</span><span class="side-label">{% trans "Message templates" %}</span></a>{% endif %}
+        {% if nav_org.applicants %}<a class="side-link {% is_active request 'organization-insights' %}" href="{% url 'organization-insights' %}"><span class="material-symbols-outlined">monitoring</span><span class="side-label">{% trans "Insights" %}</span></a>{% endif %}
+        {% if nav_org.audit %}<a class="side-link {% is_active request 'organization-activity' %}" href="{% url 'organization-activity' %}"><span class="material-symbols-outlined">history</span><span class="side-label">{% trans "Team activity" %}</span></a>{% endif %}
+        <a class="side-link {% is_active request 'organization-reviews' %}" href="{% url 'organization-reviews' %}"><span class="material-symbols-outlined">star</span><span class="side-label">{% trans "Ratings" %}</span></a>
+        <a class="side-link {% is_active request 'notifications' %}" href="{% url 'notifications' %}"><span class="material-symbols-outlined">notifications</span><span class="side-label">{% trans "Notifications" %}</span></a>
+        <a class="side-link {% is_active request 'organization-profile' 'verify-contact' 'change-password' %}" href="{% url 'organization-profile' %}"><span class="material-symbols-outlined">apartment</span><span class="side-label">{% trans "Profile &amp; security" %}</span></a>
         <a class="side-link {% is_active request 'report-submit' %}" href="{% url 'report-submit' %}"><span class="material-symbols-outlined">flag</span><span class="side-label">{% trans "Report a problem" %}</span></a>
       {% else %}
         <p class="side-heading"><span class="side-label">{% trans "Review" %}</span></p>
@@ -322,6 +341,7 @@
         <a class="side-link {% is_active request 'platform-roles' %}" href="{% url 'platform-roles' %}"><span class="material-symbols-outlined">admin_panel_settings</span><span class="side-label">{% trans "Roles" %}</span></a>
         <a class="side-link {% is_active request 'platform-integrity' %}" href="{% url 'platform-integrity' %}"><span class="material-symbols-outlined">verified_user</span><span class="side-label">{% trans "Integrity" %}</span></a>
         <a class="side-link {% is_active request 'platform-settings' %}" href="{% url 'platform-settings' %}"><span class="material-symbols-outlined">settings</span><span class="side-label">{% trans "Settings" %}</span></a>
+        <a class="side-link {% is_active request 'notifications' %}" href="{% url 'notifications' %}"><span class="material-symbols-outlined">notifications</span><span class="side-label">{% trans "Notifications" %}</span></a>
         <p class="side-heading"><span class="side-label">{% trans "Security" %}</span></p>
         {% if user.is_super_admin %}
         <a class="side-link {% is_active request 'platform-admins' 'platform-admin-new' 'platform-admin-detail' %}" href="{% url 'platform-admins' %}"><span class="material-symbols-outlined">manage_accounts</span><span class="side-label">{% trans "Administrators" %}</span></a>
@@ -330,8 +350,10 @@
         <a class="side-link {% is_active request 'platform-recovery' %}" href="{% url 'platform-recovery' %}"><span class="material-symbols-outlined">key</span><span class="side-label">{% trans "Recovery requests" %}</span></a>
         <a class="side-link {% is_active request 'mfa-settings' %}" href="{% url 'mfa-settings' %}"><span class="material-symbols-outlined">passkey</span><span class="side-label">{% trans "My MFA" %}</span></a>
       {% endif %}
+      {% if user.is_platform_admin %}
       <p class="side-heading"><span class="side-label">{% trans "Account" %}</span></p>
       <a class="side-link {% is_active request 'account-security' 'verify-contact' 'change-password' %}" href="{% url 'account-security' %}"><span class="material-symbols-outlined">shield_person</span><span class="side-label">{% trans "Account &amp; security" %}</span></a>
+      {% endif %}
     </nav>
     <div class="shrink-0 p-sm border-t border-outline-variant">
       <a href="{% url 'logout' %}" class="w-full flex items-center justify-center gap-xs px-md py-2.5 rounded-lg border border-error/40 text-error font-semibold hover:bg-error/10 transition-colors">
@@ -347,8 +369,8 @@
     <div class="flex items-center gap-xs max-w-[1280px] mx-auto w-full">
       <span class="material-symbols-outlined text-[#f57f17] text-[20px] shrink-0">campaign</span>
       <p class="font-body-md text-body-md text-[#4a3900] flex-1">{{ tc_update_banner }}</p>
-      <a href="{% url 'legal-terms' %}" class="shrink-0 font-metadata text-metadata text-[#f57f17] font-semibold hover:underline uppercase tracking-wider">View Terms</a>
-      <button type="button" id="tc-banner-close" class="shrink-0 flex items-center justify-center w-8 h-8 rounded-full hover:bg-[#f9a825]/20 transition-colors" aria-label="Dismiss">
+      <a href="{% url 'legal-terms' %}" class="shrink-0 font-metadata text-metadata text-[#f57f17] font-semibold hover:underline uppercase tracking-wider">{% trans "View Terms" %}</a>
+      <button type="button" id="tc-banner-close" class="shrink-0 flex items-center justify-center w-8 h-8 rounded-full hover:bg-[#f9a825]/20 transition-colors" aria-label="{% trans 'Dismiss' %}">
         <span class="material-symbols-outlined text-[18px] text-[#4a3900]">close</span>
       </button>
     </div>
@@ -429,7 +451,7 @@
       </div>
 
       <div class="flex flex-col sm:flex-row items-center justify-between gap-sm pt-md border-t border-outline-variant/20">
-        <span>&copy; {% now "Y" %} IPT Marketplace. {% trans "All rights reserved." %}</span>
+        <span>&copy; {% now "Y" %} {% trans "IPT Marketplace." %} {% trans "All rights reserved." %}</span>
         <div class="flex flex-wrap items-center justify-center gap-x-md gap-y-1">
           <a href="{% url 'legal-terms' %}" class="hover:text-primary transition-colors">{% trans "Terms &amp; Conditions" %}</a>
           <span class="text-outline-variant">&bull;</span>
@@ -468,9 +490,22 @@
        phoneLength: "{% filter escapejs %}{% trans 'Enter 9 digits after +255, e.g. 0712 345 678.' %}{% endfilter %}",
        phoneMobile: "{% filter escapejs %}{% trans 'Mobile numbers start with 06 or 07.' %}{% endfilter %}"
      };
+     /* Slot "time left" wording for static/js/countdown.js. Kept apart from IPT.i18n, which some pages replace. */
+     window.IPT.timeLeft = {
+       day: "{% filter escapejs %}{% trans '{n} day left' %}{% endfilter %}",
+       days: "{% filter escapejs %}{% trans '{n} days left' %}{% endfilter %}",
+       hour: "{% filter escapejs %}{% trans '{n} hour left' %}{% endfilter %}",
+       hours: "{% filter escapejs %}{% trans '{n} hours left' %}{% endfilter %}",
+       minute: "{% filter escapejs %}{% trans '{n} minute left' %}{% endfilter %}",
+       minutes: "{% filter escapejs %}{% trans '{n} minutes left' %}{% endfilter %}",
+       closed: "{% filter escapejs %}{% trans 'Applications closed' %}{% endfilter %}",
+       none: "{% filter escapejs %}{% trans 'No deadline' %}{% endfilter %}"
+     };
    </script>
    <script src="{% static 'js/phone-input.js' %}"></script>
    <script src="{% static 'js/responsive.js' %}"></script>
+   <script src="{% static 'js/filterbar.js' %}"></script>
+   <script src="{% static 'js/list-filter.js' %}"></script>
   {% if user.is_authenticated %}
     <script>
       window.IPT = window.IPT || {};
@@ -479,15 +514,17 @@
       window.IPT.userRole = "{{ user.role }}";
     </script>
     <script src="{% static 'js/ws.js' %}"></script>
+    <script src="{% static 'js/notifications-bell.js' %}"></script>
+    <script src="{% static 'js/countdown.js' %}"></script>
     <script src="{% static 'js/session-guard.js' %}"></script>
 
     <!-- Inactivity Timer Modal -->
     <div id="inactivity-modal" class="fixed top-20 left-3 right-3 sm:right-auto sm:top-4 sm:left-4 z-[100] hidden bg-error-container text-on-error-container p-4 rounded-xl shadow-2xl max-w-xs border border-error/30 flex flex-col gap-2 transition-all">
       <div class="flex items-center gap-2 font-semibold">
         <span class="material-symbols-outlined text-[20px]">timer</span>
-        <span>Session Expiring</span>
+        <span>{% trans "Session Expiring" %}</span>
       </div>
-      <p class="text-sm">You have been inactive. You will be logged out in <span id="inactivity-countdown" class="font-bold text-error"></span> seconds to protect your account. Move or click to stay signed in.</p>
+      <p class="text-sm">{% trans "You have been inactive. You will be logged out in" %} <span id="inactivity-countdown" class="font-bold text-error"></span> {% trans "seconds to protect your account. Move or click to stay signed in." %}</p>
     </div>
 
     <script>

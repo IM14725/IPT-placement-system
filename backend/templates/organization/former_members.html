@@ -1,20 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Former members{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Former members" %}{% endblock %}
 {% block content %}
 <div class="flex flex-col gap-lg">
   <div class="flex flex-col gap-xs">
-    <a href="{% url 'organization-profile' %}" class="text-primary font-semibold hover:underline flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Team accounts</a>
-    <h1 class="font-display text-display text-on-surface">Former Members</h1>
+    <a href="{% url 'organization-profile' %}" class="text-primary font-semibold hover:underline flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">arrow_back</span>{% trans "Team accounts" %}</a>
+    <h1 class="font-display text-display text-on-surface">{% trans "Former Members" %}</h1>
     <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
-      People whose access to {{ organization.name }} was revoked. Their accounts and everything they did are kept: opportunities, applications, documents and decisions stay with the organization, and their actions remain attributed to them in the activity log.
+      {% blocktrans trimmed with name=organization.name %}People whose access to {{ name }} was revoked. Their accounts and everything they did are kept: opportunities, applications, documents and decisions stay with the organization, and their actions remain attributed to them in the activity log.{% endblocktrans %}
     </p>
   </div>
   <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-x-auto">
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">
-          <th class="px-md py-sm">Name</th><th class="px-md py-sm">Email</th><th class="px-md py-sm">Previous role</th>
-          <th class="px-md py-sm">Date added</th><th class="px-md py-sm">Date removed</th><th class="px-md py-sm">Removed by</th><th class="px-md py-sm">Reason</th>
+          <th class="px-md py-sm">{% trans "Name" %}</th><th class="px-md py-sm">{% trans "Email" %}</th><th class="px-md py-sm">{% trans "Previous role" %}</th>
+          <th class="px-md py-sm">{% trans "Date added" %}</th><th class="px-md py-sm">{% trans "Date removed" %}</th><th class="px-md py-sm">{% trans "Removed by" %}</th><th class="px-md py-sm">{% trans "Reason" %}</th>
         </tr>
       </thead>
       <tbody class="font-body-md text-body-md text-on-surface">
@@ -29,11 +30,11 @@
             <td class="px-md py-sm">{{ m.removal_reason }}</td>
           </tr>
         {% empty %}
-          <tr><td colspan="7" class="px-md py-xl text-center text-on-surface-variant">No one has been removed from this organization.</td></tr>
+          <tr><td colspan="7" class="px-md py-xl text-center text-on-surface-variant">{% trans "No one has been removed from this organization." %}</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  <p class="font-metadata text-metadata text-on-surface-variant">Former members cannot sign in or see the organization's logs. Their history stays searchable in the <a class="text-primary hover:underline" href="{% url 'organization-audit-logs' %}">activity log</a>.</p>
+  <p class="font-metadata text-metadata text-on-surface-variant">{% trans "Former members cannot sign in or see the organization's logs. Their history stays searchable in the" %} <a class="text-primary hover:underline" href="{% url 'organization-audit-logs' %}">{% trans "activity log" %}</a>.</p>
 </div>
 {% endblock %}

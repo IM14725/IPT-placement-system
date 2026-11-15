@@ -1,3 +1,4 @@
+from django.utils.translation import gettext, gettext_lazy
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
@@ -29,7 +30,7 @@ class StudentProfileForm(forms.ModelForm):
     skills = forms.CharField(
         required=False,
         label=_("Skills (comma separated)"),
-        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "Python, SQL, Data Analysis"}),
+        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": gettext_lazy("Python, SQL, Data Analysis")}),
         help_text=_("Separate skills with commas."),
     )
     profile_photo = forms.ImageField(
@@ -62,7 +63,7 @@ class StudentProfileForm(forms.ModelForm):
         max_length=200,
         label=_("Your university's full name"),
         widget=forms.TextInput(
-            attrs={"class": FIELD_CLASS, "placeholder": "e.g. Example University of Tanzania", "autocomplete": "off"}
+            attrs={"class": FIELD_CLASS, "placeholder": gettext_lazy("e.g. Example University of Tanzania"), "autocomplete": "off"}
         ),
     )
 
@@ -103,10 +104,18 @@ class StudentProfileForm(forms.ModelForm):
             "ward": forms.Select(attrs={"class": "ipt-select", "id": "id_ward"}),
         }
 
-    def __init__(self, *args, user=None, require_phone=True, **kwargs):
+    def __init__(self, *args, user=None, require_phone=True, verify_phone_change=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
         self.fields["phone"].required = require_phone
+        # The student's own profile page: a different number is not written straight away. It is
+        # saved only after the code sent to it is entered (``pending_phone`` tells the view to send it).
+        self.verify_phone_change = verify_phone_change
+        self.pending_phone = None
+        if verify_phone_change and user is not None and user.phone:
+            self.fields["phone"].help_text = _(
+                "If you change this number, we send a code to the new number and it is saved only after you enter it."
+            )
         self._suggested_name = None
         self.fields["university"].queryset = selectable_universities(user)
         self.fields["university"].empty_label = _("Select your university (optional)")
@@ -128,12 +137,23 @@ class StudentProfileForm(forms.ModelForm):
             self.fields["skills"].initial = skills_to_text(self.instance.skills)
             self.initial["skills"] = skills_to_text(self.instance.skills)
 
+    def clean_phone(self):
+        phone = self.cleaned_data.get("phone")
+        if phone and self.user is not None:
+            from apps.accounts.models import User, normalize_phone
+
+            if User.objects.filter(phone=normalize_phone(phone)).exclude(pk=self.user.pk).exists():
+                raise forms.ValidationError(
+                    gettext("This phone number is already associated with an account. Please use another phone number.")
+                )
+        return phone
+
     def clean_profile_photo(self):
         photo = self.cleaned_data.get("profile_photo")
         if not photo:
             return photo
         if photo.size > 2 * 1024 * 1024:
-            raise forms.ValidationError("Profile photo must be under 2MB.")
+            raise forms.ValidationError(gettext("Profile photo must be under 2MB."))
         return photo
 
     def clean_id_card_photo(self):
@@ -141,7 +161,7 @@ class StudentProfileForm(forms.ModelForm):
         if not photo:
             return photo
         if photo.size > 2 * 1024 * 1024:
-            raise forms.ValidationError("ID card photo must be under 2MB.")
+            raise forms.ValidationError(gettext("ID card photo must be under 2MB."))
         return photo
 
     def clean_skills(self):
@@ -160,7 +180,7 @@ class StudentProfileForm(forms.ModelForm):
         edu_level = cleaned_data.get("education_level")
         academic_year = cleaned_data.get("academic_year")
         if edu_level == 7 and not academic_year:
-            self.add_error("academic_year", "Academic year is required for Higher Diploma.")
+            self.add_error("academic_year", gettext("Academic year is required for Higher Diploma."))
         elif edu_level != 7:
             cleaned_data["academic_year"] = None
         return cleaned_data
@@ -172,7 +192,12 @@ class StudentProfileForm(forms.ModelForm):
             instance.university = suggest_university(self.user, self._suggested_name)
         if self.user is not None:
             phone = self.cleaned_data.get("phone")
-            if phone and phone != self.user.phone:
+            if phone and self.verify_phone_change and self.user.phone:
+                from apps.accounts.models import normalize_phone
+
+                if normalize_phone(phone) != self.user.phone:
+                    self.pending_phone = normalize_phone(phone)
+            elif phone and phone != self.user.phone:
                 self.user.phone = phone
                 self.user.save(update_fields=["phone", "updated_at"])
         if commit:
@@ -183,14 +208,14 @@ class StudentProfileForm(forms.ModelForm):
 class DocumentUploadForm(forms.Form):
     doc_type = forms.ChoiceField(
         choices=[
-            (Document.DocType.STUDENT_ID, "Student ID Card"),
-            (Document.DocType.RESULTS_MATRIX, "Semester Results Matrix"),
-            (Document.DocType.CV, "Curriculum Vitae (CV)"),
-            (Document.DocType.INTRO_LETTER, "University Introduction Letter"),
+            (Document.DocType.STUDENT_ID, gettext_lazy("Student ID Card")),
+            (Document.DocType.RESULTS_MATRIX, gettext_lazy("Semester Results Matrix")),
+            (Document.DocType.CV, gettext_lazy("Curriculum Vitae (CV)")),
+            (Document.DocType.INTRO_LETTER, gettext_lazy("University Introduction Letter")),
         ],
         widget=forms.Select(attrs={"class": "ipt-select"}),
     )
     file = forms.FileField(
-        label="File (< 2MB)",
+        label=gettext_lazy("File (< 2MB)"),
         widget=forms.ClearableFileInput(attrs={"class": "ipt-file-input", "accept": ".pdf,.png,.jpg,.jpeg,.doc,.docx"}),
     )

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "You are accepted: next steps" %}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg max-w-3xl mx-auto">
+  <div class="rounded-xl p-md shadow-sm bg-[rgb(var(--c-ok-bg))] text-[rgb(var(--c-ok-fg))] flex items-start gap-sm">
+    <span class="material-symbols-outlined text-[32px] shrink-0" style="font-variation-settings: 'FILL' 1;">celebration</span>
+    <div class="flex flex-col gap-1 min-w-0">
+      <h1 class="font-headline-lg text-headline-lg">{% trans "Congratulations, you are accepted!" %}</h1>
+      <p class="font-body-lg text-body-lg">{{ organization.name }} · {{ application.slot.title }}</p>
+      <p class="font-body-md text-body-md opacity-90">{% trans "Accepted on" %} {{ application.updated_at|date:"d M Y" }}</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+    <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm">
+      <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary">description</span>{% trans "Acceptance letter" %}</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Your official acceptance letter. Print it or keep it on your phone: your university and the organization may ask for it." %}</p>
+      <a href="{% url 'student-acceptance-letter' application.id %}" class="bg-primary text-on-primary px-md py-sm rounded-lg font-semibold flex items-center justify-center gap-xs hover:bg-primary-container transition-colors">
+        <span class="material-symbols-outlined text-[20px]">download</span>{% trans "Download letter (PDF)" %}
+      </a>
+    </section>
+
+    <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm">
+      <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary">contact_phone</span>{% trans "Organization contact" %}</h2>
+      <ul class="flex flex-col gap-xs font-body-md text-body-md text-on-surface">
+        {% if organization.phone %}<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">call</span><a class="text-primary hover:underline" href="tel:{{ organization.phone }}">{{ organization.phone }}</a></li>{% endif %}
+        {% if organization.email %}<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">mail</span><a class="text-primary hover:underline break-all" href="mailto:{{ organization.email }}">{{ organization.email }}</a></li>{% endif %}
+        <li class="flex items-start gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">location_on</span><span>{% if application.slot.street %}{{ application.slot.street }}, {% elif organization.address %}{{ organization.address }}, {% endif %}{{ application.slot.district }}, {{ application.slot.district.region }}</span></li>
+        {% if not organization.phone and not organization.email %}<li class="text-on-surface-variant">{% trans "The organization has not published contact details." %}</li>{% endif %}
+      </ul>
+    </section>
+  </div>
+
+  {% if application.slot.start_date or application.slot.duration_weeks or application.slot.reporting_contact %}
+    <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm">
+      <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary">date_range</span>{% trans "Your placement" %}</h2>
+      <ul class="flex flex-col gap-xs font-body-md text-body-md text-on-surface">
+        {% if application.slot.start_date %}<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">event</span>{% trans "Starts" %} {{ application.slot.start_date|date:"l, j F Y" }}</li>{% endif %}
+        {% if application.slot.duration_weeks %}<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">schedule</span>{% blocktrans count n=application.slot.duration_weeks %}{{ n }} week{% plural %}{{ n }} weeks{% endblocktrans %}{% if application.slot.end_date %} ({% trans "ends about" %} {{ application.slot.end_date|date:"j F Y" }}){% endif %}</li>{% endif %}
+        {% if application.slot.reporting_contact %}<li class="flex items-start gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">badge</span><span><strong>{% trans "Report to:" %}</strong> <span class="break-words whitespace-pre-line">{{ application.slot.reporting_contact }}</span></span></li>{% endif %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {% if application.company_message %}
+    <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-xs border-l-4 border-primary">
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% blocktrans with org=organization.name %}Message from {{ org }}{% endblocktrans %}</h2>
+      <p class="font-body-lg text-body-lg text-on-surface whitespace-pre-line break-words">{{ application.company_message }}</p>
+    </section>
+  {% endif %}
+
+  <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm">
+    <div class="flex items-center justify-between gap-sm">
+      <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary">checklist</span>{% trans "Before you report" %}</h2>
+      <span class="font-metadata text-metadata text-on-surface-variant tabular-nums" id="checklist-count"></span>
+    </div>
+    <p class="font-metadata text-metadata text-on-surface-variant">{% trans "Tick things off as you go. Your ticks are remembered on this device only." %}</p>
+    <ul class="flex flex-col" id="ipt-checklist" data-key="ipt-checklist-{{ application.id }}">
+      <li><label class="flex items-start gap-sm py-2 cursor-pointer border-b border-surface-container"><input type="checkbox" value="letter" class="mt-1 rounded border-outline"><span class="font-body-md text-body-md text-on-surface">{% trans "Download and print your acceptance letter." %}</span></label></li>
+      <li><label class="flex items-start gap-sm py-2 cursor-pointer border-b border-surface-container"><input type="checkbox" value="contact" class="mt-1 rounded border-outline"><span class="font-body-md text-body-md text-on-surface">{% trans "Contact the organization to confirm your reporting date, time and supervisor." %}</span></label></li>
+      <li><label class="flex items-start gap-sm py-2 cursor-pointer border-b border-surface-container"><input type="checkbox" value="university" class="mt-1 rounded border-outline"><span class="font-body-md text-body-md text-on-surface">{% trans "Give a copy of the letter to your university's IPT / field coordinator." %}</span></label></li>
+      <li><label class="flex items-start gap-sm py-2 cursor-pointer border-b border-surface-container"><input type="checkbox" value="intro" class="mt-1 rounded border-outline"><span class="font-body-md text-body-md text-on-surface">{% trans "Collect your university introduction letter and your IPT logbook." %}</span></label></li>
+      <li><label class="flex items-start gap-sm py-2 cursor-pointer border-b border-surface-container"><input type="checkbox" value="id" class="mt-1 rounded border-outline"><span class="font-body-md text-body-md text-on-surface">{% trans "Pack your student ID card and your national ID or birth certificate copy." %}</span></label></li>
+      <li><label class="flex items-start gap-sm py-2 cursor-pointer border-b border-surface-container"><input type="checkbox" value="travel" class="mt-1 rounded border-outline"><span class="font-body-md text-body-md text-on-surface">{% trans "Plan your accommodation and daily transport to the workplace." %}</span></label></li>
+      <li><label class="flex items-start gap-sm py-2 cursor-pointer border-b border-surface-container"><input type="checkbox" value="dress" class="mt-1 rounded border-outline"><span class="font-body-md text-body-md text-on-surface">{% trans "Ask about the dress code and any safety gear you must bring." %}</span></label></li>
+      <li><label class="flex items-start gap-sm py-2 cursor-pointer"><input type="checkbox" value="logbook" class="mt-1 rounded border-outline"><span class="font-body-md text-body-md text-on-surface">{% trans "From day one, fill in your logbook daily and have your supervisor sign it weekly." %}</span></label></li>
+    </ul>
+  </section>
+
+  <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-sm">
+    <div class="flex flex-col gap-1">
+      <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary">star</span>{% trans "Rate this organization" %}</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        {% if review %}{% blocktrans with rating=review.rating %}You rated them {{ rating }}/5. You can update your review at any time.{% endblocktrans %}
+        {% else %}{% trans "After your training, tell other students how it went. Your name is not shown." %}{% endif %}
+      </p>
+    </div>
+    <a href="{% url 'student-review' application.id %}" class="shrink-0 px-md py-sm rounded-lg border border-primary text-primary font-semibold hover:bg-primary/5 text-center">{% if review %}{% trans "Edit my review" %}{% else %}{% trans "Write a review" %}{% endif %}</a>
+  </section>
+
+  <a href="{% url 'student-applications' %}" class="font-body-md text-body-md text-primary font-semibold hover:underline flex items-center gap-1 w-fit"><span class="material-symbols-outlined text-[18px]">arrow_back</span>{% trans "My Applications" %}</a>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  (function () {
+    var list = document.getElementById("ipt-checklist");
+    if (!list) return;
+    var key = list.dataset.key, boxes = list.querySelectorAll("input[type=checkbox]"), count = document.getElementById("checklist-count");
+    var done = [];
+    try { done = JSON.parse(localStorage.getItem(key) || "[]"); } catch (e) {}
+    function refresh() {
+      var n = 0;
+      boxes.forEach(function (b) { if (b.checked) n++; });
+      count.textContent = n + " / " + boxes.length;
+    }
+    boxes.forEach(function (b) {
+      b.checked = done.indexOf(b.value) !== -1;
+      b.addEventListener("change", function () {
+        var now = [];
+        boxes.forEach(function (x) { if (x.checked) now.push(x.value); });
+        try { localStorage.setItem(key, JSON.stringify(now)); } catch (e) {}
+        refresh();
+      });
+    });
+    refresh();
+  })();
+</script>
+{% endblock %}

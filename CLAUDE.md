@@ -44,6 +44,10 @@ uvicorn main:app --port 8001 --reload
 # Docker alternative: docker compose up   (postgres, redis, web, realtime, celery_worker, celery_beat)
 ```
 
+Front-end assets (no CDN at runtime): Tailwind is compiled (`scriptsuild_css.ps1`, watcher started by `dev.ps1`; rebuild after adding classes) and fonts are self-hosted (`python scripts/build_fonts.py` from `backend/` after adding a new Material icon). Both outputs are committed. Static files go through WhiteNoise; run `collectstatic` on deploy. Details: `plan.md`, "Slow-network page load".
+
+Translations (EN/Kiswahili): the committed `locale/sw/LC_MESSAGES/django.po` is the base; add strings to `backend/scripts/sw/ui.json` and run `backend\.venv\Scripts\python backend\scriptsuild_translations.py` (needs `polib`), then restart Django. The admin console stays English. See `plan.md`, "Kiswahili translation pass".
+
 Tests (from `backend/`; pytest-django, `pytest.ini` sets the settings module):
 
 ```powershell

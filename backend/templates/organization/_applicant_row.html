@@ -1,0 +1,57 @@
+{% load media_tags %}{% load i18n %}
+{# One paid applicant. Needs: app (with .blocker), can_accept, next_url. Optional: selectable, templates. #}
+<div class="p-md flex flex-col lg:flex-row lg:items-center justify-between gap-sm border-b border-surface-container last:border-b-0">
+  <div class="flex items-start gap-sm min-w-0 flex-1">
+    {% if selectable %}
+      <input type="checkbox" name="application" value="{{ app.id }}" form="bulk-accept-form" class="mt-3 rounded border-outline shrink-0" {% if app.blocker %}disabled{% endif %}
+             aria-label="{% trans 'Select' %} {{ app.student.user.full_name }}">
+    {% endif %}
+    {% if app.student.profile_photo %}
+      <img src="{{ app.student.profile_photo|thumb:96 }}" width="44" height="44" loading="lazy" decoding="async" class="ipt-img w-11 h-11 rounded-full object-cover shrink-0" alt="">
+    {% else %}
+      <div class="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0"><span class="font-body-md font-bold text-primary">{{ app.student.user.full_name|default:app.student.user.email|slice:":2"|upper }}</span></div>
+    {% endif %}
+    <div class="flex flex-col gap-0.5 min-w-0">
+      <div class="flex items-center gap-xs flex-wrap">
+        <span class="font-body-lg text-body-lg font-semibold text-on-surface break-words">{{ app.student.user.full_name|default:app.student.user.email }}</span>
+        {% if app.is_accepted %}
+          <span class="px-2 py-0.5 rounded-full bg-[rgb(var(--c-ok-bg))] text-[rgb(var(--c-ok-fg))] font-metadata text-metadata font-semibold">{% trans "Accepted" %}</span>
+        {% else %}
+          <span class="px-2 py-0.5 rounded-full bg-[#f9a825]/15 text-[#a16207] font-metadata text-metadata font-semibold">{% trans "Waiting" %}</span>
+        {% endif %}
+      </div>
+      <span class="font-body-md text-body-md text-on-surface-variant break-words">
+        {{ app.student.university|default:"—" }} · {{ app.student.course }}{% if app.student.education_level %} · {{ app.student.get_education_level_display }}{% endif %}{% if app.student.gpa is not None %} · GPA {{ app.student.gpa }}{% endif %}
+      </span>
+      <span class="font-metadata text-metadata text-outline break-words">{{ app.slot.title }}{% if app.payment.paid_at %} · {% trans "paid" %} {{ app.payment.paid_at|timesince }} {% trans "ago" %}{% endif %}</span>
+    </div>
+  </div>
+  <div class="flex flex-wrap items-center gap-xs lg:justify-end shrink-0">
+    <a href="{% url 'organization-applicant-documents' app.id %}" class="px-sm py-1.5 rounded-lg text-primary bg-primary/5 hover:bg-primary/10 font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">folder_open</span>{% trans "Documents" %}</a>
+    {% if app.application_letter %}
+      <a href="{% url 'organization-applicant-letter' app.id %}" target="_blank" rel="noopener noreferrer" class="px-sm py-1.5 rounded-lg text-primary bg-primary/5 hover:bg-primary/10 font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">note</span>{% trans "Letter" %}</a>
+    {% endif %}
+    <a href="{% url 'organization-applicant-notes' app.id %}" class="px-sm py-1.5 rounded-lg text-primary bg-primary/5 hover:bg-primary/10 font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">sticky_note_2</span>{% trans "Notes" %}{% if app.note_count %} ({{ app.note_count }}){% endif %}</a>
+    {% if app.is_accepted %}
+      <a href="{% url 'organization-applicant-acceptance-letter' app.id %}" class="px-sm py-1.5 rounded-lg text-primary bg-primary/5 hover:bg-primary/10 font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">download</span>{% trans "Acceptance letter" %}</a>
+    {% elif can_accept and not app.blocker %}
+      <details class="relative">
+        <summary class="list-none cursor-pointer px-sm py-1.5 rounded-lg bg-[#166534] text-white font-semibold text-body-md inline-flex items-center gap-1 hover:bg-[#14532d]"><span class="material-symbols-outlined text-[16px]">how_to_reg</span>{% trans "Accept" %}</summary>
+        <form method="post" action="{% url 'organization-acceptance-sms' app.id %}" class="absolute right-0 z-20 mt-2 w-[min(20rem,calc(100vw-2rem))] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl p-sm flex flex-col gap-xs">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next_url }}">
+          <label class="font-metadata text-metadata text-on-surface-variant" for="msg-{{ app.id }}">{% trans "Acceptance Note (Optional)" %}</label>
+          <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input id="msg-{{ app.id }}" type="text" name="message" maxlength="500" placeholder="{% trans 'e.g. Report on Monday 8 AM' %}"></div>
+          {% if templates %}
+            <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">chat</span></span>
+              <select name="template" aria-label="{% trans 'Or use a saved message' %}"><option value="">{% trans "Or use a saved message" %}</option>{% for t in templates %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}</select></div>
+          {% endif %}
+          <button type="submit" class="bg-[#166534] hover:bg-[#14532d] text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-xs"><span class="material-symbols-outlined text-[18px]">campaign</span>{% trans "Send Confirmation" %}</button>
+          <p class="font-metadata text-metadata text-on-surface-variant">{% trans "The student is notified in the app, by SMS and by email. Acceptance cannot be undone." %}</p>
+        </form>
+      </details>
+    {% elif app.blocker %}
+      <span class="font-metadata text-metadata text-on-surface-variant inline-flex items-center gap-1 max-w-[16rem]" title="{{ app.blocker }}"><span class="material-symbols-outlined text-[16px] text-[#a16207]">hourglass_empty</span>{% trans "In 24h cancellation window" %}</span>
+    {% endif %}
+  </div>
+</div>

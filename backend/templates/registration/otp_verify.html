@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}{{ heading }}{% endblock %}
 {% block content %}
 <div class="w-full max-w-md mx-auto my-xl auth-card bg-surface-container-lowest rounded-2xl shadow-xl p-lg lg:p-xl flex flex-col gap-md">
@@ -22,7 +23,7 @@
   <form method="post" class="text-center">
     {% csrf_token %}
     <input type="hidden" name="action" value="resend">
-    <button type="submit" class="font-metadata text-metadata text-primary font-semibold hover:underline">Send a new code</button>
+    <button type="submit" class="font-metadata text-metadata text-primary font-semibold hover:underline">{% trans "Send a new code" %}</button>
   </form>
 </div>
 {% endblock %}

@@ -1,11 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Report a problem{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Report a problem" %}{% endblock %}
 {% block content %}
 <div class="max-w-2xl mx-auto flex flex-col gap-lg">
   <div class="flex flex-col gap-xs">
-    <h1 class="font-display text-display text-on-surface">Report a problem</h1>
+    <h1 class="font-display text-display text-on-surface">{% trans "Report a problem" %}</h1>
     <p class="font-body-md text-body-md text-on-surface-variant">
-      Tell the platform team about a misleading opportunity, a payment issue, abuse or anything else that looks wrong. We review every report.
+      {% trans "Tell the platform team about a misleading opportunity, a payment issue, abuse or anything else that looks wrong. We review every report." %}
     </p>
   </div>
   <form method="post" class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
@@ -14,12 +15,12 @@
       {% include "includes/form_field.html" with field=field %}
     {% endfor %}
     <div class="flex justify-end">
-      <button class="bg-primary text-on-primary rounded-full px-xl py-3 font-body-lg" type="submit">Send report</button>
+      <button class="bg-primary text-on-primary rounded-full px-xl py-3 font-body-lg" type="submit">{% trans "Send report" %}</button>
     </div>
   </form>
 
   <section class="flex flex-col gap-sm" aria-labelledby="my-reports-heading">
-    <h2 id="my-reports-heading" class="font-headline-md text-headline-md text-on-surface">Your reports</h2>
+    <h2 id="my-reports-heading" class="font-headline-md text-headline-md text-on-surface">{% trans "Your reports" %}</h2>
     {% for r in my_reports %}
       <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-xs">
         <div class="flex flex-wrap items-start justify-between gap-sm">
@@ -27,13 +28,13 @@
           <span class="px-sm py-1 rounded-full text-metadata font-metadata {% if r.status == 'RESOLVED' %}bg-primary/10 text-primary{% elif r.status == 'DISMISSED' %}bg-surface-container text-on-surface-variant{% else %}bg-surface-container text-on-surface{% endif %}">{{ r.get_status_display }}</span>
         </div>
         <p class="text-metadata font-metadata text-on-surface-variant">
-          {{ r.get_category_display }} · sent {{ r.created_at|date:"j M Y, H:i" }}
-          {% if r.organization %}· about {{ r.organization.name }}{% endif %}
-          {% if r.handled_at %}· reviewed {{ r.handled_at|date:"j M Y" }}{% endif %}
+          {% blocktrans trimmed with get_category_display=r.get_category_display created_at=r.created_at|date:"j M Y, H:i" %}{{ get_category_display }} · sent {{ created_at }}{% endblocktrans %}
+          {% if r.organization %}{% blocktrans trimmed with name=r.organization.name %}· about {{ name }}{% endblocktrans %}{% endif %}
+          {% if r.handled_at %}{% blocktrans trimmed with handled_at=r.handled_at|date:"j M Y" %}· reviewed {{ handled_at }}{% endblocktrans %}{% endif %}
         </p>
       </div>
     {% empty %}
-      <p class="font-body-md text-body-md text-on-surface-variant">You haven't sent any reports yet.</p>
+      <p class="font-body-md text-body-md text-on-surface-variant">{% trans "You haven't sent any reports yet." %}</p>
     {% endfor %}
   </section>
 </div>

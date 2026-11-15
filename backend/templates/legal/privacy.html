@@ -5,6 +5,7 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto flex flex-col gap-lg pb-xl">
+    {% get_current_language as LEGAL_LANG %}{% if LEGAL_LANG != "en" %}<p class="rounded-xl bg-surface-container-low border border-outline-variant px-md py-sm font-metadata text-metadata text-on-surface-variant" role="note">{% trans "This Kiswahili version is a courtesy translation. If there is any difference, the English version prevails." %}</p>{% endif %}
 
     <div class="flex flex-col gap-sm">
     <div class="flex items-center gap-sm">
@@ -403,10 +404,10 @@
     {% if user.is_authenticated %}
     <a href="{% url 'legal-pdpa-request' %}" class="inline-flex items-center gap-xs px-lg py-sm rounded-full bg-primary text-on-primary font-metadata text-metadata uppercase tracking-wider shadow hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 self-start">
       <span class="material-symbols-outlined text-[16px]">shield</span>
-      <span>Submit a PDPA Rights Request</span>
+      <span>{% trans "Submit a PDPA Rights Request" %}</span>
     </a>
     {% else %}
-    <p class="font-body-md text-body-md text-on-surface-variant"><a href="{% url 'login' %}" class="text-primary hover:underline">Log in</a> to submit a PDPA rights request directly from the platform.</p>
+    <p class="font-body-md text-body-md text-on-surface-variant"><a href="{% url 'login' %}" class="text-primary hover:underline">{% trans "Log in" %}</a> {% trans "to submit a PDPA rights request directly from the platform." %}</p>
     {% endif %}
   </section>
 
@@ -423,12 +424,12 @@
     </p>
     <ul class="list-disc list-outside ml-5 space-y-sm font-body-md text-body-md text-on-surface-variant">
       <li>
-        <strong>sessionid:</strong>
+        <strong>{% trans "sessionid:" %}</strong>
         {% blocktrans %}Maintains your authenticated session.  Expires when you log out or after
         a period of inactivity.{% endblocktrans %}
       </li>
       <li>
-        <strong>csrftoken:</strong>
+        <strong>{% trans "csrftoken:" %}</strong>
         {% blocktrans %}Protects against Cross-Site Request Forgery (CSRF) attacks.
         Required for all form submissions.{% endblocktrans %}
       </li>

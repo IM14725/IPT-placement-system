@@ -1,0 +1,23 @@
+{% load i18n %}
+{# Needs: funnel (apps.companies.dashboard.slot_funnel). #}
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-sm" id="slot-funnel">
+  <h3 class="font-headline-md text-on-surface mb-sm flex items-center gap-xs"><span class="material-symbols-outlined text-primary">filter_alt</span>{% trans "How this slot is doing" %}</h3>
+  <ol class="flex flex-col gap-sm">
+    {% for step in funnel.steps %}
+      <li class="flex flex-col gap-1">
+        <div class="flex items-baseline justify-between gap-sm">
+          <span class="font-body-md text-on-surface-variant">{{ step.label }}</span>
+          <span class="font-headline-md text-on-surface tabular-nums">{{ step.count }}{% if step.pct is not None %} <span class="font-metadata text-on-surface-variant">({{ step.pct }}%)</span>{% endif %}</span>
+        </div>
+        <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden"><div class="h-full bg-primary rounded-full" style="width: {{ step.width }}%"></div></div>
+      </li>
+    {% endfor %}
+  </ol>
+  <p class="font-metadata text-metadata text-on-surface-variant mt-xs">{% trans "Percentages compare each step with the one before it. Viewed counts students who opened the slot's detail page." %}</p>
+  <dl class="mt-md pt-md border-t border-surface-container-highest flex flex-col gap-xs font-body-md">
+    <div class="flex justify-between"><dt class="text-on-surface-variant">{% trans "Awaiting payment" %}</dt><dd class="font-semibold tabular-nums">{{ funnel.awaiting }}</dd></div>
+    <div class="flex justify-between"><dt class="text-on-surface-variant">{% trans "Expired unpaid" %}</dt><dd class="font-semibold tabular-nums">{{ funnel.unpaid }}</dd></div>
+    <div class="flex justify-between"><dt class="text-on-surface-variant">{% trans "Cancelled after paying" %}</dt><dd class="font-semibold tabular-nums">{{ funnel.cancelled }}</dd></div>
+    <div class="flex justify-between"><dt class="text-on-surface-variant">{% trans "Average time to accept" %}</dt><dd class="font-semibold">{% if funnel.avg_time_to_accept %}{{ funnel.avg_time_to_accept }}{% else %}&mdash;{% endif %}</dd></div>
+  </dl>
+</div>

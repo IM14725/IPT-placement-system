@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Team activity" %}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg max-w-3xl mx-auto">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-md">
+    <div class="flex flex-col gap-xs">
+      <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Team activity" %}</h1>
+      <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "What your team did recently: who accepted whom, who changed a slot, who signed in." %}</p>
+    </div>
+    <a href="{% url 'organization-audit-logs' %}" class="px-md py-sm rounded-lg border border-primary text-primary font-semibold flex items-center gap-xs hover:bg-primary/5 self-start md:self-auto whitespace-nowrap">
+      <span class="material-symbols-outlined text-[20px]">manage_search</span>{% trans "Search the full audit log" %}
+    </a>
+  </div>
+
+  {% if logs %}
+    <ol class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+      {% for log in logs %}
+        {% ifchanged log.created_at|date:"Y-m-d" %}
+          <li class="px-md py-xs bg-surface-container font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{{ log.created_at|date:"l, d M Y" }}</li>
+        {% endifchanged %}
+        <li class="px-md py-sm flex items-start gap-sm border-b border-surface-container last:border-b-0">
+          <span class="material-symbols-outlined shrink-0 text-[20px] mt-0.5 {% if log.outcome == 'SUCCESS' %}text-outline{% else %}text-error{% endif %}">{% if log.outcome == 'SUCCESS' %}history{% else %}error{% endif %}</span>
+          <div class="flex flex-col min-w-0 flex-1">
+            <span class="font-body-md text-body-md text-on-surface break-words">
+              <span class="font-semibold">{{ log.actor_label|default:"System" }}</span>{% if log.actor_role %} <span class="text-on-surface-variant">({{ log.actor_role }})</span>{% endif %}
+              · {{ log.action }}
+            </span>
+            {% if log.target_label %}<span class="font-body-md text-body-md text-on-surface-variant break-words">{{ log.target_label }}</span>{% endif %}
+            <span class="font-metadata text-metadata text-outline">{{ log.created_at|date:"H:i" }} · {{ log.module }}{% if log.outcome != 'SUCCESS' %} · {{ log.get_outcome_display }}{% endif %}</span>
+          </div>
+          <a href="{% url 'organization-audit-detail' log.id %}" class="shrink-0 p-1.5 rounded-lg text-primary hover:bg-primary/10" title="{% trans 'Details' %}" aria-label="{% trans 'Details' %}"><span class="material-symbols-outlined text-[20px]">chevron_right</span></a>
+        </li>
+      {% endfor %}
+    </ol>
+    {% include "includes/pagination.html" %}
+  {% else %}
+    <p class="bg-surface-container-lowest rounded-xl p-md shadow-sm font-body-md text-body-md text-on-surface-variant">{% trans "No activity recorded yet." %}</p>
+  {% endif %}
+</div>
+{% endblock %}

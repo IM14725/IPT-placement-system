@@ -3,7 +3,8 @@ param(
     [switch]$SkipFastAPI,
     [switch]$SkipCelery,
     [switch]$SkipBeat,
-    [switch]$SkipRedis
+    [switch]$SkipRedis,
+    [switch]$SkipCss
 )
 
 $Root = Split-Path -Parent $PSScriptRoot
@@ -98,6 +99,12 @@ if (-not $SkipBeat) {
 if (-not $SkipDjango) {
     Start-Process $Venv -ArgumentList "manage.py", "runserver", "127.0.0.1:8000", "--noreload" -WorkingDirectory $Backend -WindowStyle Hidden
     Write-Host "Django running at http://127.0.0.1:8000" -ForegroundColor Green
+}
+
+if (-not $SkipCss) {
+    # Rebuilds backend\static\css	ailwind.css whenever templates/JS/Python change (downloads the CLI on first run).
+    Start-Process powershell -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $PSScriptRoot "build_css.ps1"), "-Watch" -WorkingDirectory $Root -WindowStyle Hidden
+    Write-Host "Tailwind CSS watcher started." -ForegroundColor Green
 }
 
 if (-not $SkipFastAPI) {

@@ -11,8 +11,8 @@
     <div class="absolute -left-10 top-1/3 w-40 h-40 bg-primary-container rounded-full opacity-20 blur-2xl pointer-events-none"></div>
     <div class="flex flex-col gap-xl z-10 relative">
       <div class="flex items-center gap-xs font-headline-lg font-headline-md tracking-tight mb-2">
-        <img src="{% static 'images/logo.png' %}" alt="IPT Marketplace" class="h-10 w-auto rounded">
-        IPT Marketplace
+        <img src="{% static 'images/logo-96.webp' %}" width="40" height="40" alt="{% trans 'IPT Marketplace' %}" class="h-10 w-auto rounded">
+        {% trans "IPT Marketplace" %}
       </div>
       <div class="flex flex-col gap-sm">
         <h2 class="font-display text-display leading-tight tracking-tight">
@@ -40,7 +40,7 @@
         </div>
       </div>
     </div>
-    <span class="relative z-10 font-metadata text-metadata text-on-secondary/60">&copy; {% now "Y" %} IPT Marketplace. {% trans "Designed by semauya." %}</span>
+    <span class="relative z-10 font-metadata text-metadata text-on-secondary/60">&copy; {% now "Y" %} {% trans "IPT Marketplace." %} {% trans "Designed by semauya." %}</span>
   </div>
 
   <!-- Form panel -->
@@ -255,7 +255,7 @@
           <div class="ipt-field-box {% if form.password2.errors %}is-error{% endif %}">
             <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span>
             {{ form.password2 }}
-            <button type="button" class="ipt-field-action" onclick="togglePassword(this, '{{ form.password2.id_for_label }}')" aria-label="Show password">
+            <button type="button" class="ipt-field-action" onclick="togglePassword(this, '{{ form.password2.id_for_label }}')" aria-label="{% trans 'Show password' %}">
               <span class="material-symbols-outlined text-[20px]" data-icon="eye">visibility</span>
             </button>
           </div>

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ slot.title }}{% endblock %}
+{% block content %}
+<div class="w-full max-w-4xl mx-auto flex flex-col gap-md">
+  <a href="{% url 'student-marketplace' %}" class="font-body-md text-body-md text-primary font-semibold hover:underline flex items-center gap-1 w-fit"><span class="material-symbols-outlined text-[18px]">arrow_back</span>{% trans "Back to slots" %}</a>
+
+  <section class="bg-surface-container-lowest rounded-2xl shadow-sm p-lg flex flex-col gap-md">
+    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-sm">
+      <div class="flex flex-col gap-xs min-w-0">
+        <a href="{% url 'organization-public-profile' organization.id %}" class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider hover:text-primary hover:underline w-fit">{{ organization.name }}</a>
+        <h1 class="font-display text-display text-on-surface tracking-tight break-words">{{ slot.title }}</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">{{ slot.industry }}{% if slot.industry and slot.role_type %} · {% endif %}{{ slot.role_type }}</p>
+      </div>
+      <div class="flex flex-col items-start sm:items-end gap-1 shrink-0">
+        {% if closed_reason %}
+          <span class="px-sm py-1 rounded-full bg-error/10 text-error font-label-caps text-label-caps">{{ closed_reason }}</span>
+        {% else %}
+          <span class="px-sm py-1 rounded-full bg-[#e8f5e9] text-[#1b5e20] font-label-caps text-label-caps">{% blocktrans count n=seats_left %}{{ n }} seat left{% plural %}{{ n }} seats left{% endblocktrans %}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-sm font-body-md text-body-md text-on-surface-variant">
+      <div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">location_on</span>{% if slot.street %}{{ slot.street }}, {% endif %}{{ slot.district }}, {{ slot.district.region }}</div>
+      {% if slot.requirement_label %}<div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">workspace_premium</span>{{ slot.requirement_label }}</div>{% endif %}
+      {% if slot.department %}<div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">school</span>{{ slot.department }}</div>{% endif %}
+      {% if slot.placement_label %}<div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">date_range</span>{{ slot.placement_label }}</div>{% endif %}
+      <div class="flex items-center gap-xs {% if slot.deadline_passed %}text-error{% endif %}"><span class="material-symbols-outlined text-[18px]">event</span>
+        {% if slot.application_deadline %}{% if slot.deadline_passed %}{% trans "Applications closed on" %}{% else %}{% trans "Apply by" %}{% endif %} {{ slot.application_deadline|date:"j M Y, H:i" }}{% else %}{% trans "No application deadline" %}{% endif %}
+      </div>
+      <div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-[#1b5e20]">payments</span>
+        {% if slot.stipend_available %}<span class="font-semibold text-[#1b5e20]">TZS {{ slot.stipend_amount }}{% trans "/month" %}</span>{% else %}{% trans "Unpaid placement" %}{% endif %}
+      </div>
+    </div>
+
+    {% if slot.description %}
+      <div class="flex flex-col gap-xs">
+        <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "About this placement" %}</h2>
+        <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed whitespace-pre-line break-words">{{ slot.description }}</p>
+      </div>
+    {% endif %}
+
+    {% if slot.skills_required %}
+      <div class="flex flex-col gap-xs">
+        <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Skills wanted" %}</h2>
+        <div class="flex flex-wrap gap-xs">
+          {% for skill in slot.skills_required %}<span class="bg-surface-container-high text-on-surface font-metadata text-metadata px-2 py-1 rounded-md">{{ skill }}</span>{% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="bg-surface-container-lowest rounded-2xl shadow-sm p-lg flex flex-col sm:flex-row sm:items-center justify-between gap-md">
+    <div class="flex flex-col gap-1 min-w-0">
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "About the organization" %}</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant">{{ organization.get_organization_type_display }}{% if organization.industry %} · {{ organization.industry }}{% endif %}</p>
+      <a href="{% url 'organization-public-profile' organization.id %}" class="font-body-md text-body-md text-primary font-semibold hover:underline w-fit">{% trans "See their profile and reviews" %}</a>
+    </div>
+    <div class="flex flex-col items-start sm:items-end gap-1 shrink-0">
+      {% if average %}
+        <span class="font-display text-display text-on-surface tabular-nums">{{ average }}<span class="font-body-lg text-body-lg text-on-surface-variant">/5</span></span>
+        {% include "includes/stars.html" with rating=average %}
+        <span class="font-metadata text-metadata text-on-surface-variant">{% blocktrans count n=review_total %}{{ n }} review{% plural %}{{ n }} reviews{% endblocktrans %}</span>
+      {% else %}
+        <span class="font-body-md text-body-md text-on-surface-variant">{% trans "No ratings yet" %}</span>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="bg-surface-container-low rounded-2xl p-lg flex flex-col gap-sm">
+    <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary">gavel</span>{% trans "How applying works" %}</h2>
+    <ul class="flex flex-col gap-xs font-body-md text-body-md text-on-surface-variant list-disc pl-md">
+      <li>{% blocktrans with fee=fee %}You pay a one-time application fee of <strong>TZS {{ fee }}</strong> by mobile money. The organization only sees your application after you have paid.{% endblocktrans %}</li>
+      <li>{% blocktrans with hours=payment_hours %}When you apply, your seat is held for <strong>{{ hours }} hours</strong>. If you do not pay in that time, the seat is released to other students.{% endblocktrans %}</li>
+      <li>{% trans "After paying you can cancel once, within 24 hours, and get a free re-application credit. After that the fee cannot be refunded." %}</li>
+      <li>{% trans "A paid application is never rejected: the organization decides only whether to accept it, and you are notified by SMS and email." %}</li>
+    </ul>
+  </section>
+
+  <section class="flex flex-col sm:flex-row sm:items-center justify-between gap-sm">
+    <form method="post" action="{% url 'student-toggle-saved-slot' slot.id %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.path }}">
+      <button type="submit" class="px-md py-sm rounded-lg border border-outline-variant text-on-surface font-semibold flex items-center gap-xs hover:border-primary transition-colors">
+        <span class="material-symbols-outlined text-[20px]" {% if saved %}style="font-variation-settings: 'FILL' 1;"{% endif %}>bookmark</span>{% if saved %}{% trans "Saved" %}{% else %}{% trans "Save slot" %}{% endif %}
+      </button>
+    </form>
+    <div class="flex flex-col sm:items-end gap-xs">
+      {% if holds_seat %}
+        <a href="{% url 'student-applications' %}" class="bg-primary/10 text-primary px-lg py-3 rounded-xl font-semibold flex items-center justify-center gap-xs">{% trans "You have applied: see My Applications" %}</a>
+      {% elif closed_reason %}
+        <span class="bg-surface-container-high text-on-surface-variant px-lg py-3 rounded-xl font-semibold text-center">{{ closed_reason }}</span>
+      {% elif blocker %}
+        <p class="bg-error-container/40 text-on-error-container rounded-lg px-sm py-sm font-body-md text-body-md max-w-md">{{ blocker }}</p>
+      {% elif not can_apply %}
+        <p class="bg-surface-container-lowest rounded-lg px-sm py-sm font-body-md text-body-md text-on-surface-variant max-w-md">{% trans "Complete your profile and verify your phone to apply." %} <a class="text-primary font-semibold underline" href="{% url 'student-profile' %}">{% trans "Go to profile" %}</a></p>
+      {% else %}
+        <a href="{% url 'student-apply' slot.id %}" class="bg-primary text-on-primary px-lg py-3 rounded-xl font-semibold shadow-md hover:bg-primary-container transition-colors flex items-center justify-center gap-xs">{% trans "Apply now" %}<span class="material-symbols-outlined text-[20px]">arrow_forward</span></a>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

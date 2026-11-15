@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Message templates" %}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg max-w-3xl mx-auto">
+  <div class="flex flex-col gap-xs">
+    <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Message templates" %}</h1>
+    <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Save the acceptance messages you send often (reporting day, what to bring) and pick one when you accept applicants, one by one or many at once." %}</p>
+  </div>
+
+  <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm">
+    <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "New template" %}</h2>
+    <form method="post" class="flex flex-col gap-sm">
+      {% csrf_token %}
+      <div class="flex flex-col gap-xs">
+        <label class="font-body-md text-body-md font-semibold text-on-surface" for="tpl-name">{% trans "Name" %} *</label>
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">title</span></span><input id="tpl-name" type="text" name="name" maxlength="120" required placeholder="{% trans 'e.g. January intake' %}"></div>
+      </div>
+      <div class="flex flex-col gap-xs">
+        <label class="font-body-md text-body-md font-semibold text-on-surface" for="tpl-body">{% trans "Message" %} *</label>
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">chat</span></span><textarea id="tpl-body" name="body" rows="3" maxlength="500" required placeholder="{% trans 'e.g. Report on Monday 6 January at 8:00 AM at our head office. Bring your student ID and introduction letter.' %}"></textarea></div>
+        <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Up to 500 characters. It is shown to the student in the app and added to the SMS, email and acceptance letter." %}</p>
+      </div>
+      <button type="submit" class="self-end bg-primary text-on-primary px-md py-2 rounded-lg font-semibold">{% trans "Save template" %}</button>
+    </form>
+  </section>
+
+  {% if templates %}
+    <div class="flex flex-col gap-sm">
+      {% for t in templates %}
+        <details class="bg-surface-container-lowest rounded-xl shadow-sm">
+          <summary class="cursor-pointer p-md flex items-center justify-between gap-sm list-none">
+            <span class="flex flex-col min-w-0"><span class="font-body-lg text-body-lg font-semibold text-on-surface break-words">{{ t.name }}</span><span class="font-body-md text-body-md text-on-surface-variant truncate">{{ t.body }}</span></span>
+            <span class="material-symbols-outlined text-on-surface-variant shrink-0">edit</span>
+          </summary>
+          <div class="px-md pb-md flex flex-col gap-sm border-t border-surface-container pt-sm">
+            <form method="post" class="flex flex-col gap-xs">
+              {% csrf_token %}
+              <input type="hidden" name="template_id" value="{{ t.id }}">
+              <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">title</span></span><input type="text" name="name" maxlength="120" required value="{{ t.name }}" aria-label="{% trans 'Name' %}"></div>
+              <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">chat</span></span><textarea name="body" rows="3" maxlength="500" required aria-label="{% trans 'Message' %}">{{ t.body }}</textarea></div>
+              <button type="submit" class="self-end bg-primary text-on-primary px-md py-2 rounded-lg font-semibold">{% trans "Save changes" %}</button>
+            </form>
+            <form method="post" onsubmit="return confirm('{% trans 'Delete this template?' %}');" class="self-start">
+              {% csrf_token %}
+              <input type="hidden" name="template_id" value="{{ t.id }}"><input type="hidden" name="action" value="delete">
+              <button type="submit" class="text-error font-semibold text-body-md hover:underline flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">delete</span>{% trans "Delete template" %}</button>
+            </form>
+          </div>
+        </details>
+      {% endfor %}
+    </div>
+    <p class="font-metadata text-metadata text-on-surface-variant">{% blocktrans with n=templates|length %}{{ n }} of {{ max_templates }} templates used.{% endblocktrans %}</p>
+  {% else %}
+    <p class="font-body-md text-body-md text-on-surface-variant text-center">{% trans "No templates yet. Save your first one above." %}</p>
+  {% endif %}
+</div>
+{% endblock %}

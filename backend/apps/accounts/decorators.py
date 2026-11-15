@@ -1,3 +1,4 @@
+from django.utils.translation import gettext
 from functools import wraps
 from urllib.parse import quote
 
@@ -19,7 +20,7 @@ def hardware_reverify(view):
     def wrapper(request, *args, **kwargs):
         if request.method == "POST" and mfa.enforced() and not mfa.hardware_recent(request):
             messages.warning(
-                request, "This is a high-risk action. Confirm with your hardware security key, then submit again."
+                request, gettext("This is a high-risk action. Confirm with your hardware security key, then submit again.")
             )
             return redirect(f"{reverse('mfa-step-up')}?next={quote(request.get_full_path())}")
         return view(request, *args, **kwargs)

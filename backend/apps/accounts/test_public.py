@@ -108,7 +108,7 @@ def test_welcome_page_has_share_metadata(client, db):
 def test_private_pages_are_noindex(client, db):
     user = User.objects.create_user(email="s@x.tz", password="Secret123!", role=UserRole.STUDENT)
     client.force_login(user)
-    html = client.get("/auth/account/").content.decode()
+    html = client.get("/auth/account/", follow=True).content.decode()
     assert "noindex" in html
 
 

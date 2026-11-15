@@ -1,5 +1,6 @@
 """OTP screens: email verification after registration, and password-recovery code entry."""
 
+from django.utils.translation import gettext
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -83,11 +84,11 @@ def _decoy_verify_email(request):
 
 def _notify_send_result(request, result):
     if result.sent:
-        messages.success(request, "A new code has been sent.")
+        messages.success(request, gettext("A new code has been sent."))
     elif result.retry_after:
-        messages.error(request, f"Please wait {result.retry_after} seconds before requesting another code.")
+        messages.error(request, gettext('Please wait %(v1)s seconds before requesting another code.') % {"v1": result.retry_after})
     else:
-        messages.error(request, "We could not send a code. Please try again shortly.")
+        messages.error(request, gettext("We could not send a code. Please try again shortly."))
 
 
 @token_bucket(
@@ -166,7 +167,7 @@ def reset_verify(request):
         if request.POST.get("action") == "resend":
             if user is not None and otp.channel_verified(user, channel):
                 otp.send_otp(user, OtpPurpose.RECOVERY, channel)
-            messages.success(request, "If a code can be sent, it is on its way.")
+            messages.success(request, gettext("If a code can be sent, it is on its way."))
             return redirect("reset-verify")
         if form.is_valid():
             result = otp.EXPIRED

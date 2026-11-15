@@ -1,54 +1,54 @@
-{% comment %}
+{% load i18n %}{% comment %}
 Shared audit filter form. Context: f (GET params), actions, modules (optional),
 organizations (platform only), export_label.
 {% endcomment %}
 <form method="get" class="p-md bg-surface-container-low grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-sm border-b border-surface-container-highest">
   {% if organizations %}
-    <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Organization
+    <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{% trans "Organization" %}
       <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">apartment</span></span><select name="organization">
-        <option value="">All organizations</option>
+        <option value="">{% trans "All organizations" %}</option>
         {% for o in organizations %}<option value="{{ o.id }}" {% if f.organization == o.id|stringformat:"s" %}selected{% endif %}>{{ o.name }}</option>{% endfor %}
       </select></div>
     </label>
   {% endif %}
-  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Actor / member
-    <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">mail</span></span><input name="actor" value="{{ f.actor|default:'' }}" placeholder="Name or email"></div>
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{% trans "Actor / member" %}
+    <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">mail</span></span><input name="actor" value="{{ f.actor|default:'' }}" placeholder="{% trans 'Name or email' %}"></div>
   </label>
-  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Action type
-    <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input name="action" list="audit-actions" value="{{ f.action|default:'' }}" placeholder="e.g. Member Removed"></div>
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{% trans "Action type" %}
+    <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input name="action" list="audit-actions" value="{{ f.action|default:'' }}" placeholder="{% trans 'e.g. Member Removed' %}"></div>
     <datalist id="audit-actions">{% for a in actions %}<option value="{{ a }}">{% endfor %}</datalist>
   </label>
-  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Target / resource
-    <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input name="target" value="{{ f.target|default:'' }}" placeholder="Application, slot, document…"></div>
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{% trans "Target / resource" %}
+    <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input name="target" value="{{ f.target|default:'' }}" placeholder="{% trans 'Application, slot, document…' %}"></div>
   </label>
-  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">From
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{% trans "From" %}
     <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">calendar_today</span></span><input type="date" name="date_from" value="{{ f.date_from|default:'' }}"></div>
   </label>
-  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">To
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{% trans "To" %}
     <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">calendar_today</span></span><input type="date" name="date_to" value="{{ f.date_to|default:'' }}"></div>
   </label>
-  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Status
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{% trans "Status" %}
     <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">flag</span></span><select name="status">
-      <option value="">Any</option>
-      <option value="SUCCESS" {% if f.status == 'SUCCESS' %}selected{% endif %}>Successful</option>
-      <option value="FAILED" {% if f.status == 'FAILED' %}selected{% endif %}>Failed</option>
-      <option value="REJECTED" {% if f.status == 'REJECTED' %}selected{% endif %}>Rejected</option>
+      <option value="">{% trans "Any" %}</option>
+      <option value="SUCCESS" {% if f.status == 'SUCCESS' %}selected{% endif %}>{% trans "Successful" %}</option>
+      <option value="FAILED" {% if f.status == 'FAILED' %}selected{% endif %}>{% trans "Failed" %}</option>
+      <option value="REJECTED" {% if f.status == 'REJECTED' %}selected{% endif %}>{% trans "Rejected" %}</option>
     </select></div>
   </label>
   {% if modules %}
-  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Module
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">{% trans "Module" %}
     <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><select name="module">
-      <option value="">All modules</option>
+      <option value="">{% trans "All modules" %}</option>
       {% for m in modules %}<option value="{{ m }}" {% if f.module == m %}selected{% endif %}>{{ m }}</option>{% endfor %}
     </select></div>
   </label>
   {% endif %}
-  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant md:col-span-2">Keyword
-    <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input name="q" value="{{ f.q|default:'' }}" placeholder="Search anything…"></div>
+  <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant md:col-span-2">{% trans "Keyword" %}
+    <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input name="q" value="{{ f.q|default:'' }}" placeholder="{% trans 'Search anything…' %}"></div>
   </label>
   <div class="flex items-end gap-sm">
-    <button type="submit" class="px-md py-2 bg-primary text-on-primary rounded-lg font-semibold">Search</button>
-    <a href="?" class="px-md py-2 bg-surface-container rounded-lg font-semibold text-on-surface">Reset</a>
-    <button type="submit" name="export" value="csv" class="px-md py-2 bg-surface-container rounded-lg font-semibold text-on-surface" title="Exports are recorded in the audit log">Export CSV</button>
+    <button type="submit" class="px-md py-2 bg-primary text-on-primary rounded-lg font-semibold">{% trans "Search" %}</button>
+    <a href="?" class="px-md py-2 bg-surface-container rounded-lg font-semibold text-on-surface">{% trans "Reset" %}</a>
+    <button type="submit" name="export" value="csv" class="px-md py-2 bg-surface-container rounded-lg font-semibold text-on-surface" title="{% trans 'Exports are recorded in the audit log' %}">{% trans "Export CSV" %}</button>
   </div>
 </form>

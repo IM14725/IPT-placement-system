@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 import uuid
 from django.conf import settings
 from django.db import models
@@ -6,8 +7,12 @@ from apps.core.models import TimeStampedModel
 
 
 class NotificationType(models.TextChoices):
-    APPLICATION = "APPLICATION", "Application"
-    ACCEPTANCE = "ACCEPTANCE", "Acceptance"
+    APPLICATION = "APPLICATION", gettext_lazy("Application")
+    ACCEPTANCE = "ACCEPTANCE", gettext_lazy("Acceptance")
+    PAYMENT = "PAYMENT", gettext_lazy("Payment")
+    SLOT_ALERT = "SLOT_ALERT", gettext_lazy("Slot alert")
+    REVIEW = "REVIEW", gettext_lazy("Review")
+    SYSTEM = "SYSTEM", gettext_lazy("System")
 
 
 class Notification(TimeStampedModel):

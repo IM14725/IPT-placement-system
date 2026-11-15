@@ -1,3 +1,4 @@
+from django.utils.translation import gettext
 from functools import wraps
 
 from django.http import HttpResponseForbidden
@@ -77,9 +78,9 @@ def org_permission_required(perm):
         @wraps(view)
         def wrapper(request, *args, **kwargs):
             if not request.user.is_organization:
-                return HttpResponseForbidden("Organization account required.")
+                return HttpResponseForbidden(gettext("Organization account required."))
             if perm not in org_permissions(request.user):
-                return HttpResponseForbidden("Your organization role does not allow this action.")
+                return HttpResponseForbidden(gettext("Your organization role does not allow this action."))
             return view(request, *args, **kwargs)
 
         return wrapper

@@ -50,7 +50,7 @@ def _setup():
     )
     r = client.post(
         f"/student/apply/{slot.id}/",
-        {"application_letter": letter},
+        {"application_letter": letter, "accept_rules": "on"},
         follow=False,
     )
     assert r.status_code == 302 and "/student/payments/" in r.get("Location"), r.status_code

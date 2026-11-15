@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Rate the organization" %}{% endblock %}
+{% block content %}
+<div class="w-full max-w-xl mx-auto bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-md">
+  <div class="flex flex-col gap-xs">
+    <h1 class="font-headline-lg text-headline-lg text-on-surface">{% if review %}{% trans "Update your review" %}{% else %}{% trans "Rate your training" %}{% endif %}</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">{{ organization.name }} · {{ application.slot.title }}</p>
+  </div>
+  {% if error %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ error }}</p>{% endif %}
+  <form method="post" class="flex flex-col gap-md">
+    {% csrf_token %}
+    <fieldset class="flex flex-col gap-xs">
+      <legend class="font-body-md text-body-md font-semibold text-on-surface mb-1">{% trans "Your rating" %} *</legend>
+      <div class="flex flex-row-reverse justify-end gap-1" id="star-row">
+        {% for value in "54321" %}
+          <input type="radio" class="sr-only peer" name="rating" id="star-{{ value }}" value="{{ value }}" required {% if review and review.rating|stringformat:"s" == value %}checked{% endif %}>
+          <label for="star-{{ value }}" class="cursor-pointer text-outline-variant peer-checked:text-[#f9a825] hover:text-[#f9a825] peer-hover:text-[#f9a825] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-primary rounded" title="{{ value }}/5" aria-label="{{ value }} {% trans 'out of 5 stars' %}">
+            <span class="material-symbols-outlined text-[40px]" style="font-variation-settings: 'FILL' 1;">star</span>
+          </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <div class="flex flex-col gap-xs">
+      <label class="font-body-md text-body-md font-semibold text-on-surface" for="review-comment">{% trans "Your experience (optional)" %}</label>
+      <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span>
+        <textarea id="review-comment" name="comment" rows="4" maxlength="1000" placeholder="{% trans 'What did you learn? How was the supervision?' %}">{% if review %}{{ review.comment }}{% endif %}</textarea></div>
+      <p class="ipt-field-desc"><span class="material-symbols-outlined">visibility_off</span>{% trans "Shown on the organization's page without your name." %}</p>
+    </div>
+    <div class="flex items-center justify-end gap-sm">
+      <a href="{% url 'student-checklist' application.id %}" class="px-md py-sm rounded-lg font-semibold text-on-surface-variant hover:bg-surface-container">{% trans "Cancel" %}</a>
+      <button type="submit" class="bg-primary text-on-primary px-md py-sm rounded-lg font-semibold hover:bg-primary-container transition-colors">{% if review %}{% trans "Save changes" %}{% else %}{% trans "Submit review" %}{% endif %}</button>
+    </div>
+  </form>
+</div>
+<style>
+  /* Fill every star up to the chosen / hovered one (the row is reversed, so "~" reaches lower stars). */
+  #star-row input:checked ~ label, #star-row label:hover ~ label { color: #f9a825; }
+</style>
+{% endblock %}

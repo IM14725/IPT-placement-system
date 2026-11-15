@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Saved slots" %}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Saved slots" %}</h1>
+    <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">{% trans "Slots you bookmarked. Saving a slot does not reserve a seat: apply before it fills up." %}</p>
+  </div>
+  {% if slots %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+      {% for slot in slots %}{% include "includes/slot_card.html" %}{% endfor %}
+    </div>
+    {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="w-full flex flex-col items-center justify-center py-xl px-md bg-surface-container-lowest rounded-xl shadow-sm border border-dashed border-outline-variant/50 text-center">
+      <span class="material-symbols-outlined text-[40px] text-outline mb-sm">bookmark</span>
+      <h3 class="font-headline-md text-headline-md text-on-surface mb-2">{% trans "No saved slots yet" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-md mb-md">{% trans "Tap the bookmark on any slot to keep it here for later." %}</p>
+      <a href="{% url 'student-marketplace' %}" class="bg-primary text-on-primary px-md py-sm rounded-lg font-semibold">{% trans "Browse Slots" %}</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

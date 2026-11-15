@@ -1,4 +1,4 @@
-{% load form_tags %}
+{% load i18n %}{% load form_tags %}
 {% comment %}
   One form field in the platform's standard style: label, icon-chip box, help text and errors.
   Usage: {% include "includes/form_field.html" with field=form.email %}
@@ -7,9 +7,9 @@
 {% with kind=field|widget_kind %}
 <div class="flex flex-col gap-xs {{ wrapper_class }}">
   {% if kind == "checkbox" %}
-    <label class="flex items-center gap-sm cursor-pointer font-body-md text-on-surface" for="{{ field.id_for_label }}">{{ field }} <span>{{ field.label }}</span></label>
+    <label class="flex items-center gap-sm cursor-pointer font-body-md text-on-surface" for="{{ field.id_for_label }}">{{ field }} <span>{% trans field.label %}</span></label>
   {% else %}
-    <label class="{{ label_class|default:'font-body-md text-body-md font-semibold text-on-surface' }}" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="text-error" aria-hidden="true">*</span>{% endif %}</label>
+    <label class="{{ label_class|default:'font-body-md text-body-md font-semibold text-on-surface' }}" for="{{ field.id_for_label }}">{% trans field.label %}{% if field.field.required %} <span class="text-error" aria-hidden="true">*</span>{% endif %}</label>
     {% if kind == "file" %}
       <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
         <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">{{ icon|default:"upload_file" }}</span></span>

@@ -13,6 +13,7 @@ urlpatterns = [
     path("student/", include("apps.students.urls")),
     path("organization/", include("apps.companies.urls")),
     path("platform/", include("apps.core.urls")),
+    path("notifications/", include("apps.notifications.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
     path("api/locations/", include("apps.locations.urls")),
     path("api/slots/", include("apps.slots.urls")),

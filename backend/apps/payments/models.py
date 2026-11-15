@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 import uuid
 
 from django.db import models
@@ -18,9 +19,9 @@ class PaymentGateway(models.TextChoices):
 
 
 class PaymentStatus(models.TextChoices):
-    PENDING = "PENDING", "Pending"
-    PAID = "PAID", "Paid"
-    FAILED = "FAILED", "Failed"
+    PENDING = "PENDING", gettext_lazy("Pending")
+    PAID = "PAID", gettext_lazy("Paid")
+    FAILED = "FAILED", gettext_lazy("Failed")
 
 
 def generate_reference_id() -> str:

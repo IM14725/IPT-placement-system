@@ -48,3 +48,11 @@ if _DATABASE_URL:
         "default": dj_database_url.config(default=_DATABASE_URL, conn_max_age=60)
     }
 
+
+# Static files: hashed filenames + gzip copies (brotli too if the `brotli` package is installed), served by WhiteNoise (run `collectstatic` on deploy).
+# Production only: the manifest storage raises on a missing manifest, which would break dev and tests.
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
+WHITENOISE_MANIFEST_STRICT = False

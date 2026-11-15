@@ -1,0 +1,21 @@
+{% load i18n %}
+{# Applied -> Paid -> Waiting for acceptance -> Accepted. Needs: app. There is no "rejected" step. #}
+{% if app.status == 'UNPAID' or app.status == 'CANCELLED' %}
+  <div class="flex items-center gap-xs font-metadata text-metadata text-error">
+    <span class="material-symbols-outlined text-[16px]">{% if app.status == 'UNPAID' %}timer_off{% else %}cancel{% endif %}</span>
+    {% if app.status == 'UNPAID' %}{% trans "Payment time ran out and the seat was released. Re-book to try again." %}{% else %}{% trans "You cancelled this application." %}{% endif %}
+  </div>
+{% else %}
+  <ol class="flex items-start w-full max-w-xl" aria-label="{% trans 'Application progress' %}">
+    {% for step in app.progress_steps %}
+      <li class="flex-1 flex flex-col items-center gap-1 relative min-w-0">
+        {% if not forloop.first %}<span class="absolute top-3 right-1/2 w-full h-[2px] {% if step.done or step.current %}bg-[rgb(var(--c-ok-fg))]{% else %}bg-surface-container-high{% endif %}" aria-hidden="true"></span>{% endif %}
+        <span class="relative z-10 w-6 h-6 rounded-full flex items-center justify-center
+          {% if step.done %}bg-[rgb(var(--c-ok-fg))] text-[rgb(var(--c-ok-bg))]{% elif step.current %}bg-primary text-on-primary{% else %}bg-surface-container-lowest border-2 border-outline text-outline{% endif %}">
+          <span class="material-symbols-outlined text-[14px]">{% if step.done %}check{% elif step.current %}hourglass_top{% else %}circle{% endif %}</span>
+        </span>
+        <span class="font-metadata text-metadata text-center px-1 {% if step.done or step.current %}text-on-surface font-semibold{% else %}text-on-surface-variant{% endif %}">{{ step.label }}</span>
+      </li>
+    {% endfor %}
+  </ol>
+{% endif %}

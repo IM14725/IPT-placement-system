@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Ratings" %}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg max-w-3xl mx-auto">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-md">
+    <div class="flex flex-col gap-xs">
+      <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Ratings" %}</h1>
+      <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "What the students you accepted say about training with you. Students see this on your public page." %}</p>
+    </div>
+    {% if organization.is_approved %}
+    <a href="{% url 'organization-public-profile' organization.id %}" class="px-md py-sm rounded-lg border border-primary text-primary font-semibold flex items-center gap-xs hover:bg-primary/5 self-start md:self-auto whitespace-nowrap">
+      <span class="material-symbols-outlined text-[20px]">visibility</span>{% trans "View public page" %}
+    </a>
+    {% endif %}
+  </div>
+
+  <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-md items-center">
+    <div class="flex flex-col items-center gap-1 px-md">
+      <span class="font-display text-display text-on-surface tabular-nums">{{ average|default:"—" }}</span>
+      {% if average %}{% include "includes/stars.html" with rating=average %}{% endif %}
+      <span class="font-metadata text-metadata text-on-surface-variant">{% blocktrans count n=review_total %}{{ n }} review{% plural %}{{ n }} reviews{% endblocktrans %}</span>
+    </div>
+    <div class="flex flex-col gap-1">
+      {% for row in breakdown %}
+        <div class="flex items-center gap-sm">
+          <span class="font-metadata text-metadata text-on-surface-variant w-10 shrink-0 tabular-nums">{{ row.stars }} ★</span>
+          <div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden" role="img" aria-label="{% blocktrans trimmed with stars=row.stars num=row.count %}{{ stars }} stars: {{ num }}{% endblocktrans %}"><div class="h-full bg-[#f9a825] rounded-full" style="width: {{ row.percent }}%"></div></div>
+          <span class="font-metadata text-metadata text-on-surface-variant w-8 text-right shrink-0 tabular-nums">{{ row.count }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% if reviews %}
+    <div class="flex flex-col gap-sm">
+      {% for r in reviews %}
+        <article class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-xs">
+          <div class="flex items-center justify-between gap-sm flex-wrap">
+            {% include "includes/stars.html" with rating=r.rating %}
+            <span class="font-metadata text-metadata text-on-surface-variant">{{ r.created_at|date:"d M Y" }}</span>
+          </div>
+          {% if r.comment %}<p class="font-body-md text-body-md text-on-surface whitespace-pre-line break-words">{{ r.comment }}</p>{% endif %}
+          <span class="font-metadata text-metadata text-on-surface-variant">{{ r.application.slot.title }}{% if r.student.university %} · {{ r.student.university }}{% endif %}</span>
+        </article>
+      {% endfor %}
+    </div>
+    {% include "includes/pagination.html" %}
+  {% else %}
+    <p class="bg-surface-container-lowest rounded-xl p-md shadow-sm font-body-md text-body-md text-on-surface-variant">{% trans "No ratings yet. Students you accept can rate their training here." %}</p>
+  {% endif %}
+</div>
+{% endblock %}

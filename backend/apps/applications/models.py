@@ -1,4 +1,5 @@
 from pathlib import Path
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -93,5 +94,76 @@ class Application(TimeStampedModel):
         self.is_accepted = True
         self.save(update_fields=["is_accepted", "updated_at"])
 
+    @property
+    def cancel_deadline(self):
+        """When the 24h cancellation window closes (None when it does not apply)."""
+        from datetime import timedelta
+
+        payment = getattr(self, "payment", None)
+        if not payment or not payment.paid_at:
+            return None
+        return payment.paid_at + timedelta(hours=24)
+
+    @property
+    def progress_steps(self):
+        """Applied -> Paid -> Waiting for acceptance -> Accepted. There is no rejected step:
+        an organization cannot reject a paid application."""
+        paid = self.status == ApplicationStatus.PAID
+        return [
+            {"key": "applied", "label": _("Applied"), "done": True},
+            {"key": "paid", "label": _("Paid"), "done": paid,
+             "current": self.status == ApplicationStatus.PENDING},
+            {"key": "review", "label": _("Waiting for acceptance"), "done": paid and self.is_accepted,
+             "current": paid and not self.is_accepted},
+            {"key": "accepted", "label": _("Accepted"), "done": paid and self.is_accepted},
+        ]
+
     def __str__(self):
         return f"Application #{self.pk} - {self.student} -> {self.slot}"
+
+
+class ApplicantNote(TimeStampedModel):
+    """Private note an organization's team keeps about an applicant. Never shown to the student."""
+
+    application = models.ForeignKey(
+        Application, on_delete=models.CASCADE, related_name="notes"
+    )
+    organization = models.ForeignKey(
+        "companies.Organization", on_delete=models.CASCADE, related_name="applicant_notes"
+    )
+    author = models.ForeignKey(
+        "accounts.User", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    # Kept so the note still shows who wrote it after that member leaves.
+    author_label = models.CharField(max_length=200, blank=True)
+    body = models.TextField(max_length=2000)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Note on {self.application_id} by {self.author_label}"
+
+
+class OrganizationReview(TimeStampedModel):
+    """A student's rating of the organization that accepted them (one per accepted application)."""
+
+    application = models.OneToOneField(
+        Application, on_delete=models.CASCADE, related_name="review"
+    )
+    organization = models.ForeignKey(
+        "companies.Organization", on_delete=models.CASCADE, related_name="reviews"
+    )
+    student = models.ForeignKey(
+        "students.StudentProfile", on_delete=models.CASCADE, related_name="reviews"
+    )
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    comment = models.TextField(blank=True, max_length=1000)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.rating}/5 for {self.organization_id}"

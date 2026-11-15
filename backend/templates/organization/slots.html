@@ -16,17 +16,17 @@
     </a>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-sm">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-sm">
     <div class="bg-surface-container-low p-md rounded-xl shadow-sm flex flex-col gap-sm">
       <div class="flex items-center justify-between">
-        <span class="text-body-md font-body-md text-on-surface-variant uppercase tracking-wider">Total Slots</span>
+        <span class="text-body-md font-body-md text-on-surface-variant uppercase tracking-wider">{% trans "Total Slots" %}</span>
         <span class="material-symbols-outlined text-primary">work</span>
       </div>
       <span class="text-display font-display text-on-surface">{{ slots|length }}</span>
     </div>
     <div class="bg-surface-container-low p-md rounded-xl shadow-sm flex flex-col gap-sm">
       <div class="flex items-center justify-between">
-        <span class="text-body-md font-body-md text-on-surface-variant uppercase tracking-wider">Total Spots</span>
+        <span class="text-body-md font-body-md text-on-surface-variant uppercase tracking-wider">{% trans "Total Spots" %}</span>
         <span class="material-symbols-outlined text-secondary">groups</span>
       </div>
       <span class="text-display font-display text-on-surface">{{ total_capacity }}</span>
@@ -44,7 +44,7 @@
     <div class="bg-surface-container-low p-md rounded-xl shadow-sm flex flex-col gap-sm relative overflow-hidden group">
       <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500"></div>
       <div class="flex items-center justify-between relative z-10">
-        <span class="text-body-md font-body-md text-on-surface-variant uppercase tracking-wider">{% trans "Total Applications" %}</span>
+        <span class="text-body-md font-body-md text-on-surface-variant uppercase tracking-wider">{% trans "Paid Applicants" %}</span>
         <span class="material-symbols-outlined text-primary">notifications_active</span>
       </div>
       <span class="text-display font-display text-on-surface relative z-10">{{ total_applications }}</span>
@@ -52,9 +52,35 @@
   </div>
 
   {% if slots %}
+    <form class="ipt-filterbar bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm" data-filterbar data-list-filter data-filter-remove="{% trans 'Remove filter' %}" onsubmit="return false">
+      <div class="flex items-end gap-xs">
+        <div class="flex-1 min-w-0 flex flex-col gap-xs">
+          <label class="hidden md:block font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="slot-q">{% trans "Search" %}</label>
+          <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span>
+            <input id="slot-q" data-list-q type="search" maxlength="100" autocomplete="off" aria-label="{% trans 'Search' %}" placeholder="{% trans 'Title, field or department' %}"></div>
+        </div>
+        <button type="button" data-filter-toggle aria-expanded="false" aria-controls="slot-filter-panel" class="shrink-0 h-[46px] px-md rounded-lg border border-outline-variant bg-surface-container text-on-surface font-body-md font-semibold flex items-center gap-xs hover:border-primary transition-colors"><span class="material-symbols-outlined text-[20px]">tune</span><span>{% trans "Filters" %}</span><span data-filter-count hidden class="min-w-[20px] h-5 px-1 rounded-full bg-primary text-on-primary font-metadata text-metadata flex items-center justify-center">0</span></button>
+      </div>
+      <div data-filter-chips class="ipt-chips" hidden></div>
+      <div id="slot-filter-panel" data-filter-panel class="grid grid-cols-1 md:grid-cols-3 gap-sm">
+        <div class="flex flex-col gap-xs" data-filter-field>
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="slot-status">{% trans "Status" %}</label>
+          <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">flag</span></span>
+            <select id="slot-status" data-list-status>
+              <option value="">{% trans "All" %}</option>
+              <option value="OPEN">{% trans "Open" %}</option>
+              <option value="FULL">{% trans "Full" %}</option>
+              <option value="PAUSED">{% trans "Paused" %}</option>
+              <option value="CLOSED">{% trans "Closed" %}</option>
+            </select></div>
+        </div>
+      </div>
+    </form>
+    <p data-list-empty hidden class="font-body-md text-body-md text-on-surface-variant text-center py-md">{% trans "No slots match your search." %}</p>
+
     <div class="flex flex-col gap-sm">
       {% for slot in slots %}
-        <div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col lg:flex-row lg:items-center justify-between gap-md group hover:shadow-md transition-shadow {% if slot.status == 'PAUSED' %}opacity-75{% endif %}">
+        <div data-filter-item data-filter-status="{{ slot.status }}" data-filter-text="{{ slot.title|lower }} {{ slot.industry|lower }} {{ slot.role_type|lower }} {{ slot.department|lower }} {{ slot.district|lower }}" class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col lg:flex-row lg:items-center justify-between gap-md group hover:shadow-md transition-shadow {% if slot.status == 'PAUSED' %}opacity-75{% endif %}">
           <div class="flex flex-col gap-xs flex-1 min-w-0">
             <div class="flex items-center gap-sm mb-1 flex-wrap">
               <h3 class="text-headline-md font-headline-md text-on-surface truncate">{{ slot.title }}</h3>
@@ -62,24 +88,30 @@
                 {% if slot.status == 'OPEN' %}bg-[#e8f5e9] text-[#1b5e20]
                 {% elif slot.status == 'FULL' %}bg-error/10 text-error
                 {% else %}bg-outline-variant/30 text-on-surface-variant{% endif %}">{{ slot.get_status_display }}</span>
+              {% if slot.applications_closed %}<span class="px-2 py-1 font-label-caps text-label-caps rounded-full whitespace-nowrap bg-[#fef3c7] text-[#854d0e]">{% trans "Applications closed" %}</span>{% endif %}
             </div>
             <div class="flex items-center gap-2 text-body-md font-body-md text-on-surface-variant truncate flex-wrap">
               <span>{{ slot.industry }}</span>
               <span class="text-outline-variant text-xs">•</span>
               <span>{{ slot.role_type }}</span>
               {% if slot.department %}<span class="text-outline-variant text-xs">•</span><span>{{ slot.department }}</span>{% endif %}
-              {% if slot.level %}<span class="text-outline-variant text-xs">•</span><span>Year {{ slot.level }}</span>{% endif %}
+              {% if slot.requirement_label %}<span class="text-outline-variant text-xs">•</span><span>{{ slot.requirement_label }}</span>{% endif %}
               <span class="text-outline-variant text-xs">•</span>
               <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">location_on</span>{{ slot.district }}</span>
+              {% if slot.application_deadline %}
+                <span class="text-outline-variant text-xs">•</span>
+                <span class="flex items-center gap-1 {% if slot.deadline_passed %}text-[#854d0e] font-semibold{% elif slot.deadline_soon %}text-[#a16207] font-semibold{% endif %}"><span class="material-symbols-outlined text-[14px]">event</span>{% if slot.deadline_passed %}{% trans "Closed" %}{% else %}{% trans "Apply by" %}{% endif %} {{ slot.application_deadline|date:"j M Y, H:i" }}</span>
+              {% endif %}
+              {% if slot.placement_label %}<span class="text-outline-variant text-xs">•</span><span>{{ slot.placement_label }}</span>{% endif %}
             </div>
           </div>
           <div class="flex flex-wrap lg:flex-nowrap items-center gap-md lg:gap-xl">
             <div class="flex flex-col gap-1 min-w-[100px]">
-              <span class="text-metadata font-metadata text-on-surface-variant uppercase">Spots Left</span>
+              <span class="text-metadata font-metadata text-on-surface-variant uppercase">{% trans "Spots Left" %}</span>
               <div class="flex items-center gap-2">
-                <span class="text-body-lg font-body-lg text-on-surface font-semibold">{{ slot.available_count }}/{{ slot.capacity }}</span>
+                <span class="text-body-lg font-body-lg text-on-surface font-semibold">{{ slot.seats_left }}/{{ slot.capacity }}</span>
                 <div class="w-16 h-1.5 bg-surface-variant rounded-full overflow-hidden">
-                  <div class="h-full {% if slot.available_count == 0 %}bg-error{% else %}bg-primary{% endif %} rounded-full" style="width: {{ slot.fill_percent }}%"></div>
+                  <div class="h-full {% if slot.seats_left == 0 %}bg-error{% else %}bg-primary{% endif %} rounded-full" style="width: {{ slot.fill_percent }}%"></div>
                 </div>
               </div>
             </div>
@@ -91,17 +123,45 @@
             {% endif %}
             <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-surface-variant pt-md lg:pt-0 lg:pl-md w-full lg:w-auto mt-sm lg:mt-0 justify-end">
               <a href="{% url 'organization-applicants' slot.id %}" class="px-sm py-1.5 text-primary bg-primary/5 hover:bg-primary/10 rounded-lg text-body-md font-body-md font-medium transition-colors">{% trans "Applicants" %}</a>
-              <a href="{% url 'organization-slot-edit' slot.id %}" class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="Edit"><span class="material-symbols-outlined text-[20px]">edit</span></a>
+              <a href="{% url 'organization-slot-edit' slot.id %}" class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="{% trans 'Edit' %}"><span class="material-symbols-outlined text-[20px]">edit</span></a>
               <form method="post" action="{% url 'organization-slot-toggle' slot.id %}">
                 {% csrf_token %}
-                <button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="{% if slot.status == 'PAUSED' %}Resume{% else %}Pause{% endif %}">
+                <button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="{% if slot.status == 'PAUSED' %}{% trans 'Resume' %}{% else %}{% trans 'Pause' %}{% endif %}">
                   <span class="material-symbols-outlined text-[20px]">{% if slot.status == 'PAUSED' %}play_arrow{% else %}pause{% endif %}</span>
                 </button>
               </form>
-              <form method="post" action="{% url 'organization-slot-delete' slot.id %}" onsubmit="return confirm('Delete this slot?');">
+              <details class="relative">
+                <summary class="list-none cursor-pointer p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors {% if slot.applications_closed %}text-[#854d0e]{% endif %}" title="{% trans 'Extend deadline' %}" aria-label="{% trans 'Extend deadline' %}"><span class="material-symbols-outlined text-[20px]">update</span></summary>
+                <form method="post" action="{% url 'organization-slot-extend' slot.id %}" class="absolute right-0 z-20 mt-1 w-56 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant p-sm flex flex-col gap-xs">
+                  {% csrf_token %}
+                  <label class="font-metadata text-metadata text-on-surface-variant" for="extend-{{ slot.id }}">{% trans "Extend the deadline by" %}</label>
+                  <div class="ipt-field-box">
+                    <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">update</span></span>
+                    <select id="extend-{{ slot.id }}" name="days" class="ipt-select">
+                      <option value="3">{% trans "3 days" %}</option>
+                      <option value="7" selected>{% trans "7 days" %}</option>
+                      <option value="14">{% trans "14 days" %}</option>
+                      <option value="30">{% trans "30 days" %}</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="bg-primary text-on-primary rounded-lg px-sm py-1.5 text-body-md font-semibold">{% trans "Extend" %}</button>
+                </form>
+              </details>
+              <form method="post" action="{% url 'organization-slot-close' slot.id %}" {% if slot.status != 'CLOSED' %}onsubmit="return confirm('{% trans "Close this slot to new applications? Existing applicants are not affected." as close_msg %}{{ close_msg|escapejs }}');"{% endif %}>
                 {% csrf_token %}
-                <button class="p-1.5 text-error hover:bg-error-container hover:text-on-error-container rounded-lg transition-colors ml-1" title="Delete"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+                <button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="{% if slot.status == 'CLOSED' %}{% trans 'Reopen' %}{% else %}{% trans 'Close to new applications' %}{% endif %}">
+                  <span class="material-symbols-outlined text-[20px]">{% if slot.status == 'CLOSED' %}lock_open{% else %}lock{% endif %}</span>
+                </button>
               </form>
+              <a href="{% url 'organization-slot-duplicate' slot.id %}" class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="{% trans 'Duplicate (post again)' %}" aria-label="{% trans 'Duplicate (post again)' %}"><span class="material-symbols-outlined text-[20px]">content_copy</span></a>
+              {% if slot.can_delete %}
+              <form method="post" action="{% url 'organization-slot-delete' slot.id %}" onsubmit="return confirm('{% trans "Delete this slot?" as delete_msg %}{{ delete_msg|escapejs }}');">
+                {% csrf_token %}
+                <button class="p-1.5 text-error hover:bg-error-container hover:text-on-error-container rounded-lg transition-colors ml-1" title="{% trans 'Delete' %}"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+              </form>
+              {% else %}
+              <span class="p-1.5 text-outline-variant ml-1 cursor-not-allowed" title="{% trans 'A slot with applications cannot be deleted. Pause it instead.' %}" aria-label="{% trans 'A slot with applications cannot be deleted. Pause it instead.' %}"><span class="material-symbols-outlined text-[20px]">delete_forever</span></span>
+              {% endif %}
             </div>
           </div>
         </div>

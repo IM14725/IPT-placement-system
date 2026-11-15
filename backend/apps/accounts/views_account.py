@@ -1,11 +1,13 @@
 """Account & security: change email/phone (verified by OTP on the NEW value) and password."""
 
+from django.utils.translation import gettext
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.password_validation import validate_password
 from django.db import IntegrityError, transaction
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.decorators.cache import never_cache
 
 from apps.accounts import otp
@@ -47,20 +49,41 @@ def _phone_in_use(phone, user):
     return bool(phone) and User.objects.filter(phone=phone).exclude(pk=user.pk).exists()
 
 
+def security_context(request):
+    """Forms and numbers for the "Account & security" section (includes/account_security.html).
+
+    Every form gets its own ``auto_id`` prefix so the section can sit on the same page as the
+    profile form without duplicate element ids (both have a "phone" field, two have "current_password").
+    """
+    from apps.accounts.sessions import seconds_remaining
+
+    return {
+        "email_form": ChangeEmailForm(auto_id="sec_email_%s"),
+        "phone_form": ChangePhoneForm(initial={"phone": request.user.phone}, auto_id="sec_phone_%s"),
+        "pwd_form": ChangePasswordForm(user=request.user, auto_id="sec_pwd_%s"),
+        "session_seconds": seconds_remaining(request),
+    }
+
+
 @login_required
 @never_cache
 def account_security(request):
-    from apps.accounts.sessions import seconds_remaining
+    """Students and organization members manage their sign-in details inside their profile page
+    (one page, "Account & security" tab). This address stays for every redirect that lands here and
+    for platform admins, who have no profile page."""
+    url = _security_tab_url(request.user)
+    if url:
+        return redirect(url)
+    return render(request, "registration/account_security.html", security_context(request))
 
-    return render(
-        request,
-        "registration/account_security.html",
-        {
-            "email_form": ChangeEmailForm(),
-            "phone_form": ChangePhoneForm(initial={"phone": request.user.phone}),
-            "session_seconds": seconds_remaining(request),
-        },
-    )
+
+def _security_tab_url(user):
+    """Where this user's "Account & security" lives: their profile page, tab #security (admins: none)."""
+    if user.is_student:
+        return reverse("student-profile") + "#security"
+    if user.is_organization:
+        return reverse("organization-profile") + "#security"
+    return None
 
 
 def _start_change(request, kind, form_class, template_forms):
@@ -85,14 +108,14 @@ def _start_change(request, kind, form_class, template_forms):
         messages.error(request, EMAIL_TAKEN if kind == "email" else PHONE_TAKEN)
         return redirect("account-security")
     if unchanged:
-        messages.info(request, f"That is already your verified {kind}.")
+        messages.info(request, gettext('That is already your verified %(kind)s.') % {"kind": kind})
         return redirect("account-security")
     result = otp.send_otp(user, purpose, channel, destination=new_value)
     if not result.sent:
         if result.retry_after:
-            messages.error(request, f"Please wait {result.retry_after} seconds before requesting another code.")
+            messages.error(request, gettext('Please wait %(v1)s seconds before requesting another code.') % {"v1": result.retry_after})
         else:
-            messages.error(request, "We could not send a code. Please check the details and try again.")
+            messages.error(request, gettext("We could not send a code. Please check the details and try again."))
         return redirect("account-security")
     return redirect("verify-contact", kind=kind)
 
@@ -123,17 +146,17 @@ def verify_contact(request, kind):
     purpose, channel = _KINDS[kind]
     destination = otp.pending_destination(user, purpose)
     if not destination:
-        messages.error(request, "That change has expired. Please start again.")
+        messages.error(request, gettext("That change has expired. Please start again."))
         return redirect("account-security")
     form = OtpCodeForm(request.POST or None)
     if request.method == "POST":
         if request.POST.get("action") == "resend":
             result = otp.send_otp(user, purpose, channel, destination=destination)
-            messages.success(request, "A new code has been sent.") if result.sent else messages.error(
+            messages.success(request, gettext("A new code has been sent.")) if result.sent else messages.error(
                 request,
-                f"Please wait {result.retry_after} seconds before requesting another code."
+                gettext('Please wait %(v1)s seconds before requesting another code.') % {"v1": result.retry_after}
                 if result.retry_after
-                else "We could not send a code. Please try again shortly.",
+                else gettext("We could not send a code. Please try again shortly."),
             )
             return redirect("verify-contact", kind=kind)
         if form.is_valid():
@@ -142,9 +165,9 @@ def verify_contact(request, kind):
                 return _apply_change(request, kind, destination)
             form.add_error(
                 "code",
-                "Incorrect code. The change was not saved."
+                gettext("Incorrect code. The change was not saved.")
                 if result == otp.INVALID
-                else "That code has expired. Request a new one.",
+                else gettext("That code has expired. Request a new one."),
             )
     masked = destination if kind == "phone" else destination
     return render(
@@ -167,13 +190,13 @@ def _apply_change(request, kind, value):
             # Re-check at the moment of saving: someone may have claimed it since the code was sent.
             if kind == "email":
                 if _email_in_use(value, user):
-                    raise IntegrityError("email taken")
+                    raise IntegrityError(gettext("email taken"))
                 user.email = value
                 user.email_verified = True
                 user.save(update_fields=["email", "email_verified"])
             else:
                 if _phone_in_use(value, user):
-                    raise IntegrityError("phone taken")
+                    raise IntegrityError(gettext("phone taken"))
                 user.phone = value
                 user.phone_verified = True
                 user.save(update_fields=["phone", "phone_verified"])
@@ -190,7 +213,7 @@ def _apply_change(request, kind, value):
         description=f"Verified and saved a new {kind}",
         context={"old": old, "new": value},
     )
-    messages.success(request, f"Your {kind} was verified and updated.")
+    messages.success(request, gettext('Your %(kind)s was verified and updated.') % {"kind": kind})
     return redirect("account-security")
 
 
@@ -202,6 +225,14 @@ def change_password(request):
     user = request.user
     forced = user.must_change_password
     form = ChangePasswordForm(request.POST or None, user=user)
+    tab_url = _security_tab_url(user)
+    if request.method == "POST" and not forced and tab_url and not form.is_valid():
+        # Changed from the security tab: show what was wrong there. The forced "replace your temporary
+        # password" step keeps its own page below.
+        for errors in form.errors.values():
+            for error in errors:
+                messages.error(request, error)
+        return redirect(tab_url)
     if request.method == "POST" and form.is_valid():
         user.set_password(form.cleaned_data["password1"])
         user.must_change_password = False
@@ -220,7 +251,7 @@ def change_password(request):
             organization=_org_of(user),
             description="Replaced the temporary password" if forced else "Changed password",
         )
-        messages.success(request, "Your password has been updated.")
+        messages.success(request, gettext("Your password has been updated."))
         from apps.accounts.views import _dashboard_url
 
         return redirect(_dashboard_url(user))

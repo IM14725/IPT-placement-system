@@ -5,61 +5,126 @@
 <div class="w-full flex flex-col gap-md">
   <div class="w-full flex flex-col gap-sm">
     <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Find an IPT Slot" %}</h1>
-    <p class="font-body-lg text-body-lg text-on-surface-variant max-w-[600px]">{% trans "Browse and filter live training opportunities tailored to your academic background and career goals." %}</p>
+    <p class="hidden sm:block font-body-lg text-body-lg text-on-surface-variant max-w-[600px]">{% trans "Browse and filter live training opportunities tailored to your academic background and career goals." %}</p>
   </div>
 
-  {% if not profile or not profile.is_verified %}
-    <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex items-start gap-sm text-body-md text-on-surface-variant">
+  {% if not can_apply %}
+    <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex items-start gap-sm text-body-md text-on-surface-variant border-l-4 border-[#f9a825]">
       <span class="material-symbols-outlined text-tertiary">info</span>
-      {% if not profile %}
-        Complete your <a class="font-semibold text-primary underline" href="{% url 'student-profile' %}">profile</a> and upload your verification documents before applying.
-      {% else %}
-        Your account is <span class="font-semibold">{{ profile.get_verification_status_display }}</span>.
-        Once approved, you can apply to slots. <a class="font-semibold text-primary underline" href="{% url 'student-documents' %}">Upload documents</a>
-        {% if profile.verification_status == 'REJECTED' %} · Reason: {{ profile.rejection_reason }}{% endif %}
-      {% endif %}
+      <p>
+        {% if not profile or not profile.is_complete %}
+          {% trans "Complete your profile (course, region and district) before applying." %}
+          <a class="font-semibold text-primary underline" href="{% url 'student-profile' %}">{% trans "Complete Profile" %}</a>
+        {% else %}
+          {% trans "Verify your phone number before applying. It takes one SMS code." %}
+          <a class="font-semibold text-primary underline" href="{% url 'account-security' %}">{% trans "Verify phone" %}</a>
+        {% endif %}
+      </p>
     </div>
   {% endif %}
 
-  <!-- Filter Bar -->
-  <div class="w-full bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col lg:flex-row gap-sm items-end relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none"></div>
-    <div class="w-full flex-1 flex flex-col gap-xs relative z-10">
-      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Region" %}</label>
-      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">map</span></span><select id="filter-region">
-          <option value="">{% trans "All Regions" %}</option>
-          {% for r in regions %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}
-        </select></div>
-    </div>
-    <div class="w-full flex-1 flex flex-col gap-xs relative z-10">
-      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "District" %}</label>
-      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">location_on</span></span><select id="filter-district">
-          <option value="">{% trans "All Districts" %}</option>
-        </select></div>
-    </div>
-    <div class="w-full flex-1 flex flex-col gap-xs relative z-10">
-      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Academic Discipline" %}</label>
-      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">work</span></span><input id="filter-department" type="text" placeholder="e.g. Computer Science"></div>
-    </div>
-    <div class="w-full flex-1 flex flex-col gap-xs relative z-10">
-      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Organization" %}</label>
-      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input id="filter-organization" type="text" placeholder="{% trans 'Search by organization name' %}"></div>
-    </div>
-      <div class="flex-1 min-w-[200px] flex flex-col gap-xs">
-        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Education Level (TCU)" %}</label>
-        <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">school</span></span><select id="filter-education-level" name="education_level">
-          <option value="">{% trans "Any Qualification" %}</option>
-          {% for value, label in education_levels %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-        </select></div>
+  <!-- Search and filters: region + district and a Filters button on phones (everything else behind it), all fields on wide screens -->
+  <section class="ipt-filterbar w-full bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm" data-filterbar data-filter-remove="{% trans 'Remove filter' %}" aria-label="{% trans 'Search and filters' %}">
+    <!-- Region and district stay visible, side by side -->
+    <div class="grid grid-cols-2 gap-xs">
+      <div class="min-w-0 flex flex-col gap-xs">
+        <label class="hidden md:block font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="filter-region">{% trans "Region" %}</label>
+        <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">map</span></span><select id="filter-region" aria-label="{% trans 'Region' %}">
+            <option value="">{% trans "All Regions" %}</option>
+            {% for r in regions %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}
+          </select></div>
       </div>
-      <div class="flex-1 min-w-[200px] flex flex-col gap-xs">
-        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Academic Year</label>
-        <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">tag</span></span><select id="filter-academic-year" name="academic_year">
-          <option value="">Any Year</option>
-          {% for value, label in academic_years %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-        </select></div>
+      <div class="min-w-0 flex flex-col gap-xs">
+        <label class="hidden md:block font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="filter-district">{% trans "District" %}</label>
+        <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">location_on</span></span><select id="filter-district" aria-label="{% trans 'District' %}">
+            <option value="">{% trans "All Districts" %}</option>
+          </select></div>
       </div>
-  </div>
+    </div>
+
+    <!-- Filters button + quick filters: one row that scrolls sideways if it must -->
+    <div class="w-full flex flex-nowrap items-center gap-xs overflow-x-auto no-scrollbar" role="group" aria-label="{% trans 'Quick filters' %}">
+      <button type="button" data-filter-toggle aria-expanded="false" aria-controls="filter-panel" class="shrink-0 h-9 px-sm rounded-full border border-outline-variant bg-surface-container text-on-surface font-body-md font-semibold flex items-center gap-xs hover:border-primary transition-colors"><span class="material-symbols-outlined text-[20px]">tune</span><span>{% trans "Filters" %}</span><span data-filter-count hidden class="min-w-[20px] h-5 px-1 rounded-full bg-primary text-on-primary font-metadata text-metadata flex items-center justify-center">0</span></button>
+      <span class="hidden sm:inline font-metadata text-metadata text-on-surface-variant uppercase tracking-wider mr-1">{% trans "Quick filters" %}</span>
+      <button type="button" data-quick="closing" class="shrink-0 whitespace-nowrap px-sm py-1 rounded-full border bg-surface-container-lowest text-on-surface border-outline-variant font-body-md text-body-md font-semibold flex items-center gap-xs hover:border-primary transition-colors" aria-pressed="false"><span class="material-symbols-outlined text-[18px]">hourglass_top</span>{% trans "Closing within 7 days" %}</button>
+      <button type="button" data-quick="new" class="shrink-0 whitespace-nowrap px-sm py-1 rounded-full border bg-surface-container-lowest text-on-surface border-outline-variant font-body-md text-body-md font-semibold flex items-center gap-xs hover:border-primary transition-colors" aria-pressed="false"><span class="material-symbols-outlined text-[18px]">fiber_new</span>{% trans "New this week" %}</button>
+    </div>
+
+    <div data-filter-chips class="ipt-chips" hidden></div>
+
+    <div id="filter-panel" data-filter-panel class="flex flex-col gap-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-sm">
+        <div class="flex flex-col gap-xs sm:col-span-2" data-filter-field>
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="filter-keyword">{% trans "Keyword or skill" %}</label>
+          <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">manage_search</span></span><input id="filter-keyword" type="text" maxlength="100" placeholder="{% trans 'e.g. Python, accounting, networking' %}"></div>
+        </div>
+        <div class="flex flex-col gap-xs" data-filter-field>
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="filter-department">{% trans "Academic Discipline" %}</label>
+          <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">work</span></span><input id="filter-department" type="text" placeholder="{% trans 'e.g. Computer Science' %}"></div>
+        </div>
+        <div class="flex flex-col gap-xs" data-filter-field>
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="filter-organization">{% trans "Organization" %}</label>
+          <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input id="filter-organization" type="text" placeholder="{% trans 'Search by organization name' %}"></div>
+        </div>
+        <div class="flex flex-col gap-xs" data-filter-field>
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="filter-education-level">{% trans "Education Level (TCU)" %}</label>
+          <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">school</span></span><select id="filter-education-level" name="education_level">
+            <option value="">{% trans "Any Qualification" %}</option>
+            {% for value, label in education_levels %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select></div>
+        </div>
+        <div class="flex flex-col gap-xs" data-filter-field>
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="filter-academic-year">{% trans "Academic Year" %}</label>
+          <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">tag</span></span><select id="filter-academic-year" name="academic_year">
+            <option value="">{% trans "Any Year" %}</option>
+            {% for value, label in academic_years %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select></div>
+        </div>
+        <div class="flex flex-col gap-xs" data-filter-field>
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="filter-min-stipend">{% trans "Minimum stipend (TZS/month)" %}</label>
+          <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">payments</span></span><input id="filter-min-stipend" type="number" min="0" step="10000" inputmode="numeric" placeholder="{% trans 'Any' %}"></div>
+        </div>
+        <div class="flex flex-col gap-xs" data-filter-field>
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="filter-sort">{% trans "Sort by" %}</label>
+          <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">sort</span></span><select id="filter-sort">
+            <option value="">{% trans "Newest first" %}</option>
+            <option value="closing">{% trans "Closing soonest" %}</option>
+            <option value="stipend">{% trans "Highest stipend" %}</option>
+            <option value="seats">{% trans "Most seats left" %}</option>
+          </select></div>
+        </div>
+      </div>
+      <div data-filter-field><label class="flex items-center gap-xs font-body-md text-body-md text-on-surface cursor-pointer"><input id="filter-paid-only" type="checkbox" class="rounded border-outline">{% trans "Paid placements only (with a stipend)" %}</label></div>
+
+      <!-- Save this search as an alert -->
+      <div class="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-sm bg-primary/5 rounded-xl px-md py-sm">
+        <p class="font-body-md text-body-md text-on-surface flex items-center gap-xs">
+          <span class="material-symbols-outlined text-primary">notifications_active</span>
+          {% trans "Did not find what you want? Save these filters and we will notify you when a matching slot is posted." %}
+        </p>
+        <div class="flex items-center gap-sm shrink-0">
+          <a href="{% url 'notifications' %}#alerts" class="font-body-md text-body-md text-primary font-semibold hover:underline">{% trans "My alerts" %}</a>
+          <button type="button" id="save-search-btn" class="bg-primary text-on-primary px-md py-2 rounded-lg font-semibold text-body-md flex items-center gap-xs hover:bg-primary-container transition-colors disabled:opacity-50">
+            <span class="material-symbols-outlined text-[18px]">add_alert</span>{% trans "Notify me" %}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recommended for you: stays on top until the student searches for something -->
+  {% if recommended %}
+  <section id="recommended-block" class="w-full flex flex-col gap-md" aria-label="{% trans 'Recommended for you' %}">
+    <div class="flex items-center justify-between gap-sm flex-wrap">
+      <h2 class="font-headline-lg text-headline-lg text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary">recommend</span>{% trans "Recommended for you" %}</h2>
+      <span class="font-metadata text-metadata text-on-surface-variant">{% trans "Matched to your course, level and location. Search or filter to see other slots." %}</span>
+    </div>
+    <div id="recommended-results" class="grid grid-cols-1 md:grid-cols-2 gap-lg w-full"></div>
+  </section>
+  {{ recommended|json_script:"recommended-data" }}
+  {% endif %}
+
+  <h2 id="results-heading" class="font-headline-lg text-headline-lg text-on-surface">{% trans "All slots" %}</h2>
 
   <!-- Results Grid -->
     <div id="slot-results" class="grid grid-cols-1 md:grid-cols-2 gap-lg w-full">
@@ -71,10 +136,27 @@
 <script>
   window.IPT = window.IPT || {};
   window.IPT.canApply = {{ can_apply|yesno:"true,false" }};
+  window.IPT.savedSlots = {{ saved_ids_json|safe }};
+  window.IPT.student = {{ student_level_json|safe }};
   window.IPT.i18n = {
+    requiresLevel: "{% trans 'Requires Level' %}",
+    requiresYear: "{% trans 'For a different year of study' %}",
+    viewDetails: "{% trans 'View details' %}",
+    startsOn: "{% trans 'Starts' %}",
     applyNow: "{% trans 'Apply Now' %}",
     slotFull: "{% trans 'Slot Full' %}",
-    verificationRequired: "{% trans 'Verification required to apply.' %}",
+    verificationRequired: "{% trans 'Complete your profile and verify your phone to apply.' %}",
+    newSlot: "{% trans 'New' %}",
+    match: "{% trans 'Match' %}",
+    allSlots: "{% trans 'All slots' %}",
+    searchResults: "{% trans 'Search results' %}",
+    saveSlot: "{% trans 'Save slot' %}",
+    unsaveSlot: "{% trans 'Remove from saved' %}",
+    slotSaved: "{% trans 'Slot saved' %}",
+    slotUnsaved: "{% trans 'Removed from saved slots' %}",
+    alertSaved: "{% trans 'Alert saved' %}",
+    alertSavedBody: "{% trans 'We will notify you when a matching slot is posted.' %}",
+    alertFailed: "{% trans 'Could not save the alert' %}",
     unpaid: "{% trans 'Unpaid' %}",
     perMonth: "{% trans '/month' %}",
     dept: "{% trans 'Dept:' %}",

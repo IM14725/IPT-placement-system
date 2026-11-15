@@ -1,0 +1,68 @@
+{% load i18n time_tags %}
+{# One slot as a card. Needs: slot (decorated by apps.students.dashboard.decorate_slots), can_apply. #}
+<div class="group bg-surface-container-lowest rounded-2xl p-md shadow-sm hover:shadow-lg transition-shadow flex flex-col gap-sm justify-between relative overflow-hidden">
+  <div class="flex flex-col gap-sm">
+    <div class="flex items-start justify-between gap-sm">
+      <div class="flex flex-col gap-1 min-w-0">
+        <a href="{% url 'organization-public-profile' slot.organization.id %}" class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider hover:text-primary truncate">{{ slot.organization.name }}</a>
+        {% if slot.is_new %}<span class="w-fit px-2 py-0.5 rounded-full bg-primary text-on-primary font-label-caps text-label-caps uppercase">{% trans "New" %}</span>{% endif %}
+        <h3 class="font-headline-md text-headline-md text-primary break-words">{% if user.is_student %}<a href="{% url 'student-slot-detail' slot.id %}" class="hover:underline">{{ slot.title }}</a>{% else %}{{ slot.title }}{% endif %}</h3>
+      </div>
+      {% if user.is_student %}
+      <form method="post" action="{% url 'student-toggle-saved-slot' slot.id %}" class="shrink-0">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button type="submit" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors {% if slot.is_saved %}text-primary{% else %}text-on-surface-variant{% endif %}"
+                title="{% if slot.is_saved %}{% trans 'Remove from saved' %}{% else %}{% trans 'Save slot' %}{% endif %}" aria-label="{% if slot.is_saved %}{% trans 'Remove from saved' %}{% else %}{% trans 'Save slot' %}{% endif %}" aria-pressed="{{ slot.is_saved|yesno:'true,false' }}">
+          <span class="material-symbols-outlined" {% if slot.is_saved %}style="font-variation-settings: 'FILL' 1;"{% endif %}>bookmark</span>
+        </button>
+      </form>
+      {% endif %}
+    </div>
+
+    {% if slot.match %}
+      <div class="flex flex-col gap-1">
+        <div class="flex items-center justify-between gap-sm">
+          <span class="font-metadata text-metadata text-on-surface-variant">{% trans "Match" %}</span>
+          <span class="font-metadata text-metadata font-bold text-primary">{{ slot.match }}%</span>
+        </div>
+        <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden" role="img" aria-label="{% trans 'Match' %} {{ slot.match }}%">
+          <div class="h-full bg-primary rounded-full" style="width: {{ slot.match }}%"></div>
+        </div>
+        <div class="flex flex-wrap gap-1 mt-1">
+          {% for reason in slot.reasons %}<span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-metadata text-metadata">{{ reason }}</span>{% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">
+      <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[16px] text-outline">location_on</span>{{ slot.district.region.name }} · {{ slot.district.name }}</span>
+      <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[16px] text-outline">school</span>{{ slot.role_type }}{% if slot.education_level %} · {{ slot.get_education_level_display }}{% endif %}{% if slot.academic_year %} · {{ slot.get_academic_year_display }}{% endif %}</span>
+      {% if slot.department %}<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[16px] text-outline">work</span>{{ slot.department }}</span>{% endif %}
+      <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[16px] text-outline">payments</span>{% if slot.stipend_available %}TZS {{ slot.stipend_amount|floatformat:"0" }}{% trans "/month" %}{% else %}{% trans "Unpaid" %}{% endif %}</span>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between gap-sm pt-sm border-t border-surface-container">
+    {% if slot.seats_left > 0 and slot.status == 'OPEN' and not slot.deadline_passed %}
+      <span class="px-2 py-1 rounded-full bg-[rgb(var(--c-ok-bg))] text-[rgb(var(--c-ok-fg))] font-metadata text-metadata font-semibold whitespace-nowrap">{{ slot.seats_left }} {% trans "seats left" %}</span>
+      {% if can_apply %}
+        <a href="{% url 'student-apply' slot.id %}" class="px-md py-2 rounded-lg bg-primary text-on-primary font-semibold text-body-md flex items-center gap-1 hover:bg-primary-container transition-colors">{% trans "Apply Now" %}<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+      {% elif user.is_student %}
+        <a href="{% url 'student-dashboard' %}" class="font-metadata text-metadata text-primary font-semibold hover:underline text-right">{% trans "Finish your profile to apply" %}</a>
+      {% endif %}
+    {% else %}
+      <span class="px-2 py-1 rounded-full bg-error/10 text-error font-metadata text-metadata font-semibold">{% if slot.deadline_passed %}{% trans "Applications closed" %}{% elif slot.status == 'PAUSED' %}{% trans "Paused" %}{% elif slot.status == 'CLOSED' %}{% trans "Closed" %}{% else %}{% trans "Slot Full" %}{% endif %}</span>
+    {% endif %}
+  </div>
+
+  {# Time left under the slot: hours, or minutes when under an hour (kept live by static/js/countdown.js). #}
+  {% if slot.application_deadline %}
+    <div class="flex items-center justify-center gap-xs font-metadata text-metadata {% if slot.deadline_passed %}text-error{% elif slot.closing_soon %}text-[#a16207] font-semibold{% else %}text-on-surface-variant{% endif %}">
+      <span class="material-symbols-outlined text-[16px]">hourglass_top</span>
+      <span data-timeleft="{{ slot.application_deadline|date:'c' }}">{{ slot.application_deadline|time_left }}</span>
+    </div>
+  {% else %}
+    <div class="flex items-center justify-center gap-xs font-metadata text-metadata text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">all_inclusive</span>{% trans "No deadline" %}</div>
+  {% endif %}
+</div>

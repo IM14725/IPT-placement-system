@@ -1,4 +1,5 @@
 """Centralized university records: seeding and "university not listed" suggestions."""
+from django.utils.translation import gettext
 import json
 
 from django.conf import settings
@@ -43,16 +44,16 @@ def check_suggestion(user, name):
     """Validate a suggestion without saving. Returns (clean_name, existing_or_None)."""
     name = " ".join((name or "").split())
     if len(name) < 3:
-        raise SuggestionError("Enter the full name of your university.")
+        raise SuggestionError(gettext("Enter the full name of your university."))
     if len(name) > 200:
-        raise SuggestionError("University name is too long.")
+        raise SuggestionError(gettext("University name is too long."))
 
     existing = University.objects.filter(name__iexact=name).first() or (
         University.objects.filter(abbreviation__iexact=name).first()
     )
     if existing is not None:
         if existing.verification_status == VerificationStatus.REJECTED:
-            raise SuggestionError("This university was reviewed and could not be added.")
+            raise SuggestionError(gettext("This university was reviewed and could not be added."))
         return name, existing
 
     pending = University.objects.filter(
@@ -60,7 +61,7 @@ def check_suggestion(user, name):
     ).count()
     if pending >= MAX_PENDING_SUGGESTIONS_PER_USER:
         raise SuggestionError(
-            "You already have university suggestions awaiting review. Please wait for an admin."
+            gettext("You already have university suggestions awaiting review. Please wait for an admin.")
         )
     return name, None
 

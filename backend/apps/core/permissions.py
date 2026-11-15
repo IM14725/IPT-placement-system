@@ -42,12 +42,14 @@ class IsPlatformSuperAdmin(BasePermission):
 
 
 class IsVerifiedStudent(IsStudent):
-    message = "Your student profile must be verified by the platform admin."
+    message = "Complete your student profile and verify your phone number first."
 
     def has_permission(self, request, view):
         if not super().has_permission(request, view):
             return False
-        return request.user.student_profile.is_verified
+        from apps.students.models import student_can_apply
+
+        return student_can_apply(request.user)
 
 
 class IsApprovedOrganization(IsOrganization):

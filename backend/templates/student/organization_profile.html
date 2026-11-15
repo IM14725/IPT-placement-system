@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ organization.name }}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <section class="bg-surface-container-lowest rounded-xl p-lg shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-md">
+    <div class="flex items-start gap-md min-w-0">
+      <div class="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-primary text-[32px]">apartment</span>
+      </div>
+      <div class="flex flex-col gap-1 min-w-0">
+        <div class="flex items-center gap-xs flex-wrap">
+          <h1 class="font-headline-lg text-headline-lg text-on-surface break-words">{{ organization.name }}</h1>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[rgb(var(--c-ok-bg))] text-[rgb(var(--c-ok-fg))] font-metadata text-metadata font-semibold"><span class="material-symbols-outlined text-[14px]">verified</span>{% trans "Verified" %}</span>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          {{ organization.get_organization_type_display }}{% if organization.industry %} · {{ organization.industry }}{% endif %}{% if organization.region %} · {{ organization.region }}{% endif %}
+        </p>
+        {% if organization.description %}<p class="font-body-md text-body-md text-on-surface mt-1 whitespace-pre-line break-words">{{ organization.description }}</p>{% endif %}
+      </div>
+    </div>
+    <div class="flex flex-col items-start md:items-end gap-1 shrink-0">
+      {% if average %}
+        <span class="font-display text-display text-on-surface tabular-nums">{{ average }}<span class="font-body-lg text-body-lg text-on-surface-variant">/5</span></span>
+        {% include "includes/stars.html" with rating=average %}
+        <span class="font-metadata text-metadata text-on-surface-variant">{% blocktrans count n=review_total %}{{ n }} review{% plural %}{{ n }} reviews{% endblocktrans %}</span>
+      {% else %}
+        <span class="font-body-md text-body-md text-on-surface-variant">{% trans "No ratings yet" %}</span>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if open_slots %}
+  <section class="flex flex-col gap-md">
+    <h2 class="font-headline-lg text-headline-lg text-on-surface">{% trans "Open slots" %}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+      {% for slot in open_slots %}{% include "includes/slot_card.html" %}{% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="flex flex-col gap-md">
+    <h2 class="font-headline-lg text-headline-lg text-on-surface">{% trans "What students say" %}</h2>
+    {% if reviews %}
+      <div class="flex flex-col gap-sm">
+        {% for r in reviews %}
+          <article class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-xs">
+            <div class="flex items-center justify-between gap-sm flex-wrap">
+              {% include "includes/stars.html" with rating=r.rating %}
+              <span class="font-metadata text-metadata text-on-surface-variant">{{ r.created_at|date:"M Y" }}</span>
+            </div>
+            {% if r.comment %}<p class="font-body-md text-body-md text-on-surface whitespace-pre-line break-words">{{ r.comment }}</p>{% endif %}
+            <span class="font-metadata text-metadata text-on-surface-variant">{% trans "Student accepted for" %} {{ r.application.slot.title }}{% if r.student.university %} · {{ r.student.university }}{% endif %}</span>
+          </article>
+        {% endfor %}
+      </div>
+      {% include "includes/pagination.html" %}
+    {% else %}
+      <p class="bg-surface-container-lowest rounded-xl p-md shadow-sm font-body-md text-body-md text-on-surface-variant">{% trans "No student has reviewed this organization yet. Only students it accepted can leave a review." %}</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

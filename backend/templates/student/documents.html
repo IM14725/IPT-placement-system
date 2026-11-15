@@ -18,7 +18,7 @@
         {% endif %}
         {% for field in form %}
           <div class="flex flex-col gap-xs">
-            <label class="text-body-md font-body-md font-bold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            <label class="text-body-md font-body-md font-bold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}</label>
             <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
               <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">{% if field.name == 'doc_type' %}description{% else %}upload_file{% endif %}</span></span>
               {% if field.name == 'file' %}<div class="ipt-file-wrap">{{ field }}</div>{% else %}{{ field }}{% endif %}
@@ -48,7 +48,7 @@
     <div class="bg-surface-container rounded-xl shadow-sm flex flex-col overflow-hidden h-full">
       <div class="p-md bg-surface-container-high flex items-center justify-between">
         <h2 class="text-headline-md font-headline-md text-on-surface">{% trans "Your Documents" %}</h2>
-        <span class="bg-primary-container text-on-primary-container text-metadata font-metadata px-3 py-1 rounded-full font-bold">{{ docs|length }} Files</span>
+        <span class="bg-primary-container text-on-primary-container text-metadata font-metadata px-3 py-1 rounded-full font-bold">{% blocktrans trimmed with docs=docs|length %}{{ docs }} Files{% endblocktrans %}</span>
       </div>
       <div class="flex flex-col flex-grow">
         {% if docs %}

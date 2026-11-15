@@ -276,3 +276,25 @@ def test_registration_stores_the_identifiers_and_flags_free_email():
     org = Organization.objects.get(name="Acme Ltd")
     assert (org.brela_number, org.tin) == ("ABC 123", "123-456-789")
     assert org.official_email_is_free is True
+
+
+@pytest.mark.django_db
+def test_login_honeypot_filled_by_a_password_manager_with_the_email_is_not_a_bot(client, antibot_on):
+    """Chrome-style password managers can drop the saved username into the hidden trap; that is not a bot."""
+    User.objects.create_user(email="real@example.tz", password=STRONG, role=UserRole.STUDENT, email_verified=True)
+    data = {"email": "real@example.tz", "password": STRONG, "website": "real@example.tz", "form_ts": _stamp(30)}
+    response = client.post("/auth/login/", data)
+    assert "verify this request" not in response.content.decode()
+    # ...but any other trap value is still rejected.
+    from django.test import Client
+
+    data["website"] = "http://spam.example"
+    response = Client().post("/auth/login/", data)
+    assert "verify this request" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_login_page_puts_the_trap_after_the_password_and_marks_the_email_as_username(client):
+    html = client.get("/auth/login/").content.decode()
+    assert html.index('name="password"') < html.index('name="website"')
+    assert 'autocomplete="username"' in html and 'data-lpignore="true"' in html

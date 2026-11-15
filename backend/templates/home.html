@@ -79,53 +79,63 @@
       </div>
     </div>
 
-    <form method="get" action="{% url 'home' %}#slots" id="slot-search" class="bg-surface-container rounded-2xl p-md grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-sm items-end"
+    <form method="get" action="{% url 'home' %}#slots" id="slot-search" class="ipt-filterbar bg-surface-container rounded-2xl p-md flex flex-col gap-sm" data-filterbar data-filter-remove="{% trans 'Remove filter' %}"
           data-districts-url="/api/locations/districts/" data-fragment-url="{% url 'public-slots' %}"
           data-all-districts="{% trans 'All districts' %}" data-loading-districts="{% trans 'Loading…' %}" data-error="{% trans 'We could not load the slots. Please try again.' %}">
-      <div class="flex flex-col gap-xs">
-        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="search-region">{% trans "Region" %}</label>
-        <div class="ipt-field-box">
-          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">map</span></span>
-          <select id="search-region" name="region">
-            <option value="">{% trans "All regions" %}</option>
-            {% for r in regions %}<option value="{{ r.id }}"{% if r.id == filters.region %} selected{% endif %}>{{ r.name }}</option>{% endfor %}
-          </select>
+      <div class="flex items-end gap-xs">
+        <div class="flex-1 min-w-0 flex flex-col gap-xs">
+          <label class="hidden md:block font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="search-industry">{% trans "Industry / field" %}</label>
+          <div class="ipt-field-box">
+            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">work</span></span>
+            <input id="search-industry" name="industry" type="search" list="search-industries" maxlength="80" autocomplete="off" aria-label="{% trans 'Industry / field' %}"
+                   value="{{ filters.industry }}" placeholder="{% trans 'e.g. Technology' %}">
+            <datalist id="search-industries">{% for i in industries %}<option value="{{ i }}">{% endfor %}</datalist>
+          </div>
         </div>
-      </div>
-      <div class="flex flex-col gap-xs">
-        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="search-district">{% trans "District" %}</label>
-        <div class="ipt-field-box">
-          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">location_on</span></span>
-          <select id="search-district" name="district"{% if not filters.region %} disabled{% endif %}>
-            <option value="">{% trans "All districts" %}</option>
-            {% for d in districts %}<option value="{{ d.id }}"{% if d.id == filters.district %} selected{% endif %}>{{ d.name }}</option>{% endfor %}
-          </select>
-        </div>
-      </div>
-      <div class="flex flex-col gap-xs">
-        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="search-industry">{% trans "Industry / field" %}</label>
-        <div class="ipt-field-box">
-          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">work</span></span>
-          <input id="search-industry" name="industry" type="search" list="search-industries" maxlength="80" autocomplete="off"
-                 value="{{ filters.industry }}" placeholder="{% trans 'e.g. Technology' %}">
-          <datalist id="search-industries">{% for i in industries %}<option value="{{ i }}">{% endfor %}</datalist>
-        </div>
-      </div>
-      <div class="flex flex-col gap-xs">
-        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="search-level">{% trans "Education level" %}</label>
-        <div class="ipt-field-box">
-          <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">school</span></span>
-          <select id="search-level" name="level">
-            <option value="">{% trans "Any level" %}</option>
-            {% for value, label in levels %}<option value="{{ value }}"{% if value == filters.level %} selected{% endif %}>{{ label }}</option>{% endfor %}
-          </select>
-        </div>
-      </div>
-      <div class="flex gap-xs sm:col-span-2 lg:col-span-1">
-        <button type="submit" class="flex-1 lg:flex-none px-md py-2.5 rounded-lg bg-primary text-on-primary font-body-md font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-xs">
-          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">search</span>{% trans "Search" %}
+        <button type="button" data-filter-toggle aria-expanded="false" aria-controls="search-filter-panel" class="shrink-0 h-[46px] px-md rounded-lg border border-outline-variant bg-surface-container text-on-surface font-body-md font-semibold flex items-center gap-xs hover:border-primary transition-colors"><span class="material-symbols-outlined text-[20px]">tune</span><span>{% trans "Filters" %}</span><span data-filter-count hidden class="min-w-[20px] h-5 px-1 rounded-full bg-primary text-on-primary font-metadata text-metadata flex items-center justify-center">0</span></button>
+        <button type="submit" class="h-[46px] px-md rounded-lg bg-primary text-on-primary font-body-md font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-xs">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">search</span><span class="hidden sm:inline">{% trans "Search" %}</span>
         </button>
-        <a href="{% url 'home' %}#slots" id="search-clear" class="px-md py-2.5 rounded-lg border border-outline-variant text-on-surface font-body-md font-semibold hover:bg-surface-container-high transition-colors{% if not filtered %} hidden{% endif %}">{% trans "Clear" %}</a>
+      </div>
+
+      <div data-filter-chips class="ipt-chips" hidden></div>
+
+      <div id="search-filter-panel" data-filter-panel class="flex flex-col gap-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-sm">
+          <div class="flex flex-col gap-xs" data-filter-field>
+            <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="search-region">{% trans "Region" %}</label>
+            <div class="ipt-field-box">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">map</span></span>
+              <select id="search-region" name="region">
+                <option value="">{% trans "All regions" %}</option>
+                {% for r in regions %}<option value="{{ r.id }}"{% if r.id == filters.region %} selected{% endif %}>{{ r.name }}</option>{% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="flex flex-col gap-xs" data-filter-field>
+            <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="search-district">{% trans "District" %}</label>
+            <div class="ipt-field-box">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">location_on</span></span>
+              <select id="search-district" name="district"{% if not filters.region %} disabled{% endif %}>
+                <option value="">{% trans "All districts" %}</option>
+                {% for d in districts %}<option value="{{ d.id }}"{% if d.id == filters.district %} selected{% endif %}>{{ d.name }}</option>{% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="flex flex-col gap-xs" data-filter-field>
+            <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="search-level">{% trans "Education level" %}</label>
+            <div class="ipt-field-box">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">school</span></span>
+              <select id="search-level" name="level">
+                <option value="">{% trans "Any level" %}</option>
+                {% for value, label in levels %}<option value="{{ value }}"{% if value == filters.level %} selected{% endif %}>{{ label }}</option>{% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div>
+          <a href="{% url 'home' %}#slots" id="search-clear" class="inline-block px-md py-2 rounded-lg border border-outline-variant text-on-surface font-body-md font-semibold hover:bg-surface-container-high transition-colors{% if not filtered %} hidden{% endif %}">{% trans "Clear" %}</a>
+        </div>
       </div>
     </form>
 
@@ -195,8 +205,8 @@
         <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Pay with" %}</span>
         <ul class="flex flex-wrap justify-center lg:justify-end gap-sm">
           <li class="px-md py-sm rounded-xl bg-surface-container-lowest border border-outline-variant font-body-md font-semibold text-on-surface">M-Pesa</li>
-          <li class="px-md py-sm rounded-xl bg-surface-container-lowest border border-outline-variant font-body-md font-semibold text-on-surface">Mixx by Yas</li>
-          <li class="px-md py-sm rounded-xl bg-surface-container-lowest border border-outline-variant font-body-md font-semibold text-on-surface">Airtel Money</li>
+          <li class="px-md py-sm rounded-xl bg-surface-container-lowest border border-outline-variant font-body-md font-semibold text-on-surface">{% trans "Mixx by Yas" %}</li>
+          <li class="px-md py-sm rounded-xl bg-surface-container-lowest border border-outline-variant font-body-md font-semibold text-on-surface">{% trans "Airtel Money" %}</li>
         </ul>
       </div>
     </div>

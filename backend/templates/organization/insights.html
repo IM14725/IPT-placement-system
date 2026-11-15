@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{% trans "Insights" %}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Insights" %}</h1>
+    <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">{% trans "Where your applicants come from and how applications are moving. Counts include paid applications only." %}</p>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-md">
+    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm flex flex-col gap-1">
+      <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Seats filled" %}</span>
+      <span class="font-headline-lg text-headline-lg text-on-surface tabular-nums">{{ kpis.filled }} / {{ kpis.capacity }}</span>
+    </div>
+    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm flex flex-col gap-1">
+      <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Paid applicants" %}</span>
+      <span class="font-headline-lg text-headline-lg text-on-surface tabular-nums">{{ kpis.paid }}</span>
+    </div>
+    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm flex flex-col gap-1">
+      <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Accepted" %}</span>
+      <span class="font-headline-lg text-headline-lg text-[rgb(var(--c-ok-fg))] tabular-nums">{{ kpis.accepted }}</span>
+    </div>
+    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm flex flex-col gap-1">
+      <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">{% trans "Waiting for acceptance" %}</span>
+      <span class="font-headline-lg text-headline-lg text-[#a16207] tabular-nums">{{ kpis.waiting }}</span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-md">
+    {% for c in charts %}
+      <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm flex flex-col {% if forloop.first %}lg:col-span-2{% endif %}" data-chart="{{ c.id }}">
+        <div class="flex items-center gap-sm mb-sm min-w-0">
+          <span class="material-symbols-outlined text-primary shrink-0" style="font-variation-settings: 'FILL' 1;">{{ c.icon }}</span>
+          <h2 class="font-body-md font-semibold text-on-surface truncate">{{ c.title }}</h2>
+        </div>
+        {% if c.note %}<p class="font-metadata text-metadata text-on-surface-variant mb-xs">{{ c.note }}</p>{% endif %}
+        <div class="relative h-64" data-canvas-wrap><span class="ipt-sk absolute inset-0" data-chart-skeleton aria-hidden="true"></span><canvas aria-label="{{ c.title }}" role="img"></canvas></div>
+        <div class="hidden h-64 flex flex-col items-center justify-center text-center gap-xs text-on-surface-variant" data-empty>
+          <span class="material-symbols-outlined text-[36px] text-outline" aria-hidden="true">bar_chart</span>
+          <p class="font-body-md">{% trans "Nothing to show yet." %}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{{ charts|json_script:"charts-data" }}
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
+<script src="{% static 'js/metrics-charts.js' %}"></script>
+{% endblock %}

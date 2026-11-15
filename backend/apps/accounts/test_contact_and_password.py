@@ -51,7 +51,7 @@ def _wrong(code):
 def test_account_page_requires_login_and_lists_status(client):
     assert client.get("/auth/account/").status_code == 302
     user = _user()
-    page = _client(user).get("/auth/account/")
+    page = _client(user).get("/auth/account/", follow=True)
     assert page.status_code == 200 and b"Verified" in page.content and user.email.encode() in page.content
 
 
@@ -198,6 +198,7 @@ def test_student_cannot_apply_until_phone_is_verified():
     StudentProfile.objects.create(
         user=student, university=University.objects.create(name="UDSM"), course="CS",
         academic_year=3, verification_status=VerificationStatus.APPROVED,
+        region=district.region, district=district,
     )
     c = _client(student)
     resp = c.get(f"/student/apply/{slot.id}/")
@@ -232,7 +233,7 @@ def test_temporary_password_must_be_replaced_before_anything_else():
     user.refresh_from_db()
     assert not user.must_change_password and user.check_password("Brand-new-77x") and not user.check_password(PW)
     # Still signed in (session id was re-synced) and free to use the site.
-    assert c.get("/auth/account/").status_code == 200
+    assert c.get("/auth/account/", follow=True).status_code == 200
     assert Client().post("/auth/login/", {"email": user.email, "password": PW}).status_code == 200  # old one is dead
 
 

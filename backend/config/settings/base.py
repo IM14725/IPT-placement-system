@@ -101,6 +101,11 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Serves static files with precompressed gzip copies + long cache headers (hashed names in production).
+    # Responds directly, so static files never reach GZipMiddleware below.
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    # Compress HTML/JSON responses (the server-rendered pages are large).
+    "django.middleware.gzip.GZipMiddleware",
     "apps.core.security.SecurityHeadersMiddleware",
     "apps.core.ajax.AjaxRedirectMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -217,6 +222,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"  # `collectstatic` target; WhiteNoise serves it in production
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -301,6 +307,10 @@ CELERY_BEAT_SCHEDULE = {
     "expire-unpaid-applications": {
         "task": "applications.expire_unpaid",
         "schedule": 600.0,  # every 10 minutes
+    },
+    "remind-expiring-seats": {
+        "task": "applications.remind_expiring",
+        "schedule": 600.0,  # every 10 minutes; one in-app reminder per reservation
     },
 }
 

@@ -3,7 +3,16 @@ window.IPT = window.IPT || {};
 (function () {
   "use strict";
 
+  // Toast text comes from notifications (slot titles, organization names...): always escape it.
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
   function toast(kind, title, body) {
+    title = esc(title);
+    body = esc(body);
     const el = document.createElement("div");
     const colors = {
       success: "bg-[#e8f5e9] text-[#1b5e20]",
@@ -44,4 +53,12 @@ window.IPT = window.IPT || {};
 
   window.IPT.toast = toast;
   window.IPT.postForm = postForm;
+
+  // Shimmer placeholder cards shown while a list loads (styles are inline in base.html).
+  window.IPT.skeletonCards = function (n) {
+    var card = '<div class="ipt-sk-card" aria-hidden="true"><span class="ipt-sk" style="height:12px;width:40%"></span>' +
+      '<span class="ipt-sk" style="height:20px;width:75%"></span><span class="ipt-sk" style="height:12px"></span>' +
+      '<span class="ipt-sk" style="height:12px;width:60%"></span><span class="ipt-sk" style="height:36px;margin-top:6px"></span></div>';
+    return new Array((n || 3) + 1).join(card);
+  };
 })();

@@ -1,3 +1,4 @@
+from django.utils.translation import gettext, gettext_lazy, ngettext
 from django import forms
 from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
@@ -116,18 +117,18 @@ class OrganizationMemberCreateForm(forms.Form):
     first_name = forms.CharField(
         label=_("First name"),
         max_length=150,
-        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "First name"}),
+        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": gettext_lazy("First name")}),
     )
     last_name = forms.CharField(
         label=_("Last name"),
         max_length=150,
-        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "Last name"}),
+        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": gettext_lazy("Last name")}),
     )
     position = forms.CharField(
         label=_("Position in the organization"),
         max_length=120,
         required=False,
-        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "e.g. Recruitment Officer"}),
+        widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": gettext_lazy("e.g. Recruitment Officer")}),
     )
     phone = forms.CharField(
         label=_("Phone"),
@@ -145,7 +146,7 @@ class OrganizationMemberCreateForm(forms.Form):
     password = forms.CharField(
         label=_("Temporary Password"),
         widget=forms.PasswordInput(
-            attrs={"class": FIELD_CLASS, "placeholder": "At least 8 characters", "autocomplete": "new-password"}
+            attrs={"class": FIELD_CLASS, "placeholder": gettext_lazy("At least 8 characters"), "autocomplete": "new-password"}
         ),
     )
 
@@ -162,7 +163,7 @@ class OrganizationDocumentUploadForm(forms.Form):
         widget=forms.Select(attrs={"class": "ipt-select"}),
     )
     file = forms.FileField(
-        label="File (< 2MB)",
+        label=gettext_lazy("File (< 2MB)"),
         widget=forms.ClearableFileInput(attrs={"class": "ipt-file-input", "accept": ".pdf,.png,.jpg,.jpeg,.doc,.docx"}),
     )
 
@@ -171,9 +172,9 @@ class OrganizationDocumentUploadForm(forms.Form):
         organization = kwargs.pop("organization", None)
         super().__init__(*args, **kwargs)
         all_choices = [
-            (Document.DocType.BRELA_CERT, "BRELA Registration Certificate"),
-            (Document.DocType.TIN_CERT, "TIN Certificate"),
-            (Document.DocType.BUSINESS_LICENSE, "Business License"),
+            (Document.DocType.BRELA_CERT, gettext_lazy("BRELA Registration Certificate")),
+            (Document.DocType.TIN_CERT, gettext_lazy("TIN Certificate")),
+            (Document.DocType.BUSINESS_LICENSE, gettext_lazy("Business License")),
         ]
         org = organization or (get_user_organization(user) if user else None)
         if org is not None:
@@ -205,6 +206,7 @@ class SlotForm(forms.ModelForm):
         model = Slot
         fields = (
             "title",
+            "industry",
             "description",
             "role_type",
             "district",
@@ -212,17 +214,26 @@ class SlotForm(forms.ModelForm):
             "education_level",
             "academic_year",
             "application_deadline",
+            "start_date",
+            "duration_weeks",
+            "reporting_contact",
             "capacity",
             "stipend_available",
             "stipend_amount",
             "skills_required",
         )
         widgets = {
+            "start_date": forms.DateInput(attrs={"class": FIELD_CLASS, "type": "date"}, format="%Y-%m-%d"),
+            "duration_weeks": forms.NumberInput(attrs={"class": FIELD_CLASS, "min": 1, "max": 104}),
+            "reporting_contact": forms.TextInput(
+                attrs={"class": FIELD_CLASS, "placeholder": gettext_lazy("e.g. Ask for Ms. Mushi, HR, 2nd floor")}
+            ),
             "application_deadline": forms.DateTimeInput(
                 attrs={"class": FIELD_CLASS, "type": "datetime-local"},
                 format="%Y-%m-%dT%H:%M",
             ),
             "title": forms.TextInput(attrs={"class": FIELD_CLASS}),
+            "industry": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "description": forms.Textarea(attrs={"class": FIELD_CLASS, "rows": 3}),
             "role_type": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "district": forms.Select(attrs={"class": "ipt-select", "id": "id_district"}),
@@ -236,6 +247,10 @@ class SlotForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Optional: when left blank the view fills in the organization's own industry.
+        self.fields["industry"].required = False
+        self.fields["industry"].label = _("Industry / sector")
+        self.fields["industry"].help_text = _("Leave blank to use your organization's industry.")
         region_id = self.data.get("region") if hasattr(self, "data") else None
         if region_id:
             self.fields["district"].queryset = District.objects.filter(region_id=region_id)
@@ -248,28 +263,58 @@ class SlotForm(forms.ModelForm):
     def clean_skills_required(self):
         return normalize_skills(self.cleaned_data.get("skills_required"))
 
+    def clean_capacity(self):
+        capacity = self.cleaned_data.get("capacity")
+        if capacity is None:
+            return capacity
+        if capacity < 1:
+            raise forms.ValidationError(gettext("A slot needs at least 1 seat."))
+        if not self.instance._state.adding:
+            booked = self.instance.booked_count
+            if capacity < booked:
+                raise forms.ValidationError(
+                    ngettext(
+                        '%(booked)s seat is already booked or paid for, so the capacity cannot be lower than %(booked)s.',
+                        '%(booked)s seats are already booked or paid for, so the capacity cannot be lower than %(booked)s.',
+                        booked,
+                    ) % {"booked": booked}
+                )
+        return capacity
+
     def clean_application_deadline(self):
         deadline = self.cleaned_data.get("application_deadline")
         if deadline is None:
             return deadline
         unchanged = self.instance.pk and deadline == self.instance.application_deadline
         if not unchanged and deadline <= timezone.now():
-            raise forms.ValidationError("The application deadline must be in the future.")
+            raise forms.ValidationError(gettext("The application deadline must be in the future."))
         return deadline
+
+    def clean_start_date(self):
+        start = self.cleaned_data.get("start_date")
+        if start is None:
+            return start
+        unchanged = not self.instance._state.adding and start == self.instance.start_date
+        if not unchanged and start < timezone.localdate():
+            raise forms.ValidationError(gettext("The start date cannot be in the past."))
+        return start
 
     def clean(self):
         cleaned = super().clean()
+        start, deadline = cleaned.get("start_date"), cleaned.get("application_deadline")
+        if start and deadline and start < timezone.localtime(deadline).date():
+            self.add_error("start_date", gettext("The placement cannot start before applications close."))
         stipend = cleaned.get("stipend_available")
         amount = cleaned.get("stipend_amount")
         if stipend and not amount:
-            self.add_error("stipend_amount", "Enter the monthly stipend amount.")
+            self.add_error("stipend_amount", gettext("Enter the monthly stipend amount."))
         elif not stipend:
             cleaned["stipend_amount"] = None
 
         edu_level = cleaned.get("education_level")
         academic_year = cleaned.get("academic_year")
         if edu_level == 7 and not academic_year:
-            self.add_error("academic_year", "Academic year is required for Higher Diploma.")
+            self.add_error("academic_year", gettext("Academic year is required for Higher Diploma."))
         elif edu_level != 7:
             cleaned["academic_year"] = None
 

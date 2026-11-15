@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Pay Application Fee{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Pay Application Fee" %}{% endblock %}
 {% block content %}
 <div class="relative w-full max-w-lg mx-auto bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden flex flex-col">
   <div class="absolute top-0 left-0 w-full h-32 bg-primary/5 blur-3xl rounded-full transform -translate-y-1/2"></div>
@@ -8,25 +9,25 @@
       <div class="w-16 h-16 rounded-full bg-primary-container/20 flex items-center justify-center mb-sm">
         <span class="material-symbols-outlined text-primary text-[32px]">payments</span>
       </div>
-      <h1 class="font-headline-lg text-headline-lg text-on-surface">Pay Application Fee</h1>
-      <p class="font-body-md text-body-md text-on-surface-variant">Complete your payment to finalize your application.</p>
+      <h1 class="font-headline-lg text-headline-lg text-on-surface">{% trans "Pay Application Fee" %}</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Complete your payment to finalize your application." %}</p>
     </div>
     <div class="flex flex-col gap-xs bg-surface p-sm rounded-lg">
       <div class="flex justify-between items-center">
-        <span class="font-metadata text-metadata text-on-surface-variant">Slot Title</span>
+        <span class="font-metadata text-metadata text-on-surface-variant">{% trans "Slot Title" %}</span>
         <span class="font-body-md text-body-md text-on-surface font-medium">{{ payment.application.slot.title }}</span>
       </div>
       <div class="flex justify-between items-center">
-        <span class="font-metadata text-metadata text-on-surface-variant">Organization</span>
+        <span class="font-metadata text-metadata text-on-surface-variant">{% trans "Organization" %}</span>
         <span class="font-body-md text-body-md text-on-surface font-medium">{{ payment.application.slot.organization.name }}</span>
       </div>
       <div class="flex justify-between items-center mt-xs pt-xs border-t border-surface-dim/50">
-        <span class="font-metadata text-metadata text-on-surface-variant">Reference</span>
+        <span class="font-metadata text-metadata text-on-surface-variant">{% trans "Reference" %}</span>
         <span class="font-label-caps text-label-caps text-on-surface bg-surface-container px-2 py-1 rounded tracking-widest">{{ payment.reference_id }}</span>
       </div>
     </div>
     <div class="flex flex-col items-center justify-center bg-surface-container py-md px-lg rounded-lg shadow-inner">
-      <span class="font-label-caps text-label-caps text-on-surface-variant mb-1">Amount Due</span>
+      <span class="font-label-caps text-label-caps text-on-surface-variant mb-1">{% trans "Amount Due" %}</span>
       <div class="flex items-baseline gap-xs">
         <span class="font-headline-md text-headline-md text-on-surface">TZS</span>
         <span class="font-display text-display text-primary">{{ payment.amount }}</span>
@@ -34,26 +35,26 @@
     </div>
     <div class="flex flex-col gap-md">
       <div class="flex flex-col gap-xs">
-        <label class="font-body-md text-body-md font-medium text-on-surface" for="pay-method">Payment Method</label>
+        <label class="font-body-md text-body-md font-medium text-on-surface" for="pay-method">{% trans "Payment Method" %}</label>
         <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">smartphone</span></span><select id="pay-method">
             <option value="M_PESA">M-Pesa</option>
             <option value="TIGO_PESA">Tigo Pesa</option>
-            <option value="AIRTEL_MONEY">Airtel Money</option>
+            <option value="AIRTEL_MONEY">{% trans "Airtel Money" %}</option>
           </select></div>
       </div>
       <div id="phone-group" class="flex flex-col gap-xs">
-        <label class="font-body-md text-body-md font-medium text-on-surface" for="pay-phone">Mobile Number</label>
+        <label class="font-body-md text-body-md font-medium text-on-surface" for="pay-phone">{% trans "Mobile Number" %}</label>
         <div class="ipt-field-box"><span class="ipt-field-prefix">+255</span><input id="pay-phone" type="text" value="{{ user.phone }}" placeholder="7XX XXX XXX"></div>
-        <span class="font-metadata text-metadata text-on-surface-variant">A push notification will be sent to this number to authorize the payment.</span>
+        <span class="font-metadata text-metadata text-on-surface-variant">{% trans "A push notification will be sent to this number to authorize the payment." %}</span>
       </div>
       <button id="pay-btn" class="w-full bg-primary text-on-primary font-body-lg text-body-lg font-medium py-3 rounded-lg shadow-md hover:shadow-lg hover:bg-primary-container transition-all flex items-center justify-center gap-xs">
-        <span>Pay Now</span>
+        <span>{% trans "Pay Now" %}</span>
         <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
       </button>
       <p id="pay-status" class="font-metadata text-metadata text-center text-on-surface-variant"></p>
       <div class="flex items-center justify-center gap-2 text-on-surface-variant/70">
         <span class="material-symbols-outlined text-[16px]">lock</span>
-        <span class="font-metadata text-metadata">Secure Payment Gateway</span>
+        <span class="font-metadata text-metadata">{% trans "Secure Payment Gateway" %}</span>
       </div>
     </div>
   </div>

@@ -108,7 +108,7 @@
           {% endif %}
         </div>
         {% if c.note %}<p class="font-metadata text-metadata text-on-surface-variant mb-xs">{{ c.note }}</p>{% endif %}
-        <div class="relative h-64" data-canvas-wrap><canvas aria-label="{{ c.title }}" role="img"></canvas></div>
+        <div class="relative h-64" data-canvas-wrap><span class="ipt-sk absolute inset-0" data-chart-skeleton aria-hidden="true"></span><canvas aria-label="{{ c.title }}" role="img"></canvas></div>
         <div class="hidden h-64 flex flex-col items-center justify-center text-center gap-xs text-on-surface-variant" data-empty>
           <span class="material-symbols-outlined text-[36px] text-outline" aria-hidden="true">bar_chart</span>
           <p class="font-body-md">{% if c.ranged %}No data in this period.{% else %}Nothing to show yet.{% endif %}</p>

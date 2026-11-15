@@ -18,3 +18,9 @@ class ApplicationLetterForm(forms.Form):
             }
         ),
     )
+    accept_rules = forms.BooleanField(
+        required=True,
+        label=_("I understand the fee, the payment deadline and the cancellation rule."),
+        error_messages={"required": _("Tick the box to confirm you understand the rules.")},
+        widget=forms.CheckboxInput(attrs={"class": "mt-1 rounded border-outline"}),
+    )

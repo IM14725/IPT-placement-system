@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Applicants" %}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-md">
+    <div class="flex flex-col gap-xs">
+      <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Applicants" %}</h1>
+      <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">{% trans "Every student who paid to apply to one of your slots. A paid applicant cannot be rejected: review them and send the acceptance." %}</p>
+    </div>
+    <a href="{% url 'organization-export-applicants' %}{% if querystring %}?{{ querystring }}{% endif %}" class="px-md py-sm rounded-lg border border-primary text-primary font-semibold flex items-center gap-xs hover:bg-primary/5 self-start md:self-auto">
+      <span class="material-symbols-outlined text-[20px]">download</span>{% trans "Export CSV" %}
+    </a>
+  </div>
+
+  <form method="get" class="ipt-filterbar bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm" data-filterbar data-filter-submit data-filter-remove="{% trans 'Remove filter' %}">
+    <div class="flex items-end gap-xs">
+      <div class="flex-1 min-w-0 flex flex-col gap-xs">
+        <label class="hidden md:block font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="f-q">{% trans "Search" %}</label>
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span>
+          <input id="f-q" type="text" name="q" value="{{ q }}" maxlength="100" aria-label="{% trans 'Search' %}" placeholder="{% trans 'Name, email, course, university' %}"></div>
+      </div>
+      <button type="button" data-filter-toggle aria-expanded="false" aria-controls="applicant-filter-panel" class="shrink-0 h-[46px] px-md rounded-lg border border-outline-variant bg-surface-container text-on-surface font-body-md font-semibold flex items-center gap-xs hover:border-primary transition-colors"><span class="material-symbols-outlined text-[20px]">tune</span><span>{% trans "Filters" %}</span><span data-filter-count hidden class="min-w-[20px] h-5 px-1 rounded-full bg-primary text-on-primary font-metadata text-metadata flex items-center justify-center">0</span></button>
+      <button type="submit" class="h-[46px] px-md rounded-lg bg-primary text-on-primary font-semibold">{% trans "Filter" %}</button>
+    </div>
+    <div data-filter-chips class="ipt-chips" hidden></div>
+    <div id="applicant-filter-panel" data-filter-panel class="grid grid-cols-1 md:grid-cols-3 gap-sm md:items-end">
+      <div class="flex flex-col gap-xs" data-filter-field>
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="f-slot">{% trans "Slot" %}</label>
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">work</span></span>
+          <select id="f-slot" name="slot"><option value="">{% trans "All slots" %}</option>{% for s in slots %}<option value="{{ s.id }}" {% if selected_slot == s.id|stringformat:"s" %}selected{% endif %}>{{ s.title }}</option>{% endfor %}</select></div>
+      </div>
+      <div class="flex flex-col gap-xs" data-filter-field>
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="f-status">{% trans "Status" %}</label>
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">flag</span></span>
+          <select id="f-status" name="status">
+            <option value="">{% trans "All" %}</option>
+            <option value="waiting" {% if status == 'waiting' %}selected{% endif %}>{% trans "Waiting for acceptance" %}</option>
+            <option value="accepted" {% if status == 'accepted' %}selected{% endif %}>{% trans "Accepted" %}</option>
+          </select></div>
+      </div>
+      {% if selected_slot or status or q %}<div><a href="{% url 'organization-all-applicants' %}" class="inline-block px-md py-2.5 rounded-lg text-primary font-semibold hover:bg-primary/5">{% trans "Reset" %}</a></div>{% endif %}
+    </div>
+  </form>
+
+  {% if applications %}
+    {% if can_accept %}
+    <form id="bulk-accept-form" method="post" action="{% url 'organization-bulk-accept' %}"
+          class="bg-primary/5 rounded-xl p-md flex flex-col lg:flex-row lg:items-end gap-sm"
+          onsubmit="return confirm('{% trans 'Accept every selected applicant? Acceptance cannot be undone.' %}');">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <div class="flex flex-col gap-xs flex-1">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="bulk-message">{% trans "Accept selected: message to all (optional)" %}</label>
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span>
+          <input id="bulk-message" type="text" name="message" maxlength="500" placeholder="{% trans 'e.g. Report on Monday 8 AM' %}"></div>
+      </div>
+      <div class="flex flex-col gap-xs flex-1">
+        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="bulk-template">{% trans "Or use a saved message" %}</label>
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">chat</span></span>
+          <select id="bulk-template" name="template"><option value="">{% trans "No saved message" %}</option>{% for t in templates %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}</select></div>
+      </div>
+      <div class="flex items-center gap-sm">
+        <label class="flex items-center gap-xs font-body-md text-body-md text-on-surface cursor-pointer whitespace-nowrap"><input type="checkbox" id="select-all" class="rounded border-outline">{% trans "Select all on this page" %}</label>
+        <button type="submit" class="bg-[#166534] hover:bg-[#14532d] text-white font-semibold px-md py-2.5 rounded-lg flex items-center gap-xs whitespace-nowrap"><span class="material-symbols-outlined text-[18px]">done_all</span>{% trans "Accept selected" %}</button>
+      </div>
+    </form>
+    <p class="font-metadata text-metadata text-on-surface-variant -mt-md"><a class="text-primary font-semibold hover:underline" href="{% url 'organization-templates' %}">{% trans "Manage saved messages" %}</a> · {% trans "Applicants still inside their 24-hour cancellation window cannot be selected yet." %}</p>
+    {% endif %}
+
+    <p class="font-body-md text-body-md text-on-surface-variant">{% blocktrans count n=total %}{{ n }} applicant{% plural %}{{ n }} applicants{% endblocktrans %}</p>
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm flex flex-col">
+      {% for app in applications %}
+        {% include "organization/_applicant_row.html" with next_url=request.get_full_path selectable=can_accept %}
+      {% endfor %}
+    </div>
+    {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="w-full flex flex-col items-center justify-center bg-surface-container-lowest rounded-xl p-xl shadow-sm border border-dashed border-outline-variant/50 text-center">
+      <span class="material-symbols-outlined text-[40px] text-outline mb-sm">group_off</span>
+      <h3 class="font-headline-md text-headline-md text-on-surface mb-2">{% if selected_slot or status or q %}{% trans "No applicants match these filters" %}{% else %}{% trans "No applicants yet" %}{% endif %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-md">{% trans "Once students apply and complete their application fee payments, they will appear here for your review." %}</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  (function () {
+    var all = document.getElementById("select-all");
+    if (!all) return;
+    all.addEventListener("change", function () {
+      document.querySelectorAll('input[name="application"][form="bulk-accept-form"]:not(:disabled)').forEach(function (box) { box.checked = all.checked; });
+    });
+  })();
+</script>
+{% endblock %}

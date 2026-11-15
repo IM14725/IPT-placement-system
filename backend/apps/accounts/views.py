@@ -1,3 +1,4 @@
+from django.utils.translation import gettext
 import logging
 
 from django.contrib.auth import authenticate, login, logout
@@ -56,7 +57,7 @@ def _register_denied(request, result):
     form = RegisterForm(request.POST or None)
     form.add_error(
         None,
-        f"Too many registration attempts. Please try again in {max(1, int(result.retry_after))} seconds.",
+        gettext('Too many registration attempts. Please try again in %(v1)s seconds.') % {"v1": max(1, int(result.retry_after))},
     )
     response = render(
         request,
@@ -274,9 +275,9 @@ def user_login(request):
     if request.method == "GET" and request.GET.get("reason") in ("expired", "elsewhere"):
         messages.info(
             request,
-            "Your session has ended because it expired."
+            gettext("Your session has ended because it expired.")
             if request.GET["reason"] == "expired"
-            else "You were signed out because your account signed in on another device.",
+            else gettext("You were signed out because your account signed in on another device."),
         )
     if request.method == "POST":
         form = LoginForm(request.POST)
@@ -299,9 +300,9 @@ def user_login(request):
                         request,
                         form,
                         lockout.lock_remaining("login", email) or settings.LOGIN_LOCKOUT_SECONDS,
-                        "Too many failed attempts.",
+                        gettext("Too many failed attempts."),
                     )
-                form.add_error(None, "Invalid email or password.")
+                form.add_error(None, gettext("Invalid email or password."))
             else:
                 lockout.clear("login", email)
                 _cancel_pending_recovery(request, user)
@@ -481,7 +482,7 @@ def reset_password(request):
 
             revoke_user_session(user, reason="password_reset")
             request.session.pop("pwd_reset_verified_user_id", None)
-            messages.success(request, "Your password has been reset. Please log in.")
+            messages.success(request, gettext("Your password has been reset. Please log in."))
             return redirect("login")
     else:
         form = ResetPasswordForm()
@@ -519,7 +520,7 @@ def notification_settings(request):
         promo_opted_in = request.POST.get("promo_notifications") == "on"
         request.user.promo_sms_optout = not promo_opted_in
         request.user.save(update_fields=["promo_sms_optout"])
-        messages.success(request, "Your notification preferences have been saved.")
+        messages.success(request, gettext("Your notification preferences have been saved."))
         return redirect("notification-settings")
     return render(request, "registration/notification_settings.html")
 
@@ -539,12 +540,12 @@ def request_account_deletion(request):
             logout(request)
             messages.success(
                 request,
-                "Your account deletion request has been received. "
-                "Your account is now deactivated and will be deleted in accordance with the PDPA.",
+                gettext("Your account deletion request has been received. "
+                "Your account is now deactivated and will be deleted in accordance with the PDPA."),
             )
             return redirect("home")
         else:
-            messages.error(request, "The email address you entered does not match your account email.")
+            messages.error(request, gettext("The email address you entered does not match your account email."))
             return redirect("delete-account")
     return render(request, "registration/delete_account.html")
 from celery.result import AsyncResult
@@ -606,7 +607,7 @@ def finalize_auth(request):
                 return begin_decoy_verification(request)
             user = User.objects.get(id=user_id, is_active=True)
         except (BadSignature, User.DoesNotExist):
-            messages.error(request, 'Authentication failed. Please try again.')
+            messages.error(request, gettext('Authentication failed. Please try again.'))
             return redirect('login')
         response, error = _start_session(request, user)
         if response is not None:

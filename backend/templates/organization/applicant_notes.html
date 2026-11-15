@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Private notes" %} — {{ application.student.user.full_name }}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg max-w-3xl mx-auto">
+  <a href="{% url 'organization-all-applicants' %}" class="font-body-md text-body-md text-primary font-semibold hover:underline flex items-center gap-1 w-fit"><span class="material-symbols-outlined text-[18px]">arrow_back</span>{% trans "Applicants" %}</a>
+
+  <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-sm">
+    <div class="flex flex-col gap-1 min-w-0">
+      <h1 class="font-headline-lg text-headline-lg text-on-surface break-words">{{ application.student.user.full_name|default:application.student.user.email }}</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant break-words">{{ application.student.university|default:"—" }} · {{ application.student.course }}{% if application.student.gpa is not None %} · GPA {{ application.student.gpa }}{% endif %}</p>
+      <p class="font-metadata text-metadata text-outline">{{ application.slot.title }} ·
+        {% if application.is_accepted %}<span class="text-[rgb(var(--c-ok-fg))] font-semibold">{% trans "Accepted" %}</span>{% else %}<span class="text-[#a16207] font-semibold">{% trans "Waiting for acceptance" %}</span>{% endif %}
+      </p>
+    </div>
+    <div class="flex flex-wrap items-center gap-xs shrink-0">
+      <a href="{% url 'organization-applicant-documents' application.id %}" class="px-sm py-1.5 rounded-lg text-primary bg-primary/5 hover:bg-primary/10 font-semibold text-body-md">{% trans "Documents" %}</a>
+      {% if application.application_letter %}<a href="{% url 'organization-applicant-letter' application.id %}" target="_blank" rel="noopener noreferrer" class="px-sm py-1.5 rounded-lg text-primary bg-primary/5 hover:bg-primary/10 font-semibold text-body-md">{% trans "Letter" %}</a>{% endif %}
+    </div>
+  </section>
+
+  {% if can_accept and not application.is_accepted %}
+    <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm">
+      <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Accept this applicant" %}</h2>
+      {% if blocker %}
+        <p class="font-body-md text-body-md text-on-surface-variant flex items-start gap-xs"><span class="material-symbols-outlined text-[#a16207] text-[18px]">hourglass_empty</span>{{ blocker }}</p>
+      {% else %}
+        <form method="post" action="{% url 'organization-acceptance-sms' application.id %}" class="flex flex-col gap-xs">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input type="text" name="message" maxlength="500" placeholder="{% trans 'e.g. Report on Monday 8 AM' %}" aria-label="{% trans 'Acceptance Note (Optional)' %}"></div>
+          {% if templates %}
+            <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">chat</span></span>
+              <select name="template" aria-label="{% trans 'Or use a saved message' %}"><option value="">{% trans "Or use a saved message" %}</option>{% for t in templates %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}</select></div>
+          {% endif %}
+          <button type="submit" class="self-start bg-[#166534] hover:bg-[#14532d] text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">campaign</span>{% trans "Send Confirmation" %}</button>
+        </form>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm">
+    <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary">sticky_note_2</span>{% trans "Private notes" %}</h2>
+    <p class="ipt-field-desc"><span class="material-symbols-outlined">visibility_off</span>{% trans "Only your organization's team can read these notes. The student never sees them." %}</p>
+    <form method="post" class="flex flex-col gap-xs">
+      {% csrf_token %}
+      <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">notes</span></span>
+        <textarea name="body" rows="3" maxlength="2000" required placeholder="{% trans 'e.g. Strong results in networking; called on 12 Nov, available from January.' %}" aria-label="{% trans 'New note' %}"></textarea></div>
+      <button type="submit" class="self-end bg-primary text-on-primary px-md py-2 rounded-lg font-semibold">{% trans "Save note" %}</button>
+    </form>
+  </section>
+
+  {% if notes %}
+    <div class="flex flex-col gap-sm">
+      {% for note in notes %}
+        <article class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-xs">
+          <div class="flex items-center justify-between gap-sm">
+            <span class="font-body-md text-body-md font-semibold text-on-surface">{{ note.author_label|default:"—" }}</span>
+            <div class="flex items-center gap-xs">
+              <span class="font-metadata text-metadata text-outline">{{ note.created_at|date:"d M Y, H:i" }}</span>
+              {% if note.author_id == user.id or can_accept %}
+                <form method="post" onsubmit="return confirm('{% trans 'Delete this note?' %}');">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete"><input type="hidden" name="note_id" value="{{ note.id }}">
+                  <button type="submit" class="p-1 rounded-lg text-error hover:bg-error/10" title="{% trans 'Delete' %}" aria-label="{% trans 'Delete' %}"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+          <p class="font-body-md text-body-md text-on-surface whitespace-pre-line break-words">{{ note.body }}</p>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="font-body-md text-body-md text-on-surface-variant text-center">{% trans "No notes yet." %}</p>
+  {% endif %}
+</div>
+{% endblock %}

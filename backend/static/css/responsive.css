@@ -2,7 +2,7 @@
    Loaded after the Tailwind CDN <style>, so overrides that must beat utilities use !important. */
 
 /* ---------- Base safety net: nothing may push the page wider than the screen ---------- */
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; overflow-x: hidden; }
 body { overflow-x: clip; }
 img, video, canvas, iframe { max-width: 100%; }
 img, video { height: auto; }
@@ -168,3 +168,29 @@ html.dark #sidebar-backdrop { background: rgba(0, 0, 0, 0.6); }
 .ipt-field-box.max-w-\[190px\] > select { padding-right: 32px; }
 .ipt-field-box { min-width: 0; }
 .ipt-field-box > textarea { min-height: 80px; }
+
+/* ---------- Compact search + filters (static/js/filterbar.js) ---------- */
+/* Phones: the filter panel stays closed until "Filters" is tapped, so the results are not pushed down the page.
+   Nothing is hidden before the script has run (.is-ready), so it also works without JavaScript. */
+@media (max-width: 767px) {
+  .ipt-filterbar.is-ready:not(.is-open) [data-filter-panel] { display: none; }
+}
+/* Wide screens: the panel is always open, so the toggle and the chips would only repeat it. */
+@media (min-width: 768px) {
+  [data-filter-toggle] { display: none !important; }
+  .ipt-filterbar [data-filter-chips] { display: none !important; }
+}
+.ipt-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ipt-chip {
+  display: inline-flex; align-items: center; gap: 4px; max-width: 100%;
+  padding: 4px 6px 4px 12px; border: 0; border-radius: 9999px; cursor: pointer;
+  background: rgb(var(--c-primary-fixed)); color: rgb(var(--c-primary));
+  font-family: "Inter", sans-serif; font-size: 12px; line-height: 16px; font-weight: 600;
+}
+.ipt-chip > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ipt-chip .material-symbols-outlined { font-size: 16px; }
+.ipt-chip:hover { background: rgb(var(--c-primary-fixed-dim)); }
+/* Phones: a slimmer icon chip so Region / District side by side keep room for their text. */
+@media (max-width: 767px) {
+  .ipt-filterbar .ipt-field-icon { width: 38px; }
+}

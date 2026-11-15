@@ -82,7 +82,7 @@ def test_whatsapp_button_shows_for_visitors_only(client):
     user.email_verified = True
     user.save(update_fields=["email_verified"])
     client.force_login(user)
-    assert 'class="no-print fixed left-3' not in client.get("/auth/account/").content.decode()
+    assert 'class="no-print fixed left-3' not in client.get("/auth/account/", follow=True).content.decode()
 
 
 @pytest.mark.django_db

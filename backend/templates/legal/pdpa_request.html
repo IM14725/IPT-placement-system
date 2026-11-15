@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "PDPA Rights Request" %} — IPT Marketplace{% endblock %}
+{% block title %}{% trans "PDPA Rights Request" %} {% trans "— IPT Marketplace" %}{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto py-xl flex flex-col gap-lg">
+    {% get_current_language as LEGAL_LANG %}{% if LEGAL_LANG != "en" %}<p class="rounded-xl bg-surface-container-low border border-outline-variant px-md py-sm font-metadata text-metadata text-on-surface-variant" role="note">{% trans "This Kiswahili version is a courtesy translation. If there is any difference, the English version prevails." %}</p>{% endif %}
 
   {# ── Page header ── #}
   <div class="flex flex-col gap-xs">

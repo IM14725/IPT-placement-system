@@ -14,3 +14,13 @@ CELERY_TASK_STORE_EAGER_RESULT = True
 # Set ADMIN_MFA_ENFORCED=True in backend/.env to exercise the full flow locally.
 ADMIN_MFA_ENFORCED = env.bool("ADMIN_MFA_ENFORCED", default=False)
 
+
+# Serve static files through WhiteNoise in dev too (same code path as production, no collectstatic needed).
+# Static files are sent as-is with a Content-Length. Do NOT compress them on the fly here: GZipMiddleware turns a
+# static file into a chunked stream, and the dev server (HTTP/1.0 style) behind a tunnel or proxy (dev tunnels,
+# ngrok) then never finishes the response, so CSS/JS hang. HTML is still gzipped (small, has a Content-Length).
+INSTALLED_APPS = ["whitenoise.runserver_nostatic", *INSTALLED_APPS]
+WHITENOISE_USE_FINDERS = True
+
+import warnings
+warnings.filterwarnings("ignore", message="No directory at")

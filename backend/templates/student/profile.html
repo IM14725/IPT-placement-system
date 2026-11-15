@@ -1,13 +1,19 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
+{% load media_tags %}
 {% block title %}{% trans "Student Profile" %}{% endblock %}
 {% block content %}
-<div class="w-full flex flex-col gap-lg">
+<div class="w-full flex flex-col gap-lg" data-tabs data-default="profile">
   <div class="flex flex-col gap-xs">
-    <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Student Profile" %}</h1>
-    <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Manage your academic details and how organizations see you." %}</p>
+    <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Profile & security" %}</h1>
+    <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Manage your academic details, how organizations see you, and how you sign in." %}</p>
+  </div>
+  <div role="tablist" class="flex gap-xs border-b border-outline-variant overflow-x-auto no-scrollbar -mt-sm">
+    <button type="button" role="tab" data-tab="profile" class="px-md py-sm font-body-md text-body-md font-semibold border-b-2 border-transparent text-on-surface-variant whitespace-nowrap flex items-center gap-xs hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">person</span>{% trans "Profile" %}</button>
+    <button type="button" role="tab" data-tab="security" class="px-md py-sm font-body-md text-body-md font-semibold border-b-2 border-transparent text-on-surface-variant whitespace-nowrap flex items-center gap-xs hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">shield_person</span>{% trans "Account & security" %}</button>
   </div>
 
+  <div data-panel="profile" class="flex flex-col gap-lg">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg w-full items-start">
     <div class="lg:col-span-8 flex flex-col gap-lg">
       <div class="bg-surface-container-lowest rounded-xl p-lg shadow-md flex flex-col gap-md relative overflow-hidden auth-card">
@@ -17,7 +23,7 @@
           <span class="material-symbols-outlined text-primary">school</span>
           <div class="flex flex-col">
             <h2 class="font-headline-md text-headline-md text-on-surface">{% trans "Academic Information" %}</h2>
-            <p class="font-body-md font-body-md text-on-surface-variant">Your account is active — keep your details up to date.</p>
+            <p class="font-body-md font-body-md text-on-surface-variant">{% trans "Your account is active — keep your details up to date." %}</p>
           </div>
         </div>
         <form method="post" enctype="multipart/form-data" class="flex flex-col gap-md z-10">
@@ -29,7 +35,7 @@
           <div class="flex flex-col sm:flex-row items-start sm:items-center gap-md p-md bg-surface-container-low rounded-xl">
             <div class="relative shrink-0">
               {% if profile and profile.profile_photo %}
-                <img src="{{ profile.profile_photo.url }}" alt="Profile photo" class="w-20 h-20 rounded-full object-cover ring-2 ring-primary/30 shadow-sm">
+                <img src="{{ profile.profile_photo|thumb:160 }}" width="80" height="80" alt="{% trans 'Profile photo' %}" class="ipt-img w-20 h-20 rounded-full object-cover ring-2 ring-primary/30 shadow-sm">
               {% else %}
                 <div class="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
                   <span class="material-symbols-outlined text-[32px]">person</span>
@@ -40,7 +46,7 @@
               </span>
             </div>
             <div class="flex flex-col gap-xs flex-1 min-w-0">
-              <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ photo.id_for_label }}">{{ photo.label }}</label>
+              <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ photo.id_for_label }}">{% trans photo.label %}</label>
               <div class="ipt-field-box {% if photo.errors %}is-error{% endif %}">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">person</span></span>
                 <div class="ipt-file-wrap">
@@ -56,7 +62,7 @@
           <div class="flex flex-col sm:flex-row items-start sm:items-center gap-md p-md bg-surface-container-low rounded-xl">
             <div class="relative shrink-0">
               {% if profile and profile.id_card_photo %}
-                <img src="{{ profile.id_card_photo.url }}" alt="ID card" class="w-20 h-20 rounded-xl object-cover ring-2 ring-primary/30 shadow-sm">
+                <img src="{{ profile.id_card_photo|thumb:160 }}" width="80" height="80" alt="{% trans 'ID card' %}" class="ipt-img w-20 h-20 rounded-xl object-cover ring-2 ring-primary/30 shadow-sm">
               {% else %}
                 <div class="w-20 h-20 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant">
                   <span class="material-symbols-outlined text-[32px]">badge</span>
@@ -64,7 +70,7 @@
               {% endif %}
             </div>
             <div class="flex flex-col gap-xs flex-1 min-w-0">
-              <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ idcard.id_for_label }}">{{ idcard.label }}</label>
+              <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ idcard.id_for_label }}">{% trans idcard.label %}</label>
               <div class="ipt-field-box {% if idcard.errors %}is-error{% endif %}">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">badge</span></span>
                 <div class="ipt-file-wrap">
@@ -82,13 +88,13 @@
               <div class="flex flex-col gap-xs md:col-span-2" id="university-not-listed-row">
                 <label class="flex items-center gap-sm font-body-md text-body-md text-on-surface cursor-pointer">
                   {{ field }}
-                  <span>{{ field.label }}</span>
+                  <span>{% trans field.label %}</span>
                 </label>
                 <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Tick this if you cannot find your university above. Platform admins will review and add it." %}</p>
               </div>
               {% elif field.name == 'university_suggestion' %}
               <div class="flex flex-col gap-xs md:col-span-2" id="university-suggestion-row" {% if not form.university_not_listed.value %}hidden{% endif %}>
-                <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}</label>
                 <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
                   <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">add_business</span></span>
                   {{ field }}
@@ -97,7 +103,7 @@
               </div>
               {% elif field.name != 'profile_photo' and field.name != 'id_card_photo' %}
               <div class="flex flex-col gap-xs">
-                <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}{% if field.field.required %} *{% endif %}</label>
                 <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
                   <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">
                     {% if field.name == 'phone' %}call
@@ -126,7 +132,7 @@
           <div class="flex justify-end mt-sm">
             <button class="bg-primary text-on-primary hover:bg-primary/90 font-body-lg text-body-lg rounded-full px-xl py-3 shadow-sm hover:shadow-md transition-all active:scale-[0.98] flex items-center gap-xs" type="submit">
               <span class="material-symbols-outlined text-[20px]">save</span>
-              Save Profile
+              {% trans "Save Profile" %}
             </button>
           </div>
         </form>
@@ -142,13 +148,13 @@
         </div>
         <div class="flex flex-col items-center justify-center py-md z-10 relative">
           {% if profile and profile.profile_photo %}
-            <img src="{{ profile.profile_photo.url }}" alt="Profile photo" class="w-16 h-16 rounded-full object-cover mb-sm shadow-sm ring-4 ring-[#e8f5e9]/40">
+            <img src="{{ profile.profile_photo|thumb:128 }}" width="64" height="64" alt="{% trans 'Profile photo' %}" class="ipt-img w-16 h-16 rounded-full object-cover mb-sm shadow-sm ring-4 ring-[#e8f5e9]/40">
           {% else %}
             <div class="w-16 h-16 rounded-full bg-[#e8f5e9] flex items-center justify-center mb-sm shadow-sm ring-4 ring-[#e8f5e9]/40">
               <span class="material-symbols-outlined text-[#1b5e20] text-[32px]">check_circle</span>
             </div>
           {% endif %}
-          <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#1b5e20] bg-[#e8f5e9]">Active</span>
+          <span class="font-label-caps text-label-caps uppercase tracking-wider px-3 py-1 rounded-full text-[#1b5e20] bg-[#e8f5e9]">{% trans "Active" %}</span>
         </div>
         <div class="h-[1px] w-full bg-surface-container-high my-sm"></div>
         <div class="flex flex-col gap-sm">
@@ -176,15 +182,19 @@
           {% endif %}
           <div class="flex items-center gap-xs">
             <span class="material-symbols-outlined text-[16px] text-on-surface-variant">calendar_month</span>
-            <span class="font-body-md text-body-md text-on-surface">Joined {{ user.date_joined|date:"M Y" }}</span>
+            <span class="font-body-md text-body-md text-on-surface">{% blocktrans trimmed with date_joined=user.date_joined|date:"M Y" %}Joined {{ date_joined }}{% endblocktrans %}</span>
           </div>
         </div>
       </div>
     </div>
   </div>
+  </div>
+
+  <div data-panel="security" hidden>{% include "includes/account_security.html" %}</div>
 </div>
 {% endblock %}
 {% block scripts %}
+<script src="{% static 'js/tabs.js' %}"></script>
 <script>
   window.IPT = window.IPT || {};
   window.IPT.regions = {{ regions_json|safe }};

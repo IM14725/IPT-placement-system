@@ -7,6 +7,11 @@ class Migration(migrations.Migration):
     dependencies = [
         ("companies", "0002_alter_companyprofile_options_companyprofile_address_and_more"),
         ("locations", "0001_initial"),
+        # slots.0001 creates Slot.company -> companies.CompanyProfile under the OLD model name, so it
+        # must already be in the migration state when this rename runs (the rename then repoints it).
+        # Without this edge the order was only right by accident of graph traversal, and a fresh
+        # database (e.g. the test database) failed with "companies.companyprofile cannot be resolved".
+        ("slots", "0002_remove_slot_level_slot_academic_year"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

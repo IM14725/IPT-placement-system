@@ -17,7 +17,7 @@
         </div>
         <span class="px-sm py-1 rounded-full bg-[#e8f5e9] text-[#1b5e20] font-label-caps text-label-caps flex items-center gap-1 whitespace-nowrap">
           <span class="w-1.5 h-1.5 rounded-full bg-[#1b5e20] animate-pulse"></span>
-          {{ slot.available_count }} available
+          {% blocktrans trimmed with available_count=slot.available_count %}{{ available_count }} available{% endblocktrans %}
         </span>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-sm">
@@ -27,12 +27,12 @@
         </div>
         <div class="flex items-center gap-xs font-body-md text-on-surface-variant">
           <span class="material-symbols-outlined text-[18px] text-outline">schedule</span>
-          <span>{{ slot.role_type }}{% if slot.level %} · Year {{ slot.level }}{% endif %}</span>
+          <span>{{ slot.role_type }}{% if slot.requirement_label %} · {{ slot.requirement_label }}{% endif %}</span>
         </div>
         {% if slot.department %}
         <div class="flex items-center gap-xs font-body-md text-on-surface-variant sm:col-span-2">
           <span class="material-symbols-outlined text-[18px] text-outline">school</span>
-          <span>Dept: {{ slot.department }}</span>
+          <span>{% blocktrans trimmed with department=slot.department %}Dept: {{ department }}{% endblocktrans %}</span>
         </div>
         {% endif %}
         {% if slot.application_deadline %}
@@ -41,12 +41,18 @@
           <span>{% if slot.deadline_passed %}{% trans "Applications closed on" %}{% else %}{% trans "Apply by" %}{% endif %} {{ slot.application_deadline|date:"j M Y, H:i" }}</span>
         </div>
         {% endif %}
+        {% if slot.placement_label %}
+        <div class="flex items-center gap-xs font-body-md text-on-surface-variant sm:col-span-2">
+          <span class="material-symbols-outlined text-[18px] text-outline">date_range</span>
+          <span>{{ slot.placement_label }}</span>
+        </div>
+        {% endif %}
         <div class="flex items-center gap-xs font-body-md text-on-surface-variant sm:col-span-2">
           <span class="material-symbols-outlined text-[18px] text-[#1b5e20]">payments</span>
           {% if slot.stipend_available %}
-            <span class="font-semibold text-[#1b5e20]">TZS {{ slot.stipend_amount }}/month</span>
+            <span class="font-semibold text-[#1b5e20]">{% blocktrans trimmed with stipend_amount=slot.stipend_amount %}TZS {{ stipend_amount }}/month{% endblocktrans %}</span>
           {% else %}
-            <span>Unpaid placement</span>
+            <span>{% trans "Unpaid placement" %}</span>
           {% endif %}
         </div>
       </div>
@@ -75,9 +81,29 @@
           <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.application_letter.errors.0 }}</p>
         {% endif %}
       </div>
+      <div class="rounded-xl bg-surface-container-low p-md flex flex-col gap-xs">
+        <h3 class="font-body-md text-body-md font-semibold text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-[20px] text-primary">gavel</span>{% trans "Before you apply" %}</h3>
+        <ul class="flex flex-col gap-xs font-body-md text-body-md text-on-surface-variant list-disc pl-md">
+          {% if has_credit %}
+            <li>{% trans "You have a free re-application credit: no fee is charged for this application." %}</li>
+          {% else %}
+            <li>{% blocktrans with fee=fee %}The application fee is <strong>TZS {{ fee }}</strong>, paid by mobile money after you submit.{% endblocktrans %}</li>
+            <li>{% blocktrans with hours=payment_hours %}Your seat is held for <strong>{{ hours }} hours</strong>. If the fee is not paid in time, the seat is released.{% endblocktrans %}</li>
+            <li>{% trans "After paying you can cancel once, within 24 hours, and get a free re-application credit. After that the fee cannot be refunded." %}</li>
+          {% endif %}
+          <li>{% trans "A paid application is never rejected: the organization decides only whether to accept it." %}</li>
+        </ul>
+        <label class="mt-xs flex items-start gap-sm cursor-pointer font-body-md text-body-md text-on-surface">
+          {{ form.accept_rules }}
+          <span>{% trans form.accept_rules.label %}</span>
+        </label>
+        {% if form.accept_rules.errors %}
+          <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.accept_rules.errors.0 }}</p>
+        {% endif %}
+      </div>
       <div class="flex items-center justify-between gap-md pt-sm">
-        <a href="{% url 'student-marketplace' %}" class="text-primary font-body-md font-medium hover:underline flex items-center gap-1">
-          <span class="material-symbols-outlined text-[18px]">arrow_back</span> {% trans "Back to slots" %}
+        <a href="{% url 'student-slot-detail' slot.id %}" class="text-primary font-body-md font-medium hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span> {% trans "Back to slot details" %}
         </a>
         <button type="submit" class="bg-primary text-on-primary font-body-lg text-body-lg font-medium py-3 px-lg rounded-xl shadow-md hover:shadow-lg hover:bg-primary-container transition-all flex items-center justify-center gap-xs" data-loading>
           <span data-label>{% trans "Submit & Proceed to Payment" %}</span>

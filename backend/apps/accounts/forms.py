@@ -1,3 +1,4 @@
+from django.utils.translation import gettext, gettext_lazy
 from django import forms
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
@@ -186,7 +187,8 @@ class RegisterForm(AntiBotMixin, forms.ModelForm):
 class LoginForm(AntiBotMixin, forms.Form):
     email = forms.EmailField(
         widget=forms.EmailInput(
-            attrs={"class": FIELD_CLASS, "placeholder": "you@example.com", "autocomplete": "email"}
+            # "username" tells password managers this is the sign-in name, so they never guess another field.
+            attrs={"class": FIELD_CLASS, "placeholder": "you@example.com", "autocomplete": "username"}
         )
     )
     password = forms.CharField(
@@ -204,7 +206,7 @@ class ForgotPasswordForm(forms.Form):
 
 class RecoveryMethodForm(forms.Form):
     channel = forms.ChoiceField(
-        choices=[("EMAIL", "Email"), ("SMS", "SMS to my phone")],
+        choices=[("EMAIL", gettext_lazy("Email")), ("SMS", gettext_lazy("SMS to my phone"))],
         initial="EMAIL",
         widget=forms.RadioSelect,
     )
@@ -217,7 +219,7 @@ class OtpCodeForm(forms.Form):
         widget=forms.TextInput(
             attrs={
                 "class": FIELD_CLASS,
-                "placeholder": "6-digit code",
+                "placeholder": gettext_lazy("6-digit code"),
                 "autocomplete": "one-time-code",
                 "inputmode": "numeric",
             }
@@ -227,14 +229,14 @@ class OtpCodeForm(forms.Form):
 
 class ResetPasswordForm(forms.Form):
     password1 = forms.CharField(
-        label="New password",
+        label=gettext_lazy("New password"),
         widget=forms.PasswordInput(
-            attrs={"class": FIELD_CLASS, "placeholder": "At least 8 characters", "autocomplete": "new-password"}
+            attrs={"class": FIELD_CLASS, "placeholder": gettext_lazy("At least 8 characters"), "autocomplete": "new-password"}
         ),
     )
     password2 = forms.CharField(
-        label="Confirm new password",
-        widget=forms.PasswordInput(attrs={"class": FIELD_CLASS, "placeholder": "Repeat your new password", "autocomplete": "new-password"}),
+        label=gettext_lazy("Confirm new password"),
+        widget=forms.PasswordInput(attrs={"class": FIELD_CLASS, "placeholder": gettext_lazy("Repeat your new password"), "autocomplete": "new-password"}),
     )
 
     def clean(self):
@@ -242,7 +244,7 @@ class ResetPasswordForm(forms.Form):
         p1 = cleaned.get("password1")
         p2 = cleaned.get("password2")
         if p1 and p2 and p1 != p2:
-            self.add_error("password2", "Passwords do not match.")
+            self.add_error("password2", gettext("Passwords do not match."))
         return cleaned
 
 class _CurrentPasswordMixin:
@@ -255,21 +257,21 @@ class _CurrentPasswordMixin:
     def clean_current_password(self):
         pw = self.cleaned_data.get("current_password") or ""
         if self.user is None or not self.user.check_password(pw):
-            raise forms.ValidationError("Your current password is incorrect.")
+            raise forms.ValidationError(gettext("Your current password is incorrect."))
         return pw
 
 
 _CURRENT_PW = forms.PasswordInput(
-    attrs={"class": FIELD_CLASS, "placeholder": "Current password", "autocomplete": "current-password"}
+    attrs={"class": FIELD_CLASS, "placeholder": gettext_lazy("Current password"), "autocomplete": "current-password"}
 )
 
 
 class ChangeEmailForm(_CurrentPasswordMixin, forms.Form):
     email = forms.EmailField(
-        label="New email address",
+        label=gettext_lazy("New email address"),
         widget=forms.EmailInput(attrs={"class": FIELD_CLASS, "placeholder": "new@example.com", "autocomplete": "email"}),
     )
-    current_password = forms.CharField(label="Current password", widget=_CURRENT_PW)
+    current_password = forms.CharField(label=gettext_lazy("Current password"), widget=_CURRENT_PW)
 
     def clean_email(self):
         return self.cleaned_data["email"].strip().lower()
@@ -277,21 +279,21 @@ class ChangeEmailForm(_CurrentPasswordMixin, forms.Form):
 
 class ChangePhoneForm(_CurrentPasswordMixin, forms.Form):
     phone = forms.CharField(
-        label="Phone number",
+        label=gettext_lazy("Phone number"),
         validators=[validate_tz_phone],
         widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": "2557XXXXXXXX", "autocomplete": "tel"}),
     )
-    current_password = forms.CharField(label="Current password", widget=_CURRENT_PW)
+    current_password = forms.CharField(label=gettext_lazy("Current password"), widget=_CURRENT_PW)
 
 
 class ChangePasswordForm(_CurrentPasswordMixin, forms.Form):
-    current_password = forms.CharField(label="Current (or temporary) password", widget=_CURRENT_PW)
+    current_password = forms.CharField(label=gettext_lazy("Current (or temporary) password"), widget=_CURRENT_PW)
     password1 = forms.CharField(
-        label="New password",
+        label=gettext_lazy("New password"),
         widget=forms.PasswordInput(attrs={"class": FIELD_CLASS, "autocomplete": "new-password"}),
     )
     password2 = forms.CharField(
-        label="Confirm new password",
+        label=gettext_lazy("Confirm new password"),
         widget=forms.PasswordInput(attrs={"class": FIELD_CLASS, "autocomplete": "new-password"}),
     )
 
@@ -299,10 +301,10 @@ class ChangePasswordForm(_CurrentPasswordMixin, forms.Form):
         cleaned = super().clean()
         p1, p2 = cleaned.get("password1"), cleaned.get("password2")
         if p1 and p2 and p1 != p2:
-            self.add_error("password2", "Passwords do not match.")
+            self.add_error("password2", gettext("Passwords do not match."))
         elif p1:
             if cleaned.get("current_password") == p1:
-                self.add_error("password1", "Choose a password different from the current one.")
+                self.add_error("password1", gettext("Choose a password different from the current one."))
             try:
                 validate_password(p1, user=self.user)
             except forms.ValidationError as exc:

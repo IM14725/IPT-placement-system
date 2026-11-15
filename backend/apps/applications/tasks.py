@@ -45,6 +45,51 @@ def expire_unpaid():
     return {"expired": len(entries), "slots": len(slot_ids)}
 
 
+EXPIRY_WARNING_MINUTES = 60
+
+
+@shared_task(name="applications.remind_expiring")
+def remind_expiring():
+    """In-app reminder when an unpaid seat will be released within the hour.
+
+    One reminder per reservation: a notification for the same payment page that is newer than the
+    reservation itself means the student was already told.
+    """
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.applications.models import PAYMENT_DEADLINE_HOURS, Application, ApplicationStatus
+    from apps.notifications.inapp import Notification, NotificationType, notify
+
+    now = timezone.now()
+    expiring = Application.objects.filter(
+        status=ApplicationStatus.PENDING,
+        payment_deadline__gt=now,
+        payment_deadline__lte=now + timedelta(minutes=EXPIRY_WARNING_MINUTES),
+        payment__is_paid=False,
+    ).select_related("student__user", "slot__organization", "payment")
+    reminded = 0
+    for app in expiring:
+        link = f"/student/payments/{app.payment.id}/"
+        reserved_at = app.payment_deadline - timedelta(hours=PAYMENT_DEADLINE_HOURS)
+        if Notification.objects.filter(
+            user=app.student.user, type=NotificationType.PAYMENT, link=link, created_at__gte=reserved_at
+        ).exists():
+            continue
+        minutes = max(1, int((app.payment_deadline - now).total_seconds() // 60))
+        notify(
+            app.student.user,
+            NotificationType.PAYMENT,
+            "Your seat is about to be released",
+            f"Pay the application fee for '{app.slot.title}' at {app.slot.organization.name} within "
+            f"{minutes} minutes, or your seat goes back to other students.",
+            link=link,
+        )
+        reminded += 1
+    return {"reminded": reminded}
+
+
 @shared_task(
     name="applications.submitted_sms",
     autoretry_for=(OutboundRateLimited,),

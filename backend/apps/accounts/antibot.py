@@ -10,12 +10,15 @@ Both failures give the same generic message and never reveal which check fired. 
 the existing rate limits and lockouts; it does not replace them.
 """
 
+import logging
 import time
 
 from django import forms
 from django.conf import settings
 from django.core.signing import BadSignature, TimestampSigner
 from django.utils.translation import gettext_lazy as _
+
+logger = logging.getLogger(__name__)
 
 SALT = "ipt.antibot.v1"
 MAX_AGE_SECONDS = 6 * 3600
@@ -43,7 +46,18 @@ class AntiBotMixin(forms.Form):
     website = forms.CharField(
         required=False,
         label="",
-        widget=forms.TextInput(attrs={"tabindex": "-1", "autocomplete": "off", "aria-hidden": "true"}),
+        widget=forms.TextInput(
+            attrs={
+                "tabindex": "-1",
+                "autocomplete": "off",
+                "aria-hidden": "true",
+                # Keep password managers (Chrome, LastPass, 1Password, Bitwarden) from filling the trap.
+                "data-lpignore": "true",
+                "data-1p-ignore": "true",
+                "data-bwignore": "true",
+                "data-form-type": "other",
+            }
+        ),
     )
     form_ts = forms.CharField(required=False, widget=forms.HiddenInput)
     antibot_min_seconds = 2
@@ -63,6 +77,14 @@ class AntiBotMixin(forms.Form):
         if not getattr(settings, "ANTIBOT_ENABLED", True):
             return cleaned
         age = stamp_age(self._submitted_stamp)
-        if self.cleaned_data.get("website") or age is None or age < self.antibot_min_seconds:
+        trap = (self.cleaned_data.get("website") or "").strip()
+        if trap and trap.lower() == str(self.data.get("email", "")).strip().lower():
+            trap = ""  # a password manager filled the saved username into the trap: not a bot
+        if trap or age is None or age < self.antibot_min_seconds:
+            # The visitor only ever sees the generic message; the reason is logged for the operator.
+            reason = "honeypot filled" if trap else (
+                "missing, forged or expired timestamp" if age is None else f"submitted too fast ({age:.1f}s)"
+            )
+            logger.warning("Anti-bot rejected %s: %s", type(self).__name__, reason)
             raise forms.ValidationError(GENERIC_MESSAGE)
         return cleaned

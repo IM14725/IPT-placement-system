@@ -5,6 +5,7 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto flex flex-col gap-lg pb-xl">
+    {% get_current_language as LEGAL_LANG %}{% if LEGAL_LANG != "en" %}<p class="rounded-xl bg-surface-container-low border border-outline-variant px-md py-sm font-metadata text-metadata text-on-surface-variant" role="note">{% trans "This Kiswahili version is a courtesy translation. If there is any difference, the English version prevails." %}</p>{% endif %}
 
     <div class="flex flex-col gap-sm">
     <div class="flex items-center gap-sm">
@@ -677,7 +678,7 @@
     </p>
     {% if user.is_authenticated %}
     <a href="{% url 'delete-account' %}" class="inline-flex items-center gap-xs mt-sm px-lg py-sm rounded-full bg-error text-on-error font-metadata text-metadata uppercase tracking-wider hover:opacity-90 transition-opacity">
-      <span class="material-symbols-outlined text-[16px]">delete_forever</span> Request Account Deletion
+      <span class="material-symbols-outlined text-[16px]">delete_forever</span> {% trans "Request Account Deletion" %}
     </a>
     {% endif %}
   </section>

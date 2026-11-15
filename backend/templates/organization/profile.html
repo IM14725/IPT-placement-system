@@ -1,13 +1,18 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% block title %}{% trans "Organization Profile" %}{% endblock %}
 {% block content %}
-<div class="w-full flex flex-col gap-lg">
+<div class="w-full flex flex-col gap-lg" data-tabs data-default="profile">
   <div class="flex flex-col gap-xs">
-    <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Organization Profile" %}</h1>
-    <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Tell students about your organization and where you are located." %}</p>
+    <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Profile & security" %}</h1>
+    <p class="font-body-lg text-body-lg text-on-surface-variant">{% trans "Tell students about your organization and where you are located, and manage how you sign in." %}</p>
+  </div>
+  <div role="tablist" class="flex gap-xs border-b border-outline-variant overflow-x-auto no-scrollbar -mt-sm">
+    <button type="button" role="tab" data-tab="profile" class="px-md py-sm font-body-md text-body-md font-semibold border-b-2 border-transparent text-on-surface-variant whitespace-nowrap flex items-center gap-xs hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">apartment</span>{% trans "Organization profile" %}</button>
+    <button type="button" role="tab" data-tab="security" class="px-md py-sm font-body-md text-body-md font-semibold border-b-2 border-transparent text-on-surface-variant whitespace-nowrap flex items-center gap-xs hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">shield_person</span>{% trans "Account & security" %}</button>
   </div>
 
+  <div data-panel="profile" class="flex flex-col gap-lg">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg w-full items-start">
     <div class="lg:col-span-7 flex flex-col gap-lg">
       <div class="bg-surface-container-lowest rounded-xl p-lg shadow-md flex flex-col gap-md relative overflow-hidden auth-card">
@@ -27,7 +32,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
             {% for field in form %}
               <div class="flex flex-col gap-xs {% if field.name == 'description' %}md:col-span-2{% endif %}">
-                <label class="font-body-md font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <label class="font-body-md font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}</label>
                 <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
                   <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">
                     {% if field.name == 'name' %}badge
@@ -103,7 +108,7 @@
                     </select></div>
                     <button type="submit" class="px-sm py-1.5 rounded-lg bg-surface-container text-on-surface text-metadata font-semibold">{% trans "Set role" %}</button>
                   </form>
-                  <form method="post" action="{% url 'organization-remove-member' m.id %}" class="flex items-center gap-xs" onsubmit="return confirm('Revoke this member\'s access? Their history is kept.');">
+                  <form method="post" action="{% url 'organization-remove-member' m.id %}" class="flex items-center gap-xs" onsubmit="return confirm('{% trans "Revoke this member's access? Their history is kept." as revoke_msg %}{{ revoke_msg|escapejs }}');">
                     {% csrf_token %}
                     <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input name="reason" required maxlength="200" placeholder="{% trans 'Reason for removal' %}"></div>
                     <button type="submit" class="text-error hover:bg-error-container/40 p-1.5 rounded-lg transition-colors" title="{% trans 'Remove access' %}">
@@ -129,55 +134,55 @@
           <form method="post" action="{% url 'organization-add-member' %}" class="grid grid-cols-1 md:grid-cols-2 gap-sm pt-sm border-t border-outline-variant/40 items-end">
             {% csrf_token %}
             <div class="flex flex-col gap-xs">
-              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.first_name.id_for_label }}">{{ member_form.first_name.label }}</label>
+              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.first_name.id_for_label }}">{% trans member_form.first_name.label %}</label>
               <div class="ipt-field-box">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">person</span></span>
                 {{ member_form.first_name }}
               </div>
             </div>
             <div class="flex flex-col gap-xs">
-              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.last_name.id_for_label }}">{{ member_form.last_name.label }}</label>
+              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.last_name.id_for_label }}">{% trans member_form.last_name.label %}</label>
               <div class="ipt-field-box">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">person</span></span>
                 {{ member_form.last_name }}
               </div>
             </div>
             <div class="flex flex-col gap-xs">
-              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.email.id_for_label }}">{{ member_form.email.label }}</label>
+              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.email.id_for_label }}">{% trans member_form.email.label %}</label>
               <div class="ipt-field-box">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">mail</span></span>
                 {{ member_form.email }}
               </div>
             </div>
             <div class="flex flex-col gap-xs">
-              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.phone.id_for_label }}">{{ member_form.phone.label }}</label>
+              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.phone.id_for_label }}">{% trans member_form.phone.label %}</label>
               <div class="ipt-field-box">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">call</span></span>
                 {{ member_form.phone }}
               </div>
             </div>
             <div class="flex flex-col gap-xs">
-              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.position.id_for_label }}">{{ member_form.position.label }}</label>
+              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.position.id_for_label }}">{% trans member_form.position.label %}</label>
               <div class="ipt-field-box">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">work</span></span>
                 {{ member_form.position }}
               </div>
             </div>
             <div class="flex flex-col gap-xs">
-              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.role.id_for_label }}">{{ member_form.role.label }}</label>
+              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.role.id_for_label }}">{% trans member_form.role.label %}</label>
               <div class="ipt-field-box">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">badge</span></span>
                 {{ member_form.role }}
               </div>
             </div>
             <div class="flex flex-col gap-xs">
-              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.password.id_for_label }}">{{ member_form.password.label }}</label>
+              <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="{{ member_form.password.id_for_label }}">{% trans member_form.password.label %}</label>
               <div class="ipt-field-box">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">lock</span></span>
                 {{ member_form.password }}
               </div>
             </div>
-            <p class="md:col-span-2 font-metadata text-metadata text-on-surface-variant">Each member signs in with their own email and password. They verify their email by code and must replace this temporary password at first sign-in.</p>
+            <p class="md:col-span-2 font-metadata text-metadata text-on-surface-variant">{% trans "Each member signs in with their own email and password. They verify their email by code and must replace this temporary password at first sign-in." %}</p>
             <div class="md:col-span-2 flex justify-end mt-xs">
               <button type="submit" class="bg-secondary text-on-secondary hover:bg-secondary-container font-body-md text-body-md font-semibold px-md py-2 rounded-lg shadow-sm transition-colors flex items-center gap-xs">
                 <span class="material-symbols-outlined text-[18px]">person_add</span>
@@ -202,14 +207,14 @@
           <form method="post" enctype="multipart/form-data" action="{% url 'organization-upload-doc' %}" class="flex flex-col gap-sm mt-sm">
             {% csrf_token %}
             <div class="flex flex-col gap-xs">
-              <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ upload_form.doc_type.id_for_label }}">{{ upload_form.doc_type.label }}</label>
+              <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ upload_form.doc_type.id_for_label }}">{% trans upload_form.doc_type.label %}</label>
               <div class="ipt-field-box">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">description</span></span>
                 {{ upload_form.doc_type }}
               </div>
             </div>
             <div class="flex flex-col gap-xs">
-              <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ upload_form.file.id_for_label }}">{{ upload_form.file.label }}</label>
+              <label class="font-body-md text-body-md font-semibold text-on-surface" for="{{ upload_form.file.id_for_label }}">{% trans upload_form.file.label %}</label>
               <div class="ipt-field-box">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">upload_file</span></span>
                 <div class="ipt-file-wrap">{{ upload_form.file }}</div>
@@ -297,9 +302,13 @@
       {% endif %}
     </div>
   </div>
+  </div>
+
+  <div data-panel="security" hidden>{% include "includes/account_security.html" %}</div>
 </div>
 {% endblock %}
 {% block scripts %}
+<script src="{% static 'js/tabs.js' %}"></script>
 <script>
   window.IPT = window.IPT || {};
   window.IPT.regions = {{ regions_json|safe }};

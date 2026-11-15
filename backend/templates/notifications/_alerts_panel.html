@@ -1,0 +1,54 @@
+{% load i18n %}
+{# Slot alerts (saved searches). Needs: alerts, max_alerts. Forms post to student-alerts, which returns here (#alerts). #}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-md">
+    <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">{% trans "Searches you saved. When an organization posts a slot that matches one, you get a notification here on the platform." %}</p>
+    <a href="{% url 'student-marketplace' %}" class="bg-primary text-on-primary px-md py-sm rounded-lg font-semibold flex items-center gap-xs self-start md:self-auto whitespace-nowrap">
+      <span class="material-symbols-outlined text-[20px]">add_alert</span>{% trans "New alert from a search" %}
+    </a>
+  </div>
+
+  {% if alerts %}
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+      {% for alert in alerts %}
+        <div class="p-md flex flex-col sm:flex-row sm:items-center justify-between gap-sm {% if not forloop.last %}border-b border-surface-container{% endif %} {% if not alert.is_active %}opacity-70{% endif %}">
+          <div class="flex items-start gap-sm min-w-0">
+            <span class="material-symbols-outlined {% if alert.is_active %}text-primary{% else %}text-outline{% endif %} shrink-0">{% if alert.is_active %}notifications_active{% else %}notifications_paused{% endif %}</span>
+            <div class="flex flex-col gap-1 min-w-0">
+              <div class="flex flex-wrap gap-1">
+                {% for part in alert.parts %}<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-metadata text-metadata">{{ part }}</span>{% endfor %}
+              </div>
+              <span class="font-metadata text-metadata text-on-surface-variant">
+                {% if alert.is_active %}{% trans "Active" %}{% else %}{% trans "Paused" %}{% endif %} ·
+                {% if alert.last_matched_at %}{% trans "Last match" %} {{ alert.last_matched_at|timesince }} {% trans "ago" %}{% else %}{% trans "No match yet" %}{% endif %}
+              </span>
+            </div>
+          </div>
+          <div class="flex items-center gap-xs shrink-0">
+            <a href="{% url 'student-marketplace' %}?{{ alert.query_string }}" class="px-sm py-1.5 rounded-lg text-primary bg-primary/5 hover:bg-primary/10 font-semibold text-body-md">{% trans "See results" %}</a>
+            <form method="post" action="{% url 'student-alerts' %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="toggle"><input type="hidden" name="alert_id" value="{{ alert.id }}">
+              <button type="submit" class="p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container" title="{% if alert.is_active %}{% trans 'Pause' %}{% else %}{% trans 'Resume' %}{% endif %}" aria-label="{% if alert.is_active %}{% trans 'Pause' %}{% else %}{% trans 'Resume' %}{% endif %}">
+                <span class="material-symbols-outlined text-[20px]">{% if alert.is_active %}pause{% else %}play_arrow{% endif %}</span>
+              </button>
+            </form>
+            <form method="post" action="{% url 'student-alerts' %}" onsubmit="return confirm('{% trans 'Delete this alert?' %}');">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delete"><input type="hidden" name="alert_id" value="{{ alert.id }}">
+              <button type="submit" class="p-2 rounded-lg text-error hover:bg-error/10" title="{% trans 'Delete' %}" aria-label="{% trans 'Delete' %}"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <p class="font-metadata text-metadata text-on-surface-variant">{% blocktrans with n=alerts|length %}{{ n }} of {{ max_alerts }} alerts used.{% endblocktrans %}</p>
+  {% else %}
+    <div class="w-full flex flex-col items-center justify-center py-xl px-md bg-surface-container-lowest rounded-xl shadow-sm border border-dashed border-outline-variant/50 text-center">
+      <span class="material-symbols-outlined text-[40px] text-outline mb-sm">notifications_active</span>
+      <h3 class="font-headline-md text-headline-md text-on-surface mb-2">{% trans "No alerts yet" %}</h3>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-md mb-md">{% trans "Did not find what you want? On the Find a Slot page, set your filters and press “Notify me”. We will tell you when a matching slot is posted." %}</p>
+      <a href="{% url 'student-marketplace' %}" class="bg-primary text-on-primary px-md py-sm rounded-lg font-semibold">{% trans "Find a Slot" %}</a>
+    </div>
+  {% endif %}
+</div>

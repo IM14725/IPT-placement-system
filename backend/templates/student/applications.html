@@ -8,6 +8,14 @@
     <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Track your placement requests and complete required payments." %}</p>
   </div>
 </div>
+<nav class="w-full flex flex-wrap gap-xs mb-md" aria-label="{% trans 'Filter applications' %}">
+  {% for t in tabs %}
+    <a href="?tab={{ t.key }}" {% if t.key == tab %}aria-current="page"{% endif %}
+       class="px-md py-1.5 rounded-full border font-body-md text-body-md font-semibold flex items-center gap-xs transition-colors {% if t.key == tab %}bg-primary text-on-primary border-primary{% else %}bg-surface-container-lowest text-on-surface border-outline-variant hover:border-primary{% endif %}">
+      {{ t.label }}<span class="tabular-nums text-metadata opacity-80">{{ t.count }}</span>
+    </a>
+  {% endfor %}
+</nav>
 {% if applications %}
   <div class="flex flex-col gap-sm w-full">
     {% for app in applications %}
@@ -25,6 +33,7 @@
                 <span class="font-headline-md text-headline-md text-on-surface">{{ app.slot.title }}</span>
               </div>
               <span class="font-body-md text-body-md text-on-surface-variant">{{ app.slot.organization.name }} · {{ app.slot.district }}</span>
+              <a href="{% url 'student-slot-detail' app.slot.id %}" class="font-metadata text-metadata text-primary hover:underline w-fit">{% trans "View slot details" %}</a>
             </div>
           </div>
           <div class="px-3 py-1 rounded-full border
@@ -35,63 +44,90 @@
         </div>
         <div class="h-[1px] w-full bg-surface-container-high"></div>
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
-          <div class="flex items-center gap-sm">
-            <div class="flex items-center">
-              {% for step in app.timeline_steps %}
-                {% if step.done %}
-                  <div class="w-6 h-6 rounded-full bg-[#10B981] flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[14px] text-white">check</span>
-                  </div>
-                  {% if not forloop.last %}<div class="w-12 h-[2px] bg-[#10B981]"></div>{% endif %}
-                {% else %}
-                  <div class="w-6 h-6 rounded-full border-2 border-outline flex items-center justify-center bg-surface-container-lowest">
-                    <span class="w-2 h-2 rounded-full bg-outline"></span>
-                  </div>
-                  {% if not forloop.last %}<div class="w-12 h-[2px] bg-surface-container-high"></div>{% endif %}
+          <div class="flex flex-col gap-sm flex-1 min-w-0">
+            {% include "includes/application_progress.html" %}
+            <p class="font-metadata text-metadata text-on-surface-variant flex flex-wrap gap-x-md gap-y-1">
+              <span>{% trans "Applied" %} {{ app.created_at|date:"j M Y, H:i" }}</span>
+              {% if app.payment and app.payment.is_paid and app.payment.paid_at %}<span>{% trans "Paid" %} {{ app.payment.paid_at|date:"j M Y, H:i" }}</span>{% endif %}
+              {% if app.is_accepted %}<span>{% trans "Accepted" %} {{ app.updated_at|date:"j M Y, H:i" }}</span>{% endif %}
+              {% if app.status == 'UNPAID' %}<span>{% trans "Seat released" %} {{ app.updated_at|date:"j M Y, H:i" }}</span>{% endif %}
+              {% if app.status == 'CANCELLED' %}<span>{% trans "Cancelled" %} {{ app.updated_at|date:"j M Y, H:i" }}</span>{% endif %}
+            </p>
+            <div class="flex flex-col gap-1">
+              {% if app.status == 'PENDING' and app.payment_deadline %}
+                <span class="font-body-md text-body-md text-error font-semibold flex items-center gap-xs">
+                  <span class="material-symbols-outlined text-[18px]">timer</span>{% trans "Pay within" %}
+                  <span class="tabular-nums" data-countdown="{{ app.payment_deadline|date:'c' }}" data-expired="{% trans 'Time is up' %}">{{ app.payment_deadline|timeuntil }}</span>
+                  {% trans "to keep your seat" %}
+                </span>
+              {% elif app.status == 'PAID' and app.is_accepted %}
+                <span class="font-body-md text-body-md font-semibold text-[rgb(var(--c-ok-fg))]">{% trans "Accepted. Your placement is confirmed." %}</span>
+              {% elif app.status == 'PAID' %}
+                <span class="font-body-md text-body-md text-on-surface-variant">{% trans "Payment verified. Waiting for the organization to send your acceptance. A paid application is never rejected." %}</span>
+                {% if app.is_cancellable and app.cancel_deadline %}
+                  <span class="font-metadata text-metadata text-on-surface-variant flex items-center gap-xs">
+                    <span class="material-symbols-outlined text-[16px]">hourglass_top</span>{% trans "You can cancel for another" %}
+                    <span class="tabular-nums font-semibold" data-countdown="{{ app.cancel_deadline|date:'c' }}" data-expired="{% trans 'window closed' %}">{{ app.cancel_deadline|timeuntil }}</span>
+                  </span>
                 {% endif %}
-              {% endfor %}
-            </div>
-            <div class="flex flex-col ml-2">
-              <span class="font-metadata text-metadata text-on-surface">
-                {% if app.status == 'PAID' %}{% if app.is_accepted %}{% trans "Timeline Complete" %}{% else %}{% trans "Under Review" %}{% endif %}
-                {% elif app.status == 'UNPAID' %}{% trans "Payment Expired" %}{% else %}{% trans "Awaiting Payment" %}{% endif %}
-              </span>
-              <span class="font-body-md font-body-md text-on-surface-variant text-[12px]">
-                {% if app.status == 'PAID' %}{% if app.is_accepted %}{% trans "Payment verified, Placement confirmed" %}{% else %}{% trans "Pending organization decision" %}{% endif %}
-                {% elif app.status == 'UNPAID' %}{% trans "Slot released - re-book to start a new application" %}
-                {% else %}{% if app.payment_deadline %}{% blocktrans with deadline=app.payment_deadline|date:"M d, H:i" %}Pay by {{ deadline }} to keep your seat{% endblocktrans %}{% else %}{% trans "Pay fee to proceed to review" %}{% endif %}{% endif %}
-              </span>
+              {% endif %}
               {% if app.application_letter %}
-                <a href="{% url 'student-view-application-letter' app.id %}" target="_blank" rel="noopener noreferrer" class="font-body-md font-body-md text-[12px] text-[#6d28d9] flex items-center gap-1 hover:underline mt-1 w-fit">
+                <a href="{% url 'student-view-application-letter' app.id %}" target="_blank" rel="noopener noreferrer" class="font-body-md text-[12px] text-primary flex items-center gap-1 hover:underline mt-1 w-fit">
                   <span class="material-symbols-outlined text-[14px]">note</span>
                   {% trans "View application letter" %}
                 </a>
               {% endif %}
             </div>
+            {% if app.is_accepted %}
+              <div class="rounded-lg p-sm bg-[rgb(var(--c-ok-bg))] text-[rgb(var(--c-ok-fg))] flex flex-col gap-xs">
+                {% if app.company_message %}
+                  <p class="font-body-md text-body-md"><span class="font-bold">{% blocktrans with org=app.slot.organization.name %}Message from {{ org }}:{% endblocktrans %}</span> <span class="whitespace-pre-line break-words">{{ app.company_message }}</span></p>
+                {% endif %}
+                {% if app.slot.placement_label %}<p class="font-body-md text-body-md"><span class="font-bold">{% trans "Placement:" %}</span> {{ app.slot.placement_label }}</p>{% endif %}
+                {% if app.slot.reporting_contact %}<p class="font-body-md text-body-md"><span class="font-bold">{% trans "Report to:" %}</span> <span class="break-words">{{ app.slot.reporting_contact }}</span></p>{% endif %}
+                <p class="font-body-md text-body-md flex flex-wrap items-center gap-x-sm gap-y-1">
+                  <span class="font-bold">{% trans "Contact:" %}</span>
+                  {% if app.slot.organization.phone %}<a class="underline" href="tel:{{ app.slot.organization.phone }}">{{ app.slot.organization.phone }}</a>{% endif %}
+                  {% if app.slot.organization.email %}<a class="underline break-all" href="mailto:{{ app.slot.organization.email }}">{{ app.slot.organization.email }}</a>{% endif %}
+                </p>
+                <div class="flex flex-wrap gap-xs">
+                  <a href="{% url 'student-acceptance-letter' app.id %}" class="px-sm py-1.5 rounded-lg bg-primary text-on-primary font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">download</span>{% trans "Acceptance letter" %}</a>
+                  <a href="{% url 'student-checklist' app.id %}" class="px-sm py-1.5 rounded-lg bg-surface-container-lowest text-primary font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">checklist</span>{% trans "Next steps" %}</a>
+                  <a href="{% url 'student-review' app.id %}" class="px-sm py-1.5 rounded-lg bg-surface-container-lowest text-primary font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">star</span>{% trans "Rate organization" %}</a>
+                </div>
+              </div>
+            {% endif %}
           </div>
           <div class="flex flex-col gap-2 items-end">
             {% if app.status == 'PENDING' and app.payment and not app.payment.is_paid %}
               <a href="{% url 'student-payment' app.payment.id %}" class="bg-primary text-on-primary font-metadata text-metadata px-xl py-3 rounded shadow-sm hover:shadow-md transition-all hover:bg-primary/90 flex items-center gap-2 w-full md:w-auto justify-center">
                 <span class="material-symbols-outlined text-[18px]">payments</span>
-                Pay TZS {{ app.payment.amount }}
+                {% blocktrans trimmed with amount=app.payment.amount %}Pay TZS {{ amount }}{% endblocktrans %}
               </a>
+              {% trans "Release this seat? You can re-book it later if it is still open." as release_msg %}
+              <form method="post" action="{% url 'student-release-seat' app.id %}" onsubmit="return confirm('{{ release_msg|escapejs }}');" class="w-full md:w-auto">
+                {% csrf_token %}
+                <button type="submit" class="w-full text-on-surface-variant border border-outline-variant hover:border-error hover:text-error px-3 py-1.5 rounded text-metadata font-semibold transition-colors flex items-center justify-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]">event_busy</span>{% trans "Release my seat" %}
+                </button>
+              </form>
             {% elif app.payment and app.payment.is_paid %}
               <div class="mt-sm flex flex-col items-end w-full md:w-auto">
                 <div class="inline-flex items-center gap-xs bg-[#ecfdf5] border border-[#a7f3d0] px-sm py-1.5 rounded-lg w-full md:w-auto justify-center">
                   <span class="material-symbols-outlined text-[16px] text-[#065F46]">check_circle</span>
                   <span class="font-metadata font-medium text-[#065F46]">{% trans "Paid" %}</span>
                 </div>
-                <span class="font-metadata text-[11px] text-on-surface-variant text-right block mt-1">Paid at: {{ app.payment.paid_at|date:"M d, H:i" }}</span>
+                <span class="font-metadata text-[11px] text-on-surface-variant text-right block mt-1">{% blocktrans trimmed with paid_at=app.payment.paid_at|date:"M d, H:i" %}Paid at: {{ paid_at }}{% endblocktrans %}</span>
               </div>
               {% if app.is_cancellable %}
                 <form id="cancel-form-{{ app.id }}" method="post" action="{% url 'student-cancel-application' app.id %}">
                   {% csrf_token %}
                   <button type="button" onclick="openCancelModal('cancel-form-{{ app.id }}')" class="text-error border border-error/30 bg-error-container/10 hover:bg-error-container/30 px-3 py-1.5 rounded text-metadata font-bold mt-1 transition-colors w-full">
-                    Cancel Application (within 24h)
+                    {% trans "Cancel Application (within 24h)" %}
                   </button>
                 </form>
               {% elif app.status == 'PAID' and not app.can_cancel %}
-                 <span class="text-[11px] text-error mt-1 italic">Cancellation used</span>
+                 <span class="text-[11px] text-error mt-1 italic">{% trans "Cancellation used" %}</span>
               {% endif %}
             {% elif app.status == 'UNPAID' %}
               <a href="{% url 'student-apply' app.slot.id %}" class="bg-[#DC2626]/10 text-[#991B1B] font-metadata text-metadata px-xl py-3 rounded shadow-sm hover:shadow-md transition-all flex items-center gap-2 w-full md:w-auto justify-center">
@@ -99,7 +135,7 @@
                 {% trans "Re-book Slot" %}
               </a>
             {% elif app.status == 'CANCELLED' %}
-              <span class="text-[11px] text-error italic">Cancelled</span>
+              <span class="text-[11px] text-error italic">{% trans "Cancelled" %}</span>
             {% endif %}
           </div>
         </div>
@@ -112,8 +148,8 @@
     <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mb-sm">
       <span class="material-symbols-outlined text-[32px] text-outline">assignment</span>
     </div>
-    <h3 class="font-headline-md font-headline-md text-on-surface mb-2">{% trans "No applications yet" %}</h3>
-    <p class="font-body-md font-body-md text-on-surface-variant text-center max-w-md mb-lg">{% trans "You have not applied to any slots." %}</p>
+    <h3 class="font-headline-md font-headline-md text-on-surface mb-2">{% if tab == 'all' %}{% trans "No applications yet" %}{% else %}{% trans "Nothing in this tab" %}{% endif %}</h3>
+    <p class="font-body-md font-body-md text-on-surface-variant text-center max-w-md mb-lg">{% if tab == 'all' %}{% trans "You have not applied to any slots." %}{% else %}{% trans "No application matches this filter. Try another tab." %}{% endif %}</p>
     <a href="{% url 'student-marketplace' %}" class="bg-primary text-on-primary font-body-md font-body-md px-md py-sm rounded-lg hover:bg-primary-container transition-colors shadow-sm flex items-center gap-base">
       <span class="material-symbols-outlined text-[20px]">search</span>
       {% trans "Browse Slots" %}

@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 import uuid
 from django.conf import settings
 from django.db import models
@@ -52,7 +53,7 @@ class AuditLog(models.Model):
     target_label = models.CharField(max_length=200, blank=True)
     outcome = models.CharField(
         max_length=10,
-        choices=[("SUCCESS", "Success"), ("FAILED", "Failed"), ("REJECTED", "Rejected")],
+        choices=[("SUCCESS", gettext_lazy("Success")), ("FAILED", gettext_lazy("Failed")), ("REJECTED", gettext_lazy("Rejected"))],
         default="SUCCESS",
     )
     context = models.JSONField(default=dict, blank=True)
@@ -72,17 +73,17 @@ class Report(TimeStampedModel):
     """A complaint or report filed by a user, reviewed by platform administrators."""
 
     class Category(models.TextChoices):
-        FRAUD = "FRAUD", "Fraud or scam"
-        MISLEADING = "MISLEADING", "Misleading or fake opportunity"
-        PAYMENT = "PAYMENT", "Payment problem"
-        ABUSE = "ABUSE", "Harassment or abuse"
-        OTHER = "OTHER", "Other"
+        FRAUD = "FRAUD", gettext_lazy("Fraud or scam")
+        MISLEADING = "MISLEADING", gettext_lazy("Misleading or fake opportunity")
+        PAYMENT = "PAYMENT", gettext_lazy("Payment problem")
+        ABUSE = "ABUSE", gettext_lazy("Harassment or abuse")
+        OTHER = "OTHER", gettext_lazy("Other")
 
     class Status(models.TextChoices):
-        OPEN = "OPEN", "Open"
-        IN_REVIEW = "IN_REVIEW", "In review"
-        RESOLVED = "RESOLVED", "Resolved"
-        DISMISSED = "DISMISSED", "Dismissed"
+        OPEN = "OPEN", gettext_lazy("Open")
+        IN_REVIEW = "IN_REVIEW", gettext_lazy("In review")
+        RESOLVED = "RESOLVED", gettext_lazy("Resolved")
+        DISMISSED = "DISMISSED", gettext_lazy("Dismissed")
 
     reporter = models.ForeignKey(
         settings.AUTH_USER_MODEL,

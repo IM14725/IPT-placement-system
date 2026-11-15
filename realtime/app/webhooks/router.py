@@ -194,7 +194,7 @@ async def _process_payment_locked(reference_id, status, gateway_txn_id, amount_s
                         "(user_id, actor_id, type, title, body, link, is_read, "
                         "created_at, updated_at) "
                         "VALUES (:uid, NULL, 'APPLICATION', 'Application Submitted', "
-                        ":body, '', FALSE, :n, :n) RETURNING id"
+                        ":body, '/student/applications/', FALSE, :n, :n) RETURNING id"
                     ),
                     {"uid": pay.student_user_id, "body": student_body, "n": now},
                 )
@@ -222,9 +222,14 @@ async def _process_payment_locked(reference_id, status, gateway_txn_id, amount_s
                             "(user_id, actor_id, type, title, body, link, is_read, "
                             "created_at, updated_at) "
                             "VALUES (:uid, NULL, 'APPLICATION', 'New Applicant', "
-                            ":body, '', FALSE, :n, :n) RETURNING id"
+                            ":body, :link, FALSE, :n, :n) RETURNING id"
                         ),
-                        {"uid": organization_user, "body": organization_body, "n": now},
+                        {
+                            "uid": organization_user,
+                            "body": organization_body,
+                            "link": f"/organization/slots/{app_row.slot_id}/applicants/",
+                            "n": now,
+                        },
                     )
                 ).scalar()
 

@@ -1,3 +1,4 @@
+from django.utils.translation import gettext
 from datetime import timedelta
 
 from django.db import transaction
@@ -8,6 +9,26 @@ from apps.applications.models import Application, ApplicationStatus, PAYMENT_DEA
 
 class SlotFullError(Exception):
     pass
+
+
+def eligibility_blocker(student_profile, slot) -> str:
+    """Why this student does not meet the slot's stated requirements, or ``""`` when they do.
+
+    A slot's education level is the *minimum* qualification, so a higher level is fine. The academic
+    year only matters when the student is at the slot's level (the Higher Diploma case). An unknown
+    value on the student's profile is never held against them.
+    """
+    from apps.core.education import education_level_label
+
+    required, level = slot.education_level, student_profile.education_level
+    if required and level and level < required:
+        return gettext(
+            "This slot requires at least a %(qualification)s qualification (Level %(required)s). Your profile says Level %(level)s."
+        ) % {"qualification": education_level_label(required), "required": required, "level": level}
+    year, student_year = slot.academic_year, student_profile.academic_year
+    if year and student_year and (not level or level == required) and student_year != year:
+        return gettext("This slot is for %(year)s students. Your profile says a different year.") % {"year": slot.get_academic_year_display()}
+    return ""
 
 
 def create_application(student_profile, slot) -> Application:
@@ -26,7 +47,7 @@ def create_application(student_profile, slot) -> Application:
             .first()
         )
         if locked is None:
-            raise SlotFullError("Slot no longer exists.")
+            raise SlotFullError(gettext("Slot no longer exists."))
         holds_seat = Application.objects.filter(
             student=student_profile,
             slot=locked,
@@ -34,21 +55,26 @@ def create_application(student_profile, slot) -> Application:
         ).exists()
         if not holds_seat:
             if locked.deadline_passed:
-                raise SlotFullError("The application deadline for this slot has passed.")
+                raise SlotFullError(gettext("The application deadline for this slot has passed."))
             if locked.organization.is_suspended:
-                raise SlotFullError("This organization is not accepting applications right now.")
+                raise SlotFullError(gettext("This organization is not accepting applications right now."))
+            if locked.status in (SlotStatus.PAUSED, SlotStatus.CLOSED):
+                raise SlotFullError(gettext("This slot is not accepting applications right now."))
+            blocker = eligibility_blocker(student_profile, locked)
+            if blocker:
+                raise SlotFullError(blocker)
         if locked.is_full:
-            raise SlotFullError("This slot is full.")
+            raise SlotFullError(gettext("This slot is full."))
 
         application, _ =Application.objects.get_or_create(
             student=student_profile, slot=locked
         )
         if application.status == ApplicationStatus.PAID:
-            raise SlotFullError("You have already applied to this slot.")
+            raise SlotFullError(gettext("You have already applied to this slot."))
         if application.status == ApplicationStatus.UNPAID:
             # Re-book: the previous reservation expired unpaid, restart it.
             if locked.is_full:
-                raise SlotFullError("This slot is full.")
+                raise SlotFullError(gettext("This slot is full."))
             application.status = ApplicationStatus.PENDING
             application.payment_deadline = timezone.now() + timedelta(
                 hours=PAYMENT_DEADLINE_HOURS
@@ -81,6 +107,66 @@ def accept_application(application, *, company_message="") -> Application:
     application.is_accepted = True
     application.company_message = company_message
     application.save(update_fields=["is_accepted", "company_message", "updated_at"])
+    return application
+
+
+class AcceptanceError(Exception):
+    """The application cannot be accepted right now (the message is safe to show the user)."""
+
+
+def acceptance_blocker(application):
+    """Why this application cannot be accepted yet, or ``""`` when it can.
+
+    There is no rejecting a paid application: the only decision an organization makes is to accept.
+    """
+    if application.status != ApplicationStatus.PAID:
+        return gettext("This application has no verified payment.")
+    if application.is_accepted:
+        return gettext("This application is already accepted.")
+    if application.is_cancellable:
+        return gettext("The student can still cancel for 24 hours after paying. You can accept after that.")
+    return ""
+
+
+def accept_and_notify(application, *, company_message="", request=None, actor=None) -> Application:
+    """Accept a paid application and tell the student: in-app notification, SMS and email.
+
+    The one place every accept path (applicants page, dashboard, bulk accept) goes through.
+    Raises AcceptanceError when the application cannot be accepted.
+    """
+    from apps.core.audit import audit_event
+    from apps.notifications.inapp import NotificationType, notify
+
+    from .tasks import acceptance_email, acceptance_sms
+
+    blocker = acceptance_blocker(application)
+    if blocker:
+        raise AcceptanceError(blocker)
+    company_message = (company_message or "").strip()[:500]
+    actor = actor or getattr(request, "user", None)
+    organization = application.slot.organization
+    accept_application(application, company_message=company_message)
+    audit_event(
+        request,
+        action="Application Accepted",
+        module="Applications",
+        actor=actor,
+        organization=organization,
+        target=application,
+        target_label=f"{application.student.user.email} -> {application.slot.title}",
+        description="Accepted an application and sent confirmation",
+    )
+    notify(
+        application.student.user,
+        NotificationType.ACCEPTANCE,
+        "You have been accepted!",
+        f"{organization.name} accepted your application for '{application.slot.title}'. "
+        "Your acceptance letter is ready to download.",
+        link=f"/student/applications/{application.id}/next-steps/",
+        actor=actor,
+    )
+    acceptance_sms.delay(application.id, company_message, actor_id=getattr(actor, "id", None))
+    acceptance_email.delay(application.id, company_message)
     return application
 
 
@@ -119,6 +205,19 @@ def finalize_verified_payment(payment, *, gateway_txn_id="", payload=None, actor
             f"Payment verified ({payment.reference_id}). The organization will review "
             f"your application letter."
         ),
+        link="/student/applications/",
+    )
+    # Tell everyone on the organization's team who may review applicants.
+    from apps.companies.permissions import APPLICANTS_VIEW
+    from apps.notifications.inapp import notify_many, organization_recipients
+
+    notify_many(
+        organization_recipients(application.slot.organization, APPLICANTS_VIEW),
+        NotificationType.APPLICATION,
+        "New Applicant",
+        f"New paid applicant for '{application.slot.title}'.",
+        link=f"/organization/slots/{application.slot_id}/applicants/",
+        actor=actor,
     )
 
     receipt_pdf.delay(payment.id)

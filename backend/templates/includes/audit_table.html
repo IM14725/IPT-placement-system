@@ -1,16 +1,16 @@
-{% comment %}
+{% load i18n %}{% comment %}
 Shared audit result table. Context: logs (page), detail_url_name, show_org (bool).
 {% endcomment %}
 <div class="overflow-x-auto w-full">
   <table class="w-full text-left border-collapse">
     <thead>
       <tr class="bg-surface-container-lowest font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">
-        <th class="px-md py-sm font-medium w-[150px]">Time</th>
-        {% if show_org %}<th class="px-md py-sm font-medium">Organization</th>{% endif %}
-        <th class="px-md py-sm font-medium">Actor</th>
-        <th class="px-md py-sm font-medium">Action</th>
-        <th class="px-md py-sm font-medium hidden lg:table-cell">Target</th>
-        <th class="px-md py-sm font-medium">Outcome</th>
+        <th class="px-md py-sm font-medium w-[150px]">{% trans "Time" %}</th>
+        {% if show_org %}<th class="px-md py-sm font-medium">{% trans "Organization" %}</th>{% endif %}
+        <th class="px-md py-sm font-medium">{% trans "Actor" %}</th>
+        <th class="px-md py-sm font-medium">{% trans "Action" %}</th>
+        <th class="px-md py-sm font-medium hidden lg:table-cell">{% trans "Target" %}</th>
+        <th class="px-md py-sm font-medium">{% trans "Outcome" %}</th>
         <th class="px-md py-sm font-medium"></th>
       </tr>
     </thead>
@@ -45,14 +45,14 @@ Shared audit result table. Context: logs (page), detail_url_name, show_org (bool
               {% if log.outcome == 'SUCCESS' %}bg-[#e8f5e9] text-[#1b5e20]{% elif log.outcome == 'FAILED' %}bg-error-container text-on-error-container{% else %}bg-[#fff4e5] text-[#a16207]{% endif %}">{{ log.get_outcome_display }}</span>
           </td>
           <td class="px-md py-sm text-right">
-            <a class="text-primary font-semibold hover:underline" href="{% url detail_url_name log.id %}">Details</a>
+            <a class="text-primary font-semibold hover:underline" href="{% url detail_url_name log.id %}">{% trans "Details" %}</a>
           </td>
         </tr>
       {% empty %}
         <tr class="border-t border-surface-container">
           <td colspan="7" class="px-md py-xl text-center">
             <span class="material-symbols-outlined text-[40px] text-outline-variant">history</span>
-            <p class="font-body-md text-on-surface-variant mt-sm">No audit records match your filters.</p>
+            <p class="font-body-md text-on-surface-variant mt-sm">{% trans "No audit records match your filters." %}</p>
           </td>
         </tr>
       {% endfor %}

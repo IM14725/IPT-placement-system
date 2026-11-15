@@ -14,6 +14,7 @@
   var level = form.elements.level;
   var clearLink = document.getElementById("search-clear");
   var timer = null;
+  var skeletonTimer = null;
   var latest = 0;
 
   function params() {
@@ -56,6 +57,12 @@
     var ticket = ++latest;
     results.setAttribute("aria-busy", "true");
     results.style.opacity = "0.6";
+    clearTimeout(skeletonTimer);
+    skeletonTimer = setTimeout(function () {
+      if (ticket !== latest || !window.IPT || !window.IPT.skeletonCards) return;
+      results.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">' + window.IPT.skeletonCards(3) + "</div>";
+      results.style.opacity = "";
+    }, 200);
     fetch(form.dataset.fragmentUrl + (query ? "?" + query : ""), { credentials: "same-origin", headers: { "X-Requested-With": "XMLHttpRequest" } })
       .then(function (r) { if (!r.ok) throw new Error("bad response"); return r.text(); })
       .then(function (html) {
@@ -75,6 +82,7 @@
       })
       .then(function () {
         if (ticket !== latest) return;
+        clearTimeout(skeletonTimer);
         results.setAttribute("aria-busy", "false");
         results.style.opacity = "";
       });

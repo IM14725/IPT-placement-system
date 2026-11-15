@@ -1,3 +1,4 @@
+from django.utils.translation import gettext
 from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -122,21 +123,21 @@ def add_organization_member(
     ).count()
     if active_count >= MAX_ORGANIZATION_ACCOUNTS:
         raise ValidationError(
-            f"An organization can have at most {MAX_ORGANIZATION_ACCOUNTS} active accounts."
+            gettext('An organization can have at most %(MAX_ORGANIZATION_ACCOUNTS)s active accounts.') % {"MAX_ORGANIZATION_ACCOUNTS": MAX_ORGANIZATION_ACCOUNTS}
         )
     if role == OrganizationMemberRole.OWNER:
-        raise ValidationError("An organization has a single Manager (Owner): the registering user.")
+        raise ValidationError(gettext("An organization has a single Manager (Owner): the registering user."))
     email_norm = (email or "").strip().lower()
     if not email_norm:
-        raise ValidationError("Email address is required.")
+        raise ValidationError(gettext("Email address is required."))
     if User.objects.filter(email=email_norm).exists():
         raise ValidationError(
-            "This email address is already associated with an account. Please use another email address."
+            gettext("This email address is already associated with an account. Please use another email address.")
         )
     phone_norm = normalize_phone(phone)
     if phone_norm and User.objects.filter(phone=phone_norm).exists():
         raise ValidationError(
-            "This phone number is already associated with an account. Please use another phone number."
+            gettext("This phone number is already associated with an account. Please use another phone number.")
         )
     user = User.objects.create_user(
         email=email_norm,
@@ -175,14 +176,14 @@ def remove_organization_member(organization, member, removed_by, reason, request
     from apps.core.audit import audit_event
 
     if member.organization_id != organization.id:
-        raise ValidationError("That member does not belong to this organization.")
+        raise ValidationError(gettext("That member does not belong to this organization."))
     if member.user_id == organization.user_id or member.user_id == removed_by.id:
-        raise ValidationError("The Manager (Owner) account cannot be removed.")
+        raise ValidationError(gettext("The Manager (Owner) account cannot be removed."))
     if member.membership_status == MembershipStatus.REMOVED:
-        raise ValidationError("This member has already been removed.")
+        raise ValidationError(gettext("This member has already been removed."))
     reason = (reason or "").strip()
     if not reason:
-        raise ValidationError("Please give a reason for removing this member.")
+        raise ValidationError(gettext("Please give a reason for removing this member."))
     previous_role = member.role
     member.membership_status = MembershipStatus.REMOVED
     member.removed_at = timezone.now()
@@ -215,11 +216,11 @@ def change_member_role(organization, member, new_role, changed_by, request=None)
     from apps.core.audit import audit_event
 
     if member.organization_id != organization.id or member.membership_status != MembershipStatus.ACTIVE:
-        raise ValidationError("That member is not an active member of this organization.")
+        raise ValidationError(gettext("That member is not an active member of this organization."))
     if member.user_id == organization.user_id:
-        raise ValidationError("The Manager (Owner) role cannot be changed.")
+        raise ValidationError(gettext("The Manager (Owner) role cannot be changed."))
     if new_role not in (OrganizationMemberRole.MANAGER, OrganizationMemberRole.RECRUITER):
-        raise ValidationError("Choose a valid role.")
+        raise ValidationError(gettext("Choose a valid role."))
     old_role = member.role
     if old_role == new_role:
         return member
@@ -287,7 +288,7 @@ def can_organization_login(user, session_key=None):
     if count >= MAX_ORGANIZATION_CONCURRENT_LOGINS:
         return (
             False,
-            f"Maximum of {MAX_ORGANIZATION_CONCURRENT_LOGINS} accounts for this organization can be logged in at once.",
+            gettext("Maximum of %(max)s accounts for this organization can be logged in at once.") % {"max": MAX_ORGANIZATION_CONCURRENT_LOGINS},
         )
     return True, ""
 

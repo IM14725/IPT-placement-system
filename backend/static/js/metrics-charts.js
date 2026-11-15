@@ -4,10 +4,14 @@
    and the charts redraw when the theme changes. A chart with nothing to show gets a message, not a blank box. */
 (function () {
   "use strict";
-  if (typeof Chart === "undefined") return;
+  // Shimmer placeholders (in the template) stay until a chart is drawn over them.
+  function clearSkeletons() {
+    document.querySelectorAll("[data-chart-skeleton]").forEach(function (el) { el.remove(); });
+  }
+  if (typeof Chart === "undefined") { clearSkeletons(); return; }
 
   var dataEl = document.getElementById("charts-data");
-  if (!dataEl) return;
+  if (!dataEl) { clearSkeletons(); return; }
   var specs = JSON.parse(dataEl.textContent);
   var charts = {};
 
@@ -121,6 +125,8 @@
     if (!el) return;
     if (charts[spec.id]) { charts[spec.id].destroy(); }
     charts[spec.id] = BUILDERS[spec.shape](spec, el.querySelector("canvas"));
+    var sk = el.querySelector("[data-chart-skeleton]");
+    if (sk) sk.remove();
   }
 
   function buildAll() {
