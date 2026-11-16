@@ -1,5 +1,5 @@
 {% load media_tags %}{% load i18n %}
-{# One paid applicant. Needs: app (with .blocker), can_accept, next_url. Optional: selectable, templates. #}
+{# One paid applicant. Needs: app (with .blocker), can_accept, next_url. Optional: selectable, templates, hide_slot. #}
 <div class="p-md flex flex-col lg:flex-row lg:items-center justify-between gap-sm border-b border-surface-container last:border-b-0">
   <div class="flex items-start gap-sm min-w-0 flex-1">
     {% if selectable %}
@@ -23,7 +23,7 @@
       <span class="font-body-md text-body-md text-on-surface-variant break-words">
         {{ app.student.university|default:"—" }} · {{ app.student.course }}{% if app.student.education_level %} · {{ app.student.get_education_level_display }}{% endif %}{% if app.student.gpa is not None %} · GPA {{ app.student.gpa }}{% endif %}
       </span>
-      <span class="font-metadata text-metadata text-outline break-words">{{ app.slot.title }}{% if app.payment.paid_at %} · {% trans "paid" %} {{ app.payment.paid_at|timesince }} {% trans "ago" %}{% endif %}</span>
+      <span class="font-metadata text-metadata text-outline break-words">{% if not hide_slot %}{{ app.slot.title }}{% if app.payment.paid_at %} · {% endif %}{% endif %}{% if app.payment.paid_at %}{% trans "paid" %} {{ app.payment.paid_at|timesince }} {% trans "ago" %}{% endif %}</span>
     </div>
   </div>
   <div class="flex flex-wrap items-center gap-xs lg:justify-end shrink-0">

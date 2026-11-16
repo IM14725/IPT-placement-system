@@ -2211,6 +2211,9 @@ msgstr "Faili linazidi kikomo cha MB 2 (baiti %(size)s)."
 msgid "File signature could not be verified or does not match its declared type."
 msgstr "Saini ya faili haikuweza kuthibitishwa au haiendani na aina iliyotajwa."
 
+msgid "Filled"
+msgstr "Imejaa"
+
 msgid "Filter"
 msgstr "Chuja"
 
@@ -3257,6 +3260,9 @@ msgstr "Timu yetu hukagua shirika lako ili wanafunzi wajue ni halali."
 msgid "Outcome"
 msgstr "Matokeo"
 
+msgid "Overview and how this slot is doing"
+msgstr "Muhtasari na hali ya nafasi hii"
+
 msgid "PDPA Rights Request"
 msgstr "Ombi la Haki za PDPA"
 
@@ -4142,6 +4148,9 @@ msgstr "Nafasi imehifadhiwa"
 
 msgid "Slot saved."
 msgstr "Nafasi imehifadhiwa."
+
+msgid "Slot statistics"
+msgstr "Takwimu za nafasi"
 
 msgid "Slot updated."
 msgstr "Nafasi imesasishwa."

@@ -834,5 +834,8 @@
  "TZS %(stipend_amount)s / month": "TZS %(stipend_amount)s / mwezi",
  "Newest paid": "Waliolipa karibuni",
  "Oldest paid": "Waliolipa zamani",
- "More": "Zaidi"
+ "More": "Zaidi",
+ "Filled": "Imejaa",
+ "Slot statistics": "Takwimu za nafasi",
+ "Overview and how this slot is doing": "Muhtasari na hali ya nafasi hii"
 }

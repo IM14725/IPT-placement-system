@@ -5,6 +5,7 @@ import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db.models import Count
 from django.http import FileResponse, HttpResponseForbidden, HttpResponseGone
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -864,8 +865,8 @@ def applicants(request, slot_id):
     education_level = request.GET.get("education_level") or None
     sort = request.GET.get("sort") if request.GET.get("sort") in ("newest", "earliest") else "newest"
     qs = get_organization_visible_applications(slot).select_related(
-        "student__user", "payment", "student__district__region"
-    )
+        "student__user", "student__university", "payment", "student__district__region"
+    ).annotate(note_count=Count("notes"))
     if education_level:
         qs = qs.filter(student__education_level=education_level)
     accepted_count = qs.filter(is_accepted=True).count()
@@ -873,11 +874,15 @@ def applicants(request, slot_id):
     fill_percent = min(100, round((qs.count() / slot.capacity) * 100)) if slot.capacity else 0
     ordering = ("payment__paid_at", "created_at") if sort == "earliest" else ("-payment__paid_at", "-created_at")
     page_obj = paginate(qs.order_by(*ordering), request.GET.get("page"))
+    for app in page_obj:  # same rows as All applicants: the 24 h cancellation window blocks acceptance
+        app.blocker = acceptance_blocker(app)
     return render(
         request,
         "organization/applicants.html",
         {
             "slot": slot,
+            "can_accept": org_has_perm(request.user, APPLICANTS_ACCEPT, organization),
+            "templates": AcceptanceTemplate.objects.filter(organization=organization),
             "applications": page_obj,
             "page_obj": page_obj,
             "querystring": urlencode({k: v for k, v in request.GET.items() if k != "page"}),

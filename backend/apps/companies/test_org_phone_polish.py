@@ -150,3 +150,49 @@ def test_slot_card_title_wraps_and_the_bar_is_full_width_on_phones(ready_org, pl
     assert "line-clamp-2" in body and 'text-on-surface truncate">' not in body
     assert 'title="A very long slot title' in body  # the full title stays available on hover/long-press
     assert "flex-1 sm:flex-none sm:w-24" in body and "w-16 h-1.5" not in body
+
+
+# ── 8/9. slot Applicants: trimmed cards with Documents / Notes / Accept, stats summary on top ──
+
+@pytest.mark.django_db
+def test_slot_applicants_uses_the_compact_rows_and_a_stats_summary(ready_org, places):
+    from apps.applications.services import accept_and_notify
+
+    slot = _slot(ready_org, places["kinondoni"], "Intern", capacity=5)
+    apps = [_pay(_student(places, email=f"s{i}@x.tz"), slot) for i in range(3)]
+    accept_and_notify(apps[0], company_message="Welcome")
+    body = _client(ready_org.user).get(reverse("organization-applicants", args=[slot.id])).content.decode()
+
+    # one compact row per applicant; the old tall card (notes box + note field + big button) is gone
+    assert body.count(reverse("organization-applicant-documents", args=[apps[1].id])) == 1
+    assert "Private notes" not in body and "One click automatically sends" not in body
+    assert "w-1 h-1 rounded-full bg-outline-variant" not in body  # no dangling dot separators in the details
+    # Notes / Accept / Documents buttons exist per applicant; Accept opens the note box, accepted ones get the letter link
+    assert reverse("organization-applicant-notes", args=[apps[1].id]) in body
+    assert f'action="{reverse("organization-acceptance-sms", args=[apps[1].id])}"' in body
+    assert f'action="{reverse("organization-acceptance-sms", args=[apps[0].id])}"' not in body  # already accepted
+    assert reverse("organization-applicant-acceptance-letter", args=[apps[0].id]) in body
+    assert "GPA" not in body or "· GPA" in body  # GPA shows in the details line when the student has one
+    # the slot's own title is not repeated on every row
+    assert body.count(">Intern<") <= 2
+
+    # phones: a one-line summary and a collapsed "Slot statistics" section ABOVE the list; desktop keeps the sidebar
+    summary = body.index('class="lg:hidden flex flex-col gap-sm"')
+    first_row = body.index(reverse("organization-applicant-documents", args=[apps[1].id]))
+    assert summary < first_row
+    section = body[summary:first_row]
+    assert "Slot statistics" in section and "<details" in section and "Slot Overview" in section
+    assert 'class="hidden lg:flex lg:col-span-4' in body
+    assert "1</strong> Accepted" in section and "2</strong> Pending Review" in section
+
+
+@pytest.mark.django_db
+def test_slot_applicants_cooling_off_applicant_cannot_be_accepted_from_the_row(ready_org, places):
+    from apps.applications.models import Application
+
+    slot = _slot(ready_org, places["kinondoni"], "Intern", capacity=2)
+    app = _pay(_student(places), slot)
+    Application.objects.filter(pk=app.pk).update(can_cancel=True)  # still inside the 24 h window
+    body = _client(ready_org.user).get(reverse("organization-applicants", args=[slot.id])).content.decode()
+    assert "In 24h cancellation window" in body
+    assert f'action="{reverse("organization-acceptance-sms", args=[app.id])}"' not in body
