@@ -432,3 +432,16 @@ def test_application_fee_is_written_with_a_thousands_separator_everywhere(places
     for url in (reverse("student-applications"), reverse("student-slot-detail", args=[other.id]), reverse("student-apply", args=[other.id])):
         body = c.get(url).content.decode()
         assert "TZS 15,000" in body and "15000.00" not in body, url
+
+
+@pytest.mark.django_db
+def test_slot_location_does_not_repeat_the_region(places, org):
+    """District's own text is already "Kinondoni, Dar es Salaam"; pages used to append the region again."""
+    slot = _slot(org, places["kinondoni"])
+    student = _student(places)
+    c = _client(student.user)
+    app = create_application(student, slot)
+    for url in (reverse("student-slot-detail", args=[slot.id]), reverse("student-apply", args=[_slot(org, places["kinondoni"], "Second").id])):
+        body = c.get(url).content.decode()
+        assert "Dar es Salaam, Dar es Salaam" not in body and "Dar es Salaam · Dar es Salaam" not in body, url
+        assert "Kinondoni, Dar es Salaam" in body, url

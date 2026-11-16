@@ -23,7 +23,7 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-sm font-body-md text-body-md text-on-surface-variant">
-      <div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">location_on</span>{% if slot.street %}{{ slot.street }}, {% endif %}{{ slot.district }}, {{ slot.district.region }}</div>
+      <div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">location_on</span>{% if slot.street %}{{ slot.street }}, {% endif %}{{ slot.district }}</div>
       {% if slot.requirement_label %}<div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">workspace_premium</span>{{ slot.requirement_label }}</div>{% endif %}
       {% if slot.department %}<div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">school</span>{{ slot.department }}</div>{% endif %}
       {% if slot.placement_label %}<div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">date_range</span>{{ slot.placement_label }}</div>{% endif %}

@@ -26,7 +26,7 @@
       <ul class="flex flex-col gap-xs font-body-md text-body-md text-on-surface">
         {% if organization.phone %}<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">call</span><a class="text-primary hover:underline" href="tel:{{ organization.phone }}">{{ organization.phone }}</a></li>{% endif %}
         {% if organization.email %}<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">mail</span><a class="text-primary hover:underline break-all" href="mailto:{{ organization.email }}">{{ organization.email }}</a></li>{% endif %}
-        <li class="flex items-start gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">location_on</span><span>{% if application.slot.street %}{{ application.slot.street }}, {% elif organization.address %}{{ organization.address }}, {% endif %}{{ application.slot.district }}, {{ application.slot.district.region }}</span></li>
+        <li class="flex items-start gap-xs"><span class="material-symbols-outlined text-[18px] text-outline">location_on</span><span>{% if application.slot.street %}{{ application.slot.street }}, {% elif organization.address %}{{ organization.address }}, {% endif %}{{ application.slot.district }}</span></li>
         {% if not organization.phone and not organization.email %}<li class="text-on-surface-variant">{% trans "The organization has not published contact details." %}</li>{% endif %}
       </ul>
     </section>
