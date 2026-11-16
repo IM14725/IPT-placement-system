@@ -1,4 +1,5 @@
 {% load i18n time_tags %}
+{% load money_tags %}
 {# One slot as a card. Needs: slot (decorated by apps.students.dashboard.decorate_slots), can_apply. #}
 <div class="group bg-surface-container-lowest rounded-2xl p-md shadow-sm hover:shadow-lg transition-shadow flex flex-col gap-sm justify-between relative overflow-hidden">
   <div class="flex flex-col gap-sm">
@@ -39,7 +40,7 @@
       <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[16px] text-outline">location_on</span>{{ slot.district.region.name }} · {{ slot.district.name }}</span>
       <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[16px] text-outline">school</span>{{ slot.role_type }}{% if slot.education_level %} · {{ slot.get_education_level_display }}{% endif %}{% if slot.academic_year %} · {{ slot.get_academic_year_display }}{% endif %}</span>
       {% if slot.department %}<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[16px] text-outline">work</span>{{ slot.department }}</span>{% endif %}
-      <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[16px] text-outline">payments</span>{% if slot.stipend_available %}TZS {{ slot.stipend_amount|floatformat:"0" }}{% trans "/month" %}{% else %}{% trans "Unpaid" %}{% endif %}</span>
+      <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[16px] text-outline">payments</span>{% if slot.stipend_available %}TZS {{ slot.stipend_amount|money }} {% trans "/ month" %}{% else %}{% trans "Unpaid" %}{% endif %}</span>
     </div>
   </div>
 

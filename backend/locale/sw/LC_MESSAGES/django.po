@@ -969,6 +969,9 @@ msgstr "- Chagua chaguo -"
 msgid ". Choose a new password below."
 msgstr ". Chagua nenosiri jipya hapa chini."
 
+msgid "/ month"
+msgstr "/ mwezi"
+
 msgid "/mo"
 msgstr "/mwezi"
 
@@ -4303,6 +4306,9 @@ msgstr "Cheti cha TIN"
 
 msgid "TRA Taxpayer Identification Number, 9 digits (optional)."
 msgstr "Namba ya Mlipakodi ya TRA, tarakimu 9 (si lazima)."
+
+msgid "TZS %(stipend_amount)s / month"
+msgstr "TZS %(stipend_amount)s / mwezi"
 
 msgid "TZS %(stipend_amount)s/month"
 msgstr "TZS %(stipend_amount)s/mwezi"

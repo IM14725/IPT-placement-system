@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load money_tags %}
 {% block title %}{% trans "Apply" %} — {{ slot.title }}{% endblock %}
 {% block content %}
 <div class="w-full max-w-3xl mx-auto flex flex-col gap-md">
@@ -50,7 +51,7 @@
         <div class="flex items-center gap-xs font-body-md text-on-surface-variant sm:col-span-2">
           <span class="material-symbols-outlined text-[18px] text-[#1b5e20]">payments</span>
           {% if slot.stipend_available %}
-            <span class="font-semibold text-[#1b5e20]">{% blocktrans trimmed with stipend_amount=slot.stipend_amount %}TZS {{ stipend_amount }}/month{% endblocktrans %}</span>
+            <span class="font-semibold text-[#1b5e20]">{% blocktrans trimmed with stipend_amount=slot.stipend_amount|money %}TZS {{ stipend_amount }} / month{% endblocktrans %}</span>
           {% else %}
             <span>{% trans "Unpaid placement" %}</span>
           {% endif %}

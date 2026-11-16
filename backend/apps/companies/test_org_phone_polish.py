@@ -55,3 +55,28 @@ def test_slot_applicants_capacity_percent_in_kiswahili(ready_org, places):
     c.cookies["django_language"] = "sw"
     body = c.get(reverse("organization-applicants", args=[slot.id])).content.decode()
     assert "80% Imejaa" in body and "%%" not in body
+
+
+# ── 2. stipend reads "TZS 300,000 / month" ─────────────────────────────────────
+
+def test_money_filter():
+    from apps.core.templatetags.money_tags import money
+
+    assert money("300000.00") == "300,000"
+    assert money(1250000) == "1,250,000"
+    assert money(None) is None
+
+
+@pytest.mark.django_db
+def test_stipend_is_shown_as_whole_shillings_with_separator(ready_org, places):
+    slot = _slot(ready_org, places["kinondoni"], "Paid intern", capacity=2, stipend_available=True, stipend_amount=300000)
+    mine = _client(ready_org.user).get(reverse("organization-slots")).content.decode()
+    assert "TZS 300,000" in mine and "300000" not in mine and ".00" not in mine
+    assert "/ month" in mine and "/mo<" not in mine
+    student = _client(_student(places).user)
+    assert "TZS 300,000 / month" in student.get(reverse("student-slot-detail", args=[slot.id])).content.decode()
+    apply_page = student.get(reverse("student-apply", args=[slot.id])).content.decode()
+    assert "TZS 300,000 / month" in apply_page
+    sw = _client(ready_org.user)
+    sw.cookies["django_language"] = "sw"
+    assert "/ mwezi" in sw.get(reverse("organization-slots")).content.decode()

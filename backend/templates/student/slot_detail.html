@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load money_tags %}
 {% block title %}{{ slot.title }}{% endblock %}
 {% block content %}
 <div class="w-full max-w-4xl mx-auto flex flex-col gap-md">
@@ -30,7 +31,7 @@
         {% if slot.application_deadline %}{% if slot.deadline_passed %}{% trans "Applications closed on" %}{% else %}{% trans "Apply by" %}{% endif %} {{ slot.application_deadline|date:"j M Y, H:i" }}{% else %}{% trans "No application deadline" %}{% endif %}
       </div>
       <div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[18px] text-[#1b5e20]">payments</span>
-        {% if slot.stipend_available %}<span class="font-semibold text-[#1b5e20]">TZS {{ slot.stipend_amount }}{% trans "/month" %}</span>{% else %}{% trans "Unpaid placement" %}{% endif %}
+        {% if slot.stipend_available %}<span class="font-semibold text-[#1b5e20]">TZS {{ slot.stipend_amount|money }} {% trans "/ month" %}</span>{% else %}{% trans "Unpaid placement" %}{% endif %}
       </div>
     </div>
 
