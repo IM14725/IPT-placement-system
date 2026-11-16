@@ -119,47 +119,49 @@
                 <span class="text-body-lg font-body-lg text-[#006e1c] font-semibold">TZS {{ slot.stipend_amount|money }}<span class="text-metadata font-metadata text-on-surface-variant font-normal"> {% trans "/ month" %}</span></span>
               </div>
             {% endif %}
-            <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-surface-variant pt-md lg:pt-0 lg:pl-md w-full lg:w-auto mt-sm lg:mt-0 justify-end">
-              <a href="{% url 'organization-applicants' slot.id %}" class="px-sm py-1.5 text-primary bg-primary/5 hover:bg-primary/10 rounded-lg text-body-md font-body-md font-medium transition-colors">{% trans "Applicants" %}</a>
-              <a href="{% url 'organization-slot-edit' slot.id %}" class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="{% trans 'Edit' %}"><span class="material-symbols-outlined text-[20px]">edit</span></a>
-              <form method="post" action="{% url 'organization-slot-toggle' slot.id %}">
-                {% csrf_token %}
-                <button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="{% if slot.status == 'PAUSED' %}{% trans 'Resume' %}{% else %}{% trans 'Pause' %}{% endif %}">
-                  <span class="material-symbols-outlined text-[20px]">{% if slot.status == 'PAUSED' %}play_arrow{% else %}pause{% endif %}</span>
-                </button>
-              </form>
-              <details class="relative">
-                <summary class="list-none cursor-pointer p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors {% if slot.applications_closed %}text-[#854d0e]{% endif %}" title="{% trans 'Extend deadline' %}" aria-label="{% trans 'Extend deadline' %}"><span class="material-symbols-outlined text-[20px]">update</span></summary>
-                <form method="post" action="{% url 'organization-slot-extend' slot.id %}" class="absolute right-0 z-20 mt-1 w-56 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant p-sm flex flex-col gap-xs">
-                  {% csrf_token %}
-                  <label class="font-metadata text-metadata text-on-surface-variant" for="extend-{{ slot.id }}">{% trans "Extend the deadline by" %}</label>
-                  <div class="ipt-field-box">
-                    <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">update</span></span>
-                    <select id="extend-{{ slot.id }}" name="days" class="ipt-select">
-                      <option value="3">{% trans "3 days" %}</option>
-                      <option value="7" selected>{% trans "7 days" %}</option>
-                      <option value="14">{% trans "14 days" %}</option>
-                      <option value="30">{% trans "30 days" %}</option>
-                    </select>
-                  </div>
-                  <button type="submit" class="bg-primary text-on-primary rounded-lg px-sm py-1.5 text-body-md font-semibold">{% trans "Extend" %}</button>
-                </form>
+            <div class="flex items-center gap-xs flex-wrap border-t lg:border-t-0 lg:border-l border-surface-variant pt-sm lg:pt-0 lg:pl-md w-full lg:w-auto mt-sm lg:mt-0 lg:justify-end">
+              <a href="{% url 'organization-applicants' slot.id %}" class="px-md min-h-[40px] inline-flex items-center gap-xs text-primary bg-primary/10 hover:bg-primary/20 rounded-lg text-body-md font-body-md font-semibold transition-colors"><span class="material-symbols-outlined text-[18px]">group</span>{% trans "Applicants" %}</a>
+              <a href="{% url 'organization-slot-edit' slot.id %}" class="px-md min-h-[40px] inline-flex items-center gap-xs text-on-surface bg-surface-container hover:bg-surface-container-high rounded-lg text-body-md font-body-md font-semibold transition-colors"><span class="material-symbols-outlined text-[18px]">edit</span>{% trans "Edit" %}</a>
+              <details class="relative ipt-more">
+                <summary class="list-none cursor-pointer px-md min-h-[40px] inline-flex items-center gap-xs text-on-surface bg-surface-container hover:bg-surface-container-high rounded-lg text-body-md font-body-md font-semibold transition-colors">{% trans "More" %}<span class="material-symbols-outlined text-[18px]">expand_more</span></summary>
+                <div class="absolute right-0 z-20 mt-1 w-[min(18rem,calc(100vw-3rem))] bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant p-xs flex flex-col">
+                  <form method="post" action="{% url 'organization-slot-toggle' slot.id %}">
+                    {% csrf_token %}
+                    <button class="w-full text-left px-sm min-h-[44px] flex items-center gap-sm rounded-lg text-body-md font-body-md text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">{% if slot.status == 'PAUSED' %}play_arrow{% else %}pause{% endif %}</span>{% if slot.status == 'PAUSED' %}{% trans 'Resume' %}{% else %}{% trans 'Pause' %}{% endif %}</button>
+                  </form>
+                  <details>
+                    <summary class="list-none cursor-pointer w-full px-sm min-h-[44px] flex items-center gap-sm rounded-lg text-body-md font-body-md hover:bg-surface-container transition-colors {% if slot.applications_closed %}text-[#854d0e]{% else %}text-on-surface{% endif %}"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">update</span>{% trans "Extend deadline" %}</summary>
+                    <form method="post" action="{% url 'organization-slot-extend' slot.id %}" class="px-sm pb-sm pt-xs flex flex-col gap-xs">
+                      {% csrf_token %}
+                      <label class="font-metadata text-metadata text-on-surface-variant" for="extend-{{ slot.id }}">{% trans "Extend the deadline by" %}</label>
+                      <div class="ipt-field-box">
+                        <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">update</span></span>
+                        <select id="extend-{{ slot.id }}" name="days" class="ipt-select">
+                          <option value="3">{% trans "3 days" %}</option>
+                          <option value="7" selected>{% trans "7 days" %}</option>
+                          <option value="14">{% trans "14 days" %}</option>
+                          <option value="30">{% trans "30 days" %}</option>
+                        </select>
+                      </div>
+                      <button type="submit" class="bg-primary text-on-primary rounded-lg px-sm min-h-[40px] text-body-md font-semibold">{% trans "Extend" %}</button>
+                    </form>
+                  </details>
+                  <form method="post" action="{% url 'organization-slot-close' slot.id %}" {% if slot.status != 'CLOSED' %}onsubmit="return confirm('{% trans "Close this slot to new applications? Existing applicants are not affected." as close_msg %}{{ close_msg|escapejs }}');"{% endif %}>
+                    {% csrf_token %}
+                    <button class="w-full text-left px-sm min-h-[44px] flex items-center gap-sm rounded-lg text-body-md font-body-md text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">{% if slot.status == 'CLOSED' %}lock_open{% else %}lock{% endif %}</span>{% if slot.status == 'CLOSED' %}{% trans 'Reopen' %}{% else %}{% trans 'Close to new applications' %}{% endif %}</button>
+                  </form>
+                  <a href="{% url 'organization-slot-duplicate' slot.id %}" class="w-full px-sm min-h-[44px] flex items-center gap-sm rounded-lg text-body-md font-body-md text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">content_copy</span>{% trans "Duplicate (post again)" %}</a>
+                  <div class="h-px bg-outline-variant/60 my-xs"></div>
+                  {% if slot.can_delete %}
+                  <form method="post" action="{% url 'organization-slot-delete' slot.id %}" onsubmit="return confirm('{% trans "Delete this slot?" as delete_msg %}{{ delete_msg|escapejs }}');">
+                    {% csrf_token %}
+                    <button class="w-full text-left px-sm min-h-[44px] flex items-center gap-sm rounded-lg text-body-md font-body-md text-error hover:bg-error-container/40 transition-colors"><span class="material-symbols-outlined text-[20px]">delete</span>{% trans "Delete" %}</button>
+                  </form>
+                  {% else %}
+                  <p class="px-sm py-xs flex items-start gap-sm text-metadata font-metadata text-on-surface-variant"><span class="material-symbols-outlined text-[20px] text-outline-variant">delete_forever</span><span>{% trans "A slot with applications cannot be deleted. Pause it instead." %}</span></p>
+                  {% endif %}
+                </div>
               </details>
-              <form method="post" action="{% url 'organization-slot-close' slot.id %}" {% if slot.status != 'CLOSED' %}onsubmit="return confirm('{% trans "Close this slot to new applications? Existing applicants are not affected." as close_msg %}{{ close_msg|escapejs }}');"{% endif %}>
-                {% csrf_token %}
-                <button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="{% if slot.status == 'CLOSED' %}{% trans 'Reopen' %}{% else %}{% trans 'Close to new applications' %}{% endif %}">
-                  <span class="material-symbols-outlined text-[20px]">{% if slot.status == 'CLOSED' %}lock_open{% else %}lock{% endif %}</span>
-                </button>
-              </form>
-              <a href="{% url 'organization-slot-duplicate' slot.id %}" class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-lg transition-colors" title="{% trans 'Duplicate (post again)' %}" aria-label="{% trans 'Duplicate (post again)' %}"><span class="material-symbols-outlined text-[20px]">content_copy</span></a>
-              {% if slot.can_delete %}
-              <form method="post" action="{% url 'organization-slot-delete' slot.id %}" onsubmit="return confirm('{% trans "Delete this slot?" as delete_msg %}{{ delete_msg|escapejs }}');">
-                {% csrf_token %}
-                <button class="p-1.5 text-error hover:bg-error-container hover:text-on-error-container rounded-lg transition-colors ml-1" title="{% trans 'Delete' %}"><span class="material-symbols-outlined text-[20px]">delete</span></button>
-              </form>
-              {% else %}
-              <span class="p-1.5 text-outline-variant ml-1 cursor-not-allowed" title="{% trans 'A slot with applications cannot be deleted. Pause it instead.' %}" aria-label="{% trans 'A slot with applications cannot be deleted. Pause it instead.' %}"><span class="material-symbols-outlined text-[20px]">delete_forever</span></span>
-              {% endif %}
             </div>
           </div>
         </div>

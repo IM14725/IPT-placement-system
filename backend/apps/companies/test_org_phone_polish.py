@@ -115,3 +115,27 @@ def test_slot_applicants_header_has_no_trailing_separator(ready_org, places):
     body = _applicants_page(ready_org, places, slot)
     head = body[body.index("<h1") : body.index("</section>", body.index("<h1"))]
     assert head.count("ipt-meta-item") == 3 and "w-1 h-1 rounded-full" not in head
+
+
+# ── 5. My Slots: two labelled buttons + a "More" menu with text labels ─────────
+
+@pytest.mark.django_db
+def test_my_slots_actions_are_labelled_with_a_more_menu(ready_org, places):
+    empty = _slot(ready_org, places["kinondoni"], "No applicants yet", capacity=2)
+    busy = _slot(ready_org, places["kinondoni"], "Has applicants", capacity=2)
+    _pay(_student(places), busy)
+    c = _client(ready_org.user)
+    body = c.get(reverse("organization-slots")).content.decode()
+    assert body.count('class="relative ipt-more"') == 2
+    for label in ("Applicants", "Edit", "More", "Pause", "Extend deadline", "Close to new applications", "Duplicate (post again)"):
+        assert f">{label}<" in body.replace("</span>", "<").replace("\n", "") or label in body, label
+    assert "p-1.5 text-on-surface-variant" not in body  # the unlabelled icon buttons are gone
+    # Delete is the last item of the menu, red, with its confirm; a slot with applications explains why it cannot be deleted.
+    delete_url = reverse("organization-slot-delete", args=[empty.id])
+    assert f'action="{delete_url}"' in body and "return confirm(" in body
+    assert reverse("organization-slot-delete", args=[busy.id]) not in body
+    assert body.count("cannot be deleted") == 1
+    # The actions still work: pause through the menu's form.
+    assert c.post(reverse("organization-slot-toggle", args=[empty.id])).status_code == 302
+    empty.refresh_from_db()
+    assert empty.status == "PAUSED"

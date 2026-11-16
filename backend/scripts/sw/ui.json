@@ -833,5 +833,6 @@
  "/ month": "/ mwezi",
  "TZS %(stipend_amount)s / month": "TZS %(stipend_amount)s / mwezi",
  "Newest paid": "Waliolipa karibuni",
- "Oldest paid": "Waliolipa zamani"
+ "Oldest paid": "Waliolipa zamani",
+ "More": "Zaidi"
 }

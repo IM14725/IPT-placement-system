@@ -2810,6 +2810,9 @@ msgstr "Namba za simu za mkononi huanza na 06 au 07."
 msgid "Module"
 msgstr "Moduli"
 
+msgid "More"
+msgstr "Zaidi"
+
 msgid "Most seats left"
 msgstr "Nafasi nyingi zaidi zilizobaki"
 
