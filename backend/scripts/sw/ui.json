@@ -8,7 +8,6 @@
  "%(doc_type_name)s deleted. You must upload a replacement.": "%(doc_type_name)s imefutwa. Lazima upakie mbadala.",
  "%(docs)s Documents": "Nyaraka %(docs)s",
  "%(docs)s Files": "Mafaili %(docs)s",
- "%(fill_percent)s%%%% Filled": "%(fill_percent)s%%%% Imejaa",
  "%(get_category_display)s · sent %(created_at)s": "%(get_category_display)s · imetumwa %(created_at)s",
  "%(n).1f days": "siku %(n).1f",
  "%(n).1f hours": "saa %(n).1f",
@@ -829,5 +828,6 @@
  "Organization details": "Taarifa za shirika",
  "Name, contact and registration numbers": "Jina, mawasiliano na namba za usajili",
  "Region, district and street": "Mkoa, wilaya na mtaa",
- "Documents still needed": "Nyaraka bado zinahitajika"
+ "Documents still needed": "Nyaraka bado zinahitajika",
+ "%(fill_percent)s%% Filled": "%(fill_percent)s%% Imejaa"
 }

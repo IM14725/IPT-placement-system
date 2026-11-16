@@ -846,6 +846,9 @@ msgstr "Nyaraka %(docs)s"
 msgid "%(docs)s Files"
 msgstr "Mafaili %(docs)s"
 
+msgid "%(fill_percent)s%% Filled"
+msgstr "%(fill_percent)s%% Imejaa"
+
 msgid "%(fill_percent)s%%%% Filled"
 msgstr "%(fill_percent)s%%%% Imejaa"
 
