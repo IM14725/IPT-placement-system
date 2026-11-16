@@ -102,11 +102,11 @@
           <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.accept_rules.errors.0 }}</p>
         {% endif %}
       </div>
-      <div class="flex items-center justify-between gap-md pt-sm">
-        <a href="{% url 'student-slot-detail' slot.id %}" class="text-primary font-body-md font-medium hover:underline flex items-center gap-1">
+      <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-sm pt-sm">
+        <a href="{% url 'student-slot-detail' slot.id %}" class="text-primary font-body-md font-medium hover:underline flex items-center justify-center sm:justify-start gap-1 min-h-[44px]">
           <span class="material-symbols-outlined text-[18px]">arrow_back</span> {% trans "Back to slot details" %}
         </a>
-        <button type="submit" class="bg-primary text-on-primary font-body-lg text-body-lg font-medium py-3 px-lg rounded-xl shadow-md hover:shadow-lg hover:bg-primary-container transition-all flex items-center justify-center gap-xs" data-loading>
+        <button type="submit" class="w-full sm:w-auto justify-center bg-primary text-on-primary font-body-lg text-body-lg font-medium py-3 px-lg rounded-xl shadow-md hover:shadow-lg hover:bg-primary-container transition-all flex items-center justify-center gap-xs" data-loading>
           <span data-label>{% trans "Submit & Proceed to Payment" %}</span>
           <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
         </button>

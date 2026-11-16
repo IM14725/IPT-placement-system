@@ -501,3 +501,17 @@ def test_document_vault_shows_file_count_required_documents_and_status(places):
     # both required documents are now ticked (check_circle) in the "Required documents" strip
     strip = body[body.index('aria-label="Required documents"') :][:900]
     assert strip.count("check_circle") == 2 and "radio_button_unchecked" not in strip
+
+
+@pytest.mark.django_db
+def test_apply_buttons_stack_on_phones_and_slot_detail_collapses_the_rules(places, org):
+    slot = _slot(org, places["kinondoni"])
+    c = _client(_student(places).user)
+    apply_page = c.get(reverse("student-apply", args=[slot.id])).content.decode()
+    assert "flex-col-reverse sm:flex-row" in apply_page  # primary button first, full width; "Back" under it
+    assert "w-full sm:w-auto justify-center bg-primary" in apply_page
+    detail = c.get(reverse("student-slot-detail", args=[slot.id])).content.decode()
+    # the rules live in a closed section (the binding copy sits right above the Submit button on the apply page)
+    start = detail.index('<details class="ipt-section">')
+    assert "How applying works" in detail[start : start + 600] and "<details class=\"ipt-section\" open" not in detail
+    assert "TZS 15,000" in detail

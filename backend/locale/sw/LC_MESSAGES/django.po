@@ -2222,6 +2222,9 @@ msgstr "Kushindwa kupata uwekaji wa mwisho ndani ya kipindi cha masomo."
 msgid "Fair"
 msgstr "Wastani"
 
+msgid "Fee, seat hold and cancellation"
+msgstr "Ada, kushikilia nafasi na kughairi"
+
 msgid "Fees are non-refundable. Please read the <a href=\"%(url)s#payments\" class=\"text-primary font-semibold hover:underline\">payments and refund policy</a> in our Terms before you apply."
 msgstr "Ada hazirudishwi. Tafadhali soma <a href=\"%(url)s#payments\" class=\"text-primary font-semibold hover:underline\">sera ya malipo na marejesho</a> kwenye Masharti yetu kabla ya kuomba."
 

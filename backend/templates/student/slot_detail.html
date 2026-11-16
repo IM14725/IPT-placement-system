@@ -69,15 +69,21 @@
     </div>
   </section>
 
-  <section class="bg-surface-container-low rounded-2xl p-lg flex flex-col gap-sm">
-    <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary">gavel</span>{% trans "How applying works" %}</h2>
-    <ul class="flex flex-col gap-xs font-body-md text-body-md text-on-surface-variant list-disc pl-md">
+  <details class="ipt-section">
+    <summary class="ipt-section-summary">
+      <span class="material-symbols-outlined text-primary">gavel</span>
+      <span class="flex-1 min-w-0"><span class="block font-body-md text-body-md font-semibold text-on-surface">{% trans "How applying works" %}</span><span class="block font-metadata text-metadata text-on-surface-variant">{% trans "Fee, seat hold and cancellation" %}</span></span>
+      <span class="material-symbols-outlined ipt-section-chev">expand_more</span>
+    </summary>
+    <div class="ipt-section-body">
+      <ul class="flex flex-col gap-xs font-body-md text-body-md text-on-surface-variant list-disc pl-md">
       <li>{% blocktrans with fee=fee|money %}You pay a one-time application fee of <strong>TZS {{ fee }}</strong> by mobile money. The organization only sees your application after you have paid.{% endblocktrans %}</li>
       <li>{% blocktrans with hours=payment_hours %}When you apply, your seat is held for <strong>{{ hours }} hours</strong>. If you do not pay in that time, the seat is released to other students.{% endblocktrans %}</li>
       <li>{% trans "After paying you can cancel once, within 24 hours, and get a free re-application credit. After that the fee cannot be refunded." %}</li>
       <li>{% trans "A paid application is never rejected: the organization decides only whether to accept it, and you are notified by SMS and email." %}</li>
-    </ul>
-  </section>
+      </ul>
+    </div>
+  </details>
 
   <section class="flex flex-col sm:flex-row sm:items-center justify-between gap-sm">
     <form method="post" action="{% url 'student-toggle-saved-slot' slot.id %}">
