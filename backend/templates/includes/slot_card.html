@@ -50,7 +50,7 @@
       {% if can_apply %}
         <a href="{% url 'student-apply' slot.id %}" class="px-md py-2 rounded-lg bg-primary text-on-primary font-semibold text-body-md flex items-center gap-1 hover:bg-primary-container transition-colors">{% trans "Apply Now" %}<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
       {% elif user.is_student %}
-        <a href="{% url 'student-dashboard' %}" class="font-metadata text-metadata text-primary font-semibold hover:underline text-right">{% trans "Finish your profile to apply" %}</a>
+        <a href="{% url 'student-profile' %}" class="font-metadata text-metadata text-primary font-semibold hover:underline text-right">{% trans "Finish your profile to apply" %}</a>
       {% endif %}
     {% else %}
       <span class="px-2 py-1 rounded-full bg-error/10 text-error font-metadata text-metadata font-semibold">{% if slot.deadline_passed %}{% trans "Applications closed" %}{% elif slot.status == 'PAUSED' %}{% trans "Paused" %}{% elif slot.status == 'CLOSED' %}{% trans "Closed" %}{% else %}{% trans "Slot Full" %}{% endif %}</span>

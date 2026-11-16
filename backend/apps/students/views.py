@@ -38,35 +38,24 @@ def _file_sha256(uploaded):
     return sha256_bytes(data)
 
 
-def _profile_required(request):
-    return StudentProfile.objects.filter(user=request.user).first()
-
-
-@login_required
-def dashboard(request):
-    if not request.user.is_student:
-        return HttpResponseForbidden(gettext("Student account required."))
+def _completeness(user, profile):
     from apps.students import dashboard as dash
 
-    profile = _profile_required(request)
-    all_applications = list(
-        Application.objects.filter(student__user=request.user)
-        .select_related("slot__organization", "slot__district__region", "payment")
-        .order_by("-created_at")
-    )
-    return render(
-        request,
-        "student/dashboard.html",
-        {
-            "profile": profile,
-            "applications": all_applications[:5],
-            "next_step": dash.next_step(request.user, profile, all_applications),
-            "completeness": dash.profile_completeness(request.user, profile),
-            "stats": dash.application_stats(profile),
-            "saved": dash.saved_slots(profile, limit=3),
-            "can_apply": student_can_apply(request.user),
-        },
-    )
+    return dash.profile_completeness(user, profile)
+
+
+def _banner_step(user, page):
+    from apps.students import dashboard as dash
+
+    return dash.banner_step(user, _profile_required_for(user), page)
+
+
+def _profile_required_for(user):
+    return StudentProfile.objects.filter(user=user).first()
+
+
+def _profile_required(request):
+    return StudentProfile.objects.filter(user=request.user).first()
 
 
 def _slot_list_page(request, template, slots, extra=None):
@@ -412,7 +401,7 @@ def profile(request):
             messages.success(request, gettext("Profile saved."))
             if form.pending_phone:
                 return _verify_new_phone(request, form.pending_phone)
-            return redirect("student-dashboard")
+            return redirect("student-marketplace")
     else:
         form = StudentProfileForm(instance=instance, user=request.user, verify_phone_change=True)
     regions = get_regions()
@@ -424,6 +413,7 @@ def profile(request):
         {
             "form": form,
             "profile": instance,
+            "completeness": _completeness(request.user, instance),
             "regions_json": safe_json_dumps(regions),
             "institutions_json": safe_json_dumps(get_institutions()),
             **security_context(request),
@@ -467,6 +457,7 @@ def marketplace(request):
         return HttpResponseForbidden(gettext("Student account required."))
     profile = _profile_required(request)
     regions = get_regions()
+    from apps.students import dashboard as dash
     from apps.students.models import SavedSlot
 
     saved_ids = (
@@ -479,6 +470,7 @@ def marketplace(request):
         "student/marketplace.html",
         {
             "profile": profile,
+            "next_step": dash.banner_step(request.user, profile),
             "regions": regions,
             "education_levels": education_level_choices(),
             "academic_years": academic_year_choices(),
@@ -560,6 +552,7 @@ def applications(request):
             "page_obj": page_obj,
             "tabs": tabs,
             "tab": tab,
+            "next_step": _banner_step(request.user, "applications"),
             "querystring": urlencode({k: v for k, v in request.GET.items() if k != "page"}),
         },
     )

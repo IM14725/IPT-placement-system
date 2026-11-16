@@ -217,7 +217,7 @@ def test_temporary_password_must_be_replaced_before_anything_else():
     resp = c.post("/auth/login/", {"email": user.email, "password": PW})
     assert resp.status_code == 302
     # Every page now leads to the change screen, except logout/status.
-    for path in ("/student/dashboard/", "/auth/account/", "/"):
+    for path in ("/student/marketplace/", "/auth/account/", "/"):
         r = c.get(path)
         assert r.status_code == 302 and r.url == "/auth/change-password/", path
     assert c.get("/auth/change-password/").status_code == 200

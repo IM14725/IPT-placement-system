@@ -504,7 +504,7 @@ def _mask_email(email):
 
 def _dashboard_url(user):
     if user.is_student:
-        return "student-dashboard"
+        return "student-marketplace"  # Find a Slot is the first page after login
     if user.is_organization:
         return "organization-dashboard"
     return "platform-verifications"

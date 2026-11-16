@@ -366,12 +366,17 @@ def next_step(user, profile, applications):
     return None
 
 
-def application_stats(profile):
-    if profile is None:
-        return {"sent": 0, "paid": 0, "accepted": 0}
-    row = Application.objects.filter(student=profile).aggregate(
-        sent=Count("id"),
-        paid=Count("id", filter=Q(status=ApplicationStatus.PAID)),
-        accepted=Count("id", filter=Q(is_accepted=True)),
+def banner_step(user, profile, page="marketplace"):
+    """The student's next step for the banner on Find a Slot / My Applications, or ``None``.
+
+    The friendly "you are ready to apply" step is not shown (the student is already looking at slots).
+    On My Applications the steps its own cards already show (pay, accepted, cancel window) are skipped too.
+    """
+    applications = list(
+        Application.objects.filter(student__user=user).select_related("slot__organization", "payment")
     )
-    return {"sent": row["sent"] or 0, "paid": row["paid"] or 0, "accepted": row["accepted"] or 0}
+    step = next_step(user, profile, applications)
+    skip = {"apply"} | ({"pay", "accepted", "cancel-window"} if page == "applications" else set())
+    if step is None or step["kind"] in skip:
+        return None
+    return step

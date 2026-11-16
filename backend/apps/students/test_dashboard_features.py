@@ -157,23 +157,36 @@ def test_next_step_priorities(places, org):
 
 
 @pytest.mark.django_db
-def test_dashboard_page_renders_for_new_and_active_students(places, org):
+def test_find_a_slot_shows_the_next_step_and_the_profile_page_shows_completeness(places, org):
     slot = _slot(org, places["kinondoni"])
     student = _student(places)
     app = create_application(student, slot)
     Payment.objects.create(student=student, application=app, amount=15000, method=PaymentMethod.M_PESA)
-    page = _client(student.user).get(reverse("student-dashboard"))
+    c = _client(student.user)
+    page = c.get(reverse("student-marketplace"))
     body = page.content.decode()
     assert page.status_code == 200
-    assert "Pay now to keep your seat" in body and "data-countdown" in body
-    assert page.context["stats"] == {"sent": 1, "paid": 0, "accepted": 0}
-    assert "Profile completeness" in body
+    assert "Pay now to keep your seat" in body and "data-countdown" in body  # the urgent step is on the landing page
+    assert page.context["next_step"]["kind"] == "pay"
+    # My Applications already shows the pay countdown on the card, so the banner is not repeated there
+    assert c.get(reverse("student-applications")).context["next_step"] is None
+    profile = c.get(reverse("student-profile"))
+    assert "Profile completeness" in profile.content.decode() and profile.context["completeness"]["percent"] > 0
 
-    # A student with no profile at all still gets a working dashboard.
+    # A student with no profile at all still gets working pages: the banner asks to complete it.
     bare = User.objects.create_user(email="bare@x.tz", password=PW, role=UserRole.STUDENT, email_verified=True)
-    page = _client(bare).get(reverse("student-dashboard"))
+    cb = _client(bare)
+    page = cb.get(reverse("student-marketplace"))
     assert page.status_code == 200 and page.context["next_step"]["kind"] == "profile"
-    assert page.context["completeness"]["percent"] == 0
+    assert "Complete your profile to start applying" in page.content.decode()
+    assert cb.get(reverse("student-applications")).context["next_step"]["kind"] == "profile"
+    assert cb.get(reverse("student-profile")).context["completeness"]["percent"] == 0
+
+
+def test_ready_student_sees_no_banner_on_find_a_slot(places):
+    student = _student(places)
+    page = _client(student.user).get(reverse("student-marketplace"))
+    assert page.context["next_step"] is None  # "you are ready to apply" is not shown to someone already browsing slots
 
 
 @pytest.mark.django_db

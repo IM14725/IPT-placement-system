@@ -206,7 +206,7 @@ def test_reporter_sees_own_reports_with_status_but_not_admin_notes(student, orga
 
 
 def test_students_and_organizations_have_a_report_link_in_the_menu(student, organization):
-    for user, url in ((student.user, "student-dashboard"), (organization.user, "organization-dashboard")):
+    for user, url in ((student.user, "student-marketplace"), (organization.user, "organization-dashboard")):
         client = Client()
         client.force_login(user)
         resp = client.get(reverse(url), follow=True)

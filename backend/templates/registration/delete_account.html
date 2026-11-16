@@ -65,9 +65,9 @@
         {% trans "Permanently Delete My Account" %}
       </button>
 
-      {# Cancel — back to their dashboard #}
+      {# Cancel — back to their home page #}
       {% if user.is_student %}
-        <a href="{% url 'student-dashboard' %}"
+        <a href="{% url 'student-marketplace' %}"
       {% elif user.is_organization %}
         <a href="{% url 'organization-dashboard' %}"
       {% else %}

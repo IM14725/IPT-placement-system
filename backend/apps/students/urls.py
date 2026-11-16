@@ -1,9 +1,15 @@
 from django.urls import path
+from django.views.generic import RedirectView
 
 from apps.students import views
 
 urlpatterns = [
-    path("dashboard/", views.dashboard, name="student-dashboard"),
+    # The Dashboard page was removed: Find a Slot is the first page after login. Old bookmarks and links still work.
+    path(
+        "dashboard/",
+        RedirectView.as_view(pattern_name="student-marketplace", permanent=True, query_string=True),
+        name="student-dashboard-legacy",
+    ),
     path("profile/", views.profile, name="student-profile"),
     path("documents/", views.documents, name="student-documents"),
     path("marketplace/", views.marketplace, name="student-marketplace"),

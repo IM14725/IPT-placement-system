@@ -119,17 +119,16 @@ def test_search_api_quick_filters_closing_and_new(places, org):
 
 
 @pytest.mark.django_db
-def test_dashboard_has_no_recommended_or_closing_soon_previews(places, org):
-    """Those live in Find a Slot only; the dashboard keeps its next step, stats, saved slots and applications."""
+def test_dashboard_page_is_gone_and_its_old_address_redirects_to_find_a_slot(places):
     student = _student(places)
-    _slot(org, places["kinondoni"], "Closing", application_deadline=timezone.now() + timedelta(days=2))
-    page = _client(student.user).get(reverse("student-dashboard"))
-    body = page.content.decode()
-    assert page.status_code == 200
-    assert "Recommended for you" not in body and "?quick=closing" not in body
-    assert reverse("student-recommended") not in body and reverse("student-discover") not in body
-    assert "recommended" not in page.context and "closing_soon" not in page.context
-    assert "Profile completeness" in body and "Recent Applications" in body
+    c = _client(student.user)
+    legacy = c.get("/student/dashboard/")
+    assert legacy.status_code == 301 and legacy.url == reverse("student-marketplace")
+    assert c.get("/student/dashboard/?quick=closing").url == reverse("student-marketplace") + "?quick=closing"
+    from django.urls import NoReverseMatch
+
+    with pytest.raises(NoReverseMatch):
+        reverse("student-dashboard")
 
 
 # ── notifications and alerts: one page ──────────────────────────────────────
@@ -162,7 +161,7 @@ def test_alerts_live_on_the_notifications_page(places, org):
 
 @pytest.mark.django_db
 def test_side_menu_has_no_separate_pages_for_what_moved(places, org):
-    student_menu = _client(_student(places).user).get(reverse("student-dashboard")).content.decode()
+    student_menu = _client(_student(places).user).get(reverse("student-marketplace")).content.decode()
     for gone in (reverse("student-recommended"), reverse("student-discover"), reverse("student-alerts"), "/auth/account/"):
         assert f'href="{gone}"' not in student_menu, gone
     assert reverse("student-marketplace") in student_menu and "Notifications &amp; alerts" in student_menu
@@ -258,7 +257,7 @@ def test_profile_phone_unchanged_or_taken_does_not_start_a_change(places, capsys
 
     # The same number typed with a "+" is not a change.
     same = c.post(reverse("student-profile"), _profile_post(places, "+" + old))
-    assert same.status_code == 302 and same.url == reverse("student-dashboard")
+    assert same.status_code == 302 and same.url == reverse("student-marketplace")
     assert "[SMS:MOCK]" not in capsys.readouterr().out
 
     # A number another account already uses is refused with the agreed message, and no code is sent.
@@ -279,7 +278,7 @@ def test_first_phone_in_the_profile_is_saved_directly(places):
     student = _student(places)
     User.objects.filter(pk=student.user_id).update(phone="", phone_verified=False)
     resp = _client(student.user).post(reverse("student-profile"), _profile_post(places, "255700000099"))
-    assert resp.status_code == 302 and resp.url == reverse("student-dashboard")
+    assert resp.status_code == 302 and resp.url == reverse("student-marketplace")
     student.user.refresh_from_db()
     assert student.user.phone == "255700000099" and not student.user.phone_verified  # still to be verified
 

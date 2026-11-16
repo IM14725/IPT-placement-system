@@ -1,0 +1,22 @@
+{% load i18n %}{% comment %}Profile completeness bar. Needs: completeness.{% endcomment %}
+<section class="bg-surface-container-lowest p-md rounded-xl shadow-sm flex flex-col gap-sm" aria-label="{% trans 'Profile completeness' %}">
+  <div class="flex items-center justify-between gap-sm">
+    <h2 class="font-body-md text-body-md font-bold text-on-surface">{% trans "Profile completeness" %}</h2>
+    <span class="font-headline-md text-headline-md text-primary tabular-nums">{{ completeness.percent }}%</span>
+  </div>
+  <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden" role="progressbar" aria-valuenow="{{ completeness.percent }}" aria-valuemin="0" aria-valuemax="100">
+    <div class="h-full rounded-full {% if completeness.percent == 100 %}bg-[rgb(var(--c-ok-fg))]{% else %}bg-primary{% endif %}" style="width: {{ completeness.percent }}%"></div>
+  </div>
+  {% if completeness.missing %}
+    <ul class="flex flex-col gap-1">
+      {% for item in completeness.missing|slice:":4" %}
+        <li><a href="{{ item.url }}" class="flex items-center gap-xs font-body-md text-body-md text-on-surface-variant hover:text-primary">
+          <span class="material-symbols-outlined text-[16px] text-outline">radio_button_unchecked</span>{{ item.label }}
+          <span class="material-symbols-outlined text-[14px] ml-auto">chevron_right</span></a></li>
+      {% endfor %}
+    </ul>
+    {% if completeness.missing|length > 4 %}<a href="{% url 'student-profile' %}" class="font-metadata text-metadata text-primary font-semibold hover:underline">+{{ completeness.missing|length|add:"-4" }} {% trans "more" %}</a>{% endif %}
+  {% else %}
+    <p class="flex items-center gap-xs font-body-md text-body-md text-[rgb(var(--c-ok-fg))]"><span class="material-symbols-outlined text-[18px]">check_circle</span>{% trans "Your profile is complete." %}</p>
+  {% endif %}
+</section>

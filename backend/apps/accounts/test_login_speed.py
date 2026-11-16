@@ -48,10 +48,10 @@ def test_middleware_rewrites_only_ajax_post_redirects():
 
     from apps.core.ajax import AjaxRedirectMiddleware
 
-    mw = AjaxRedirectMiddleware(lambda request: HttpResponseRedirect("/student/dashboard/"))
+    mw = AjaxRedirectMiddleware(lambda request: HttpResponseRedirect("/student/marketplace/"))
     ajax = mw(RequestFactory().post("/x/", HTTP_X_REQUESTED_WITH="XMLHttpRequest"))
-    assert ajax.status_code == 200 and ajax["X-Redirect-To"] == "/student/dashboard/" and not ajax.has_header("Location")
+    assert ajax.status_code == 200 and ajax["X-Redirect-To"] == "/student/marketplace/" and not ajax.has_header("Location")
     normal = mw(RequestFactory().post("/x/"))
-    assert normal.status_code == 302 and normal["Location"] == "/student/dashboard/"
+    assert normal.status_code == 302 and normal["Location"] == "/student/marketplace/"
     get = mw(RequestFactory().get("/x/", HTTP_X_REQUESTED_WITH="XMLHttpRequest"))
     assert get.status_code == 302

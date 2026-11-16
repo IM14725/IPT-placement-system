@@ -1,0 +1,26 @@
+{% load i18n %}{% comment %}The single most urgent next step (pay, finish the profile, verify the phone, ...). Needs: next_step.{% endcomment %}
+{% if next_step %}
+  <section aria-label="{% trans 'Your next step' %}"
+           class="rounded-xl p-md shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-md border-l-4
+           {% if next_step.tone == 'error' %}bg-error-container text-on-error-container border-error
+           {% elif next_step.tone == 'ok' %}bg-[rgb(var(--c-ok-bg))] text-[rgb(var(--c-ok-fg))] border-[rgb(var(--c-ok-fg))]
+           {% elif next_step.tone == 'warn' %}bg-surface-container-lowest text-on-surface border-[#f9a825]
+           {% else %}bg-surface-container-lowest text-on-surface border-primary{% endif %}">
+    <div class="flex items-start gap-sm min-w-0">
+      <span class="material-symbols-outlined text-[28px] shrink-0" style="font-variation-settings: 'FILL' 1;">{{ next_step.icon }}</span>
+      <div class="flex flex-col gap-1 min-w-0">
+        <span class="font-label-caps text-label-caps uppercase tracking-wider opacity-80">{% trans "Your next step" %}</span>
+        <p class="font-headline-md text-headline-md">{{ next_step.title }}</p>
+        <p class="font-body-md text-body-md opacity-90">{{ next_step.body }}</p>
+        {% if next_step.countdown %}
+          <p class="font-body-md text-body-md font-semibold flex items-center gap-xs mt-1">
+            <span class="material-symbols-outlined text-[18px]">timer</span>
+            {{ next_step.countdown_label }}
+            <span class="tabular-nums text-body-lg font-bold" data-countdown="{{ next_step.countdown|date:'c' }}" data-expired="{{ next_step.expired_label }}">{{ next_step.countdown|timeuntil }}</span>
+          </p>
+        {% endif %}
+      </div>
+    </div>
+    <a href="{{ next_step.url }}" class="shrink-0 bg-primary text-on-primary px-md py-sm rounded-lg font-semibold hover:bg-primary-container transition-colors text-center">{{ next_step.action }}</a>
+  </section>
+{% endif %}

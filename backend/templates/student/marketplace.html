@@ -8,7 +8,9 @@
     <p class="hidden sm:block font-body-lg text-body-lg text-on-surface-variant max-w-[600px]">{% trans "Browse and filter live training opportunities tailored to your academic background and career goals." %}</p>
   </div>
 
-  {% if not can_apply %}
+  {% if next_step %}{% include "student/_next_step.html" %}{% endif %}
+
+  {% if not can_apply and not next_step %}
     <div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex items-start gap-sm text-body-md text-on-surface-variant border-l-4 border-[#f9a825]">
       <span class="material-symbols-outlined text-tertiary">info</span>
       <p>

@@ -220,7 +220,7 @@
       <div class="flex items-center gap-sm min-w-0">
         {% if user.is_authenticated %}
           {% if user.is_student %}
-            <a href="{% url 'student-dashboard' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-white tracking-tight shrink-0 whitespace-nowrap">
+            <a href="{% url 'student-marketplace' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-white tracking-tight shrink-0 whitespace-nowrap">
           {% elif user.is_organization %}
             <a href="{% url 'organization-dashboard' %}" class="flex items-center gap-xs font-headline-lg font-headline-md text-white tracking-tight shrink-0 whitespace-nowrap">
           {% else %}
@@ -306,10 +306,10 @@
          class="fixed left-0 top-16 bottom-0 z-40 bg-surface-container-lowest border-r border-outline-variant shadow-2xl flex flex-col">
     <nav class="flex-1 overflow-y-auto p-sm flex flex-col gap-1" aria-label="{% trans 'Main menu' %}">
       {% if user.is_student %}
-        <a class="side-link {% is_active request 'student-dashboard' 'student-profile' 'student-documents' %}" href="{% url 'student-dashboard' %}"><span class="material-symbols-outlined">dashboard</span><span class="side-label">{% trans "Dashboard" %}</span></a>
         <a class="side-link {% is_active request 'student-marketplace' %}" href="{% url 'student-marketplace' %}"><span class="material-symbols-outlined">search</span><span class="side-label">{% trans "Find a Slot" %}</span></a>
         <a class="side-link {% is_active request 'student-saved-slots' %}" href="{% url 'student-saved-slots' %}"><span class="material-symbols-outlined">bookmark</span><span class="side-label">{% trans "Saved slots" %}</span></a>
         <a class="side-link {% is_active request 'student-applications' 'student-payment' 'student-checklist' 'student-review' %}" href="{% url 'student-applications' %}"><span class="material-symbols-outlined">assignment</span><span class="side-label">{% trans "My Applications" %}</span></a>
+        <a class="side-link {% is_active request 'student-documents' %}" href="{% url 'student-documents' %}"><span class="material-symbols-outlined">folder_open</span><span class="side-label">{% trans "Documents" %}</span></a>
         {% is_active request 'notifications' as grp_notif %}
         <div class="side-group{% if grp_notif %} is-open{% endif %}" data-side-group>
           <div class="side-group-row">

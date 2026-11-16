@@ -8,6 +8,7 @@
     <p class="font-body-md text-body-md text-on-surface-variant hidden sm:block">{% trans "Track your placement requests and complete required payments." %}</p>
   </div>
 </div>
+{% if next_step %}<div class="w-full mb-sm md:mb-md">{% include "student/_next_step.html" %}</div>{% endif %}
 <nav class="w-full flex flex-nowrap gap-xs mb-sm md:mb-md overflow-x-auto no-scrollbar" aria-label="{% trans 'Filter applications' %}">
   {% for t in tabs %}
     <a href="?tab={{ t.key }}" {% if t.key == tab %}aria-current="page"{% endif %}
