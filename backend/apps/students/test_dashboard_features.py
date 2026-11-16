@@ -531,3 +531,15 @@ def test_find_a_slot_cards_are_compact_with_a_solid_apply_button(places, org):
     assert js.count("col-span-2 flex items-center gap-xs") >= 3  # location and role are full-width lines, not truncated halves
     assert "t(\"dept\", \"Dept:\")" not in js  # the department joins the role line instead of getting its own row
     assert 'ipt-scroll-hint' in c.get(reverse("student-applications")).content.decode()
+
+
+@pytest.mark.django_db
+def test_notification_rows_have_big_action_buttons_and_no_type_tag_repeating_the_title_on_phones(places, org):
+    from apps.notifications.models import Notification, NotificationType
+
+    student = _student(places)
+    Notification.objects.create(user=student.user, type=NotificationType.APPLICATION, title="Application Submitted", body="Your application was submitted.", link="/student/applications/")
+    body = _client(student.user).get(reverse("notifications")).content.decode()
+    assert body.count("w-11 h-11 inline-flex items-center justify-center") == 3  # open, mark read, delete
+    assert 'p-2 rounded-lg text-error' not in body
+    assert 'class="hidden sm:inline-block px-2 py-0.5 rounded-full bg-surface-container' in body  # the type tag shows from tablet width up

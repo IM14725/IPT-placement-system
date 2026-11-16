@@ -69,27 +69,27 @@
             <div class="flex items-center gap-xs flex-wrap">
               <span class="font-body-md text-body-md text-on-surface {% if not n.is_read %}font-bold{% else %}font-semibold{% endif %}">{{ n.title }}</span>
               {% if not n.is_read %}<span class="px-2 py-0.5 rounded-full bg-primary text-on-primary font-label-caps text-label-caps uppercase">{% trans "New" %}</span>{% endif %}
-              <span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-metadata text-metadata">{{ n.get_type_display }}</span>
+              <span class="hidden sm:inline-block px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-metadata text-metadata">{{ n.get_type_display }}</span>
             </div>
             <p class="font-body-md text-body-md text-on-surface-variant break-words">{{ n.body }}</p>
             <span class="font-metadata text-metadata text-outline">{{ n.created_at|timesince }} {% trans "ago" %}</span>
           </div>
-          <div class="flex items-center gap-1 shrink-0 col-span-2 sm:col-span-1 justify-self-end -mt-1 sm:mt-0">
+          <div class="flex items-center gap-2 shrink-0 col-span-2 sm:col-span-1 justify-self-end -mt-1 sm:mt-0">
             {% if n.link %}
-              <a href="{% url 'notification-open' n.id %}" class="p-2 rounded-lg text-primary hover:bg-primary/10 transition-colors" title="{% trans 'Open' %}" aria-label="{% trans 'Open' %}"><span class="material-symbols-outlined text-[20px]">open_in_new</span></a>
+              <a href="{% url 'notification-open' n.id %}" class="w-11 h-11 inline-flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors" title="{% trans 'Open' %}" aria-label="{% trans 'Open' %}"><span class="material-symbols-outlined text-[20px]">open_in_new</span></a>
             {% endif %}
             <form method="post" action="{% url 'notification-mark' n.id %}">
               {% csrf_token %}
               <input type="hidden" name="read" value="{% if n.is_read %}0{% else %}1{% endif %}">
               <input type="hidden" name="next" value="{{ request.get_full_path }}">
-              <button type="submit" class="p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="{% if n.is_read %}{% trans 'Mark as unread' %}{% else %}{% trans 'Mark as read' %}{% endif %}" aria-label="{% if n.is_read %}{% trans 'Mark as unread' %}{% else %}{% trans 'Mark as read' %}{% endif %}">
+              <button type="submit" class="w-11 h-11 inline-flex items-center justify-center rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="{% if n.is_read %}{% trans 'Mark as unread' %}{% else %}{% trans 'Mark as read' %}{% endif %}" aria-label="{% if n.is_read %}{% trans 'Mark as unread' %}{% else %}{% trans 'Mark as read' %}{% endif %}">
                 <span class="material-symbols-outlined text-[20px]">{% if n.is_read %}mark_email_unread{% else %}done{% endif %}</span>
               </button>
             </form>
             <form method="post" action="{% url 'notification-delete' n.id %}">
               {% csrf_token %}
               <input type="hidden" name="next" value="{{ request.get_full_path }}">
-              <button type="submit" class="p-2 rounded-lg text-error hover:bg-error/10 transition-colors" title="{% trans 'Delete' %}" aria-label="{% trans 'Delete' %}"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+              <button type="submit" class="w-11 h-11 inline-flex items-center justify-center rounded-lg text-error hover:bg-error/10 transition-colors" title="{% trans 'Delete' %}" aria-label="{% trans 'Delete' %}"><span class="material-symbols-outlined text-[20px]">delete</span></button>
             </form>
           </div>
         </div>
