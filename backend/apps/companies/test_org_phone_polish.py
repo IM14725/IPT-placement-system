@@ -139,3 +139,14 @@ def test_my_slots_actions_are_labelled_with_a_more_menu(ready_org, places):
     assert c.post(reverse("organization-slot-toggle", args=[empty.id])).status_code == 302
     empty.refresh_from_db()
     assert empty.status == "PAUSED"
+
+
+# ── 6/7. slot title on at most two lines; the spots-left bar spans the card on phones ──
+
+@pytest.mark.django_db
+def test_slot_card_title_wraps_and_the_bar_is_full_width_on_phones(ready_org, places):
+    _slot(ready_org, places["kinondoni"], "A very long slot title for the Dar es Salaam head office internship", capacity=4)
+    body = _client(ready_org.user).get(reverse("organization-slots")).content.decode()
+    assert "line-clamp-2" in body and 'text-on-surface truncate">' not in body
+    assert 'title="A very long slot title' in body  # the full title stays available on hover/long-press
+    assert "flex-1 sm:flex-none sm:w-24" in body and "w-16 h-1.5" not in body
