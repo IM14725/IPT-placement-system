@@ -234,3 +234,23 @@ def test_all_applicants_search_row_layout(ready_org, places):
     assert "Apply filters" in panel
     export_links = [m for m in body.split("<a ") if "organization/applicants/export" in m.split(">")[0]]
     assert len(export_links) == 2  # header link (wide screens) + the one beside Filters (phones)
+
+
+# ── 12. bulk accept is a bottom bar that only shows once someone is ticked ─────
+
+@pytest.mark.django_db
+def test_bulk_accept_is_a_hidden_bar_with_select_all_in_the_list_heading(ready_org, places):
+    slot = _slot(ready_org, places["kinondoni"], "Intern", capacity=4)
+    for i in range(3):
+        _pay(_student(places, email=f"s{i}@x.tz"), slot)
+    body = _client(ready_org.user).get(reverse("organization-all-applicants")).content.decode()
+    form_start = body.index('id="bulk-accept-form"')
+    bar = body[form_start : body.index("</form>", form_start)]
+    assert "data-bulk-bar" in bar and 'class="hidden fixed inset-x-0 bottom-0' in bar  # hidden until a box is ticked
+    assert "<details>" in bar and 'id="bulk-message"' in bar and 'id="bulk-template"' in bar  # message fields open from the bar
+    assert "data-bulk-count" in bar and "Accept selected" in bar
+    assert "data-confirm=" in bar and "data-none=" in bar  # the safety step from fix 10 is kept
+    # "Select all on this page" lives with the list heading, before the first row
+    assert body.index('id="select-all"') < body.index('type="checkbox" name="application"')
+    assert "data-bulk-spacer" in body
+    assert body.count('type="checkbox" name="application"') == 3 and body.count('value="') and body.count('" form="bulk-accept-form"') == 3

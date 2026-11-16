@@ -1257,6 +1257,9 @@ msgstr "Mhusika / mwanachama"
 msgid "Add Organization Account"
 msgstr "Ongeza Akaunti ya Shirika"
 
+msgid "Add a message (optional)"
+msgstr "Ongeza ujumbe (hiari)"
+
 msgid "Add your course, education level and location so organizations can assess you."
 msgstr "Ongeza kozi, kiwango cha elimu na eneo lako ili mashirika yakutathmini."
 
@@ -5337,6 +5340,9 @@ msgstr "sekunde ili kulinda akaunti yako. Sogeza kipanya au bofya ili kuendelea 
 
 msgid "secure & verified."
 msgstr "salama na kuthibitishwa."
+
+msgid "selected"
+msgstr "waliochaguliwa"
 
 msgid "sessionid:"
 msgstr "sessionid:"

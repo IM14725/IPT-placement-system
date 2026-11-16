@@ -49,37 +49,44 @@
 
   {% if applications %}
     {% if can_accept %}
-    <form id="bulk-accept-form" method="post" action="{% url 'organization-bulk-accept' %}"
-          class="bg-primary/5 rounded-xl p-md flex flex-col lg:flex-row lg:items-end gap-sm"
+    {# Bulk accept: a bar that appears at the bottom of the screen once at least one applicant is ticked #}
+    <form id="bulk-accept-form" method="post" action="{% url 'organization-bulk-accept' %}" data-bulk-bar
+          class="hidden fixed inset-x-0 bottom-0 z-40 bg-surface-container-lowest border-t border-outline-variant shadow-2xl px-md py-sm flex-col gap-xs md:inset-x-auto md:right-md md:bottom-md md:w-[26rem] md:rounded-xl md:border"
           data-confirm="{% trans 'Accept __N__ selected applicant(s)? Each one is notified by SMS and email and this cannot be undone.' %}"
           data-none="{% trans 'Select at least one applicant first.' %}"
           onsubmit="var n = document.querySelectorAll('input[name=application]:checked').length; if (!n) { alert(this.dataset.none); return false; } return confirm(this.dataset.confirm.replace('__N__', n));">
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ request.get_full_path }}">
-      <div class="flex flex-col gap-xs flex-1">
-        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="bulk-message">{% trans "Accept selected: message to all (optional)" %}</label>
-        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span>
-          <input id="bulk-message" type="text" name="message" maxlength="500" placeholder="{% trans 'e.g. Report on Monday 8 AM' %}"></div>
-      </div>
-      <div class="flex flex-col gap-xs flex-1">
-        <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="bulk-template">{% trans "Or use a saved message" %}</label>
-        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">chat</span></span>
-          <select id="bulk-template" name="template"><option value="">{% trans "No saved message" %}</option>{% for t in templates %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}</select></div>
-      </div>
+      <details>
+        <summary class="list-none cursor-pointer min-h-[40px] flex items-center gap-xs font-body-md text-body-md font-semibold text-primary"><span class="material-symbols-outlined text-[20px]">edit_note</span>{% trans "Add a message (optional)" %}<span class="material-symbols-outlined text-[18px] ml-auto">expand_more</span></summary>
+        <div class="flex flex-col gap-xs pb-xs">
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="bulk-message">{% trans "Accept selected: message to all (optional)" %}</label>
+          <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span>
+            <input id="bulk-message" type="text" name="message" maxlength="500" placeholder="{% trans 'e.g. Report on Monday 8 AM' %}"></div>
+          <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="bulk-template">{% trans "Or use a saved message" %}</label>
+          <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">chat</span></span>
+            <select id="bulk-template" name="template"><option value="">{% trans "No saved message" %}</option>{% for t in templates %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}</select></div>
+          <a class="text-primary font-semibold hover:underline text-metadata font-metadata" href="{% url 'organization-templates' %}">{% trans "Manage saved messages" %}</a>
+        </div>
+      </details>
       <div class="flex items-center gap-sm">
-        <label class="flex items-center gap-xs font-body-md text-body-md text-on-surface cursor-pointer whitespace-nowrap"><input type="checkbox" id="select-all" class="rounded border-outline">{% trans "Select all on this page" %}</label>
-        <button type="submit" class="bg-[#166534] hover:bg-[#14532d] text-white font-semibold px-md py-2.5 rounded-lg flex items-center gap-xs whitespace-nowrap"><span class="material-symbols-outlined text-[18px]">done_all</span>{% trans "Accept selected" %}</button>
+        <span class="flex-1 font-body-md text-body-md text-on-surface"><strong data-bulk-count>0</strong> {% trans "selected" %}</span>
+        <button type="submit" class="bg-[#166534] hover:bg-[#14532d] text-white font-semibold px-md min-h-[44px] rounded-lg flex items-center gap-xs whitespace-nowrap"><span class="material-symbols-outlined text-[18px]">done_all</span>{% trans "Accept selected" %}</button>
       </div>
     </form>
-    <p class="font-metadata text-metadata text-on-surface-variant -mt-md"><a class="text-primary font-semibold hover:underline" href="{% url 'organization-templates' %}">{% trans "Manage saved messages" %}</a> · {% trans "Applicants still inside their 24-hour cancellation window cannot be selected yet." %}</p>
     {% endif %}
 
-    <p class="font-body-md text-body-md text-on-surface-variant">{% blocktrans count n=total %}{{ n }} applicant{% plural %}{{ n }} applicants{% endblocktrans %}</p>
+    <div class="flex flex-wrap items-center justify-between gap-x-md gap-y-xs">
+      <p class="font-body-md text-body-md text-on-surface-variant">{% blocktrans count n=total %}{{ n }} applicant{% plural %}{{ n }} applicants{% endblocktrans %}</p>
+      {% if can_accept %}<label class="flex items-center gap-xs min-h-[40px] font-body-md text-body-md text-on-surface cursor-pointer whitespace-nowrap"><input type="checkbox" id="select-all" class="rounded border-outline w-5 h-5">{% trans "Select all on this page" %}</label>{% endif %}
+    </div>
+    {% if can_accept %}<p class="font-metadata text-metadata text-on-surface-variant -mt-sm">{% trans "Applicants still inside their 24-hour cancellation window cannot be selected yet." %}</p>{% endif %}
     <div class="bg-surface-container-lowest rounded-xl shadow-sm flex flex-col">
       {% for app in applications %}
         {% include "organization/_applicant_row.html" with next_url=request.get_full_path selectable=can_accept %}
       {% endfor %}
     </div>
+    <div data-bulk-spacer class="hidden h-40" aria-hidden="true"></div>
     {% include "includes/pagination.html" %}
   {% else %}
     <div class="w-full flex flex-col items-center justify-center bg-surface-container-lowest rounded-xl p-xl shadow-sm border border-dashed border-outline-variant/50 text-center">
@@ -94,10 +101,29 @@
 <script>
   (function () {
     var all = document.getElementById("select-all");
-    if (!all) return;
+    var bar = document.querySelector("[data-bulk-bar]");
+    if (!all || !bar) return;
+    var count = bar.querySelector("[data-bulk-count]");
+    var spacer = document.querySelector("[data-bulk-spacer]");
+    function boxes() { return document.querySelectorAll('input[name="application"][form="bulk-accept-form"]:not(:disabled)'); }
+    function sync() {
+      var list = boxes(), n = 0;
+      list.forEach(function (b) { if (b.checked) n++; });
+      count.textContent = n;
+      bar.classList.toggle("hidden", n === 0);
+      bar.classList.toggle("flex", n > 0);
+      if (spacer) spacer.classList.toggle("hidden", n === 0);
+      all.checked = list.length > 0 && n === list.length;
+      all.indeterminate = n > 0 && n < list.length;
+    }
     all.addEventListener("change", function () {
-      document.querySelectorAll('input[name="application"][form="bulk-accept-form"]:not(:disabled)').forEach(function (box) { box.checked = all.checked; });
+      boxes().forEach(function (box) { box.checked = all.checked; });
+      sync();
     });
+    document.addEventListener("change", function (e) {
+      if (e.target && e.target.name === "application") sync();
+    });
+    sync();
   })();
 </script>
 {% endblock %}

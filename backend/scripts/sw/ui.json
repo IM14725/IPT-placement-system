@@ -842,5 +842,7 @@
  "Accept __N__ selected applicant(s)? Each one is notified by SMS and email and this cannot be undone.": "Kubali waombaji __N__ waliochaguliwa? Kila mmoja atajulishwa kwa SMS na barua pepe na hili haliwezi kutenduliwa.",
  "Select at least one applicant first.": "Chagua angalau mwombaji mmoja kwanza.",
  "Apply filters": "Tumia vichujio",
- "Search applicants": "Tafuta waombaji"
+ "Search applicants": "Tafuta waombaji",
+ "selected": "waliochaguliwa",
+ "Add a message (optional)": "Ongeza ujumbe (hiari)"
 }
