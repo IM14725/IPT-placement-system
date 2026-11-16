@@ -29,7 +29,16 @@
       <span class="font-body-md text-body-md text-on-surface-variant break-words">
         {{ app.student.university|default:"—" }} · {{ app.student.course }}{% if app.student.education_level %} · {{ app.student.get_education_level_display }}{% endif %}{% if app.student.gpa is not None %} · GPA {{ app.student.gpa }}{% endif %}
       </span>
-      <span class="font-metadata text-metadata text-outline break-words">{% if not hide_slot %}{{ app.slot.title }}{% if app.payment.paid_at %} · {% endif %}{% endif %}{% if app.payment.paid_at %}{% trans "paid" %} {{ app.payment.paid_at|timesince }} {% trans "ago" %}{% endif %}</span>
+      {% if hide_slot %}
+        <div class="ipt-meta font-metadata text-metadata text-outline"><div class="ipt-meta-row">
+          {% if app.student.academic_year %}<span class="ipt-meta-item">{{ app.student.get_academic_year_display }}</span>{% endif %}
+          {% if app.student.graduation_year %}<span class="ipt-meta-item">{% trans "Graduates" %} {{ app.student.graduation_year }}</span>{% endif %}
+          <span class="ipt-meta-item">{% trans "Applied" %} {{ app.created_at|date:"j M Y, H:i" }}</span>
+          {% if app.payment and app.payment.paid_at %}<span class="ipt-meta-item">{% trans "Paid" %} {{ app.payment.paid_at|date:"j M Y, H:i" }}</span>{% endif %}
+        </div></div>
+      {% else %}
+      <span class="font-metadata text-metadata text-outline break-words">{{ app.slot.title }}{% if app.payment.paid_at %} · {% trans "paid" %} {{ app.payment.paid_at|timesince }} {% trans "ago" %}{% endif %}</span>
+      {% endif %}
     </div>
   </div>
   <div class="flex flex-wrap items-center gap-xs lg:justify-end shrink-0">
