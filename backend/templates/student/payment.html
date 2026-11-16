@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n money_tags phone_tags %}
 {% block title %}{% trans "Pay Application Fee" %}{% endblock %}
 {% block content %}
 <div class="relative w-full max-w-lg mx-auto bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden flex flex-col">
@@ -11,6 +11,12 @@
       </div>
       <h1 class="font-headline-lg text-headline-lg text-on-surface">{% trans "Pay Application Fee" %}</h1>
       <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Complete your payment to finalize your application." %}</p>
+      {% with deadline=payment.application.payment_deadline %}{% if deadline and not payment.is_paid %}
+        <p class="mt-xs inline-flex items-center gap-xs rounded-full bg-error-container text-on-error-container px-md py-1 font-body-md text-body-md font-semibold">
+          <span class="material-symbols-outlined text-[18px]">timer</span>{% trans "Seat released in" %}
+          <span class="tabular-nums font-bold" data-countdown="{{ deadline|date:'c' }}" data-expired="{% trans 'Seat released' %}">{{ deadline|timeuntil }}</span>
+        </p>
+      {% endif %}{% endwith %}
     </div>
     <div class="flex flex-col gap-xs bg-surface p-sm rounded-lg">
       <div class="flex justify-between items-center">
@@ -30,7 +36,7 @@
       <span class="font-label-caps text-label-caps text-on-surface-variant mb-1">{% trans "Amount Due" %}</span>
       <div class="flex items-baseline gap-xs">
         <span class="font-headline-md text-headline-md text-on-surface">TZS</span>
-        <span class="font-display text-display text-primary">{{ payment.amount }}</span>
+        <span class="font-display text-display text-primary">{{ payment.amount|money }}</span>
       </div>
     </div>
     <div class="flex flex-col gap-md">
@@ -44,7 +50,7 @@
       </div>
       <div id="phone-group" class="flex flex-col gap-xs">
         <label class="font-body-md text-body-md font-medium text-on-surface" for="pay-phone">{% trans "Mobile Number" %}</label>
-        <div class="ipt-field-box"><span class="ipt-field-prefix">+255</span><input id="pay-phone" type="text" value="{{ user.phone }}" placeholder="7XX XXX XXX"></div>
+        <div class="ipt-field-box"><span class="ipt-field-prefix">+255</span><input id="pay-phone" type="tel" inputmode="numeric" autocomplete="tel-national" value="{{ user.phone|phone_local }}" placeholder="7XX XXX XXX"></div>
         <span class="font-metadata text-metadata text-on-surface-variant">{% trans "A push notification will be sent to this number to authorize the payment." %}</span>
       </div>
       <button id="pay-btn" class="w-full bg-primary text-on-primary font-body-lg text-body-lg font-medium py-3 rounded-lg shadow-md hover:shadow-lg hover:bg-primary-container transition-all flex items-center justify-center gap-xs">

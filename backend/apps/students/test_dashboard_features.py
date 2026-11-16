@@ -392,3 +392,30 @@ def test_acceptance_letter_checklist_and_review(places, org):
     body = page.content.decode()
     assert page.status_code == 200 and page.context["average"] == 5.0
     assert "Even better" in body and "Asha" not in body.split("What students say")[1]  # reviews are anonymous
+
+
+# ── payment page (phone review): countdown, number without a doubled +255, amount with a separator ──
+
+@pytest.mark.django_db
+def test_payment_page_shows_the_seat_countdown_a_clean_phone_number_and_a_formatted_amount(places, org):
+    slot = _slot(org, places["kinondoni"])
+    student = _student(places)
+    student.user.phone = "255791099136"
+    student.user.save()
+    app = create_application(student, slot)
+    payment = Payment.objects.create(student=student, application=app, amount=15000, method=PaymentMethod.M_PESA)
+    body = _client(student.user).get(reverse("student-payment", args=[payment.id])).content.decode()
+    assert "Seat released in" in body and "data-countdown=" in body  # the 3-hour hold is visible while paying
+    assert 'value="791 099 136"' in body and 'value="255791099136"' not in body  # "+255" is the prefix, not part of the value
+    assert 'text-primary">15,000</span>' in body  # the amount the student reads (the JS variable keeps the raw value)
+
+
+def test_phone_filters():
+    from apps.core.templatetags.phone_tags import phone_intl, phone_local
+
+    assert phone_local("255791099136") == "791 099 136"
+    assert phone_local("+255 791 099 136") == "791 099 136"
+    assert phone_local("0791099136") == "791 099 136"
+    assert phone_local("") == ""
+    assert phone_intl("255700000001") == "+255 700 000 001"
+    assert phone_intl("12345") == "12345"

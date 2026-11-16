@@ -27,7 +27,10 @@
 
   btn.addEventListener("click", function () {
     var method = methodSelect.value;
-    var phone = phoneInput.value.trim();
+    // The box shows the number without "+255"; the server always gets the canonical 255XXXXXXXXX.
+    var digits = String(phoneInput.value || "").replace(/\D/g, "");
+    if (digits.indexOf("255") === 0) { digits = digits.slice(3); } else if (digits.charAt(0) === "0") { digits = digits.slice(1); }
+    var phone = digits ? "255" + digits.slice(0, 9) : "";
     var appId = window.IPT.appId;
     var txUuid = window.IPT.paymentRef; // from template
 
