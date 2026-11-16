@@ -837,5 +837,8 @@
  "More": "Zaidi",
  "Filled": "Imejaa",
  "Slot statistics": "Takwimu za nafasi",
- "Overview and how this slot is doing": "Muhtasari na hali ya nafasi hii"
+ "Overview and how this slot is doing": "Muhtasari na hali ya nafasi hii",
+ "Accept %(name)s? They are notified by SMS and email and this cannot be undone.": "Kubali %(name)s? Atajulishwa kwa SMS na barua pepe na hili haliwezi kutenduliwa.",
+ "Accept __N__ selected applicant(s)? Each one is notified by SMS and email and this cannot be undone.": "Kubali waombaji __N__ waliochaguliwa? Kila mmoja atajulishwa kwa SMS na barua pepe na hili haliwezi kutenduliwa.",
+ "Select at least one applicant first.": "Chagua angalau mwombaji mmoja kwanza."
 }

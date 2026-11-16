@@ -1131,6 +1131,12 @@ msgstr "Mwaka wa masomo unahitajika kwa Stashahada ya Juu."
 msgid "Accept"
 msgstr "Kubali"
 
+msgid "Accept %(name)s? They are notified by SMS and email and this cannot be undone."
+msgstr "Kubali %(name)s? Atajulishwa kwa SMS na barua pepe na hili haliwezi kutenduliwa."
+
+msgid "Accept __N__ selected applicant(s)? Each one is notified by SMS and email and this cannot be undone."
+msgstr "Kubali waombaji __N__ waliochaguliwa? Kila mmoja atajulishwa kwa SMS na barua pepe na hili haliwezi kutenduliwa."
+
 msgid "Accept and stay in touch"
 msgstr "Kubali na endelea kuwasiliana"
 
@@ -3975,6 +3981,9 @@ msgstr "Chagua Mkoa"
 
 msgid "Select all on this page"
 msgstr "Chagua wote kwenye ukurasa huu"
+
+msgid "Select at least one applicant first."
+msgstr "Chagua angalau mwombaji mmoja kwanza."
 
 msgid "Select at least one applicant to accept."
 msgstr "Chagua angalau mwombaji mmoja wa kukubali."

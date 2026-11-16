@@ -47,7 +47,9 @@
     {% if can_accept %}
     <form id="bulk-accept-form" method="post" action="{% url 'organization-bulk-accept' %}"
           class="bg-primary/5 rounded-xl p-md flex flex-col lg:flex-row lg:items-end gap-sm"
-          onsubmit="return confirm('{% trans 'Accept every selected applicant? Acceptance cannot be undone.' %}');">
+          data-confirm="{% trans 'Accept __N__ selected applicant(s)? Each one is notified by SMS and email and this cannot be undone.' %}"
+          data-none="{% trans 'Select at least one applicant first.' %}"
+          onsubmit="var n = document.querySelectorAll('input[name=application]:checked').length; if (!n) { alert(this.dataset.none); return false; } return confirm(this.dataset.confirm.replace('__N__', n));">
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ request.get_full_path }}">
       <div class="flex flex-col gap-xs flex-1">

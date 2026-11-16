@@ -196,3 +196,22 @@ def test_slot_applicants_cooling_off_applicant_cannot_be_accepted_from_the_row(r
     body = _client(ready_org.user).get(reverse("organization-applicants", args=[slot.id])).content.decode()
     assert "In 24h cancellation window" in body
     assert f'action="{reverse("organization-acceptance-sms", args=[app.id])}"' not in body
+
+
+# ── 10. every Accept asks first, naming the student ───────────────────────────
+
+@pytest.mark.django_db
+def test_accept_buttons_ask_for_confirmation_with_the_students_name(ready_org, places):
+    slot = _slot(ready_org, places["kinondoni"], "Intern", capacity=3)
+    app = _pay(_student(places), slot)
+    c = _client(ready_org.user)
+    for url in (reverse("organization-applicants", args=[slot.id]), reverse("organization-all-applicants"), reverse("organization-dashboard")):
+        body = c.get(url).content.decode()
+        form = body[body.index(f'action="{reverse("organization-acceptance-sms", args=[app.id])}"') :][:400]
+        assert "return confirm(" in form and "Asha Juma" in form and "cannot be undone" in form, url
+    bulk = c.get(reverse("organization-all-applicants")).content.decode()
+    assert "data-confirm=" in bulk and "__N__" in bulk and "data-none=" in bulk
+    # Kiswahili asks too
+    c.cookies["django_language"] = "sw"
+    sw = c.get(reverse("organization-applicants", args=[slot.id])).content.decode()
+    assert "Kubali Asha Juma?" in sw
