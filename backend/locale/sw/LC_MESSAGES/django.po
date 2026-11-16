@@ -1622,6 +1622,9 @@ msgstr "Kughairi &amp; Nafasi ya Kuomba Tena"
 msgid "Cancellation used"
 msgstr "Kughairi kumetumika"
 
+msgid "Cancellation window closed"
+msgstr "Muda wa kughairi umeisha"
+
 msgid "Cancellation, Reassignment &amp; Application Credit"
 msgstr "Kughairi, Kupangiwa Upya &amp; Nafasi ya Kuomba Tena"
 

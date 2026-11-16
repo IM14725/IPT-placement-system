@@ -251,10 +251,15 @@ else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     DEFAULT_FROM_EMAIL = "noreply@iptmarketplace.com"
 
-# SMS Configuration
-BEEM_API_KEY = env("BEEM_API_KEY", default="")
-BEEM_SECRET_KEY = env("BEEM_SECRET_KEY", default="")
-BEEM_SENDER_ID = env("BEEM_SENDER_ID", default="IPT")
+# SMS Configuration (AstraCall). Put the key in backend/.env, never in code or chat.
+ASTRACALL_API_KEY = env("ASTRACALL_API_KEY", default="")
+ASTRACALL_BASE_URL = env("ASTRACALL_BASE_URL", default="https://astracall.cc/api/v1")
+ASTRACALL_SENDER_ID = env("ASTRACALL_SENDER_ID", default="IPT MARKET")
+# "auto": real AstraCall when ASTRACALL_API_KEY is set, else the console mock. "mock" / "astracall" force one.
+SMS_BACKEND = env("SMS_BACKEND", default="auto")
+# Keep the plain OTP on its row (admin "OTP requests" page, on-screen hint) when it was sent through a
+# mock adapter. Real SMS/email codes are never stored. Must stay False in production.
+OTP_STORE_MOCK_CODE = False
 
 # Payment Configuration (Selcom)
 SELCOM_BASE_URL = env("SELCOM_BASE_URL", default="https://apitest.selcommobile.com")

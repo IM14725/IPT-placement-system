@@ -196,6 +196,22 @@ class OtpChannel(models.TextChoices):
     SMS = "SMS", "SMS"
 
 
+class OtpDelivery(models.TextChoices):
+    UNKNOWN = "UNKNOWN", "Unknown"
+    SENT = "SENT", "Sent"
+    FAILED = "FAILED", "Failed"
+
+
+class OtpOutcome(models.TextChoices):
+    PENDING = "PENDING", "Pending"
+    VERIFIED = "VERIFIED", "Verified"
+    LOCKED = "LOCKED", "Locked out"
+    SUPERSEDED = "SUPERSEDED", "Replaced"
+    REVOKED = "REVOKED", "Revoked"
+    UNDELIVERED = "UNDELIVERED", "Not delivered"
+    EXPIRED = "EXPIRED", "Expired"  # derived, never stored
+
+
 class OneTimeCode(models.Model):
     """A hashed, single-use, expiring verification code. The plain code is never stored."""
 
@@ -209,9 +225,42 @@ class OneTimeCode(models.Model):
     attempts = models.PositiveSmallIntegerField(default=0)
     consumed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Delivery and outcome bookkeeping for the admin "OTP requests" page. Rows from before this
+    # existed keep UNKNOWN / PENDING.
+    delivery_status = models.CharField(
+        max_length=10, choices=OtpDelivery.choices, default=OtpDelivery.UNKNOWN
+    )
+    delivery_provider = models.CharField(max_length=30, blank=True)
+    delivery_error = models.CharField(max_length=200, blank=True)
+    outcome = models.CharField(max_length=12, choices=OtpOutcome.choices, default=OtpOutcome.PENDING)
+    # Plain code, kept ONLY when it went out through a mock adapter (dev) and ``OTP_STORE_MOCK_CODE``
+    # is on. Never set for a real SMS or email; cleared as soon as the code is used, replaced or revoked.
+    debug_code = models.CharField(max_length=6, blank=True)
 
     class Meta:
-        indexes = [models.Index(fields=["user", "purpose", "-created_at"])]
+        indexes = [
+            models.Index(fields=["user", "purpose", "-created_at"]),
+            models.Index(fields=["-created_at"]),
+        ]
+
+    @property
+    def is_live(self):
+        from django.utils import timezone
+
+        return self.consumed_at is None and self.expires_at > timezone.now()
+
+    @property
+    def status(self):
+        """What happened to this code, for the admin page."""
+        from django.utils import timezone
+
+        if self.outcome != OtpOutcome.PENDING:
+            return self.outcome
+        if self.delivery_status == OtpDelivery.FAILED:
+            return OtpOutcome.UNDELIVERED
+        if self.consumed_at is not None:
+            return OtpOutcome.SUPERSEDED  # closed before this field existed
+        return OtpOutcome.PENDING if self.expires_at > timezone.now() else OtpOutcome.EXPIRED
 
 # ── Administrator MFA, recovery and break-glass ─────────────────────────────
 

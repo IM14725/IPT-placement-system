@@ -60,6 +60,8 @@ def security_context(request):
     return {
         "email_form": ChangeEmailForm(auto_id="sec_email_%s"),
         "phone_form": ChangePhoneForm(initial={"phone": request.user.phone}, auto_id="sec_phone_%s"),
+        # "Verify this number": the saved, unverified number plus the current password.
+        "verify_phone_form": ChangePhoneForm(initial={"phone": request.user.phone}, auto_id="sec_vphone_%s"),
         "pwd_form": ChangePasswordForm(user=request.user, auto_id="sec_pwd_%s"),
         "session_seconds": seconds_remaining(request),
     }
@@ -169,15 +171,25 @@ def verify_contact(request, kind):
                 if result == otp.INVALID
                 else gettext("That code has expired. Request a new one."),
             )
-    masked = destination if kind == "phone" else destination
+    current = (user.email if kind == "email" else user.phone) == destination
+    if current:  # verifying the number/address already on the account, not changing it
+        heading = gettext("Verify your %(kind)s") % {"kind": gettext(kind)}
+        intro = gettext("We sent a 6-digit code to %(to)s. Enter it to verify this %(kind)s. The code expires in 5 minutes.") % {"to": destination, "kind": gettext(kind)}
+        submit_label = gettext("Verify %(kind)s") % {"kind": gettext(kind)}
+    else:
+        heading = f"Verify your new {kind}"
+        intro = f"We sent a 6-digit code to {destination}. Your {kind} is only changed once you enter it. The code expires in 5 minutes."
+        submit_label = f"Confirm new {kind}"
     return render(
         request,
         "registration/otp_verify.html",
         {
             "form": form,
-            "heading": f"Verify your new {kind}",
-            "intro": f"We sent a 6-digit code to {masked}. Your {kind} is only changed once you enter it. The code expires in 5 minutes.",
-            "submit_label": f"Confirm new {kind}",
+            "heading": heading,
+            "intro": intro,
+            "submit_label": submit_label,
+            # Dev only (OTP_STORE_MOCK_CODE and a mock-delivered code): the SMS never leaves the machine.
+            "dev_code": otp.live_debug_code(user, purpose),
         },
     )
 

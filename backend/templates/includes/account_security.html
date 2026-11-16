@@ -27,6 +27,16 @@
     </div>
     <p class="font-body-md">{{ user.phone|default:"No phone number on file." }}</p>
     {% if user.is_student %}<p class="font-metadata text-metadata text-on-surface-variant">{% trans "Students must verify their phone before they can submit an IPT application." %}</p>{% endif %}
+    {% if user.phone and not user.phone_verified %}
+    <form method="post" action="{% url 'change-phone' %}" class="grid grid-cols-1 md:grid-cols-2 gap-sm items-end rounded-lg bg-[#fff4e5] p-md" id="verify-current-phone">
+      {% csrf_token %}
+      <p class="md:col-span-2 font-body-md text-[#a16207]">{% blocktrans with phone=user.phone %}Verify {{ phone }}: we will text a code to this number. Enter your current password to confirm it is you.{% endblocktrans %}</p>
+      <input type="hidden" name="phone" value="{{ user.phone }}">
+      {% include "includes/form_field.html" with field=verify_phone_form.current_password label_class="font-metadata text-metadata text-on-surface-variant" %}
+      <button type="submit" class="justify-self-start bg-primary text-on-primary font-semibold px-md py-2 rounded-lg">{% trans "Verify this number" %}</button>
+    </form>
+    <p class="font-metadata text-metadata text-on-surface-variant">{% trans "Or enter a different number below." %}</p>
+    {% endif %}
     <form method="post" action="{% url 'change-phone' %}" class="grid grid-cols-1 md:grid-cols-2 gap-sm items-end">
       {% csrf_token %}
       {% include "includes/form_field.html" with field=phone_form.phone label_class="font-metadata text-metadata text-on-surface-variant" %}

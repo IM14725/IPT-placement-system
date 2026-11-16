@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.core import views, views_admins, views_governance
+from apps.core import views, views_admins, views_governance, views_otp
 from apps.locations import views_admin as locations_admin
 
 urlpatterns = [
@@ -44,6 +44,8 @@ urlpatterns = [
     path("admins/", views_admins.admin_list, name="platform-admins"),
     path("admins/new/", views_admins.admin_create, name="platform-admin-new"),
     path("admins/<uuid:pk>/", views_admins.admin_detail, name="platform-admin-detail"),
+    path("otp-requests/", views_otp.otp_requests, name="platform-otp-requests"),
+    path("otp-requests/<uuid:pk>/action/", views_otp.otp_action, name="platform-otp-action"),
     path("recovery/", views_admins.recovery_queue, name="platform-recovery"),
     path("break-glass/", views_admins.break_glass, name="platform-break-glass"),
     # Legal pages — public

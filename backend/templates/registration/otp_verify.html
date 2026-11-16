@@ -15,6 +15,12 @@
     {% endfor %}
   {% endif %}
 
+  {% if dev_code %}
+    <div class="rounded-lg bg-[#fff4e5] border-l-2 border-[#a16207] px-sm py-sm text-body-md text-[#a16207]">
+      Dev mode: the code was not sent to a real phone or inbox. Your code is <strong class="font-mono tracking-widest">{{ dev_code }}</strong>.
+    </div>
+  {% endif %}
+
   <form method="post" class="flex flex-col gap-md" novalidate>
     {% csrf_token %}
     {% include "includes/form_field.html" with field=form.code icon="pin" %}

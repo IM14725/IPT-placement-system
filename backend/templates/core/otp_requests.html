@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}OTP requests{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-col gap-xs">
+    <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Security</span>
+    <h1 class="font-display text-display text-on-surface">OTP requests</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-2">
+      Every one-time code a user has asked for: why, by SMS or email, to which number or address, whether it was delivered and what became of it. Codes are stored only as a hash, so a real SMS or email code can never be read here. Revoking, re-sending and viewing a code are recorded in the audit log.
+    </p>
+    {% if codes_visible %}
+    <p class="font-metadata text-metadata text-[#a16207] bg-[#fff4e5] rounded-lg px-sm py-xs self-start">Dev mode (SMS backend: {{ sms_backend }}). Codes delivered through the console mock can be viewed and copied below. This is switched off in production.</p>
+    {% endif %}
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm flex flex-col w-full overflow-hidden">
+    <form method="get" class="p-md bg-surface-container-low grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-xs sm:gap-sm border-b border-surface-container-highest">
+      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant col-span-2">Search
+        <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input name="q" value="{{ f.q|default:'' }}" placeholder="Name, email, phone or destination"></div>
+      </label>
+      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Method
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">mail</span></span><select name="channel">
+          <option value="">Any</option>
+          {% for value, label in channels %}<option value="{{ value }}" {% if f.channel == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select></div>
+      </label>
+      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Purpose
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><select name="purpose">
+          <option value="">Any</option>
+          {% for value, label in purposes %}<option value="{{ value }}" {% if f.purpose == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select></div>
+      </label>
+      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Status
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">flag</span></span><select name="status">
+          <option value="">Any</option>
+          {% for value, label in statuses %}<option value="{{ value }}" {% if f.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select></div>
+      </label>
+      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">Delivery
+        <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">flag</span></span><select name="delivery">
+          <option value="">Any</option>
+          <option value="SENT" {% if f.delivery == 'SENT' %}selected{% endif %}>Sent</option>
+          <option value="FAILED" {% if f.delivery == 'FAILED' %}selected{% endif %}>Failed</option>
+        </select></div>
+      </label>
+      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">From
+        <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">calendar_today</span></span><input type="date" name="date_from" value="{{ f.date_from|default:'' }}"></div>
+      </label>
+      <label class="flex flex-col gap-1 font-metadata text-metadata text-on-surface-variant">To
+        <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">calendar_today</span></span><input type="date" name="date_to" value="{{ f.date_to|default:'' }}"></div>
+      </label>
+      <div class="flex items-end gap-sm col-span-2 md:col-span-1">
+        <button type="submit" class="px-md py-2 bg-primary text-on-primary rounded-lg font-semibold">Search</button>
+        <a href="?" class="px-md py-2 bg-surface-container rounded-lg font-semibold text-on-surface">Reset</a>
+      </div>
+    </form>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left font-body-md text-body-md">
+        <thead>
+          <tr class="bg-surface-container-low font-metadata text-metadata text-on-surface-variant uppercase">
+            <th class="p-sm">Requested</th>
+            <th class="p-sm">User</th>
+            <th class="p-sm">Purpose</th>
+            <th class="p-sm">Method &amp; destination</th>
+            <th class="p-sm">Delivery</th>
+            <th class="p-sm">Status</th>
+            <th class="p-sm">Tries</th>
+            <th class="p-sm">Expires</th>
+            {% if can_edit %}<th class="p-sm">Actions</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+        {% for r in rows %}
+          {% with st=r.status %}
+          <tr class="border-t border-surface-container-highest align-top">
+            <td class="p-sm whitespace-nowrap">{{ r.created_at|date:"d M Y H:i" }}</td>
+            <td class="p-sm">
+              <div class="font-semibold">{{ r.user.get_full_name|default:r.user.email }}</div>
+              <div class="font-metadata text-metadata text-on-surface-variant break-all">{{ r.user.email }}</div>
+              <div class="font-metadata text-metadata text-on-surface-variant">{{ r.user.get_role_display }}</div>
+            </td>
+            <td class="p-sm">{{ r.get_purpose_display }}</td>
+            <td class="p-sm">
+              <span class="material-symbols-outlined text-[18px] align-middle">{% if r.channel == 'SMS' %}sms{% else %}mail{% endif %}</span>
+              {{ r.get_channel_display }}
+              <div class="font-metadata text-metadata text-on-surface-variant break-all">{{ r.destination }}</div>
+            </td>
+            <td class="p-sm">
+              {% if r.delivery_status == 'SENT' %}<span class="px-2 py-1 rounded-full text-metadata font-semibold bg-[#e8f5e9] text-[#1b5e20]">Sent</span>
+              {% elif r.delivery_status == 'FAILED' %}<span class="px-2 py-1 rounded-full text-metadata font-semibold bg-[#fdecea] text-[#b3261e]">Failed</span>
+              {% else %}<span class="px-2 py-1 rounded-full text-metadata font-semibold bg-surface-container text-on-surface-variant">Unknown</span>{% endif %}
+              {% if r.delivery_provider %}<div class="font-metadata text-metadata text-on-surface-variant">{{ r.delivery_provider }}</div>{% endif %}
+              {% if r.delivery_error %}<div class="font-metadata text-metadata text-[#b3261e] break-words max-w-[16rem]">{{ r.delivery_error }}</div>{% endif %}
+            </td>
+            <td class="p-sm">
+              {% if st == 'VERIFIED' %}<span class="px-2 py-1 rounded-full text-metadata font-semibold bg-[#e8f5e9] text-[#1b5e20]">Verified</span>
+              {% elif st == 'PENDING' %}<span class="px-2 py-1 rounded-full text-metadata font-semibold bg-[#fff4e5] text-[#a16207]">Pending</span>
+              {% elif st == 'LOCKED' or st == 'UNDELIVERED' %}<span class="px-2 py-1 rounded-full text-metadata font-semibold bg-[#fdecea] text-[#b3261e]">{% if st == 'LOCKED' %}Locked out{% else %}Not delivered{% endif %}</span>
+              {% else %}<span class="px-2 py-1 rounded-full text-metadata font-semibold bg-surface-container text-on-surface-variant">{% if st == 'EXPIRED' %}Expired{% elif st == 'REVOKED' %}Revoked{% else %}Replaced{% endif %}</span>{% endif %}
+            </td>
+            <td class="p-sm">{{ r.attempts }}/5</td>
+            <td class="p-sm whitespace-nowrap">{{ r.expires_at|date:"H:i" }}</td>
+            {% if can_edit %}
+            <td class="p-sm">
+              <form method="post" action="{% url 'platform-otp-action' r.pk %}" class="flex flex-wrap gap-xs">
+                {% csrf_token %}
+                <input type="hidden" name="qs" value="{{ querystring }}">
+                {% if r.is_live %}<button type="submit" name="action" value="revoke" class="px-sm py-1 rounded-lg bg-surface-container font-semibold text-on-surface" onclick="return confirm('Revoke this code? The user will have to request a new one.')">Revoke</button>{% endif %}
+                {% if r.resend_ok %}<button type="submit" name="action" value="resend" class="px-sm py-1 rounded-lg bg-surface-container font-semibold text-on-surface" onclick="return confirm('Send a new code to this destination? The current one stops working.')">Resend</button>{% endif %}
+                {% if r.debug_code and r.is_live %}<button type="submit" name="action" value="reveal" class="px-sm py-1 rounded-lg bg-primary text-on-primary font-semibold">View code</button>{% endif %}
+              </form>
+            </td>
+            {% endif %}
+          </tr>
+          {% endwith %}
+        {% empty %}
+          <tr><td class="p-lg text-center text-on-surface-variant" colspan="9">No one-time codes match these filters.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="p-md border-t border-surface-container-highest flex items-center justify-between">
+      <span class="font-metadata text-metadata text-on-surface-variant">Showing {{ rows|length }} of {{ total }} total requests. A request refused by the rate limiter never issues a code and is not listed.</span>
+    </div>
+    {% include "includes/pagination.html" %}
+  </div>
+</div>
+{% endblock %}

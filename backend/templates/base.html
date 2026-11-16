@@ -398,6 +398,7 @@
         <a class="side-link {% is_active request 'platform-admins' 'platform-admin-new' 'platform-admin-detail' %}" href="{% url 'platform-admins' %}"><span class="material-symbols-outlined">manage_accounts</span><span class="side-label">{% trans "Administrators" %}</span></a>
         <a class="side-link {% is_active request 'platform-break-glass' %}" href="{% url 'platform-break-glass' %}"><span class="material-symbols-outlined">emergency</span><span class="side-label">{% trans "Break-glass" %}</span></a>
         {% endif %}
+        <a class="side-link {% is_active request 'platform-otp-requests' %}" href="{% url 'platform-otp-requests' %}"><span class="material-symbols-outlined">pin</span><span class="side-label">{% trans "OTP requests" %}</span></a>
         <a class="side-link {% is_active request 'platform-recovery' %}" href="{% url 'platform-recovery' %}"><span class="material-symbols-outlined">key</span><span class="side-label">{% trans "Recovery requests" %}</span></a>
         <a class="side-link {% is_active request 'mfa-settings' %}" href="{% url 'mfa-settings' %}"><span class="material-symbols-outlined">passkey</span><span class="side-label">{% trans "My MFA" %}</span></a>
       {% endif %}

@@ -4,6 +4,12 @@ DEBUG = True
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+# Local dev uses the console SMS mock unless SMS_BACKEND=astracall is set in backend/.env (a key in
+# .env does not switch dev to live SMS on its own). Mock-sent codes are shown on the verify page
+# and on the admin "OTP requests" page.
+SMS_BACKEND = env("SMS_BACKEND", default="mock")
+OTP_STORE_MOCK_CODE = True
+
 # Ensure login/registration tasks execute immediately in local dev even if a
 # separate Celery worker process is not running, while still storing results in
 # Redis for /auth/task-status/<task_id>/ polling.

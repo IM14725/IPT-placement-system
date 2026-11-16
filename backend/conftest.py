@@ -3,9 +3,9 @@ import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 os.environ.setdefault("CACHE_ENABLED", "0")
 os.environ.setdefault("RATE_LIMIT_ENABLED", "0")
-# Tests must never send real SMS, even when backend/.env holds live Beem keys.
-os.environ["BEEM_API_KEY"] = ""
-os.environ["BEEM_SECRET_KEY"] = ""
+# Tests must never send real SMS, even when backend/.env holds a live AstraCall key.
+os.environ["ASTRACALL_API_KEY"] = ""
+os.environ["SMS_BACKEND"] = "mock"  # even if backend/.env says SMS_BACKEND=astracall
 
 
 def pytest_configure(config):
@@ -16,8 +16,8 @@ def pytest_configure(config):
     # Settings may load before the env tweak above; blank the live SMS keys here too.
     settings.ANTIBOT_ENABLED = False  # antibot tests switch it on explicitly
     settings.ADMIN_MFA_ENFORCED = False  # MFA tests switch it on explicitly
-    settings.BEEM_API_KEY = ""
-    settings.BEEM_SECRET_KEY = ""
+    settings.ASTRACALL_API_KEY = ""
+    settings.SMS_BACKEND = "mock"
     _install_fake_redis()
 
 

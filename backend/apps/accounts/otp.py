@@ -7,6 +7,7 @@ Delivery is synchronous on purpose: queueing the code would put it on the Celery
 
 import hashlib
 import hmac
+import logging
 import secrets
 from datetime import timedelta
 
@@ -14,9 +15,11 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
-from apps.accounts.models import OneTimeCode, OtpChannel, OtpPurpose
+from apps.accounts.models import OneTimeCode, OtpChannel, OtpDelivery, OtpOutcome, OtpPurpose
 from apps.core.providers import send_email, send_sms
 from apps.core.rate_limit import consume
+
+log = logging.getLogger(__name__)
 
 OTP_TTL = timedelta(minutes=5)
 OTP_MAX_ATTEMPTS = 5
@@ -70,7 +73,7 @@ def send_otp(user, purpose, channel, destination=None):
     with transaction.atomic():
         OneTimeCode.objects.filter(
             user=user, purpose=purpose, consumed_at__isnull=True
-        ).update(consumed_at=now)
+        ).update(consumed_at=now, outcome=OtpOutcome.SUPERSEDED, debug_code="")
         otp = OneTimeCode(
             user=user,
             purpose=purpose,
@@ -85,11 +88,24 @@ def send_otp(user, purpose, channel, destination=None):
     text = f"Your IPT Marketplace verification code is {code}. It expires in {minutes} minutes."
     try:
         if channel == OtpChannel.EMAIL:
-            send_email("Your IPT Marketplace verification code", [destination], text)
+            delivered = send_email("Your IPT Marketplace verification code", [destination], text)
         else:
-            send_sms(destination, text)
-    except Exception:  # noqa: BLE001 - provider outage must not leak or crash the flow
+            delivered = send_sms(destination, text, kind="otp", idempotency_key=f"otp-{otp.id}")
+    except Exception as exc:  # noqa: BLE001 - provider outage must not leak or crash the flow
+        # Never log ``text`` (it holds the code). The exception type and provider message are enough.
+        log.warning("OTP delivery failed (%s, %s): %s: %s", purpose, channel, type(exc).__name__, exc)
+        OneTimeCode.objects.filter(pk=otp.pk).update(
+            delivery_status=OtpDelivery.FAILED,
+            delivery_error=f"{type(exc).__name__}: {exc}"[:200],
+            outcome=OtpOutcome.UNDELIVERED,
+            consumed_at=timezone.now(),  # a code nobody received is void
+        )
         return SendResult(False)
+    provider = str((delivered or {}).get("provider", ""))[:30]
+    fields = {"delivery_status": OtpDelivery.SENT, "delivery_provider": provider}
+    if getattr(settings, "OTP_STORE_MOCK_CODE", False) and provider.startswith("mock"):
+        fields["debug_code"] = code  # dev only: this code never left the machine
+    OneTimeCode.objects.filter(pk=otp.pk).update(**fields)
     return SendResult(True)
 
 
@@ -97,7 +113,7 @@ def invalidate_pending(user, purpose):
     """Void every unused code for ``purpose`` (e.g. recovery codes once the user logs in)."""
     return OneTimeCode.objects.filter(
         user=user, purpose=purpose, consumed_at__isnull=True
-    ).update(consumed_at=timezone.now())
+    ).update(consumed_at=timezone.now(), outcome=OtpOutcome.REVOKED, debug_code="")
 
 
 def pending_destination(user, purpose):
@@ -126,11 +142,39 @@ def verify_otp(user, purpose, code):
     otp.attempts += 1
     if hmac.compare_digest(otp.code_hash, _hash(otp.id, purpose, (code or "").strip())):
         otp.consumed_at = now
-        otp.save(update_fields=["attempts", "consumed_at"])
+        otp.outcome = OtpOutcome.VERIFIED
+        otp.debug_code = ""
+        otp.save(update_fields=["attempts", "consumed_at", "outcome", "debug_code"])
         return OK
     if otp.attempts >= OTP_MAX_ATTEMPTS:
         otp.consumed_at = now
-        otp.save(update_fields=["attempts", "consumed_at"])
+        otp.outcome = OtpOutcome.LOCKED
+        otp.debug_code = ""
+        otp.save(update_fields=["attempts", "consumed_at", "outcome", "debug_code"])
         return EXPIRED
     otp.save(update_fields=["attempts"])
     return INVALID
+
+
+def live_debug_code(user, purpose):
+    """The plain code of the live OTP, only if a mock adapter delivered it (dev). Else None."""
+    if not getattr(settings, "OTP_STORE_MOCK_CODE", False):
+        return None
+    otp = (
+        OneTimeCode.objects.filter(
+            user=user, purpose=purpose, consumed_at__isnull=True, expires_at__gt=timezone.now()
+        )
+        .exclude(debug_code="")
+        .order_by("-created_at")
+        .first()
+    )
+    return otp.debug_code if otp else None
+
+
+def revoke(otp):
+    """Void one pending code (admin action). Returns True if it was still live."""
+    return bool(
+        OneTimeCode.objects.filter(pk=otp.pk, consumed_at__isnull=True).update(
+            consumed_at=timezone.now(), outcome=OtpOutcome.REVOKED, debug_code=""
+        )
+    )
