@@ -287,3 +287,8 @@ html.dark #sidebar-backdrop { background: rgba(0, 0, 0, 0.6); }
 .ipt-meta-row { display: flex; flex-wrap: wrap; row-gap: 2px; margin-left: -14px; }
 .ipt-meta-item { position: relative; padding-left: 14px; min-width: 0; }
 .ipt-meta-item::before { content: "\2022"; position: absolute; left: 3px; color: rgb(var(--c-outline-variant)); font-size: 12px; line-height: inherit; }
+
+/* ---------- Sideways-scrolling chip rows fade out at the right edge on phones, so it is clear there is more ---------- */
+@media (max-width: 767px) {
+  .ipt-scroll-hint { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); }
+}

@@ -235,7 +235,7 @@
     } else if (s.available_count > 0) {
       if (window.IPT.canApply) {
         apply =
-          '<a href="/student/apply/' + s.id + '/" class="w-full h-11 bg-primary/10 text-primary group-hover:bg-primary group-hover:text-on-primary rounded-xl font-label-caps text-label-caps uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2">' +
+          '<a href="/student/apply/' + s.id + '/" class="w-full h-11 bg-primary text-on-primary hover:bg-primary-container rounded-xl font-label-caps text-label-caps uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2">' +
           esc(t("applyNow", "Apply Now")) + "<span class='material-symbols-outlined text-[16px]'>arrow_forward</span></a>";
       } else {
         apply =
@@ -259,9 +259,9 @@
       '<div class="absolute -top-16 -right-16 w-32 h-32 bg-secondary-fixed/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>' +
       '<div class="flex flex-col gap-md relative z-10">' +
       '<div class="flex items-start justify-between gap-sm">' +
-      '<div class="flex flex-col gap-xs">' +
+      '<div class="flex flex-wrap items-center gap-x-xs gap-y-1 min-w-0">' +
       '<span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">' + esc(s.organization_name) + "</span>" +
-      '<span class="font-metadata text-metadata text-secondary font-semibold">' + esc(s.industry) + "</span>" +
+      '<span class="font-metadata text-metadata text-secondary font-semibold">· ' + esc(s.industry) + "</span>" +
       (s.is_new ? '<span class="w-fit px-2 py-0.5 rounded-full bg-primary text-on-primary font-label-caps text-label-caps uppercase">' + esc(t("newSlot", "New")) + "</span>" : "") +
       "</div>" +
       '<div class="flex items-center gap-1 shrink-0">' +
@@ -274,16 +274,15 @@
       "</div>" +
       '<h3 class="font-headline-md text-headline-md text-primary group-hover:text-primary-fixed-variant transition-colors"><a href="/student/slots/' + esc(s.id) + '/" class="hover:underline" title="' + esc(t("viewDetails", "View details")) + '">' + esc(s.title) + "</a></h3>" +
       matchBlock(s) +
-      '<div class="grid grid-cols-2 gap-sm">' +
-      '<div class="flex items-center gap-xs">' +
+      '<div class="grid grid-cols-2 gap-x-sm gap-y-1">' +
+      '<div class="col-span-2 flex items-center gap-xs">' +
       '<span class="material-symbols-outlined text-outline text-[18px]">location_on</span>' +
       '<span class="font-metadata text-metadata text-on-surface-variant truncate">' + esc(s.region.name) + " · " + esc(s.district_name) + "</span>" +
       "</div>" +
-      '<div class="flex items-center gap-xs">' +
+      '<div class="col-span-2 flex items-center gap-xs">' +
       '<span class="material-symbols-outlined text-outline text-[18px]">schedule</span>' +
-      '<span class="font-metadata text-metadata text-on-surface-variant truncate">' + esc(s.role_type) + (s.education_level_display ? " · " + esc(s.education_level_display) : "") + (s.academic_year_display ? " - " + esc(s.academic_year_display) : "") + "</span>" +
+      '<span class="font-metadata text-metadata text-on-surface-variant truncate">' + esc(s.role_type) + (s.education_level_display ? " · " + esc(s.education_level_display) : "") + (s.academic_year_display ? " - " + esc(s.academic_year_display) : "") + (s.department ? " · " + esc(s.department) : "") + "</span>" +
       "</div>" +
-      (s.department ? '<div class="col-span-2 flex items-center gap-xs"><span class="material-symbols-outlined text-outline text-[18px]">school</span><span class="font-metadata text-metadata text-on-surface-variant truncate">' + esc(t("dept", "Dept:")) + " " + esc(s.department) + "</span></div>" : "") +
       (s.placement_label ? '<div class="col-span-2 flex items-center gap-xs"><span class="material-symbols-outlined text-outline text-[18px]">date_range</span><span class="font-metadata text-metadata text-on-surface-variant truncate">' + esc(s.placement_label) + "</span></div>" : "") +
       '<div class="col-span-2 flex items-center gap-xs">' +
       '<span class="material-symbols-outlined text-[#1b5e20] text-[18px]">payments</span>' +
@@ -292,7 +291,7 @@
       "</div>" +
       (skills ? '<div class="flex flex-wrap gap-xs mt-sm">' + skills + "</div>" : "") +
       "</div>" +
-      '<div class="w-full mt-lg relative z-10">' + apply + "</div>" +
+      '<div class="w-full mt-md relative z-10">' + apply + "</div>" +
       timeLeftLine(s) +
       "</div>"
     );
@@ -306,9 +305,8 @@
     }).join("");
     return (
       '<div class="flex flex-col gap-1">' +
-      '<div class="flex items-center justify-between gap-sm"><span class="font-metadata text-metadata text-on-surface-variant">' + esc(t("match", "Match")) + "</span>" +
-      '<span class="font-metadata text-metadata font-bold text-primary">' + esc(s.match) + "%</span></div>" +
-      '<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden" role="img" aria-label="' + esc(t("match", "Match")) + " " + esc(s.match) + '%"><div class="h-full bg-primary rounded-full" style="width:' + Number(s.match) + '%"></div></div>' +
+      '<div class="flex items-center gap-sm"><span class="font-metadata text-metadata text-on-surface-variant whitespace-nowrap">' + esc(t("match", "Match")) + ' <b class="text-primary">' + esc(s.match) + "%</b></span>" +
+      '<div class="flex-1 h-1.5 bg-surface-container rounded-full overflow-hidden" role="img" aria-label="' + esc(t("match", "Match")) + " " + esc(s.match) + '%"><div class="h-full bg-primary rounded-full" style="width:' + Number(s.match) + '%"></div></div></div>' +
       (reasons ? '<div class="flex flex-wrap gap-1 mt-1">' + reasons + "</div>" : "") +
       "</div>"
     );

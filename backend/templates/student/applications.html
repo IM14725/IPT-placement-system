@@ -9,7 +9,7 @@
   </div>
 </div>
 {% if next_step %}<div class="w-full mb-sm md:mb-md">{% include "student/_next_step.html" %}</div>{% endif %}
-<nav class="w-full flex flex-nowrap gap-xs mb-sm md:mb-md overflow-x-auto no-scrollbar" aria-label="{% trans 'Filter applications' %}">
+<nav class="ipt-scroll-hint w-full flex flex-nowrap gap-xs mb-sm md:mb-md overflow-x-auto no-scrollbar" aria-label="{% trans 'Filter applications' %}">
   {% for t in tabs %}
     <a href="?tab={{ t.key }}" {% if t.key == tab %}aria-current="page"{% endif %}
        class="shrink-0 whitespace-nowrap px-sm py-1 rounded-full border font-body-md text-body-md font-semibold flex items-center gap-xs transition-colors {% if t.key == tab %}bg-primary text-on-primary border-primary{% else %}bg-surface-container-lowest text-on-surface border-outline-variant hover:border-primary{% endif %}">

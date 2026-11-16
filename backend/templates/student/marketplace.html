@@ -45,7 +45,7 @@
     </div>
 
     <!-- Filters button + quick filters: one row that scrolls sideways if it must -->
-    <div class="w-full flex flex-nowrap items-center gap-xs overflow-x-auto no-scrollbar" role="group" aria-label="{% trans 'Quick filters' %}">
+    <div class="ipt-scroll-hint w-full flex flex-nowrap items-center gap-xs overflow-x-auto no-scrollbar" role="group" aria-label="{% trans 'Quick filters' %}">
       <button type="button" data-filter-toggle aria-expanded="false" aria-controls="filter-panel" class="shrink-0 h-9 px-sm rounded-full border border-outline-variant bg-surface-container text-on-surface font-body-md font-semibold flex items-center gap-xs hover:border-primary transition-colors"><span class="material-symbols-outlined text-[20px]">tune</span><span>{% trans "Filters" %}</span><span data-filter-count hidden class="min-w-[20px] h-5 px-1 rounded-full bg-primary text-on-primary font-metadata text-metadata flex items-center justify-center">0</span></button>
       <span class="hidden sm:inline font-metadata text-metadata text-on-surface-variant uppercase tracking-wider mr-1">{% trans "Quick filters" %}</span>
       <button type="button" data-quick="closing" class="shrink-0 whitespace-nowrap px-sm py-1 rounded-full border bg-surface-container-lowest text-on-surface border-outline-variant font-body-md text-body-md font-semibold flex items-center gap-xs hover:border-primary transition-colors" aria-pressed="false"><span class="material-symbols-outlined text-[18px]">hourglass_top</span>{% trans "Closing within 7 days" %}</button>

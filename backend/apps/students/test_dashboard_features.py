@@ -515,3 +515,19 @@ def test_apply_buttons_stack_on_phones_and_slot_detail_collapses_the_rules(place
     start = detail.index('<details class="ipt-section">')
     assert "How applying works" in detail[start : start + 600] and "<details class=\"ipt-section\" open" not in detail
     assert "TZS 15,000" in detail
+
+
+@pytest.mark.django_db
+def test_find_a_slot_cards_are_compact_with_a_solid_apply_button(places, org):
+    from pathlib import Path
+
+    c = _client(_student(places).user)
+    _slot(org, places["kinondoni"], "Intern")
+    body = c.get(reverse("student-marketplace")).content.decode()
+    assert 'class="ipt-scroll-hint' in body  # the quick-filter row fades at the edge: more chips to the right
+    js = (Path(__file__).resolve().parents[2] / "static" / "js" / "marketplace.js").read_text(encoding="utf-8")
+    assert "bg-primary text-on-primary hover:bg-primary-container" in js and "group-hover:bg-primary group-hover:text-on-primary" not in js
+    assert 'flex flex-wrap items-center gap-x-xs gap-y-1 min-w-0' in js  # organization, industry and NEW share one wrapped line
+    assert js.count("col-span-2 flex items-center gap-xs") >= 3  # location and role are full-width lines, not truncated halves
+    assert "t(\"dept\", \"Dept:\")" not in js  # the department joins the role line instead of getting its own row
+    assert 'ipt-scroll-hint' in c.get(reverse("student-applications")).content.decode()
