@@ -1476,6 +1476,9 @@ msgstr "Omba Sasa"
 msgid "Apply by"
 msgstr "Omba kabla ya"
 
+msgid "Apply filters"
+msgstr "Tumia vichujio"
+
 msgid "Apply now"
 msgstr "Omba sasa"
 
@@ -3906,6 +3909,9 @@ msgstr "Tafuta na vichujio"
 
 msgid "Search anything…"
 msgstr "Tafuta chochote…"
+
+msgid "Search applicants"
+msgstr "Tafuta waombaji"
 
 msgid "Search by name..."
 msgstr "Tafuta kwa jina..."

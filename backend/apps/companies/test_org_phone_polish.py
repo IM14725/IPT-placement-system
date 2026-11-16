@@ -215,3 +215,22 @@ def test_accept_buttons_ask_for_confirmation_with_the_students_name(ready_org, p
     c.cookies["django_language"] = "sw"
     sw = c.get(reverse("organization-applicants", args=[slot.id])).content.decode()
     assert "Kubali Asha Juma?" in sw
+
+
+# ── 11. All applicants: search on its own row, Filters + Export below, "Apply filters" in the panel ──
+
+@pytest.mark.django_db
+def test_all_applicants_search_row_layout(ready_org, places):
+    slot = _slot(ready_org, places["kinondoni"], "Intern", capacity=2)
+    _pay(_student(places), slot)
+    body = _client(ready_org.user).get(reverse("organization-all-applicants")).content.decode()
+    bar = body[body.index('data-filterbar'): body.index('data-filter-chips')]
+    assert bar.index('id="f-q"') < bar.index("data-filter-toggle") < bar.index("Export CSV")  # search, then Filters, then Export
+    assert 'aria-label="Search" class="order-2 md:order-3' in bar  # the search submit is an icon button
+    assert bar.count("data-filter-toggle") == 1  # filterbar.js binds a single toggle
+    assert ">Filter<" in bar  # still labelled on wide screens
+    assert "placeholder=\"Search applicants\"" in bar  # short enough not to be clipped on a phone
+    panel = body[body.index('id="applicant-filter-panel"'):][:3500]
+    assert "Apply filters" in panel
+    export_links = [m for m in body.split("<a ") if "organization/applicants/export" in m.split(">")[0]]
+    assert len(export_links) == 2  # header link (wide screens) + the one beside Filters (phones)

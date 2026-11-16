@@ -8,20 +8,23 @@
       <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Applicants" %}</h1>
       <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">{% trans "Every student who paid to apply to one of your slots. A paid applicant cannot be rejected: review them and send the acceptance." %}</p>
     </div>
-    <a href="{% url 'organization-export-applicants' %}{% if querystring %}?{{ querystring }}{% endif %}" class="px-md py-sm rounded-lg border border-primary text-primary font-semibold flex items-center gap-xs hover:bg-primary/5 self-start md:self-auto">
+    <a href="{% url 'organization-export-applicants' %}{% if querystring %}?{{ querystring }}{% endif %}" class="hidden md:flex px-md py-sm rounded-lg border border-primary text-primary font-semibold items-center gap-xs hover:bg-primary/5 md:self-auto">
       <span class="material-symbols-outlined text-[20px]">download</span>{% trans "Export CSV" %}
     </a>
   </div>
 
   <form method="get" class="ipt-filterbar bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm" data-filterbar data-filter-submit data-filter-remove="{% trans 'Remove filter' %}">
-    <div class="flex items-end gap-xs">
-      <div class="flex-1 min-w-0 flex flex-col gap-xs">
+    <div class="grid grid-cols-[minmax(0,1fr)_auto] md:flex items-end gap-xs">
+      <div class="min-w-0 md:flex-1 flex flex-col gap-xs">
         <label class="hidden md:block font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="f-q">{% trans "Search" %}</label>
         <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span>
-          <input id="f-q" type="text" name="q" value="{{ q }}" maxlength="100" aria-label="{% trans 'Search' %}" placeholder="{% trans 'Name, email, course, university' %}"></div>
+          <input id="f-q" type="text" name="q" value="{{ q }}" maxlength="100" aria-label="{% trans 'Search' %}" placeholder="{% trans 'Search applicants' %}"></div>
       </div>
-      <button type="button" data-filter-toggle aria-expanded="false" aria-controls="applicant-filter-panel" class="shrink-0 h-[46px] px-md rounded-lg border border-outline-variant bg-surface-container text-on-surface font-body-md font-semibold flex items-center gap-xs hover:border-primary transition-colors"><span class="material-symbols-outlined text-[20px]">tune</span><span>{% trans "Filters" %}</span><span data-filter-count hidden class="min-w-[20px] h-5 px-1 rounded-full bg-primary text-on-primary font-metadata text-metadata flex items-center justify-center">0</span></button>
-      <button type="submit" class="h-[46px] px-md rounded-lg bg-primary text-on-primary font-semibold">{% trans "Filter" %}</button>
+      <button type="submit" aria-label="{% trans 'Search' %}" class="order-2 md:order-3 h-[46px] min-w-[46px] px-md rounded-lg bg-primary text-on-primary font-semibold inline-flex items-center justify-center gap-xs"><span class="material-symbols-outlined text-[20px]">search</span><span class="hidden md:inline">{% trans "Filter" %}</span></button>
+      <div class="col-span-2 order-3 flex items-center gap-xs md:contents">
+        <button type="button" data-filter-toggle aria-expanded="false" aria-controls="applicant-filter-panel" class="md:order-2 flex-1 md:flex-none shrink-0 h-[46px] px-md rounded-lg border border-outline-variant bg-surface-container text-on-surface font-body-md font-semibold flex items-center gap-xs hover:border-primary transition-colors"><span class="material-symbols-outlined text-[20px]">tune</span><span>{% trans "Filters" %}</span><span data-filter-count hidden class="min-w-[20px] h-5 px-1 rounded-full bg-primary text-on-primary font-metadata text-metadata flex items-center justify-center">0</span></button>
+        <a href="{% url 'organization-export-applicants' %}{% if querystring %}?{{ querystring }}{% endif %}" class="md:hidden h-[46px] px-md rounded-lg border border-primary text-primary font-semibold inline-flex items-center gap-xs hover:bg-primary/5"><span class="material-symbols-outlined text-[20px]">download</span>{% trans "Export CSV" %}</a>
+      </div>
     </div>
     <div data-filter-chips class="ipt-chips" hidden></div>
     <div id="applicant-filter-panel" data-filter-panel class="grid grid-cols-2 md:grid-cols-3 gap-xs sm:gap-sm items-end">
@@ -39,6 +42,7 @@
             <option value="accepted" {% if status == 'accepted' %}selected{% endif %}>{% trans "Accepted" %}</option>
           </select></div>
       </div>
+      <button type="submit" class="md:hidden col-span-2 h-[46px] px-md rounded-lg bg-primary text-on-primary font-semibold inline-flex items-center justify-center gap-xs"><span class="material-symbols-outlined text-[20px]">filter_alt</span>{% trans "Apply filters" %}</button>
       {% if selected_slot or status or q %}<div><a href="{% url 'organization-all-applicants' %}" class="inline-block px-md py-2.5 rounded-lg text-primary font-semibold hover:bg-primary/5">{% trans "Reset" %}</a></div>{% endif %}
     </div>
   </form>
