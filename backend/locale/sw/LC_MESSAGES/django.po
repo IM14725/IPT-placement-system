@@ -896,6 +896,11 @@ msgid_plural "%(n)s days left"
 msgstr[0] "siku %(n)s imebaki"
 msgstr[1] "siku %(n)s zimebaki"
 
+msgid "%(n)s file"
+msgid_plural "%(n)s files"
+msgstr[0] "faili %(n)s"
+msgstr[1] "mafaili %(n)s"
+
 msgid "%(n)s of %(max_alerts)s alerts used."
 msgstr "Vikumbusho %(n)s kati ya %(max_alerts)s vimetumika."
 
@@ -1865,6 +1870,9 @@ msgstr "Nyaraka za Shirika"
 
 msgid "Correct My Data"
 msgstr "Sahihisha Data Yangu"
+
+msgid "Could not be checked: upload it again"
+msgstr "Haikuweza kukaguliwa: ipakie tena"
 
 msgid "Could not load notifications."
 msgstr "Imeshindwa kupakia arifa."
@@ -3083,6 +3091,9 @@ msgstr "Sasa taarifa zako binafsi. Unaingia kwa barua pepe yako mwenyewe na neno
 msgid "Number of seats and monthly stipend"
 msgstr "Idadi ya nafasi na posho ya kila mwezi"
 
+msgid "OTP requests"
+msgstr "Maombi ya OTP"
+
 msgid "Offer a monthly stipend to interns."
 msgstr "Toa posho ya mwezi kwa wanafunzi wanaofanya mazoezi."
 
@@ -3172,6 +3183,9 @@ msgstr "Si lazima. Uwekaji unatarajiwa kuanza lini."
 
 msgid "Optional. Who to ask for and where to report. Only students you accept can see this."
 msgstr "Si lazima. Nani wa kumuuliza na wapi pa kuripoti. Ni wanafunzi uliowakubali pekee wanaoweza kuona hili."
+
+msgid "Or enter a different number below."
+msgstr "Au weka nambari nyingine hapa chini."
 
 msgid "Or use a saved message"
 msgstr "Au tumia ujumbe uliohifadhiwa"
@@ -3427,6 +3441,9 @@ msgstr "Inasubiri Uthibitisho"
 
 msgid "Pending company decision"
 msgstr "Inasubiri uamuzi wa kampuni"
+
+msgid "Pending review"
+msgstr "Inasubiri ukaguzi"
 
 msgid "People whose access to %(name)s was revoked. Their accounts and everything they did are kept: opportunities, applications, documents and decisions stay with the organization, and their actions remain attributed to them in the activity log."
 msgstr "Watu ambao ufikiaji wao kwa %(name)s uliondolewa. Akaunti zao na kila walichofanya vinahifadhiwa: fursa, maombi, nyaraka na maamuzi vinabaki kwa shirika, na vitendo vyao vinaendelea kuhusishwa nao kwenye kumbukumbu ya shughuli."
@@ -3798,6 +3815,9 @@ msgstr "Omba data yako ifutwe, kwa kuzingatia wajibu wa kisheria wa kuhifadhi."
 
 msgid "Request type"
 msgstr "Aina ya ombi"
+
+msgid "Required documents"
+msgstr "Nyaraka zinazohitajika"
 
 msgid "Required if Higher Diploma is selected"
 msgstr "Inahitajika ikiwa Stashahada ya Juu imechaguliwa"
@@ -4806,8 +4826,20 @@ msgstr "Wanafunzi waliothibitishwa, kampuni zilizothibitishwa"
 msgid "Verified students, verified organizations"
 msgstr "Wanafunzi waliothibitishwa, mashirika yaliyothibitishwa"
 
+msgid "Verify %(kind)s"
+msgstr "Thibitisha %(kind)s"
+
+msgid "Verify %(phone)s: we will text a code to this number. Enter your current password to confirm it is you."
+msgstr "Thibitisha %(phone)s: tutatuma msimbo kwa nambari hii. Weka nenosiri lako la sasa kuthibitisha kuwa ni wewe."
+
 msgid "Verify phone"
 msgstr "Thibitisha simu"
+
+msgid "Verify this number"
+msgstr "Thibitisha nambari hii"
+
+msgid "Verify your %(kind)s"
+msgstr "Thibitisha %(kind)s yako"
 
 msgid "Verify your academic documents, browse available training slots, and secure your placement with one-tap mobile money."
 msgstr "Thibitisha nyaraka zako za kielimu, vinjari nafasi za mafunzo, na uhakikishe uwekaji wako kwa malipo ya pesa mtandaooni."
@@ -4899,6 +4931,9 @@ msgstr "Tunaweza kutoa taarifa zako binafsi na kumbukumbu za shughuli kwa Jeshi 
 
 msgid "We need to verify your identity before deleting your account."
 msgstr "Tunahitaji kuthibitisha utambulisho wako kabla ya kufuta akaunti yako."
+
+msgid "We sent a 6-digit code to %(to)s. Enter it to verify this %(kind)s. The code expires in 5 minutes."
+msgstr "Tumetuma msimbo wa tarakimu 6 kwa %(to)s. Uweke ili kuthibitisha %(kind)s hii. Msimbo unaisha muda baada ya dakika 5."
 
 msgid "We verify your identity before resetting"
 msgstr "Tunathibitisha utambulisho wako kabla ya kuweka upya"
@@ -5336,6 +5371,9 @@ msgstr "mf. Matokeo mazuri katika mitandao; nilimpigia simu tarehe 12 Nov, anapa
 msgid "e.g. Technology"
 msgstr "mf. Teknolojia"
 
+msgid "email"
+msgstr "barua pepe"
+
 msgid "email taken"
 msgstr "barua pepe imeshatumika"
 
@@ -5361,6 +5399,9 @@ msgstr "kati ya nyota 5"
 
 msgid "paid"
 msgstr "imelipwa"
+
+msgid "phone"
+msgstr "simu"
 
 msgid "phone taken"
 msgstr "namba ya simu imeshatumika"

@@ -126,5 +126,13 @@
    "saa %(n)d imebaki",
    "saa %(n)d zimebaki"
   ]
+ },
+ {
+  "msgid": "%(n)s file",
+  "msgid_plural": "%(n)s files",
+  "msgstr": [
+   "faili %(n)s",
+   "mafaili %(n)s"
+  ]
  }
 ]

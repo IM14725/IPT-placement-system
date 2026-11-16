@@ -48,7 +48,12 @@
     <div class="bg-surface-container rounded-xl shadow-sm flex flex-col overflow-hidden h-full">
       <div class="p-md bg-surface-container-high flex items-center justify-between">
         <h2 class="text-headline-md font-headline-md text-on-surface">{% trans "Your Documents" %}</h2>
-        <span class="bg-primary-container text-on-primary-container text-metadata font-metadata px-3 py-1 rounded-full font-bold">{% blocktrans trimmed with docs=docs|length %}{{ docs }} Files{% endblocktrans %}</span>
+        <span class="bg-primary-container text-on-primary-container text-metadata font-metadata px-3 py-1 rounded-full font-bold">{% blocktrans trimmed count n=docs|length %}{{ n }} file{% plural %}{{ n }} files{% endblocktrans %}</span>
+      </div>
+      <div class="px-md py-sm flex flex-wrap gap-xs border-b border-outline-variant/40" aria-label="{% trans 'Required documents' %}">
+        {% for item in required %}
+          <span class="inline-flex items-center gap-1 rounded-full px-sm py-1 font-metadata text-metadata font-semibold {% if item.done %}bg-[rgb(var(--c-ok-bg))] text-[rgb(var(--c-ok-fg))]{% else %}bg-[#fff4e5] text-[#a16207]{% endif %}"><span class="material-symbols-outlined text-[16px]">{% if item.done %}check_circle{% else %}radio_button_unchecked{% endif %}</span>{{ item.label }}</span>
+        {% endfor %}
       </div>
       <div class="flex flex-col flex-grow">
         {% if docs %}
@@ -65,6 +70,7 @@
                     <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
                     <span>{{ doc.size_bytes|filesizeformat }}</span>
                   </div>
+                  <span class="mt-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 font-metadata text-metadata font-semibold {% if doc.is_verified %}bg-[rgb(var(--c-ok-bg))] text-[rgb(var(--c-ok-fg))]{% elif doc.scan_status == 'ERROR' %}bg-error-container text-on-error-container{% else %}bg-[#fff4e5] text-[#a16207]{% endif %}"><span class="material-symbols-outlined text-[14px]">{% if doc.is_verified %}verified{% elif doc.scan_status == 'ERROR' %}error{% else %}hourglass_top{% endif %}</span>{% if doc.is_verified %}{% trans "Verified" %}{% elif doc.scan_status == 'ERROR' %}{% trans "Could not be checked: upload it again" %}{% else %}{% trans "Pending review" %}{% endif %}</span>
                 </div>
               </div>
               <div class="flex items-center gap-sm flex-shrink-0 ml-sm">

@@ -448,7 +448,13 @@ def documents(request):
     else:
         form = DocumentUploadForm()
     docs = Document.objects.filter(owner=request.user)
-    return render(request, "student/documents.html", {"form": form, "docs": docs})
+    have = set(docs.values_list("doc_type", flat=True))
+    # The documents the profile checklist asks for, with whether each one is already uploaded.
+    required = [
+        {"label": Document.DocType(t).label, "done": t in have}
+        for t in (Document.DocType.STUDENT_ID, Document.DocType.RESULTS_MATRIX)
+    ]
+    return render(request, "student/documents.html", {"form": form, "docs": docs, "required": required})
 
 
 @login_required

@@ -855,5 +855,17 @@
  "Number of seats and monthly stipend": "Idadi ya nafasi na posho ya kila mwezi",
  "Closes": "Inafungwa",
  "e.g. Software Engineering Intern": "mf. Mwanafunzi wa Uhandisi wa Programu",
- "e.g. Internship": "mf. Mafunzo kwa vitendo"
+ "e.g. Internship": "mf. Mafunzo kwa vitendo",
+ "Verify this number": "Thibitisha nambari hii",
+ "Or enter a different number below.": "Au weka nambari nyingine hapa chini.",
+ "Verify %(phone)s: we will text a code to this number. Enter your current password to confirm it is you.": "Thibitisha %(phone)s: tutatuma msimbo kwa nambari hii. Weka nenosiri lako la sasa kuthibitisha kuwa ni wewe.",
+ "Verify your %(kind)s": "Thibitisha %(kind)s yako",
+ "We sent a 6-digit code to %(to)s. Enter it to verify this %(kind)s. The code expires in 5 minutes.": "Tumetuma msimbo wa tarakimu 6 kwa %(to)s. Uweke ili kuthibitisha %(kind)s hii. Msimbo unaisha muda baada ya dakika 5.",
+ "Verify %(kind)s": "Thibitisha %(kind)s",
+ "phone": "simu",
+ "email": "barua pepe",
+ "OTP requests": "Maombi ya OTP",
+ "Required documents": "Nyaraka zinazohitajika",
+ "Pending review": "Inasubiri ukaguzi",
+ "Could not be checked: upload it again": "Haikuweza kukaguliwa: ipakie tena"
 }

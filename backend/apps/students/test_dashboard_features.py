@@ -468,3 +468,36 @@ def test_seats_left_is_worded_the_same_everywhere_and_singular_for_one(places, o
     sw = _client(student.user)
     sw.cookies["django_language"] = "sw"
     assert "seatOne:" in sw.get(reverse("student-marketplace")).content.decode()
+
+
+# ── Document Vault: singular file count, required documents, per-document status ──
+
+@pytest.mark.django_db
+def test_document_vault_shows_file_count_required_documents_and_status(places):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from apps.documents.models import Document
+    from apps.documents.tests import make_png_bytes
+
+    student = _student(places)
+    c = _client(student.user)
+    first = c.get(reverse("student-documents")).content.decode()
+    assert "0 files" in first and "Student ID Card" in first and "Semester Results Matrix" in first
+
+    def upload(doc_type, **extra):
+        return Document.objects.create(
+            owner=student.user, doc_type=doc_type, original_name="d.png", **extra,
+            file=SimpleUploadedFile("d.png", make_png_bytes(), content_type="image/png"),
+        )
+
+    upload(Document.DocType.STUDENT_ID)
+    body = c.get(reverse("student-documents")).content.decode()
+    assert "1 file<" in body and "1 files" not in body
+    assert "Pending review" in body  # uploaded, not yet verified
+    upload(Document.DocType.RESULTS_MATRIX, is_verified=True)
+    upload(Document.DocType.CV, scan_status="ERROR")
+    body = c.get(reverse("student-documents")).content.decode()
+    assert "3 files" in body and "Verified" in body and "Could not be checked: upload it again" in body
+    # both required documents are now ticked (check_circle) in the "Required documents" strip
+    strip = body[body.index('aria-label="Required documents"') :][:900]
+    assert strip.count("check_circle") == 2 and "radio_button_unchecked" not in strip
