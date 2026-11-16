@@ -2888,6 +2888,9 @@ msgstr "Mgeni sokoni?"
 msgid "Newest first"
 msgstr "Mpya kwanza"
 
+msgid "Newest paid"
+msgstr "Waliolipa karibuni"
+
 msgid "Newest paid first"
 msgstr "Waliolipa karibuni kwanza"
 
@@ -3052,6 +3055,9 @@ msgstr "Toa posho ya mwezi kwa wanafunzi wanaofanya mazoezi."
 
 msgid "Official organization email"
 msgstr "Barua pepe rasmi ya shirika"
+
+msgid "Oldest paid"
+msgstr "Waliolipa zamani"
 
 msgid "Once students apply and complete their application fee payments, they will appear here for your review."
 msgstr "Wanafunzi wakituma maombi na kukamilisha malipo yao ya ada, wataonekana hapa kwa uhakiki wako."

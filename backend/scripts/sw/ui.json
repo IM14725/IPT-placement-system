@@ -831,5 +831,7 @@
  "Documents still needed": "Nyaraka bado zinahitajika",
  "%(fill_percent)s%% Filled": "%(fill_percent)s%% Imejaa",
  "/ month": "/ mwezi",
- "TZS %(stipend_amount)s / month": "TZS %(stipend_amount)s / mwezi"
+ "TZS %(stipend_amount)s / month": "TZS %(stipend_amount)s / mwezi",
+ "Newest paid": "Waliolipa karibuni",
+ "Oldest paid": "Waliolipa zamani"
 }

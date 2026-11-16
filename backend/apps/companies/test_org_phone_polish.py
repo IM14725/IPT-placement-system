@@ -94,3 +94,24 @@ def test_slot_meta_line_uses_wrap_safe_separators(ready_org, places):
 
     css = (Path(__file__).resolve().parents[2] / "static" / "css" / "responsive.css").read_text(encoding="utf-8")
     assert ".ipt-meta { overflow: hidden; }" in css and r'content: "\2022"' in css
+
+
+# ── 4. slot Applicants filters fit side by side on a phone ─────────────────────
+
+@pytest.mark.django_db
+def test_slot_applicants_filters_use_short_labels(ready_org, places):
+    slot = _slot(ready_org, places["kinondoni"], "Intern", capacity=3)
+    body = _applicants_page(ready_org, places, slot)
+    assert 'class="ipt-compact-filters' in body
+    for short in ("Any level", "Newest paid", "Oldest paid", ">Education level<"):
+        assert short in body, short
+    for long in ("Any qualification", "Newest paid first", "Earliest paid first", "Filter by Education Level"):
+        assert long not in body, long
+
+
+@pytest.mark.django_db
+def test_slot_applicants_header_has_no_trailing_separator(ready_org, places):
+    slot = _slot(ready_org, places["kinondoni"], "Intern", capacity=3)
+    body = _applicants_page(ready_org, places, slot)
+    head = body[body.index("<h1") : body.index("</section>", body.index("<h1"))]
+    assert head.count("ipt-meta-item") == 3 and "w-1 h-1 rounded-full" not in head

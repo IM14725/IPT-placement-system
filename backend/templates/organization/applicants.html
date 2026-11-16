@@ -6,25 +6,23 @@
 <section class="w-full relative pt-lg pb-md mb-md">
   <div class="flex flex-col gap-sm">
     <h1 class="font-display text-display text-on-surface tracking-tight">{% trans "Applicants" %}</h1>
-    <div class="flex flex-wrap items-center gap-xs font-body-md text-on-surface-variant">
-      <span class="font-bold text-primary">{{ slot.title }}</span>
-      <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
-      <span>{{ slot.organization.name }}</span>
-      <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
-      <span class="inline-flex items-center gap-1 bg-tertiary-container/10 text-tertiary-container px-2 py-0.5 rounded-full font-metadata">
+    <div class="ipt-meta font-body-md text-on-surface-variant"><div class="ipt-meta-row items-center">
+      <span class="ipt-meta-item font-bold text-primary">{{ slot.title }}</span>
+      <span class="ipt-meta-item">{{ slot.organization.name }}</span>
+      <span class="ipt-meta-item"><span class="inline-flex items-center gap-1 bg-tertiary-container/10 text-tertiary-container px-2 py-0.5 rounded-full font-metadata">
         <span class="material-symbols-outlined text-[14px]">group</span>
         {% blocktrans trimmed with available_count=slot.available_count capacity=slot.capacity %}{{ available_count }}/{{ capacity }} spots left{% endblocktrans %}
-      </span>
-    </div>
+      </span></span>
+    </div></div>
   </div>
 </section>
-  <form method="get" class="w-full mb-sm md:mb-md flex flex-row gap-xs sm:gap-sm">
+  <form method="get" class="ipt-compact-filters w-full mb-sm md:mb-md flex flex-row gap-xs sm:gap-sm">
     <div class="flex-1 min-w-0 sm:max-w-xs flex flex-col gap-xs">
-      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="applicants-education-level">{% trans "Filter by Education Level (TCU)" %}</label>
+      <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="applicants-education-level">{% trans "Education level" %}</label>
       <div class="ipt-field-box">
         <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">workspace_premium</span></span>
         <select id="applicants-education-level" name="education_level" class="ipt-select" onchange="this.form.submit()">
-          <option value="">{% trans "Any qualification" %}</option>
+          <option value="">{% trans "Any level" %}</option>
           {% for value, label in education_levels %}
             <option value="{{ value }}" {% if selected_education_level == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
@@ -36,8 +34,8 @@
       <div class="ipt-field-box">
         <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">sort</span></span>
         <select id="applicants-sort" name="sort" class="ipt-select" onchange="this.form.submit()">
-          <option value="newest" {% if sort == 'newest' %}selected{% endif %}>{% trans "Newest paid first" %}</option>
-          <option value="earliest" {% if sort == 'earliest' %}selected{% endif %}>{% trans "Earliest paid first" %}</option>
+          <option value="newest" {% if sort == 'newest' %}selected{% endif %}>{% trans "Newest paid" %}</option>
+          <option value="earliest" {% if sort == 'earliest' %}selected{% endif %}>{% trans "Oldest paid" %}</option>
         </select>
       </div>
     </div>
