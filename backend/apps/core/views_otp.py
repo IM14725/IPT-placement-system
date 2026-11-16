@@ -1,8 +1,9 @@
 """Platform console: every one-time code users have requested, how it was delivered and what became of it.
 
 Read access needs the ``user_management`` module (view); revoke / resend / reveal need edit and, like
-other high-risk admin POSTs, a fresh hardware key. The plain code is only ever shown for a code that a
-mock adapter delivered (dev), never for a real SMS or email.
+other high-risk admin POSTs, a fresh hardware key. A live code is stored encrypted and shown only by the
+audited "View code" action, so support can relay it by hand when delivery fails. Codes belonging to
+administrator accounts are never shown (it would let one admin take over another).
 """
 
 from urllib.parse import urlencode
@@ -18,7 +19,7 @@ from django.utils.dateparse import parse_date
 
 from apps.accounts import otp as otp_lib
 from apps.accounts.decorators import hardware_reverify
-from apps.accounts.models import OneTimeCode, OtpChannel, OtpDelivery, OtpOutcome, OtpPurpose
+from apps.accounts.models import OneTimeCode, OtpChannel, OtpDelivery, OtpOutcome, OtpPurpose, UserRole
 from apps.core.audit import audit_event
 from apps.core.pagination import paginate
 
@@ -82,12 +83,13 @@ def otp_requests(request):
     params = request.GET
     now = timezone.now()
     # A stored dev code never outlives its code.
-    OneTimeCode.objects.filter(expires_at__lte=now).exclude(debug_code="").update(debug_code="")
+    otp_lib.wipe_expired_codes()
     qs = filter_requests(OneTimeCode.objects.select_related("user"), params).order_by("-created_at")
     page_obj = paginate(qs, params.get("page"), page_size=50)
     total = OneTimeCode.objects.count()
     for row in page_obj:
         row.resend_ok = can_resend(row)  # the Resend button follows the same rule as the action
+        row.can_view_code = can_view_code(row)
     return render(
         request,
         "core/otp_requests.html",
@@ -101,9 +103,19 @@ def otp_requests(request):
             "purposes": OtpPurpose.choices,
             "statuses": STATUS_CHOICES,
             "can_edit": _can_edit(request),
-            "codes_visible": bool(getattr(settings, "OTP_STORE_MOCK_CODE", False)),
+            "codes_visible": bool(getattr(settings, "OTP_ADMIN_CAN_VIEW_CODES", False)),
             "sms_backend": getattr(settings, "SMS_BACKEND", "auto"),
         },
+    )
+
+
+def can_view_code(row):
+    """A live, stored code of an ordinary (non-administrator) account."""
+    return bool(
+        getattr(settings, "OTP_ADMIN_CAN_VIEW_CODES", False)
+        and row.code_enc
+        and row.is_live
+        and row.user.role not in (UserRole.ADMIN, UserRole.SUPER_ADMIN)
     )
 
 
@@ -172,14 +184,17 @@ def otp_action(request, pk):
             messages.error(request, "The code could not be delivered. See the delivery error on the new row.")
         return back
     if action == "reveal":
-        if not (getattr(settings, "OTP_STORE_MOCK_CODE", False) and row.debug_code and row.is_live):
-            messages.error(request, "No code is available for this request. Real SMS and email codes are never stored.")
+        code = otp_lib.unseal(row) if can_view_code(row) else None
+        if not code:
+            messages.error(request, "No code is available for this request. It may have been used, replaced or expired, or belong to an administrator account.")
             return back
         audit_event(
             request, action="OTP Code Revealed", module="Security", target=row.user,
-            target_label=row.user.email, description="Viewed a mock-delivered one-time code (dev)",
-            context=ctx,
+            target_label=row.user.email, description=f"Viewed a live {row.get_purpose_display()} code to relay it manually",
+            context={**ctx, "delivery": row.delivery_status},
         )
-        return render(request, "core/otp_reveal.html", {"row": row, "back_qs": qs})
+        response = render(request, "core/otp_reveal.html", {"row": row, "code": code, "back_qs": qs})
+        response["Cache-Control"] = "no-store"
+        return response
     messages.error(request, "Unknown action.")
     return back

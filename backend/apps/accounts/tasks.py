@@ -94,3 +94,11 @@ def process_registration_task(form_data):
     finally:
         if token:
             release_lock(f"register:{email}", token)
+
+
+@shared_task(name="accounts.wipe_expired_otp_codes")
+def wipe_expired_otp_codes():
+    """Delete the stored (encrypted) copy of every one-time code that has expired."""
+    from apps.accounts import otp
+
+    return otp.wipe_expired_codes()

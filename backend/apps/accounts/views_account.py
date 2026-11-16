@@ -23,6 +23,7 @@ from apps.core.audit import audit_event
 from apps.core.rate_limit import token_bucket
 
 EMAIL_TAKEN = "This email address is already associated with an account. Please use another email address."
+KEPT_MESSAGE = "We could not deliver your code automatically. Contact support and they can read it to you, then enter it here. The code works for 5 minutes."
 PHONE_TAKEN = "This phone number is already associated with an account. Please use another phone number."
 
 _KINDS = {
@@ -114,6 +115,9 @@ def _start_change(request, kind, form_class, template_forms):
         return redirect("account-security")
     result = otp.send_otp(user, purpose, channel, destination=new_value)
     if not result.sent:
+        if result.code_kept:
+            messages.warning(request, gettext(KEPT_MESSAGE))
+            return redirect("verify-contact", kind=kind)
         if result.retry_after:
             messages.error(request, gettext('Please wait %(v1)s seconds before requesting another code.') % {"v1": result.retry_after})
         else:
@@ -154,7 +158,7 @@ def verify_contact(request, kind):
     if request.method == "POST":
         if request.POST.get("action") == "resend":
             result = otp.send_otp(user, purpose, channel, destination=destination)
-            messages.success(request, gettext("A new code has been sent.")) if result.sent else messages.error(
+            messages.success(request, gettext("A new code has been sent.")) if result.sent else messages.warning(request, gettext(KEPT_MESSAGE)) if result.code_kept else messages.error(
                 request,
                 gettext('Please wait %(v1)s seconds before requesting another code.') % {"v1": result.retry_after}
                 if result.retry_after

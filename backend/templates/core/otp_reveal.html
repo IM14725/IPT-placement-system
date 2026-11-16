@@ -4,10 +4,10 @@
 <div class="w-full max-w-md mx-auto my-xl bg-surface-container-lowest rounded-2xl shadow-xl p-lg flex flex-col gap-md">
   <h1 class="font-headline-lg text-headline-lg text-on-surface">One-time code</h1>
   <p class="font-body-md text-on-surface-variant">
-    {{ row.get_purpose_display }} code for {{ row.user.email }}, sent by {{ row.get_channel_display }} to {{ row.destination }}. It was delivered through the console mock, so it is shown here. Viewing it has been recorded in the audit log.
+    {{ row.get_purpose_display }} code for {{ row.user.email }}, sent by {{ row.get_channel_display }} to {{ row.destination }}. Give it to the user only after you are sure it is them. It stops working when it is used or after 5 minutes. Viewing it has been recorded in the audit log under your name.
   </p>
   <div class="flex items-center justify-between gap-sm rounded-lg bg-surface-container px-md py-sm">
-    <span id="otp-code" class="font-mono text-headline-lg tracking-widest">{{ row.debug_code }}</span>
+    <span id="otp-code" class="font-mono text-headline-lg tracking-widest">{{ code }}</span>
     <button type="button" id="otp-copy" class="px-md py-2 bg-primary text-on-primary rounded-lg font-semibold">Copy</button>
   </div>
   <a class="text-primary font-semibold hover:underline" href="{% url 'platform-otp-requests' %}{% if back_qs %}?{{ back_qs }}{% endif %}">&larr; Back to OTP requests</a>

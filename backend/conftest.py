@@ -18,6 +18,7 @@ def pytest_configure(config):
     settings.ADMIN_MFA_ENFORCED = False  # MFA tests switch it on explicitly
     settings.ASTRACALL_API_KEY = ""
     settings.SMS_BACKEND = "mock"
+    settings.OTP_ADMIN_CAN_VIEW_CODES = True  # on by default; tests that need it off set it themselves
     _install_fake_redis()
 
 

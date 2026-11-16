@@ -365,6 +365,11 @@ def _verify_new_phone(request, phone):
             gettext('Your profile was saved. Enter the code we sent to %(phone)s to finish changing your phone number.') % {"phone": phone},
         )
         return redirect("verify-contact", kind="phone")
+    if result.code_kept:
+        from apps.accounts.views_account import KEPT_MESSAGE
+
+        messages.warning(request, gettext("Your profile was saved.") + " " + gettext(KEPT_MESSAGE))
+        return redirect("verify-contact", kind="phone")
     if result.retry_after:
         messages.error(
             request,

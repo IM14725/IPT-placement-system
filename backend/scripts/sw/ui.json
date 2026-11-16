@@ -869,5 +869,7 @@
  "Pending review": "Inasubiri ukaguzi",
  "Could not be checked: upload it again": "Haikuweza kukaguliwa: ipakie tena",
  "Fee, seat hold and cancellation": "Ada, kushikilia nafasi na kughairi",
- "Cancellation window closed": "Muda wa kughairi umeisha"
+ "Cancellation window closed": "Muda wa kughairi umeisha",
+ "We could not deliver your code automatically. Contact support and they can read it to you, then enter it here. The code works for 5 minutes.": "Hatukuweza kukutumia msimbo wako moja kwa moja. Wasiliana na msaada, watakusomea msimbo, kisha uuweke hapa. Msimbo unafanya kazi kwa dakika 5.",
+ "Your profile was saved.": "Wasifu wako umehifadhiwa."
 }

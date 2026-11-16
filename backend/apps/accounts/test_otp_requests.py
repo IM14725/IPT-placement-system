@@ -75,12 +75,19 @@ def test_provider_failure_marks_the_row_and_tells_the_user(monkeypatch):
     resp = _login(user).post(
         "/auth/account/phone/", {"phone": user.phone, "current_password": PW}, follow=True
     )
-    assert "We could not send a code" in resp.content.decode()
+    body = resp.content.decode()
+    assert "could not deliver your code automatically" in body  # told to ask support, on the code page
+    assert "Verify your phone" in body
     row = OneTimeCode.objects.get()
     assert row.delivery_status == OtpDelivery.FAILED and "AstraCall HTTP 401" in row.delivery_error
-    assert row.outcome == OtpOutcome.UNDELIVERED and row.consumed_at is not None
-    assert row.status == OtpOutcome.UNDELIVERED
-    assert row.debug_code == ""
+    # The code is NOT voided: support can read it out and the user can still enter it.
+    assert row.outcome == OtpOutcome.PENDING and row.is_live and row.status == OtpOutcome.PENDING
+    assert row.code_enc
+    code = otp.unseal(row)
+    c = _login(user)
+    assert c.post("/auth/account/verify/phone/", {"code": code}).status_code == 302
+    user.refresh_from_db()
+    assert user.phone_verified
 
 
 @pytest.mark.django_db
@@ -234,12 +241,11 @@ def test_verify_current_phone_needs_the_password():
 
 
 @pytest.mark.django_db
-def test_dev_code_is_not_shown_when_the_code_was_really_sent(settings):
-    settings.OTP_STORE_MOCK_CODE = False
+def test_dev_code_is_not_shown_to_the_user_when_the_code_was_really_sent(settings, monkeypatch):
+    monkeypatch.setattr(otp, "send_sms", lambda phone, text, **kw: {"status": "SENT", "provider": "astracall-sms"})
     user = _user(phone_verified=False)
     c = _login(user)
     c.post("/auth/account/phone/", {"phone": user.phone, "current_password": PW})
-    assert OneTimeCode.objects.get().debug_code == ""
     assert "Dev mode" not in c.get("/auth/account/verify/phone/").content.decode()
 
 
@@ -252,18 +258,19 @@ def test_outcomes_superseded_locked_and_verified():
     otp.send_otp(user, P, C, destination="255787000111")
     first = OneTimeCode.objects.get()
     assert first.delivery_status == OtpDelivery.SENT and first.delivery_provider == "mock-sms"
-    assert first.status == OtpOutcome.PENDING and first.debug_code
+    assert first.status == OtpOutcome.PENDING and otp.unseal(first)
     otp.send_otp(user, P, C, destination="255787000111")
     first.refresh_from_db()
-    assert first.outcome == OtpOutcome.SUPERSEDED and first.debug_code == ""
+    assert first.outcome == OtpOutcome.SUPERSEDED and first.code_enc == ""
     for _ in range(otp.OTP_MAX_ATTEMPTS):
         otp.verify_otp(user, P, "000000")
     second = OneTimeCode.objects.order_by("created_at").last()
-    assert second.outcome == OtpOutcome.LOCKED and second.debug_code == ""
+    assert second.outcome == OtpOutcome.LOCKED and second.code_enc == ""
     otp.send_otp(user, P, C, destination="255787000111")
-    code = OneTimeCode.objects.order_by("created_at").last().debug_code
+    code = otp.unseal(OneTimeCode.objects.order_by("created_at").last())
     assert otp.verify_otp(user, P, code) == otp.OK
-    assert OneTimeCode.objects.order_by("created_at").last().outcome == OtpOutcome.VERIFIED
+    done = OneTimeCode.objects.order_by("created_at").last()
+    assert done.outcome == OtpOutcome.VERIFIED and done.code_enc == ""
 
 
 @pytest.mark.django_db
@@ -327,8 +334,9 @@ def test_failed_delivery_shows_the_error_and_filters(monkeypatch):
     otp.send_otp(user, OtpPurpose.CHANGE_PHONE, OtpChannel.SMS, destination="255787000111")
     c = _login(_super())
     body = c.get(URL, {"delivery": "FAILED"}).content.decode()
-    assert "AstraCall HTTP 401" in body and "Not delivered" in body
-    assert "u@x.tz" in c.get(URL, {"status": "UNDELIVERED"}).content.decode()
+    assert "AstraCall HTTP 401" in body and "Failed" in body and "Pending" in body
+    assert "u@x.tz" in c.get(URL, {"status": "PENDING"}).content.decode()
+    assert 'value="reveal"' in body  # the code is still live, so support can relay it
 
 
 @pytest.mark.django_db
@@ -339,7 +347,7 @@ def test_revoke_voids_the_code_and_is_audited():
     resp = c.post(reverse("platform-otp-action", args=[row.pk]), {"action": "revoke"})
     assert resp.status_code == 302
     row.refresh_from_db()
-    assert row.outcome == OtpOutcome.REVOKED and row.debug_code == "" and not row.is_live
+    assert row.outcome == OtpOutcome.REVOKED and row.code_enc == "" and not row.is_live
     assert otp.verify_otp(student, OtpPurpose.CHANGE_PHONE, "123456") == otp.EXPIRED
     assert AuditLog.objects.filter(action="OTP Revoked", target_id=str(student.pk)).exists()
 
@@ -415,37 +423,142 @@ def test_read_only_admin_cannot_act():
 
 
 @pytest.mark.django_db
-def test_reveal_shows_a_mock_code_only_and_is_audited(settings):
-    student, org = _seed()
-    row = OneTimeCode.objects.get(user=student)
-    c = _login(_super())
-    page = c.post(reverse("platform-otp-action", args=[row.pk]), {"action": "reveal"})
-    assert page.status_code == 200 and row.debug_code in page.content.decode()
-    assert AuditLog.objects.filter(action="OTP Code Revealed").exists()
-
-    # Not shown after it is used / when stored codes are off (production).
-    settings.OTP_STORE_MOCK_CODE = False
-    again = c.post(reverse("platform-otp-action", args=[row.pk]), {"action": "reveal"})
-    assert again.status_code == 302
-    assert row.debug_code not in c.get(URL).content.decode()
-
-
-@pytest.mark.django_db
-def test_real_sends_never_store_or_reveal_a_code(settings, monkeypatch):
-    settings.OTP_STORE_MOCK_CODE = True
-    monkeypatch.setattr(otp, "send_sms", lambda phone, text, **kw: {"status": "SENT", "provider": "astracall-sms"})
-    user = _user()
-    otp.send_otp(user, OtpPurpose.CHANGE_PHONE, OtpChannel.SMS, destination="255787000111")
+def test_reveal_shows_the_live_code_and_is_audited(monkeypatch):
+    sent = {}
+    monkeypatch.setattr(
+        otp, "send_sms",
+        lambda phone, text, **kw: sent.update(text=text) or {"status": "SENT", "provider": "astracall-sms"},
+    )
+    student = _user("stu@x.tz")
+    otp.send_otp(student, OtpPurpose.CHANGE_PHONE, OtpChannel.SMS, destination="255787000111")
+    real_code = re.search(r"code is (\d{6})", sent["text"]).group(1)
     row = OneTimeCode.objects.get()
-    assert row.debug_code == "" and row.delivery_provider == "astracall-sms"
+    assert row.code_enc and real_code not in row.code_enc  # encrypted at rest, never plain
     c = _login(_super())
-    resp = c.post(reverse("platform-otp-action", args=[row.pk]), {"action": "reveal"})
-    assert resp.status_code == 302 and 'value="reveal"' not in c.get(URL).content.decode()
+    assert real_code not in c.get(URL).content.decode()  # not in the list either
+    page = c.post(reverse("platform-otp-action", args=[row.pk]), {"action": "reveal"})
+    assert page.status_code == 200 and real_code in page.content.decode()
+    assert "no-store" in page["Cache-Control"]
+    log = AuditLog.objects.get(action="OTP Code Revealed")
+    assert real_code not in str(log.context) and log.target_id == str(student.pk)
+    # Once used it is gone for good.
+    assert otp.verify_otp(student, OtpPurpose.CHANGE_PHONE, real_code) == otp.OK
+    again = c.post(reverse("platform-otp-action", args=[row.pk]), {"action": "reveal"})
+    assert again.status_code == 302 and real_code not in c.get(URL).content.decode()
 
 
 @pytest.mark.django_db
-def test_expired_dev_codes_are_cleared_when_the_page_loads():
+def test_any_admin_with_edit_can_view_but_a_viewer_cannot():
+    student = _user("stu@x.tz")
+    otp.send_otp(student, OtpPurpose.RECOVERY, OtpChannel.SMS)
+    row = OneTimeCode.objects.get()
+    url = reverse("platform-otp-action", args=[row.pk])
+    editor = _admin({"user_management": {"view": True, "edit": True}}, "ed@p.tz")
+    assert _login(editor).post(url, {"action": "reveal"}).status_code == 200  # recovery codes included
+    viewer = _admin({"user_management": {"view": True}}, "vw@p.tz")
+    assert _login(viewer).post(url, {"action": "reveal"}).status_code == 403
+    assert 'value="reveal"' not in _login(viewer).get(URL).content.decode()
+
+
+@pytest.mark.django_db
+def test_codes_of_administrator_accounts_are_never_shown():
+    boss = _super()
+    otp.send_otp(boss, OtpPurpose.RECOVERY, OtpChannel.SMS)
+    row = OneTimeCode.objects.get()
+    editor = _admin({"user_management": {"view": True, "edit": True}}, "ed@p.tz")
+    c = _login(editor)
+    assert c.post(reverse("platform-otp-action", args=[row.pk]), {"action": "reveal"}).status_code == 302
+    assert not AuditLog.objects.filter(action="OTP Code Revealed").exists()
+    assert 'value="reveal"' not in c.get(URL).content.decode()
+
+
+@pytest.mark.django_db
+def test_nothing_is_stored_when_the_switch_is_off(settings):
+    settings.OTP_ADMIN_CAN_VIEW_CODES = False
+    otp.send_otp(_user(), OtpPurpose.CHANGE_PHONE, OtpChannel.SMS, destination="255787000111")
+    row = OneTimeCode.objects.get()
+    assert row.code_enc == "" and otp.unseal(row) is None
+    c = _login(_super())
+    assert c.post(reverse("platform-otp-action", args=[row.pk]), {"action": "reveal"}).status_code == 302
+    assert 'value="reveal"' not in c.get(URL).content.decode()
+
+
+@pytest.mark.django_db
+def test_expired_codes_are_wiped_when_the_page_loads():
     _seed()
     OneTimeCode.objects.update(expires_at=timezone.now() - timedelta(minutes=1))
     _login(_super()).get(URL)
-    assert not OneTimeCode.objects.exclude(debug_code="").exists()
+    assert not OneTimeCode.objects.exclude(code_enc="").exists()
+
+
+# ── failed delivery: what is kept, what is voided ────────────────────────────────────────────
+
+def _failing(monkeypatch):
+    def boom(phone, text, **kw):
+        raise providers.SmsDeliveryError("AstraCall HTTP 503 service_unavailable")
+
+    monkeypatch.setattr(otp, "send_sms", boom)
+
+
+@pytest.mark.django_db
+def test_failed_recovery_code_can_still_be_used_after_support_relays_it(monkeypatch):
+    from apps.accounts.views_otp import RESET_CHANNEL_KEY, RESET_EMAIL_KEY
+
+    _failing(monkeypatch)
+    user = _user("rec@x.tz")
+    c = Client()
+    session = c.session
+    session[RESET_EMAIL_KEY], session[RESET_CHANNEL_KEY] = user.email, "SMS"
+    session.save()
+    assert c.post("/auth/reset-password/method/", {"channel": "SMS"}).status_code == 302
+    row = OneTimeCode.objects.get(user=user, purpose=OtpPurpose.RECOVERY)
+    assert row.delivery_status == OtpDelivery.FAILED and row.is_live
+    code = otp.unseal(row)
+    resp = c.post("/auth/reset-password/verify/", {"code": code})
+    assert resp.status_code == 302 and resp.url == reverse("reset-password")
+
+
+@pytest.mark.django_db
+def test_administrator_codes_are_not_stored_and_a_failed_send_is_voided(monkeypatch):
+    _failing(monkeypatch)
+    boss = _super()
+    result = otp.send_otp(boss, OtpPurpose.RECOVERY, OtpChannel.SMS)
+    row = OneTimeCode.objects.get()
+    assert row.code_enc == "" and not result.sent and not result.code_kept
+    assert row.outcome == OtpOutcome.UNDELIVERED and not row.is_live
+    assert row.status == OtpOutcome.UNDELIVERED
+    # Delivered normally it is also not stored.
+    OneTimeCode.objects.all().delete()
+    monkeypatch.undo()
+    otp.send_otp(boss, OtpPurpose.RECOVERY, OtpChannel.SMS)
+    assert OneTimeCode.objects.get().code_enc == ""
+
+
+@pytest.mark.django_db
+def test_failed_send_with_the_switch_off_is_voided(monkeypatch, settings):
+    settings.OTP_ADMIN_CAN_VIEW_CODES = False
+    _failing(monkeypatch)
+    user = _user()
+    result = otp.send_otp(user, OtpPurpose.CHANGE_PHONE, OtpChannel.SMS, destination="255787000111")
+    row = OneTimeCode.objects.get()
+    assert not result.sent and not result.code_kept
+    assert row.outcome == OtpOutcome.UNDELIVERED and not row.is_live
+    resp = _login(user).post("/auth/account/phone/", {"phone": "255787000111", "current_password": PW}, follow=True)
+    assert "We could not send a code" in resp.content.decode()  # the ordinary message, no "ask support"
+
+
+@pytest.mark.django_db
+def test_expired_ciphertext_is_wiped_by_the_task_and_on_verify():
+    from apps.accounts.tasks import wipe_expired_otp_codes
+
+    user = _user()
+    otp.send_otp(user, OtpPurpose.CHANGE_PHONE, OtpChannel.SMS, destination="255787000111")
+    OneTimeCode.objects.update(expires_at=timezone.now() - timedelta(seconds=1))
+    assert OneTimeCode.objects.exclude(code_enc="").exists()
+    assert wipe_expired_otp_codes() == 1
+    assert not OneTimeCode.objects.exclude(code_enc="").exists()
+    # A verify attempt on an expired code also clears it.
+    otp.send_otp(user, OtpPurpose.CHANGE_PHONE, OtpChannel.SMS, destination="255787000111")
+    OneTimeCode.objects.filter(consumed_at__isnull=True).update(expires_at=timezone.now() - timedelta(seconds=1))
+    assert otp.verify_otp(user, OtpPurpose.CHANGE_PHONE, "123456") == otp.EXPIRED
+    assert not OneTimeCode.objects.exclude(code_enc="").exists()

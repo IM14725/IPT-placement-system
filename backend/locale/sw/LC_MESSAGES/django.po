@@ -4916,6 +4916,9 @@ msgstr "Wanaosubiri kukubaliwa"
 msgid "Ward"
 msgstr "Kata"
 
+msgid "We could not deliver your code automatically. Contact support and they can read it to you, then enter it here. The code works for 5 minutes."
+msgstr "Hatukuweza kukutumia msimbo wako moja kwa moja. Wasiliana na msaada, watakusomea msimbo, kisha uuweke hapa. Msimbo unafanya kazi kwa dakika 5."
+
 msgid "We could not load the slots. Please try again."
 msgstr "Hatukuweza kupakia nafasi. Tafadhali jaribu tena."
 
@@ -5269,6 +5272,9 @@ msgstr "Wasifu wako umekamilika. Vinjari nafasi zinazokufaa na utume ombi lako l
 
 msgid "Your profile was saved, but we could not send the code. Try again from Account & security."
 msgstr "Wasifu wako umehifadhiwa, lakini hatukuweza kutuma msimbo. Jaribu tena kutoka Akaunti & usalama."
+
+msgid "Your profile was saved."
+msgstr "Wasifu wako umehifadhiwa."
 
 msgid "Your profile was saved. Enter the code we sent to %(phone)s to finish changing your phone number."
 msgstr "Wasifu wako umehifadhiwa. Weka msimbo tuliotuma kwa %(phone)s ili ukamilishe kubadilisha namba yako ya simu."

@@ -233,9 +233,10 @@ class OneTimeCode(models.Model):
     delivery_provider = models.CharField(max_length=30, blank=True)
     delivery_error = models.CharField(max_length=200, blank=True)
     outcome = models.CharField(max_length=12, choices=OtpOutcome.choices, default=OtpOutcome.PENDING)
-    # Plain code, kept ONLY when it went out through a mock adapter (dev) and ``OTP_STORE_MOCK_CODE``
-    # is on. Never set for a real SMS or email; cleared as soon as the code is used, replaced or revoked.
-    debug_code = models.CharField(max_length=6, blank=True)
+    # The code itself, encrypted (Fernet), so a platform admin can read it out to a user when delivery
+    # fails. Empty when ``OTP_ADMIN_CAN_VIEW_CODES`` is off. Wiped as soon as the code is used, replaced,
+    # revoked or expired; never listed, only shown by the audited "View code" action.
+    code_enc = models.TextField(blank=True)
 
     class Meta:
         indexes = [
@@ -256,8 +257,6 @@ class OneTimeCode(models.Model):
 
         if self.outcome != OtpOutcome.PENDING:
             return self.outcome
-        if self.delivery_status == OtpDelivery.FAILED:
-            return OtpOutcome.UNDELIVERED
         if self.consumed_at is not None:
             return OtpOutcome.SUPERSEDED  # closed before this field existed
         return OtpOutcome.PENDING if self.expires_at > timezone.now() else OtpOutcome.EXPIRED

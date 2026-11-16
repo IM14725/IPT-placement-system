@@ -6,10 +6,12 @@
     <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Security</span>
     <h1 class="font-display text-display text-on-surface">OTP requests</h1>
     <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-2">
-      Every one-time code a user has asked for: why, by SMS or email, to which number or address, whether it was delivered and what became of it. Codes are stored only as a hash, so a real SMS or email code can never be read here. Revoking, re-sending and viewing a code are recorded in the audit log.
+      Every one-time code a user has asked for: why, by SMS or email, to which number or address, whether it was delivered and what became of it. Revoking, re-sending and viewing a code are recorded in the audit log.
     </p>
     {% if codes_visible %}
-    <p class="font-metadata text-metadata text-[#a16207] bg-[#fff4e5] rounded-lg px-sm py-xs self-start">Dev mode (SMS backend: {{ sms_backend }}). Codes delivered through the console mock can be viewed and copied below. This is switched off in production.</p>
+    <p class="font-metadata text-metadata text-[#a16207] bg-[#fff4e5] rounded-lg px-sm py-xs max-w-3xl">Live codes can be viewed with <strong>View code</strong> and read out to the user if the SMS or email did not arrive. A code disappears as soon as it is used, replaced, revoked or expires (5 minutes). Codes of administrator accounts are never shown. Every view is recorded in the audit log with your name.</p>
+    {% else %}
+    <p class="font-metadata text-metadata text-on-surface-variant max-w-3xl">Codes are not being kept (OTP_ADMIN_CAN_VIEW_CODES is off), so they cannot be viewed here.</p>
     {% endif %}
   </div>
 
@@ -108,7 +110,7 @@
                 <input type="hidden" name="qs" value="{{ querystring }}">
                 {% if r.is_live %}<button type="submit" name="action" value="revoke" class="px-sm py-1 rounded-lg bg-surface-container font-semibold text-on-surface" onclick="return confirm('Revoke this code? The user will have to request a new one.')">Revoke</button>{% endif %}
                 {% if r.resend_ok %}<button type="submit" name="action" value="resend" class="px-sm py-1 rounded-lg bg-surface-container font-semibold text-on-surface" onclick="return confirm('Send a new code to this destination? The current one stops working.')">Resend</button>{% endif %}
-                {% if r.debug_code and r.is_live %}<button type="submit" name="action" value="reveal" class="px-sm py-1 rounded-lg bg-primary text-on-primary font-semibold">View code</button>{% endif %}
+                {% if r.can_view_code %}<button type="submit" name="action" value="reveal" class="px-sm py-1 rounded-lg bg-primary text-on-primary font-semibold">View code</button>{% endif %}
               </form>
             </td>
             {% endif %}

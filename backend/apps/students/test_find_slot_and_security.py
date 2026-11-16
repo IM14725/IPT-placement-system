@@ -338,3 +338,27 @@ def test_forced_password_change_keeps_its_own_page(places):
         {"current_password": "wrong-one", "password1": "NewSecret123!x", "password2": "NewSecret123!x"},
     )
     assert resp.status_code == 200 and "Choose a new password" in resp.content.decode()
+
+
+@pytest.mark.django_db
+def test_profile_phone_change_with_a_failed_send_still_lands_on_the_code_page(places, monkeypatch):
+    from apps.accounts import otp as otp_lib
+    from apps.core import providers
+
+    def boom(phone, text, **kw):
+        raise providers.SmsDeliveryError("AstraCall HTTP 503 service_unavailable")
+
+    monkeypatch.setattr(otp_lib, "send_sms", boom)
+    student = _student(places)
+    user, old = student.user, student.user.phone
+    c = _client(user)
+    resp = c.post(reverse("student-profile"), _profile_post(places, "255700000099"))
+    assert resp.status_code == 302 and resp.url == reverse("verify-contact", kwargs={"kind": "phone"})
+    from apps.accounts.models import OneTimeCode
+
+    row = OneTimeCode.objects.get(user=user)
+    assert row.is_live and row.delivery_status == "FAILED"
+    code = otp_lib.unseal(row)  # what support would read out
+    assert c.post(reverse("verify-contact", kwargs={"kind": "phone"}), {"code": code}).status_code == 302
+    user.refresh_from_db()
+    assert user.phone == "255700000099" and user.phone_verified and old != user.phone

@@ -257,8 +257,11 @@ ASTRACALL_BASE_URL = env("ASTRACALL_BASE_URL", default="https://astracall.cc/api
 ASTRACALL_SENDER_ID = env("ASTRACALL_SENDER_ID", default="IPT MARKET")
 # "auto": real AstraCall when ASTRACALL_API_KEY is set, else the console mock. "mock" / "astracall" force one.
 SMS_BACKEND = env("SMS_BACKEND", default="auto")
-# Keep the plain OTP on its row (admin "OTP requests" page, on-screen hint) when it was sent through a
-# mock adapter. Real SMS/email codes are never stored. Must stay False in production.
+# Keep every OTP, encrypted, until it is used or expires, so an admin with user-management edit can read it
+# from the OTP requests page and relay it by hand when SMS/email delivery fails (each view is audited).
+# Set False to stop storing codes at all.
+OTP_ADMIN_CAN_VIEW_CODES = env.bool("OTP_ADMIN_CAN_VIEW_CODES", default=True)
+# Dev only: also print the code on the signed-in verify page when SMS/email is mocked.
 OTP_STORE_MOCK_CODE = False
 
 # Payment Configuration (Selcom)
@@ -312,6 +315,10 @@ CELERY_BEAT_SCHEDULE = {
     "expire-unpaid-applications": {
         "task": "applications.expire_unpaid",
         "schedule": 600.0,  # every 10 minutes
+    },
+    "wipe-expired-otp-codes": {
+        "task": "accounts.wipe_expired_otp_codes",
+        "schedule": 60.0,  # stored OTP ciphertext never outlives the code by more than a minute
     },
     "remind-expiring-seats": {
         "task": "applications.remind_expiring",
