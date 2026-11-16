@@ -163,6 +163,9 @@
     perMonth: "{% trans '/month' %}",
     dept: "{% trans 'Dept:' %}",
     available: "{% trans 'Available' %}",
+    // "1 seat left" / "N seats left", translated with the same plural strings as the server-rendered cards
+    seatOne: "{% blocktrans count n=1 %}{{ n }} seat left{% plural %}{{ n }} seats left{% endblocktrans %}",
+    seatMany: "{% blocktrans count n=2 %}{{ n }} seat left{% plural %}{{ n }} seats left{% endblocktrans %}",
     full: "{% trans 'FULL' %}",
     noMatch: "{% trans 'No slots match your filters.' %}",
     loading: "{% trans 'Loading...' %}",

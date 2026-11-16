@@ -6,6 +6,11 @@
     return T[key] || fallback;
   }
 
+  // "1 seat left" / "4 seats left": the same wording as the cards the server draws.
+  function seatsLeft(n) {
+    return n === 1 ? t("seatOne", "1 seat left") : t("seatMany", "2 seats left").replace("2", n);
+  }
+
   var region = document.getElementById("filter-region");
   var district = document.getElementById("filter-district");
   // The "any district" option text comes from the (translated) template, so JS-built lists match it.
@@ -263,7 +268,7 @@
       saveButton(s.id) +
       '<span class="px-sm py-1 rounded-full ' + (s.available_count > 0 ? "bg-[#e8f5e9] text-[#1b5e20]" : "bg-error/10 text-error") + ' font-label-caps text-label-caps flex items-center gap-1 whitespace-nowrap">' +
       '<span class="w-1.5 h-1.5 rounded-full ' + (s.available_count > 0 ? "bg-[#1b5e20]" : "bg-error") + ' animate-pulse"></span>' +
-      (s.available_count > 0 ? s.available_count + " " + esc(t("available", "Available")) : esc(t("full", "FULL"))) +
+      (s.available_count > 0 ? esc(seatsLeft(s.available_count)) : esc(t("full", "FULL"))) +
       "</span>" +
       "</div>" +
       "</div>" +

@@ -46,7 +46,7 @@
 
   <div class="flex items-center justify-between gap-sm pt-sm border-t border-surface-container">
     {% if slot.seats_left > 0 and slot.status == 'OPEN' and not slot.deadline_passed %}
-      <span class="px-2 py-1 rounded-full bg-[rgb(var(--c-ok-bg))] text-[rgb(var(--c-ok-fg))] font-metadata text-metadata font-semibold whitespace-nowrap">{{ slot.seats_left }} {% trans "seats left" %}</span>
+      <span class="px-2 py-1 rounded-full bg-[rgb(var(--c-ok-bg))] text-[rgb(var(--c-ok-fg))] font-metadata text-metadata font-semibold whitespace-nowrap">{% blocktrans count n=slot.seats_left %}{{ n }} seat left{% plural %}{{ n }} seats left{% endblocktrans %}</span>
       {% if can_apply %}
         <a href="{% url 'student-apply' slot.id %}" class="px-md py-2 rounded-lg bg-primary text-on-primary font-semibold text-body-md flex items-center gap-1 hover:bg-primary-container transition-colors">{% trans "Apply Now" %}<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
       {% elif user.is_student %}

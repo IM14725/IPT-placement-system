@@ -445,3 +445,26 @@ def test_slot_location_does_not_repeat_the_region(places, org):
         body = c.get(url).content.decode()
         assert "Dar es Salaam, Dar es Salaam" not in body and "Dar es Salaam · Dar es Salaam" not in body, url
         assert "Kinondoni, Dar es Salaam" in body, url
+
+
+@pytest.mark.django_db
+def test_seats_left_is_worded_the_same_everywhere_and_singular_for_one(places, org):
+    from pathlib import Path
+
+    from apps.students.models import SavedSlot
+
+    one = _slot(org, places["kinondoni"], "One seat", capacity=1)
+    many = _slot(org, places["kinondoni"], "Four seats", capacity=4)
+    student = _student(places)
+    SavedSlot.objects.create(student=student, slot=one)
+    SavedSlot.objects.create(student=student, slot=many)
+    c = _client(student.user)
+    saved = c.get(reverse("student-saved-slots")).content.decode()
+    assert "1 seat left" in saved and "1 seats left" not in saved and "4 seats left" in saved
+    market = c.get(reverse("student-marketplace")).content.decode()
+    assert 'seatOne: "1 seat left"' in market and 'seatMany: "2 seats left"' in market  # strings the card script uses
+    js = (Path(__file__).resolve().parents[2] / "static" / "js" / "marketplace.js").read_text(encoding="utf-8")
+    assert "seatsLeft(s.available_count)" in js and 'esc(t("available", "Available"))' not in js
+    sw = _client(student.user)
+    sw.cookies["django_language"] = "sw"
+    assert "seatOne:" in sw.get(reverse("student-marketplace")).content.decode()
