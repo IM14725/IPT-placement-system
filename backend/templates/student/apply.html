@@ -88,7 +88,7 @@
           {% if has_credit %}
             <li>{% trans "You have a free re-application credit: no fee is charged for this application." %}</li>
           {% else %}
-            <li>{% blocktrans with fee=fee %}The application fee is <strong>TZS {{ fee }}</strong>, paid by mobile money after you submit.{% endblocktrans %}</li>
+            <li>{% blocktrans with fee=fee|money %}The application fee is <strong>TZS {{ fee }}</strong>, paid by mobile money after you submit.{% endblocktrans %}</li>
             <li>{% blocktrans with hours=payment_hours %}Your seat is held for <strong>{{ hours }} hours</strong>. If the fee is not paid in time, the seat is released.{% endblocktrans %}</li>
             <li>{% trans "After paying you can cancel once, within 24 hours, and get a free re-application credit. After that the fee cannot be refunded." %}</li>
           {% endif %}

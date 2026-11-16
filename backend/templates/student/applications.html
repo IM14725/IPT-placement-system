@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n money_tags %}
 {% block title %}{% trans "My Applications" %}{% endblock %}
 {% block content %}
 <div class="w-full flex justify-between items-end mb-sm md:mb-md">
@@ -57,7 +57,7 @@
           {% if app.status == 'PENDING' and app.payment and not app.payment.is_paid %}
             <a href="{% url 'student-payment' app.payment.id %}" class="bg-primary text-on-primary font-metadata text-metadata px-sm py-2 rounded-lg shadow-sm hover:bg-primary/90 flex items-center gap-1 justify-center">
               <span class="material-symbols-outlined text-[16px]">payments</span>
-              {% blocktrans trimmed with amount=app.payment.amount %}Pay TZS {{ amount }}{% endblocktrans %}
+              {% blocktrans trimmed with amount=app.payment.amount|money %}Pay TZS {{ amount }}{% endblocktrans %}
             </a>
             {% trans "Release this seat? You can re-book it later if it is still open." as release_msg %}
             <form method="post" action="{% url 'student-release-seat' app.id %}" onsubmit="return confirm('{{ release_msg|escapejs }}');">

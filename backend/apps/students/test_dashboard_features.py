@@ -419,3 +419,16 @@ def test_phone_filters():
     assert phone_local("") == ""
     assert phone_intl("255700000001") == "+255 700 000 001"
     assert phone_intl("12345") == "12345"
+
+
+@pytest.mark.django_db
+def test_application_fee_is_written_with_a_thousands_separator_everywhere(places, org):
+    slot = _slot(org, places["kinondoni"])
+    student = _student(places)
+    app = create_application(student, slot)
+    Payment.objects.create(student=student, application=app, amount=15000, method=PaymentMethod.M_PESA)
+    other = _slot(org, places["kinondoni"], "Another")
+    c = _client(student.user)
+    for url in (reverse("student-applications"), reverse("student-slot-detail", args=[other.id]), reverse("student-apply", args=[other.id])):
+        body = c.get(url).content.decode()
+        assert "TZS 15,000" in body and "15000.00" not in body, url
