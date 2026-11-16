@@ -80,3 +80,17 @@ def test_stipend_is_shown_as_whole_shillings_with_separator(ready_org, places):
     sw = _client(ready_org.user)
     sw.cookies["django_language"] = "sw"
     assert "/ mwezi" in sw.get(reverse("organization-slots")).content.decode()
+
+
+# ── 3. no dangling "•" between meta items ─────────────────────────────────────
+
+@pytest.mark.django_db
+def test_slot_meta_line_uses_wrap_safe_separators(ready_org, places):
+    _slot(ready_org, places["kinondoni"], "Intern", capacity=2, department="Computer Science")
+    body = _client(ready_org.user).get(reverse("organization-slots")).content.decode()
+    assert body.count("ipt-meta-item") >= 4
+    assert "•" not in body  # no hand-written bullets left between items (they dangled at wrapped line ends)
+    from pathlib import Path
+
+    css = (Path(__file__).resolve().parents[2] / "static" / "css" / "responsive.css").read_text(encoding="utf-8")
+    assert ".ipt-meta { overflow: hidden; }" in css and r'content: "\2022"' in css

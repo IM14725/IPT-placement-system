@@ -279,3 +279,11 @@ html.dark #sidebar-backdrop { background: rgba(0, 0, 0, 0.6); }
 .ipt-section[open] > .ipt-section-summary .ipt-section-chev { transform: rotate(180deg); }
 .ipt-section-body { padding: 4px 14px 16px; }
 .ipt-section-thumb { width: 48px; height: 48px; flex: none; object-fit: cover; }
+
+/* ---------- Meta lines without dangling separators (static/css/responsive.css) ----------
+   Items are separated by a bullet that belongs to the item on its right; the outer box clips the bullet of
+   whichever item starts a line, so a wrapped line never begins or ends with a stray "•". */
+.ipt-meta { overflow: hidden; }
+.ipt-meta-row { display: flex; flex-wrap: wrap; row-gap: 2px; margin-left: -14px; }
+.ipt-meta-item { position: relative; padding-left: 14px; min-width: 0; }
+.ipt-meta-item::before { content: "\2022"; position: absolute; left: 3px; color: rgb(var(--c-outline-variant)); font-size: 12px; line-height: inherit; }

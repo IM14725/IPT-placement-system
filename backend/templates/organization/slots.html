@@ -91,20 +91,17 @@
                 {% else %}bg-outline-variant/30 text-on-surface-variant{% endif %}">{{ slot.get_status_display }}</span>
               {% if slot.applications_closed %}<span class="px-2 py-1 font-label-caps text-label-caps rounded-full whitespace-nowrap bg-[#fef3c7] text-[#854d0e]">{% trans "Applications closed" %}</span>{% endif %}
             </div>
-            <div class="flex items-center gap-2 text-body-md font-body-md text-on-surface-variant truncate flex-wrap">
-              <span>{{ slot.industry }}</span>
-              <span class="text-outline-variant text-xs">•</span>
-              <span>{{ slot.role_type }}</span>
-              {% if slot.department %}<span class="text-outline-variant text-xs">•</span><span>{{ slot.department }}</span>{% endif %}
-              {% if slot.requirement_label %}<span class="text-outline-variant text-xs">•</span><span>{{ slot.requirement_label }}</span>{% endif %}
-              <span class="text-outline-variant text-xs">•</span>
-              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">location_on</span>{{ slot.district }}</span>
+            <div class="ipt-meta text-body-md font-body-md text-on-surface-variant"><div class="ipt-meta-row">
+              <span class="ipt-meta-item">{{ slot.industry }}</span>
+                            <span class="ipt-meta-item">{{ slot.role_type }}</span>
+              {% if slot.department %}<span class="ipt-meta-item">{{ slot.department }}</span>{% endif %}
+              {% if slot.requirement_label %}<span class="ipt-meta-item">{{ slot.requirement_label }}</span>{% endif %}
+                            <span class="ipt-meta-item flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">location_on</span>{{ slot.district }}</span>
               {% if slot.application_deadline %}
-                <span class="text-outline-variant text-xs">•</span>
-                <span class="flex items-center gap-1 {% if slot.deadline_passed %}text-[#854d0e] font-semibold{% elif slot.deadline_soon %}text-[#a16207] font-semibold{% endif %}"><span class="material-symbols-outlined text-[14px]">event</span>{% if slot.deadline_passed %}{% trans "Closed" %}{% else %}{% trans "Apply by" %}{% endif %} {{ slot.application_deadline|date:"j M Y, H:i" }}</span>
+                                <span class="ipt-meta-item flex items-center gap-1 {% if slot.deadline_passed %}text-[#854d0e] font-semibold{% elif slot.deadline_soon %}text-[#a16207] font-semibold{% endif %}"><span class="material-symbols-outlined text-[14px]">event</span>{% if slot.deadline_passed %}{% trans "Closed" %}{% else %}{% trans "Apply by" %}{% endif %} {{ slot.application_deadline|date:"j M Y, H:i" }}</span>
               {% endif %}
-              {% if slot.placement_label %}<span class="text-outline-variant text-xs">•</span><span>{{ slot.placement_label }}</span>{% endif %}
-            </div>
+              {% if slot.placement_label %}<span class="ipt-meta-item">{{ slot.placement_label }}</span>{% endif %}
+            </div></div>
           </div>
           <div class="flex flex-wrap lg:flex-nowrap items-center gap-md lg:gap-xl">
             <div class="flex flex-col gap-1 min-w-[100px]">
