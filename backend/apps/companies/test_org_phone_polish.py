@@ -254,3 +254,20 @@ def test_bulk_accept_is_a_hidden_bar_with_select_all_in_the_list_heading(ready_o
     assert body.index('id="select-all"') < body.index('type="checkbox" name="application"')
     assert "data-bulk-spacer" in body
     assert body.count('type="checkbox" name="application"') == 3 and body.count('value="') and body.count('" form="bulk-accept-form"') == 3
+
+
+# ── 13. row checkbox: 20 px box inside a 44 px-high label that also covers the avatar ─────
+
+@pytest.mark.django_db
+def test_applicant_row_checkbox_has_a_big_tap_area(ready_org, places):
+    slot = _slot(ready_org, places["kinondoni"], "Intern", capacity=2)
+    _pay(_student(places), slot)
+    c = _client(ready_org.user)
+    body = c.get(reverse("organization-all-applicants")).content.decode()
+    label = body[body.index('<label class="flex items-start gap-sm shrink-0 min-h-[44px] cursor-pointer">') :][:900]
+    assert 'class="w-5 h-5' in label and "ipt-img" in label or "bg-primary/10" in label  # the avatar sits inside the same label
+    assert "</label>" in label and label.index('type="checkbox"') < label.index("</label>")
+    # rows that are not selectable (dashboard, slot page) have no label wrapper or checkbox
+    for url in (reverse("organization-dashboard"), reverse("organization-applicants", args=[slot.id])):
+        page = c.get(url).content.decode()
+        assert 'type="checkbox" name="application"' not in page
