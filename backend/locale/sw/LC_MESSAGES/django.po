@@ -1566,6 +1566,9 @@ msgstr "Rudi kwenye maelezo ya nafasi"
 msgid "Back to slots"
 msgstr "Rudi kwenye nafazi"
 
+msgid "Basics"
+msgstr "Msingi"
+
 msgid "Before you apply"
 msgstr "Kabla ya kuomba"
 
@@ -1703,6 +1706,9 @@ msgstr "Funga isipokee maombi mapya"
 
 msgid "Closed"
 msgstr "Imefungwa"
+
+msgid "Closes"
+msgstr "Inafungwa"
 
 msgid "Closes today"
 msgstr "Inafungwa leo"
@@ -1947,6 +1953,9 @@ msgstr "Tarehe ya mwisho imeongezwa hadi %(date)s."
 msgid "Deadline passed"
 msgstr "Tarehe ya mwisho imepita"
 
+msgid "Deadline, start date and duration"
+msgstr "Mwisho wa maombi, tarehe ya kuanza na muda"
+
 msgid "Defamatory, threatening, abusive, or obscene content."
 msgstr "Maudhui ya kashfa, vitisho, matusi au machafu."
 
@@ -2099,6 +2108,9 @@ msgstr "Kiwango cha Elimu (TCU)"
 
 msgid "Education level"
 msgstr "Ngazi ya elimu"
+
+msgid "Education level, department and skills"
+msgstr "Kiwango cha elimu, idara na ujuzi"
 
 msgid "Effective date: 1 September 2026 &nbsp;·&nbsp; Data Controller: Semauya Limited"
 msgstr "Tarehe ya kuanza kutumika: 1 Septemba 2026 &nbsp;·&nbsp; Msimamizi wa Data: Semauya Limited"
@@ -3068,6 +3080,9 @@ msgstr "Niarifu"
 msgid "Now your personal details. You sign in with your own email and a password."
 msgstr "Sasa taarifa zako binafsi. Unaingia kwa barua pepe yako mwenyewe na nenosiri."
 
+msgid "Number of seats and monthly stipend"
+msgstr "Idadi ya nafasi na posho ya kila mwezi"
+
 msgid "Offer a monthly stipend to interns."
 msgstr "Toa posho ya mwezi kwa wanafunzi wanaofanya mazoezi."
 
@@ -3790,6 +3805,9 @@ msgstr "Inahitajika ikiwa Stashahada ya Juu imechaguliwa"
 msgid "Required skills (comma separated)"
 msgstr "Ujuzi unaohitajika (zikitenganishwa kwa koma)"
 
+msgid "Requirements"
+msgstr "Mahitaji"
+
 msgid "Requires Level"
 msgstr "Inahitaji Kiwango"
 
@@ -3939,6 +3957,9 @@ msgstr "Nafasi itaachiliwa baada ya"
 
 msgid "Seat released: payment time ran out."
 msgstr "Nafasi imeachiliwa: muda wa malipo uliisha."
+
+msgid "Seats & stipend"
+msgstr "Nafasi na posho"
 
 msgid "Seats are held as soon as a student applies, and released if the fee is not paid in 3 hours. You cannot go below the seats already taken."
 msgstr "Nafasi hushikiliwa mara tu mwanafunzi anapoomba, na huachiliwa ada isipolipwa ndani ya saa 3. Huwezi kwenda chini ya nafasi zilizokwisha chukuliwa."
@@ -4589,11 +4610,17 @@ msgstr "Muda umeisha"
 msgid "Timeline Complete"
 msgstr "Mtiririko Umekamilika"
 
+msgid "Timing"
+msgstr "Muda"
+
 msgid "Title"
 msgstr "Kichwa"
 
 msgid "Title, field or department"
 msgstr "Kichwa, fani au idara"
+
+msgid "Title, role and description"
+msgstr "Kichwa, aina ya nafasi na maelezo"
 
 msgid "To"
 msgstr "Hadi"
@@ -5279,6 +5306,9 @@ msgstr "mf. Meneja Rasilimali Watu"
 msgid "e.g. Human Resources Manager, Director, Training Coordinator. You become the organization's Manager."
 msgstr "mf. Meneja Rasilimali Watu, Mkurugenzi, Mratibu wa Mafunzo. Unakuwa Meneja wa shirika."
 
+msgid "e.g. Internship"
+msgstr "mf. Mafunzo kwa vitendo"
+
 msgid "e.g. January intake"
 msgstr "mf. Mapokezi ya Januari"
 
@@ -5296,6 +5326,9 @@ msgstr "mf. Ripoti Jumatatu tarehe 6 Januari saa 2:00 asubuhi katika ofisi yetu 
 
 msgid "e.g. Report on Monday 8 AM"
 msgstr "mf. Ripoti Jumatatu saa 2 asubuhi"
+
+msgid "e.g. Software Engineering Intern"
+msgstr "mf. Mwanafunzi wa Uhandisi wa Programu"
 
 msgid "e.g. Strong results in networking; called on 12 Nov, available from January."
 msgstr "mf. Matokeo mazuri katika mitandao; nilimpigia simu tarehe 12 Nov, anapatikana kuanzia Januari."

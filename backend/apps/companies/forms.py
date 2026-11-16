@@ -232,16 +232,19 @@ class SlotForm(forms.ModelForm):
                 attrs={"class": FIELD_CLASS, "type": "datetime-local"},
                 format="%Y-%m-%dT%H:%M",
             ),
-            "title": forms.TextInput(attrs={"class": FIELD_CLASS}),
+            "title": forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": gettext_lazy("e.g. Software Engineering Intern")}),
             "industry": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "description": forms.Textarea(attrs={"class": FIELD_CLASS, "rows": 3}),
-            "role_type": forms.TextInput(attrs={"class": FIELD_CLASS}),
+            # Free text, with suggestions from the <datalist id="role-type-options"> in slot_form.html.
+            "role_type": forms.TextInput(
+                attrs={"class": FIELD_CLASS, "placeholder": gettext_lazy("e.g. Internship"), "list": "role-type-options", "autocomplete": "off"}
+            ),
             "district": forms.Select(attrs={"class": "ipt-select", "id": "id_district"}),
             "department": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "education_level": forms.Select(attrs={"class": "ipt-select"}),
             "academic_year": forms.Select(attrs={"class": "ipt-select"}),
             "capacity": forms.NumberInput(attrs={"class": FIELD_CLASS, "min": 1}),
-            "stipend_available": forms.CheckboxInput(attrs={"class": "rounded border-gray-300"}),
+            "stipend_available": forms.CheckboxInput(attrs={"class": "rounded border-gray-300 w-5 h-5 shrink-0"}),
             "stipend_amount": forms.NumberInput(attrs={"class": FIELD_CLASS, "step": "0.01"}),
         }
 

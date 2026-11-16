@@ -844,5 +844,16 @@
  "Apply filters": "Tumia vichujio",
  "Search applicants": "Tafuta waombaji",
  "selected": "waliochaguliwa",
- "Add a message (optional)": "Ongeza ujumbe (hiari)"
+ "Add a message (optional)": "Ongeza ujumbe (hiari)",
+ "Basics": "Msingi",
+ "Title, role and description": "Kichwa, aina ya nafasi na maelezo",
+ "Requirements": "Mahitaji",
+ "Education level, department and skills": "Kiwango cha elimu, idara na ujuzi",
+ "Timing": "Muda",
+ "Deadline, start date and duration": "Mwisho wa maombi, tarehe ya kuanza na muda",
+ "Seats & stipend": "Nafasi na posho",
+ "Number of seats and monthly stipend": "Idadi ya nafasi na posho ya kila mwezi",
+ "Closes": "Inafungwa",
+ "e.g. Software Engineering Intern": "mf. Mwanafunzi wa Uhandisi wa Programu",
+ "e.g. Internship": "mf. Mafunzo kwa vitendo"
 }

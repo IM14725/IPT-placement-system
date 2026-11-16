@@ -30,79 +30,37 @@
           <p>{% trans "Check the details below, then press the button again to save and send the notification." %}</p>
         </div>
       {% endif %}
-      {% for field in form %}
-        {% if field.name == 'stipend_available' %}
-        <div class="flex items-start gap-sm p-md rounded-xl border border-outline-variant bg-surface-container-lowest {% if field.errors %}border-error{% endif %}">
-          <div class="flex items-center gap-sm flex-1">
-            {{ field }}
-            <label class="font-body-md font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}</label>
-          </div>
-          <p class="ipt-field-desc flex-1"><span class="material-symbols-outlined">info</span>{% trans "Offer a monthly stipend to interns." %}</p>
+      {% trans "Optional. Shown to students on the slot and in their acceptance letter." as optional_shown %}
+
+      {# Basics #}
+      <details class="ipt-section" open>
+        <summary class="ipt-section-summary">
+          <span class="material-symbols-outlined text-primary">work</span>
+          <span class="flex-1 min-w-0"><span class="block font-body-md text-body-md font-semibold text-on-surface">{% trans "Basics" %}</span><span class="block font-metadata text-metadata text-on-surface-variant">{% trans "Title, role and description" %}</span></span>
+          <span class="material-symbols-outlined ipt-section-chev">expand_more</span>
+        </summary>
+        <div class="ipt-section-body flex flex-col gap-md">
+          {% include "includes/profile_field.html" with field=form.title %}
+          {% include "includes/profile_field.html" with field=form.role_type %}
+          <datalist id="role-type-options">
+            <option value="Internship"></option>
+            <option value="Attachment"></option>
+            <option value="Field placement"></option>
+            <option value="Other"></option>
+          </datalist>
+          {% include "includes/profile_field.html" with field=form.industry %}
+          {% include "includes/profile_field.html" with field=form.description %}
         </div>
-        {% elif field.name == 'stipend_amount' %}
-        <div class="flex flex-col gap-xs" data-stipend-row>
-          <label class="font-body-md font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}</label>
-          <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
-            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">payments</span></span>
-            {{ field }}
-          </div>
-          {% if field.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ field.errors.0 }}</p>{% endif %}
-        </div>
-        {% elif field.name != 'district' %}
-        <div class="flex flex-col gap-xs">
-          <label class="font-body-md font-body-md font-semibold text-on-surface" for="{{ field.id_for_label }}">{% trans field.label %}{% if field.field.required %} *{% endif %}</label>
-          <div class="ipt-field-box {% if field.errors %}is-error{% endif %}">
-            <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">
-              {% if field.name == 'title' %}work
-              {% elif field.name == 'industry' %}factory
-              {% elif field.name == 'description' %}description
-              {% elif field.name == 'role_type' %}badge
-              {% elif field.name == 'department' %}account_tree
-              {% elif field.name == 'education_level' %}workspace_premium
-              {% elif field.name == 'academic_year' %}tag
-              {% elif field.name == 'application_deadline' %}event
-              {% elif field.name == 'start_date' %}event_available
-              {% elif field.name == 'duration_weeks' %}schedule
-              {% elif field.name == 'reporting_contact' %}badge
-              {% elif field.name == 'capacity' %}groups
-              {% elif field.name == 'stipend_amount' %}payments
-              {% elif field.name == 'skills_required' %}psychology
-              {% else %}edit{% endif %}
-            </span></span>
-            {{ field }}
-          </div>
-          {% if field.name == 'industry' %}
-            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{{ field.help_text }}</p>
-          {% endif %}
-          {% if field.name == 'start_date' or field.name == 'duration_weeks' %}
-            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Optional. Shown to students on the slot and in their acceptance letter." %}</p>
-          {% endif %}
-          {% if field.name == 'reporting_contact' %}
-            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Optional. Who to ask for and where to report. Only students you accept can see this." %}</p>
-          {% endif %}
-          {% if field.name == 'capacity' %}
-            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Seats are held as soon as a student applies, and released if the fee is not paid in 3 hours. You cannot go below the seats already taken." %}</p>
-          {% endif %}
-          {% if field.name == 'skills_required' %}
-            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Separate skills with commas, e.g. Python, SQL, Communication." %}</p>
-          {% endif %}
-          {% if field.name == 'application_deadline' %}
-            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Optional. After this time students can no longer start a new application." %}</p>
-          {% endif %}
-          {% if field.name == 'education_level' %}
-            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Minimum TCU qualification: Level 4 Certificate to Level 10 PhD." %}</p>
-          {% endif %}
-          {% if field.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ field.errors.0 }}</p>{% endif %}
-        </div>
-        {% endif %}
-      {% endfor %}
-      <div class="p-md bg-surface-container-low rounded-lg flex flex-col gap-md relative overflow-hidden">
-        <div class="absolute -right-16 -top-16 w-32 h-32 bg-secondary/10 rounded-full blur-2xl"></div>
-        <div class="flex items-center gap-xs relative z-10">
+      </details>
+
+      {# Location #}
+      <details class="ipt-section" open>
+        <summary class="ipt-section-summary">
           <span class="material-symbols-outlined text-primary">location_on</span>
-          <h3 class="font-headline-md text-headline-md text-on-surface">{% trans "Location Details" %}</h3>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-md relative z-10">
+          <span class="flex-1 min-w-0"><span class="block font-body-md text-body-md font-semibold text-on-surface">{% trans "Location" %}</span><span class="block font-metadata text-metadata text-on-surface-variant">{% trans "Region and district" %}</span></span>
+          <span class="material-symbols-outlined ipt-section-chev">expand_more</span>
+        </summary>
+        <div class="ipt-section-body grid grid-cols-1 md:grid-cols-2 gap-md">
           <div class="flex flex-col gap-xs">
             <label class="font-body-md text-body-md font-semibold text-on-surface" for="id_region">{% trans "Region" %} *</label>
             <div class="ipt-field-box">
@@ -114,17 +72,78 @@
           </div>
           <div class="flex flex-col gap-xs">
             <label class="font-body-md text-body-md font-semibold text-on-surface" for="id_district">{% trans "District *" %}</label>
-            <div class="ipt-field-box">
+            <div class="ipt-field-box {% if form.district.errors %}is-error{% endif %}">
               <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">location_on</span></span>
               <select id="id_district" name="district" class="ipt-select">
                 <option value="">{% trans "Select District" %}</option>
               </select>
             </div>
+            {% if form.district.errors %}<p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.district.errors.0 }}</p>{% endif %}
           </div>
         </div>
-      </div>
+      </details>
+
+      {# Requirements #}
+      <details class="ipt-section">
+        <summary class="ipt-section-summary">
+          <span class="material-symbols-outlined text-primary">fact_check</span>
+          <span class="flex-1 min-w-0"><span class="block font-body-md text-body-md font-semibold text-on-surface">{% trans "Requirements" %}</span><span class="block font-metadata text-metadata text-on-surface-variant">{% trans "Education level, department and skills" %}</span></span>
+          <span class="material-symbols-outlined ipt-section-chev">expand_more</span>
+        </summary>
+        <div class="ipt-section-body flex flex-col gap-md">
+          {% trans "Minimum TCU qualification: Level 4 Certificate to Level 10 PhD." as hint_level %}
+          {% include "includes/profile_field.html" with field=form.education_level hint=hint_level %}
+          {% include "includes/profile_field.html" with field=form.academic_year %}
+          {% include "includes/profile_field.html" with field=form.department %}
+          {% trans "Separate skills with commas, e.g. Python, SQL, Communication." as hint_skills %}
+          {% include "includes/profile_field.html" with field=form.skills_required hint=hint_skills %}
+        </div>
+      </details>
+
+      {# Timing #}
+      <details class="ipt-section">
+        <summary class="ipt-section-summary">
+          <span class="material-symbols-outlined text-primary">event</span>
+          <span class="flex-1 min-w-0"><span class="block font-body-md text-body-md font-semibold text-on-surface">{% trans "Timing" %}</span><span class="block font-metadata text-metadata text-on-surface-variant">{% trans "Deadline, start date and duration" %}</span></span>
+          <span class="material-symbols-outlined ipt-section-chev">expand_more</span>
+        </summary>
+        <div class="ipt-section-body flex flex-col gap-md">
+          {% trans "Optional. After this time students can no longer start a new application." as hint_deadline %}
+          {% trans "Closes" as closes %}
+          {% include "includes/profile_field.html" with field=form.application_deadline hint=hint_deadline date_text=closes %}
+          {% trans "Starts" as starts %}
+          {% include "includes/profile_field.html" with field=form.start_date hint=optional_shown date_text=starts %}
+          {% include "includes/profile_field.html" with field=form.duration_weeks hint=optional_shown %}
+          {% trans "Optional. Who to ask for and where to report. Only students you accept can see this." as hint_contact %}
+          {% include "includes/profile_field.html" with field=form.reporting_contact hint=hint_contact %}
+        </div>
+      </details>
+
+      {# Seats and stipend #}
+      <details class="ipt-section" open>
+        <summary class="ipt-section-summary">
+          <span class="material-symbols-outlined text-primary">groups</span>
+          <span class="flex-1 min-w-0"><span class="block font-body-md text-body-md font-semibold text-on-surface">{% trans "Seats & stipend" %}</span><span class="block font-metadata text-metadata text-on-surface-variant">{% trans "Number of seats and monthly stipend" %}</span></span>
+          <span class="material-symbols-outlined ipt-section-chev">expand_more</span>
+        </summary>
+        <div class="ipt-section-body flex flex-col gap-md">
+          {% trans "Seats are held as soon as a student applies, and released if the fee is not paid in 3 hours. You cannot go below the seats already taken." as hint_capacity %}
+          {% include "includes/profile_field.html" with field=form.capacity hint=hint_capacity %}
+          <div class="flex flex-col gap-xs">
+            <label class="flex items-center gap-sm min-h-[48px] px-md rounded-xl border border-outline-variant bg-surface-container-lowest cursor-pointer {% if form.stipend_available.errors %}border-error{% endif %}" for="{{ form.stipend_available.id_for_label }}">
+              {{ form.stipend_available }}
+              <span class="font-body-md text-body-md font-semibold text-on-surface">{% trans form.stipend_available.label %}</span>
+            </label>
+            <p class="ipt-field-desc"><span class="material-symbols-outlined">info</span>{% trans "Offer a monthly stipend to interns." %}</p>
+          </div>
+          <div data-stipend-row>
+            {% include "includes/profile_field.html" with field=form.stipend_amount %}
+          </div>
+        </div>
+      </details>
+
       <div class="pt-sm mt-sm flex justify-end gap-md items-center">
-        <a href="{% url 'organization-slots' %}" class="font-label-caps text-label-caps text-primary hover:text-primary/80 transition-colors uppercase tracking-widest px-sm py-2">{% trans "Cancel" %}</a>
+        <a href="{% url 'organization-slots' %}" class="min-h-[48px] px-lg inline-flex items-center rounded-full border border-outline-variant text-primary font-body-md text-body-md font-semibold hover:bg-primary/5 transition-colors">{% trans "Cancel" %}</a>
         <button class="bg-primary hover:bg-primary/90 text-on-primary font-body-lg text-body-lg px-xl py-3 rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-2" type="submit" data-loading>
           <span data-label>{% if pending_changes %}{% trans "Save and notify students" %}{% elif editing %}{% trans "Save Changes" %}{% else %}{% trans "Post Slot" %}{% endif %}</span>
           <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
@@ -141,17 +160,41 @@
   window.IPT.profileRegion = "{{ current_region|default:'' }}";
   window.IPT.profileDistrict = "{{ current_district|default:'' }}";
 
-  const stipendBox = document.getElementById('id_stipend_available');
-  const stipendRow = stipendBox.closest('[data-stipend-row]');
-  function syncStipend() {
-    if (stipendBox && stipendRow) {
+  (function () {
+    var stipendBox = document.getElementById('id_stipend_available');
+    var stipendRow = document.querySelector('[data-stipend-row]');
+    var amount = document.getElementById('id_stipend_amount');
+    function syncStipend() {
+      if (!stipendBox || !stipendRow) return;
       stipendRow.style.display = stipendBox.checked ? '' : 'none';
+      if (!stipendBox.checked && amount) amount.value = '';  // the server ignores it anyway; do not leave a stale number
     }
-  }
-  if (stipendBox) {
-    stipendBox.addEventListener('change', syncStipend);
-    syncStipend();
-  }
+    if (stipendBox) { stipendBox.addEventListener('change', syncStipend); syncStipend(); }
+
+    // Echo each date field as plain text ("Closes Fri, 20 Nov 2026, 17:00"): the native picker shows it in the phone's own format.
+    var locale = document.documentElement.lang === 'sw' ? 'sw-TZ' : 'en-GB';
+    document.querySelectorAll('[data-date-for]').forEach(function (p) {
+      var input = document.getElementById(p.getAttribute('data-date-for'));
+      var out = p.querySelector('[data-date-out]');
+      if (!input || !out) return;
+      function sync() {
+        var v = input.value, d = null, withTime = v.indexOf('T') !== -1;
+        if (v) {
+          var m = v.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/);
+          if (m) d = new Date(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0));
+        }
+        if (!d || isNaN(d)) { p.style.display = 'none'; return; }
+        var opts = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+        if (withTime) { opts.hour = '2-digit'; opts.minute = '2-digit'; opts.hour12 = false; }
+        out.textContent = p.getAttribute('data-prefix') + ' ' + new Intl.DateTimeFormat(locale, opts).format(d);
+        p.style.display = '';
+      }
+      input.addEventListener('input', sync);
+      input.addEventListener('change', sync);
+      sync();
+    });
+  })();
 </script>
+<script src="/static/js/form-sections.js"></script>
 <script src="/static/js/location-cascade.js"></script>
 {% endblock %}

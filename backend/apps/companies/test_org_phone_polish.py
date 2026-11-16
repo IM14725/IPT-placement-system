@@ -271,3 +271,61 @@ def test_applicant_row_checkbox_has_a_big_tap_area(ready_org, places):
     for url in (reverse("organization-dashboard"), reverse("organization-applicants", args=[slot.id])):
         page = c.get(url).content.decode()
         assert 'type="checkbox" name="application"' not in page
+
+
+# ── 14-17. the slot form: sections, stipend row, role type hints, date echo, Cancel button ─────
+
+@pytest.mark.django_db
+def test_slot_form_is_split_into_sections_and_loses_no_field(ready_org, places):
+    import re
+
+    from apps.companies.forms import SlotForm
+
+    c = _client(ready_org.user)
+    slot = _slot(ready_org, places["kinondoni"], "Existing", capacity=2)
+    for url in (reverse("organization-slot-create"), reverse("organization-slot-edit", args=[slot.id])):
+        body = c.get(url).content.decode()
+        sections = re.findall(r'<details class="ipt-section"( open)?>', body)
+        assert len(sections) == 5 and sections.count(" open") == 3, url  # Basics, Location, Seats open; Requirements, Timing closed
+        for title in ("Basics", "Location", "Requirements", "Timing", "Seats & stipend"):
+            assert title in body, (url, title)
+        for name in SlotForm().fields:
+            if name == "district":
+                assert 'id="id_district"' in body and 'name="district"' in body
+            else:
+                assert f'name="{name}"' in body, (url, name)
+        assert 'id="id_region"' in body and "form-sections.js" in body
+
+
+@pytest.mark.django_db
+def test_slot_form_hints_stipend_row_dates_and_cancel_button(ready_org, places):
+    body = _client(ready_org.user).get(reverse("organization-slot-create")).content.decode()
+    # 16. examples in the required fields and role type suggestions that still allow your own text
+    assert 'placeholder="e.g. Software Engineering Intern"' in body and 'placeholder="e.g. Internship"' in body
+    assert 'list="role-type-options"' in body and '<datalist id="role-type-options">' in body
+    for suggestion in ("Internship", "Attachment", "Field placement", "Other"):
+        assert f'<option value="{suggestion}">' in body
+    # 15. the stipend amount sits in its own row, found by the script (it used to look for it around the checkbox)
+    assert body.count("data-stipend-row") >= 2  # the row and the script's selector
+    assert "closest('[data-stipend-row]')" not in body and "document.querySelector('[data-stipend-row]')" in body
+    # 17. dates are echoed as text; Cancel is a 48 px outlined button
+    assert body.count("data-date-for=") == 2 and 'data-prefix="Closes"' in body and 'data-prefix="Starts"' in body
+    assert "min-h-[48px] px-lg inline-flex items-center rounded-full border" in body
+    assert "font-label-caps text-label-caps text-primary hover:text-primary/80" not in body
+
+
+@pytest.mark.django_db
+def test_slot_form_still_posts_a_new_slot_and_clears_the_stipend_when_unticked(ready_org, places):
+    c = _client(ready_org.user)
+    resp = c.post(
+        reverse("organization-slot-create"),
+        {"title": "Intern", "role_type": "Internship", "region": places["dar"].id, "district": places["kinondoni"].id, "capacity": 2,
+         "stipend_amount": "250000", "industry": "", "description": "", "department": "", "education_level": "",
+         "academic_year": "", "application_deadline": "", "start_date": "", "duration_weeks": "",
+         "reporting_contact": "", "skills_required": ""},
+    )
+    assert resp.status_code == 302
+    from apps.slots.models import Slot
+
+    created = Slot.objects.get(title="Intern")
+    assert created.stipend_available is False and created.stipend_amount is None  # untick means no stipend
