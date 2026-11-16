@@ -543,3 +543,19 @@ def test_notification_rows_have_big_action_buttons_and_no_type_tag_repeating_the
     assert body.count("w-11 h-11 inline-flex items-center justify-center") == 3  # open, mark read, delete
     assert 'p-2 rounded-lg text-error' not in body
     assert 'class="hidden sm:inline-block px-2 py-0.5 rounded-full bg-surface-container' in body  # the type tag shows from tablet width up
+
+
+@pytest.mark.django_db
+def test_checklist_formats_the_phone_and_has_big_checkboxes_and_applications_drop_the_red_note(places, org):
+    from apps.applications.services import accept_and_notify
+
+    slot = _slot(org, places["kinondoni"])
+    student = _student(places)
+    app = _pay(student, slot)
+    c = _client(student.user)
+    mine = c.get(reverse("student-applications")).content.decode()
+    assert "Cancellation used" not in mine and "Cancellation window closed" in mine and "text-error italic" not in mine
+    accept_and_notify(app, company_message="Welcome")
+    body = c.get(reverse("student-checklist", args=[app.id])).content.decode()
+    assert "+255 700 000 001" in body and 'href="tel:+255700000001"' in body  # shown readable, dials correctly
+    assert body.count("w-5 h-5 shrink-0 rounded border-outline") == 8 and "py-3 min-h-[48px]" in body

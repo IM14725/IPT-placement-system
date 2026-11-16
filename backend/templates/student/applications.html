@@ -75,7 +75,7 @@
                 </button>
               </form>
             {% elif app.status == 'PAID' and not app.can_cancel %}
-              <span class="text-[12px] text-error italic">{% trans "Cancellation used" %}</span>
+              <span class="inline-flex items-center gap-1 font-metadata text-metadata text-on-surface-variant"><span class="material-symbols-outlined text-[14px]">lock</span>{% trans "Cancellation window closed" %}</span>
             {% endif %}
           {% elif app.status == 'UNPAID' %}
             <a href="{% url 'student-apply' app.slot.id %}" class="bg-[#DC2626]/10 text-[#991B1B] font-metadata text-metadata px-sm py-2 rounded-lg hover:shadow-sm transition-all flex items-center gap-1 justify-center">
