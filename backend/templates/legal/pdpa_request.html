@@ -117,7 +117,7 @@
     </button>
   </form>
 
-  <script>
+  <script nonce="{{ csp_nonce }}">
     (function () {
       var detailsSection = document.getElementById('details-section');
       var radios = document.querySelectorAll('input[name="request_type"]');

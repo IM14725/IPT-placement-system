@@ -107,6 +107,9 @@ MIDDLEWARE = [
     # Compress HTML/JSON responses (the server-rendered pages are large).
     "django.middleware.gzip.GZipMiddleware",
     "apps.core.security.SecurityHeadersMiddleware",
+    # After SecurityHeadersMiddleware in this list = its response hook runs first on the way out,
+    # so the nonce-bearing policy is already set when the other headers are added.
+    "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "apps.core.ajax.AjaxRedirectMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     # Activates the per-user/site language for every request (EN / Kiswahili).
@@ -141,6 +144,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.csp",
                 "apps.core.context_processors.nav_user",
                 "apps.core.context_processors.tc_update_banner",
             ],
@@ -174,6 +178,24 @@ SESSION_COOKIE_SAMESITE = "Lax"  # Lax: the payment gateway returns users via to
 SESSION_SAVE_EVERY_REQUEST = False
 CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+# Content-Security-Policy. Scripts run only from our own files or from <script nonce="{{ csp_nonce }}">
+# blocks: there is no 'unsafe-inline' for scripts, so injected markup (stored XSS) cannot execute and
+# inline on*= handlers / javascript: links are refused (use the data-* actions in static/js/csp-actions.js).
+# Styles keep 'unsafe-inline' (style="" attributes are used widely); that cannot run code.
+from django.utils.csp import CSP  # noqa: E402
+
+SECURE_CSP = {
+    "default-src": [CSP.SELF],
+    "script-src": [CSP.SELF, CSP.NONCE],
+    "style-src": [CSP.SELF, CSP.UNSAFE_INLINE],
+    "font-src": [CSP.SELF, "data:"],
+    "img-src": [CSP.SELF, "data:", "blob:"],
+    "connect-src": [CSP.SELF, "ws:", "wss:"],
+    "object-src": [CSP.NONE],
+    "frame-ancestors": [CSP.NONE],
+    "base-uri": [CSP.SELF],
+    "form-action": [CSP.SELF],
+}
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 X_FRAME_OPTIONS = "DENY"
@@ -194,6 +216,8 @@ WEBAUTHN_RP_NAME = env("WEBAUTHN_RP_NAME", default="IPT Marketplace")
 # Temporary login lockout (apps/core/lockout.py): never a permanent account lock.
 LOGIN_LOCKOUT_ATTEMPTS = env.int("LOGIN_LOCKOUT_ATTEMPTS", default=5)
 LOGIN_LOCKOUT_SECONDS = env.int("LOGIN_LOCKOUT_SECONDS", default=300)
+# Failures on one email from ALL addresses before it locks for everyone (LOGIN_LOCKOUT_ATTEMPTS is per address+email).
+LOGIN_LOCKOUT_ACCOUNT_ATTEMPTS = env.int("LOGIN_LOCKOUT_ACCOUNT_ATTEMPTS", default=25)
 
 LOGIN_URL = "/auth/login/"
 LOGIN_REDIRECT_URL = "/"
@@ -254,7 +278,7 @@ else:
 # SMS Configuration (AstraCall). Put the key in backend/.env, never in code or chat.
 ASTRACALL_API_KEY = env("ASTRACALL_API_KEY", default="")
 ASTRACALL_BASE_URL = env("ASTRACALL_BASE_URL", default="https://astracall.cc/api/v1")
-ASTRACALL_SENDER_ID = env("ASTRACALL_SENDER_ID", default="IPT MARKET")
+ASTRACALL_SENDER_ID = env("ASTRACALL_SENDER_ID", default="POSTSMS")
 # "auto": real AstraCall when ASTRACALL_API_KEY is set, else the console mock. "mock" / "astracall" force one.
 SMS_BACKEND = env("SMS_BACKEND", default="auto")
 # Keep every OTP, encrypted, until it is used or expires, so an admin with user-management edit can read it

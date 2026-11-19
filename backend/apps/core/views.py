@@ -23,7 +23,10 @@ def health(request):
         connection.ensure_connection()
     except Exception:  # noqa: BLE001
         db_ok = False
-    return JsonResponse({"status": "ok", "database": "ok" if db_ok else "error"})
+    # Public probe: status only. Which component failed is for logs, not for strangers.
+    if db_ok:
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "error"}, status=503)
 
 
 def django_admin_redirect(request):

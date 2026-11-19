@@ -12,7 +12,7 @@
   </div>
   <a class="text-primary font-semibold hover:underline" href="{% url 'platform-otp-requests' %}{% if back_qs %}?{{ back_qs }}{% endif %}">&larr; Back to OTP requests</a>
 </div>
-<script>
+<script nonce="{{ csp_nonce }}">
   document.getElementById("otp-copy").addEventListener("click", function () {
     var btn = this, code = document.getElementById("otp-code").textContent.trim();
     var done = function () { btn.textContent = "Copied"; };

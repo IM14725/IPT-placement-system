@@ -422,7 +422,7 @@ def test_login_lockout_after_five_failures_then_lifts():
     assert locked.status_code == 429 and "_auth_user_id" not in client.session
     # The rate limiter answers here, but the timer still reflects the (longer) lock.
     assert int(locked["Retry-After"]) > 30
-    keys = list(get_redis().scan_iter("*lockout:login:l@x.tz:lock"))
+    keys = list(get_redis().scan_iter("*lockout:login:*:l@x.tz:lock"))
     assert len(keys) == 1 and 0 < get_redis().ttl(keys[0]) <= 300
     # After the 5 minutes pass (key expires) the same account logs in: it was never disabled.
     get_redis().delete(keys[0])
@@ -438,6 +438,36 @@ def test_lockout_does_not_reveal_whether_account_exists(client):
     for _ in range(5):
         client.post("/auth/login/", {"email": "ghost@x.tz", "password": "bad"})
     assert client.post("/auth/login/", {"email": "ghost@x.tz", "password": "bad"}).status_code == 429
+
+
+@pytest.mark.django_db
+def test_lockout_from_one_address_does_not_lock_the_owner_out():
+    """A stranger guessing the owner's email from their own IP cannot lock the owner out."""
+    User.objects.create_user(
+        email="owner@x.tz", password="Secret123!x", role=UserRole.STUDENT, email_verified=True
+    )
+    attacker = Client(REMOTE_ADDR="198.51.100.7")
+    for _ in range(5):
+        attacker.post("/auth/login/", {"email": "owner@x.tz", "password": "bad"})
+    assert attacker.post("/auth/login/", {"email": "owner@x.tz", "password": "bad"}).status_code == 429
+    owner = Client(REMOTE_ADDR="203.0.113.20")
+    ok = owner.post("/auth/login/", {"email": "owner@x.tz", "password": "Secret123!x"})
+    assert ok.status_code == 302 and "_auth_user_id" in owner.session
+
+
+@pytest.mark.django_db
+def test_account_wide_lock_trips_when_many_addresses_guess_one_email(settings):
+    settings.LOGIN_LOCKOUT_ACCOUNT_ATTEMPTS = 6
+    User.objects.create_user(
+        email="spread@x.tz", password="Secret123!x", role=UserRole.STUDENT, email_verified=True
+    )
+    for n in range(6):  # one failure from each of six addresses: no single address reaches 5
+        Client(REMOTE_ADDR=f"198.51.100.{n + 1}").post(
+            "/auth/login/", {"email": "spread@x.tz", "password": "bad"}
+        )
+    fresh = Client(REMOTE_ADDR="203.0.113.99")
+    locked = fresh.post("/auth/login/", {"email": "spread@x.tz", "password": "Secret123!x"})
+    assert locked.status_code == 429 and "_auth_user_id" not in fresh.session
 
 
 @pytest.mark.django_db
@@ -569,13 +599,27 @@ def test_logout_destroys_server_session_and_stale_cookie_is_rejected():
     c = Client()
     _login(c)
     stolen = c.cookies[dj_settings.SESSION_COOKIE_NAME].value
-    c.get("/auth/logout/")
+    c.post("/auth/logout/")
     from django.contrib.sessions.models import Session
 
     assert not Session.objects.filter(session_key=stolen).exists()
     thief = Client()
     thief.cookies[dj_settings.SESSION_COOKIE_NAME] = stolen
     assert thief.get("/auth/session-status/").status_code == 401
+
+
+@pytest.mark.django_db
+def test_logout_by_get_is_refused_and_keeps_the_session():
+    """A link or image on another site must not be able to sign a user out."""
+    _student()
+    c = Client()
+    _login(c)
+    assert c.get("/auth/logout/").status_code == 405
+    assert c.get("/auth/session-status/").status_code == 200
+    c2 = Client(enforce_csrf_checks=True)
+    c2.cookies = c.cookies  # same signed-in browser session, but a POST with no CSRF token
+    assert c2.post("/auth/logout/").status_code == 403  # a forged POST without the CSRF token
+    assert c2.get("/auth/session-status/").status_code == 200
 
 
 @pytest.mark.django_db
@@ -627,7 +671,7 @@ def test_login_and_logout_are_audited():
     _student()
     c = Client()
     _login(c)
-    c.get("/auth/logout/")
+    c.post("/auth/logout/")
     actions = list(AuditLog.objects.filter(module="Security").values_list("action", flat=True))
     assert "Login" in actions and "Logout" in actions
 

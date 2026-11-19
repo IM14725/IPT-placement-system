@@ -21,7 +21,16 @@ async def lifespan(app: FastAPI):
         pass
 
 
-app = FastAPI(title="IPT Marketplace Realtime", version="0.1.0", lifespan=lifespan)
+# No interactive docs or OpenAPI schema: this service is called only by the payment gateway and by
+# our own pages, and the schema would advertise the callback and mock-gateway routes to everyone.
+app = FastAPI(
+    title="IPT Marketplace Realtime",
+    version="0.1.0",
+    lifespan=lifespan,
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+)
 
 app.add_middleware(
     CORSMiddleware,

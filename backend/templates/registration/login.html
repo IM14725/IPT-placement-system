@@ -95,7 +95,7 @@
           <div class="ipt-field-box {% if form.password.errors %}is-error{% endif %}">
             <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span>
             {{ form.password }}
-            <button type="button" class="ipt-field-action" onclick="togglePassword(this, '{{ form.password.id_for_label }}')" aria-label="{% trans "Show password" %}">
+            <button type="button" class="ipt-field-action" data-toggle-password="{{ form.password.id_for_label }}" aria-label="{% trans "Show password" %}">
               <span class="material-symbols-outlined text-[20px]" data-icon="eye">visibility</span>
             </button>
           </div>
@@ -131,7 +131,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   // Live lockout countdown. Runs for any [data-countdown] element, including one that
   // arrives later when form-loading.js swaps a re-rendered form into the page.
   (function () {
@@ -167,14 +167,5 @@
     scan();
     new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
   })();
-</script>
-<script>
-  function togglePassword(btn, id) {
-    const input = document.getElementById(id);
-    const icon = btn.querySelector('[data-icon]');
-    const show = input.type === "password";
-    input.type = show ? "text" : "password";
-    icon.textContent = show ? "visibility_off" : "visibility";
-  }
 </script>
 {% endblock %}

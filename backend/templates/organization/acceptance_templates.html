@@ -41,7 +41,7 @@
               <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">chat</span></span><textarea name="body" rows="3" maxlength="500" required aria-label="{% trans 'Message' %}">{{ t.body }}</textarea></div>
               <button type="submit" class="self-end bg-primary text-on-primary px-md py-2 rounded-lg font-semibold">{% trans "Save changes" %}</button>
             </form>
-            <form method="post" onsubmit="return confirm('{% trans 'Delete this template?' %}');" class="self-start">
+            <form method="post" data-ipt-confirm="{% trans 'Delete this template?' %}" class="self-start">
               {% csrf_token %}
               <input type="hidden" name="template_id" value="{{ t.id }}"><input type="hidden" name="action" value="delete">
               <button type="submit" class="text-error font-semibold text-body-md hover:underline flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">delete</span>{% trans "Delete template" %}</button>

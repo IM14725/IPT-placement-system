@@ -2,10 +2,10 @@
 <html lang="{% get_current_language as CUR_LANG %}{{ CUR_LANG }}" class="bg-background">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#3525cd">
-  <script>
+  <script nonce="{{ csp_nonce }}">
     /* Apply the saved/system theme before first paint to avoid a light flash. */
     (function () {
       var m = "system";
@@ -39,7 +39,7 @@
     /* Photos: a quiet shimmer-grey box until the image arrives. */
     img.ipt-img{background-color:#e3e5e8}html.dark img.ipt-img{background-color:#262b30}
   </style>
-  <script>
+  <script nonce="{{ csp_nonce }}">
     /* Stylesheets load without blocking paint, so the skeleton shell can show on slow networks.
        Failsafe: the page is always revealed after 12 s, even if a stylesheet never arrives. */
     (function (d) {
@@ -54,10 +54,20 @@
       }
       function counted() { if (--left <= 0) reveal(); }
       window.iptCss = function (l) {
-        l.onload = l.onerror = null;
+        if (l.__iptDone) return;
+        l.__iptDone = true;
         l.media = "all";
         counted();
       };
+      /* The stylesheet links carry data-ipt-css instead of inline onload/onerror (the CSP blocks
+         inline handlers). load/error do not bubble, so listen in the capture phase on document;
+         this runs before the first <link> is parsed, so no event can be missed. */
+      function onSheet(e) {
+        var l = e.target;
+        if (l && l.tagName === "LINK" && l.hasAttribute("data-ipt-css")) window.iptCss(l);
+      }
+      d.addEventListener("load", onSheet, true);
+      d.addEventListener("error", onSheet, true);
       setTimeout(function () {
         var rest = d.querySelectorAll('link[rel="stylesheet"][media="print"]');
         for (var i = 0; i < rest.length; i++) { rest[i].media = "all"; }
@@ -65,7 +75,7 @@
       }, 12000);
     })(document);
   </script>
-  <link rel="stylesheet" href="{% static 'css/theme.css' %}" media="print" fetchpriority="high" onload="iptCss(this)" onerror="iptCss(this)"><noscript><link rel="stylesheet" href="{% static 'css/theme.css' %}"></noscript>
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}" media="print" fetchpriority="high" data-ipt-css><noscript><link rel="stylesheet" href="{% static 'css/theme.css' %}"></noscript>
   <title>{% block title %}{% trans "IPT Marketplace" %}{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}{% trans 'Find verified Industrial Practical Training (IPT) slots in Tanzania, or recruit pre-verified students. Secure, mobile-money payments.' %}{% endblock %}">
   <meta name="robots" content="{% block robots %}noindex, nofollow{% endblock %}">
@@ -86,9 +96,12 @@
   {# Self-hosted fonts + compiled Tailwind (no third-party requests; see scripts/build_fonts.py and scripts/build_css.ps1). #}
   <link rel="preload" href="{% static 'fonts/inter-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="{% static 'fonts/material-symbols-outlined.woff2' %}" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="{% static 'css/fonts.css' %}" media="print" fetchpriority="high" onload="iptCss(this)" onerror="iptCss(this)"><noscript><link rel="stylesheet" href="{% static 'css/fonts.css' %}"></noscript>
-  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}" media="print" fetchpriority="high" onload="iptCss(this)" onerror="iptCss(this)"><noscript><link rel="stylesheet" href="{% static 'css/tailwind.css' %}"></noscript>
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}" media="print" fetchpriority="high" data-ipt-css><noscript><link rel="stylesheet" href="{% static 'css/fonts.css' %}"></noscript>
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}" media="print" fetchpriority="high" data-ipt-css><noscript><link rel="stylesheet" href="{% static 'css/tailwind.css' %}"></noscript>
   {# The hidden attribute must always win: Tailwind display classes (flex, grid) otherwise keep a "hidden" panel on screen. #}
+  {# Confirm dialogs, auto-submit selects, password toggles etc.: the CSP forbids inline on*= handlers, so pages use data-* attributes handled here. #}
+  <script src="{% static 'js/csp-actions.js' %}" defer></script>
+  <script src="{% static 'js/keyboard.js' %}" defer></script>
   <style>[hidden]{display:none !important}</style>
   <style>
     body { overscroll-behavior: none; }
@@ -200,7 +213,7 @@
     .auth-card { animation: auth-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .auth-card .auth-card-panel { animation: auth-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both; }
   </style>
-  <link rel="stylesheet" href="{% static 'css/responsive.css' %}" media="print" fetchpriority="high" onload="iptCss(this)" onerror="iptCss(this)"><noscript><link rel="stylesheet" href="{% static 'css/responsive.css' %}"></noscript>
+  <link rel="stylesheet" href="{% static 'css/responsive.css' %}" media="print" fetchpriority="high" data-ipt-css><noscript><link rel="stylesheet" href="{% static 'css/responsive.css' %}"></noscript>
 </head>
 <body class="bg-background min-h-screen text-on-surface font-body-md{% if user.is_authenticated %} has-sidebar{% endif %}">
   <div id="ipt-skel" aria-hidden="true">
@@ -238,7 +251,7 @@
           {% csrf_token %}
           <input type="hidden" name="next" value="{{ request.path }}">
           <label class="sr-only" for="language-switcher">{% trans "Language" %}</label>
-          <select name="language" id="language-switcher" onchange="this.form.submit()"
+          <select name="language" id="language-switcher" data-autosubmit
                   class="bg-white/10 text-white text-metadata rounded-lg pl-2 sm:pl-sm pr-1 sm:pr-xs py-1.5 max-w-[84px] sm:max-w-none cursor-pointer border border-white/25 focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none">
             {% get_current_language as CURRENT_LANGUAGE %}
             {% get_available_languages as AVAILABLE_LANGUAGES %}
@@ -408,9 +421,11 @@
       {% endif %}
     </nav>
     <div class="shrink-0 p-sm border-t border-outline-variant">
-      <a href="{% url 'logout' %}" class="w-full flex items-center justify-center gap-xs px-md py-2.5 rounded-lg border border-error/40 text-error font-semibold hover:bg-error/10 transition-colors">
-        <span class="material-symbols-outlined text-[20px]">logout</span><span class="side-label">{% trans "Logout" %}</span>
-      </a>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+        <button type="submit" class="w-full flex items-center justify-center gap-xs px-md py-2.5 rounded-lg border border-error/40 text-error font-semibold hover:bg-error/10 transition-colors">
+          <span class="material-symbols-outlined text-[20px]">logout</span><span class="side-label">{% trans "Logout" %}</span>
+        </button>
+      </form>
     </div>
   </aside>
   {% endif %}
@@ -427,7 +442,7 @@
       </button>
     </div>
   </div>
-  <script>
+  <script nonce="{{ csp_nonce }}">
     (function(){
       var key = 'tc_banner_dismissed_{{ tc_update_banner|slugify }}';
       if(sessionStorage.getItem(key)){
@@ -539,7 +554,7 @@
    <script src="{% static 'js/app.js' %}"></script>
    <script src="{% static 'js/media-preview.js' %}"></script>
    <script src="{% static 'js/form-loading.js' %}"></script>
-   <script>
+   <script nonce="{{ csp_nonce }}">
      window.IPT = window.IPT || {};
      window.IPT.i18n = {
        phoneLength: "{% filter escapejs %}{% trans 'Enter 9 digits after +255, e.g. 0712 345 678.' %}{% endfilter %}",
@@ -563,7 +578,7 @@
    <script src="{% static 'js/filterbar.js' %}"></script>
    <script src="{% static 'js/list-filter.js' %}"></script>
   {% if user.is_authenticated %}
-    <script>
+    <script nonce="{{ csp_nonce }}">
       window.IPT = window.IPT || {};
       window.IPT.currentUserId = "{{ user.id }}";
       window.IPT.csrf = "{{ csrf_token }}";
@@ -574,6 +589,8 @@
     <script src="{% static 'js/countdown.js' %}"></script>
     <script src="{% static 'js/session-guard.js' %}"></script>
 
+    <form id="idle-logout-form" method="post" action="{% url 'logout' %}" hidden>{% csrf_token %}</form>
+
     <!-- Inactivity Timer Modal -->
     <div id="inactivity-modal" class="fixed top-20 left-3 right-3 sm:right-auto sm:top-4 sm:left-4 z-[100] hidden bg-error-container text-on-error-container p-4 rounded-xl shadow-2xl max-w-xs border border-error/30 flex flex-col gap-2 transition-all">
       <div class="flex items-center gap-2 font-semibold">
@@ -583,7 +600,7 @@
       <p class="text-sm">{% trans "You have been inactive. You will be logged out in" %} <span id="inactivity-countdown" class="font-bold text-error"></span> {% trans "seconds to protect your account. Move or click to stay signed in." %}</p>
     </div>
 
-    <script>
+    <script nonce="{{ csp_nonce }}">
       (function() {
         let idleTime = 0;
         const MAX_IDLE_TIME = 600; // 10 minutes, same as the server's idle window
@@ -612,13 +629,13 @@
             countdownEl.textContent = timeRemaining;
           } else if (timeRemaining <= 0) {
             clearInterval(timer);
-            window.location.href = "{% url 'logout' %}";
+            document.getElementById('idle-logout-form').submit();
           }
         }, 1000);
       })();
     </script>
   {% endif %}
-  <script>
+  <script nonce="{{ csp_nonce }}">
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for(let registration of registrations) {

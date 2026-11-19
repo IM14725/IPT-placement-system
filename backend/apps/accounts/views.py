@@ -96,10 +96,46 @@ def _login_blocked(request, form, seconds, message):
     return response
 
 
+def _login_lock_idents(request, email):
+    """Lockout identifiers for one login attempt.
+
+    ``login`` counts failures per (client IP, email): five bad passwords from one address lock
+    that address out for that email only, so a stranger cannot lock the real owner out. The
+    separate ``login-any`` scope counts failures on the email from every address and trips at a
+    much higher count, which still slows a distributed guessing run. Both key on the submitted
+    email whether or not an account exists.
+    """
+    return (
+        ("login", f"{client_ip(request) or 'unknown'}:{email}", settings.LOGIN_LOCKOUT_ATTEMPTS),
+        ("login-any", email, settings.LOGIN_LOCKOUT_ACCOUNT_ATTEMPTS),
+    )
+
+
+def _login_lock_remaining(request, email):
+    return max(
+        (lockout.lock_remaining(scope, ident) for scope, ident, _limit in _login_lock_idents(request, email)),
+        default=0,
+    )
+
+
+def _login_register_failure(request, email):
+    """Count one failed login on both scopes; True if either just tripped its lock."""
+    tripped = False
+    for scope, ident, limit in _login_lock_idents(request, email):
+        if lockout.register_failure(scope, ident, limit, settings.LOGIN_LOCKOUT_SECONDS):
+            tripped = True
+    return tripped
+
+
+def _login_clear_failures(request, email):
+    for scope, ident, _limit in _login_lock_idents(request, email):
+        lockout.clear(scope, ident)
+
+
 def _login_denied(request, result):
     # The rate limiter runs before the lockout check; never show a shorter wait than the lock.
     email = (request.POST.get("email") or "").strip().lower()
-    locked_for = lockout.lock_remaining("login", email) if email else 0
+    locked_for = _login_lock_remaining(request, email) if email else 0
     if locked_for > result.retry_after:
         seconds, message = locked_for, "Too many failed attempts."
     else:
@@ -283,7 +319,7 @@ def user_login(request):
         form = LoginForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data["email"].strip().lower()
-            remaining = lockout.lock_remaining("login", email)
+            remaining = _login_lock_remaining(request, email)
             if remaining:
                 return _login_blocked(request, form, remaining, "Too many failed attempts.")
             # Authenticated inline: the raw password must never be queued on the broker.
@@ -291,20 +327,18 @@ def user_login(request):
                 request, username=email, password=form.cleaned_data["password"]
             )
             if user is None:
-                locked = lockout.register_failure(
-                    "login", email, settings.LOGIN_LOCKOUT_ATTEMPTS, settings.LOGIN_LOCKOUT_SECONDS
-                )
+                locked = _login_register_failure(request, email)
                 if locked:
                     # This was the failure that tripped the lock: start the countdown now.
                     return _login_blocked(
                         request,
                         form,
-                        lockout.lock_remaining("login", email) or settings.LOGIN_LOCKOUT_SECONDS,
+                        _login_lock_remaining(request, email) or settings.LOGIN_LOCKOUT_SECONDS,
                         gettext("Too many failed attempts."),
                     )
                 form.add_error(None, gettext("Invalid email or password."))
             else:
-                lockout.clear("login", email)
+                _login_clear_failures(request, email)
                 _cancel_pending_recovery(request, user)
                 response, error = _start_session(request, user)
                 if response is not None:
@@ -396,7 +430,9 @@ def session_extend(request):
     return JsonResponse({"valid": True, "expires_in": seconds_remaining(request)})
 
 
+@require_POST
 def user_logout(request):
+    # POST only (with CSRF): a link or image on another site must not be able to sign a user out.
     if getattr(request, "session", None) and request.session.session_key:
         from apps.companies.services import remove_organization_session
 

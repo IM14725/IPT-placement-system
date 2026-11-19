@@ -60,7 +60,7 @@
               {% blocktrans trimmed with amount=app.payment.amount|money %}Pay TZS {{ amount }}{% endblocktrans %}
             </a>
             {% trans "Release this seat? You can re-book it later if it is still open." as release_msg %}
-            <form method="post" action="{% url 'student-release-seat' app.id %}" onsubmit="return confirm('{{ release_msg|escapejs }}');">
+            <form method="post" action="{% url 'student-release-seat' app.id %}" data-ipt-confirm="{{ release_msg }}">
               {% csrf_token %}
               <button type="submit" class="text-on-surface-variant border border-outline-variant hover:border-error hover:text-error px-sm py-1.5 rounded-lg text-metadata font-semibold transition-colors flex items-center justify-center gap-1">
                 <span class="material-symbols-outlined text-[16px]">event_busy</span>{% trans "Release my seat" %}
@@ -70,7 +70,7 @@
             {% if app.is_cancellable %}
               <form id="cancel-form-{{ app.id }}" method="post" action="{% url 'student-cancel-application' app.id %}">
                 {% csrf_token %}
-                <button type="button" onclick="openCancelModal('cancel-form-{{ app.id }}')" class="text-error border border-error/30 bg-error-container/10 hover:bg-error-container/30 px-sm py-1.5 rounded-lg text-metadata font-bold transition-colors">
+                <button type="button" data-cancel-open="cancel-form-{{ app.id }}" class="text-error border border-error/30 bg-error-container/10 hover:bg-error-container/30 px-sm py-1.5 rounded-lg text-metadata font-bold transition-colors">
                   {% trans "Cancel Application (within 24h)" %}
                 </button>
               </form>
@@ -160,17 +160,17 @@
       {% endblocktrans %}
     </p>
     <div class="flex justify-end gap-sm mt-sm">
-      <button type="button" onclick="closeCancelModal()" class="px-md py-sm rounded-lg font-body-md font-bold text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+      <button type="button" data-cancel-close class="px-md py-sm rounded-lg font-body-md font-bold text-on-surface-variant hover:bg-surface-container-highest transition-colors">
         {% trans "No, Keep it" %}
       </button>
-      <button type="button" onclick="submitCancelForm()" class="px-md py-sm rounded-lg font-body-md font-bold bg-error text-on-error hover:bg-error/90 shadow-sm hover:shadow transition-colors">
+      <button type="button" data-cancel-submit class="px-md py-sm rounded-lg font-body-md font-bold bg-error text-on-error hover:bg-error/90 shadow-sm hover:shadow transition-colors">
         {% trans "Yes, Cancel Application" %}
       </button>
     </div>
   </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
   let formToSubmit = null;
   const modal = document.getElementById('cancelModal');
   const modalContent = document.getElementById('cancelModalContent');
@@ -198,5 +198,13 @@
       formToSubmit.submit();
     }
   }
+
+  document.addEventListener('click', function (e) {
+    const t = e.target.closest ? e.target.closest('[data-cancel-open],[data-cancel-close],[data-cancel-submit]') : null;
+    if (!t) return;
+    if (t.hasAttribute('data-cancel-open')) openCancelModal(t.getAttribute('data-cancel-open'));
+    else if (t.hasAttribute('data-cancel-close')) closeCancelModal();
+    else submitCancelForm();
+  });
 </script>
 {% endblock %}

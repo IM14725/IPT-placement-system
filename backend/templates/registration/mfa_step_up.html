@@ -19,7 +19,7 @@
 {% endblock %}
 {% block scripts %}
 <script src="{% load static %}{% static 'js/webauthn.js' %}"></script>
-<script>
+<script nonce="{{ csp_nonce }}">
   (function () {
     var btn = document.getElementById("use-key"); if (!btn) return;
     var box = document.getElementById("key-error");

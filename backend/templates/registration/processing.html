@@ -34,7 +34,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   document.addEventListener('DOMContentLoaded', function() {
     const taskId = '{{ task_id }}';
     const checkInterval = 2000;

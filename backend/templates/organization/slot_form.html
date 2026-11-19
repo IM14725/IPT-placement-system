@@ -154,7 +154,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   window.IPT = window.IPT || {};
   window.IPT.regions = {{ regions_json|safe }};
   window.IPT.profileRegion = "{{ current_region|default:'' }}";

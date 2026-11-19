@@ -130,7 +130,7 @@
         </thead>
         <tbody>
           {% for row in rows %}
-            <tr class="border-b border-surface-variant hover:bg-surface/50 transition-colors cursor-pointer" onclick="window.location.href='{% if tab == 'students' %}{% url 'platform-student-verification' row.pk %}{% else %}{% url 'platform-organization-verification' row.pk %}{% endif %}'">
+            <tr class="border-b border-surface-variant hover:bg-surface/50 transition-colors cursor-pointer" data-href="{% if tab == 'students' %}{% url 'platform-student-verification' row.pk %}{% else %}{% url 'platform-organization-verification' row.pk %}{% endif %}">
               {% if tab == 'students' %}
                 <td class="py-sm px-sm">
                   <div class="flex items-center gap-sm">
@@ -207,7 +207,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   window.IPT = window.IPT || {};
   window.IPT.cascadeMode = "filter";
   window.IPT.regions = {{ regions_json|safe }};

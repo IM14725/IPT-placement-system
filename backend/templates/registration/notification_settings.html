@@ -91,7 +91,7 @@
         <span class="material-symbols-outlined text-[16px]">save</span>
         {% trans "Save Preferences" %}
       </button>
-      <a href="javascript:history.back()"
+      <a href="{% url 'dashboard' %}" data-history-back
          class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors">
         {% trans "Cancel" %}
       </a>

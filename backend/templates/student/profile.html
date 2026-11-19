@@ -165,7 +165,7 @@
 {% block scripts %}
 <script src="{% static 'js/tabs.js' %}"></script>
 <script src="{% static 'js/form-sections.js' %}"></script>
-<script>
+<script nonce="{{ csp_nonce }}">
   window.IPT = window.IPT || {};
   window.IPT.regions = {{ regions_json|safe }};
   window.IPT.institutions = {{ institutions_json|safe }};
@@ -173,7 +173,7 @@
   window.IPT.profileDistrict = "{{ profile.district_id|default:'' }}";
   window.IPT.profileWard = "{{ profile.ward_id|default:'' }}";
 </script>
-<script>
+<script nonce="{{ csp_nonce }}">
   (function () {
     var box = document.getElementById("id_university_not_listed");
     var row = document.getElementById("university-suggestion-row");

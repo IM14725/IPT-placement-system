@@ -169,7 +169,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   // Sections are chosen from the side drawer (links end in #students / #organizations).
   function switchTab(tabId) {
     ['students', 'organizations'].forEach(tab => {

@@ -83,7 +83,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   (function () {
     var list = document.getElementById("ipt-checklist");
     if (!list) return;

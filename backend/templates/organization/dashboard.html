@@ -146,7 +146,7 @@
               {% if can_manage_slots %}
                 <a href="{% url 'organization-slot-duplicate' slot.id %}" class="px-sm py-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">content_copy</span>{% trans "Duplicate" %}</a>
                 {% if slot.can_delete %}
-                  <form method="post" action="{% url 'organization-slot-delete' slot.id %}" onsubmit="return confirm('{% trans 'Delete this slot? Nobody has applied to it yet.' %}');" class="ml-auto">
+                  <form method="post" action="{% url 'organization-slot-delete' slot.id %}" data-ipt-confirm="{% trans 'Delete this slot? Nobody has applied to it yet.' %}" class="ml-auto">
                     {% csrf_token %}
                     <button type="submit" class="p-1.5 text-error hover:bg-error/10 rounded-lg" title="{% trans 'Delete' %}" aria-label="{% trans 'Delete' %}"><span class="material-symbols-outlined text-[20px]">delete</span></button>
                   </form>

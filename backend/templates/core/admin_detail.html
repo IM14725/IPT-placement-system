@@ -40,7 +40,7 @@
     <form method="post" class="flex items-center gap-sm">{% csrf_token %}<input type="hidden" name="action" value="approver"><input type="hidden" name="value" value="{% if person.is_recovery_approver %}0{% else %}1{% endif %}">
       <button class="bg-surface-container font-semibold px-md py-2 rounded-lg" type="submit">{% if person.is_recovery_approver %}Remove as recovery approver{% else %}Designate as recovery approver{% endif %}</button></form>
     {% if person.is_active %}
-      <form method="post" class="flex flex-wrap gap-sm items-end" onsubmit="return confirm('Suspend this administrator?');">{% csrf_token %}<input type="hidden" name="action" value="suspend">
+      <form method="post" class="flex flex-wrap gap-sm items-end" data-ipt-confirm="Suspend this administrator?">{% csrf_token %}<input type="hidden" name="action" value="suspend">
         <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input name="reason" required placeholder="Reason"></div><button class="text-error font-semibold px-md py-2 rounded-lg border border-error/40" type="submit">Suspend</button></form>
     {% else %}
       <form method="post">{% csrf_token %}<input type="hidden" name="action" value="reactivate"><button class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg" type="submit">Reactivate</button></form>

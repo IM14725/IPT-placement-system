@@ -190,7 +190,7 @@
         </a>
         {% url 'platform-student-verification' student.id as student_url %}
         {% include "includes/account_status.html" with kind="student" obj_id=student.id suspended_at=student.user.suspended_at reason=student.user.suspension_reason next_url=student_url %}
-        <form method="post" onsubmit="return confirm('Are you sure you want to deactivate this account? It will be hidden from the platform.');">
+        <form method="post" data-ipt-confirm="Are you sure you want to deactivate this account? It will be hidden from the platform.">
           {% csrf_token %}
           <button class="w-full py-3 px-md bg-error/10 hover:bg-error/20 text-error rounded-lg text-body-md font-medium transition-all flex items-center justify-center gap-xs" name="decision" value="deactivate" type="submit">
             <span class="material-symbols-outlined text-[20px]">delete</span>

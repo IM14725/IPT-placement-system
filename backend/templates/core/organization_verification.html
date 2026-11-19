@@ -157,7 +157,7 @@
         </a>
         {% url 'platform-organization-verification' organization.id as org_url %}
         {% include "includes/account_status.html" with kind="organization" obj_id=organization.id suspended_at=organization.suspended_at reason=organization.suspension_reason next_url=org_url %}
-        <form method="post" onsubmit="return confirm('Are you sure you want to deactivate this account? It will be hidden from the platform.');">
+        <form method="post" data-ipt-confirm="Are you sure you want to deactivate this account? It will be hidden from the platform.">
           {% csrf_token %}
           <button class="w-full py-3 bg-error-container text-on-error-container rounded-full font-body-md text-body-md font-bold hover:bg-error-container/80 transition-all flex items-center justify-center gap-xs" name="decision" value="deactivate" type="submit">
             <span class="material-symbols-outlined text-[20px]">delete</span>

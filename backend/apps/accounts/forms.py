@@ -109,8 +109,8 @@ class RegisterForm(AntiBotMixin, forms.ModelForm):
         fields = ("email", "first_name", "last_name", "phone", "role", "organization_name")  # + extras above
         widgets = {
             "email": forms.EmailInput(attrs={"class": FIELD_CLASS, "placeholder": "you@example.com", "autocomplete": "email"}),
-            "first_name": forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": _("First name")}),
-            "last_name": forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": _("Last name")}),
+            "first_name": forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": _("First name"), "autocomplete": "given-name"}),
+            "last_name": forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": _("Last name"), "autocomplete": "family-name"}),
         }
 
     def clean_email(self):

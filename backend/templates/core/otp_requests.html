@@ -108,8 +108,8 @@
               <form method="post" action="{% url 'platform-otp-action' r.pk %}" class="flex flex-wrap gap-xs">
                 {% csrf_token %}
                 <input type="hidden" name="qs" value="{{ querystring }}">
-                {% if r.is_live %}<button type="submit" name="action" value="revoke" class="px-sm py-1 rounded-lg bg-surface-container font-semibold text-on-surface" onclick="return confirm('Revoke this code? The user will have to request a new one.')">Revoke</button>{% endif %}
-                {% if r.resend_ok %}<button type="submit" name="action" value="resend" class="px-sm py-1 rounded-lg bg-surface-container font-semibold text-on-surface" onclick="return confirm('Send a new code to this destination? The current one stops working.')">Resend</button>{% endif %}
+                {% if r.is_live %}<button type="submit" name="action" value="revoke" class="px-sm py-1 rounded-lg bg-surface-container font-semibold text-on-surface" data-ipt-confirm="Revoke this code? The user will have to request a new one.">Revoke</button>{% endif %}
+                {% if r.resend_ok %}<button type="submit" name="action" value="resend" class="px-sm py-1 rounded-lg bg-surface-container font-semibold text-on-surface" data-ipt-confirm="Send a new code to this destination? The current one stops working.">Resend</button>{% endif %}
                 {% if r.can_view_code %}<button type="submit" name="action" value="reveal" class="px-sm py-1 rounded-lg bg-primary text-on-primary font-semibold">View code</button>{% endif %}
               </form>
             </td>

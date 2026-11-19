@@ -246,7 +246,7 @@
           <div class="ipt-field-box {% if form.password1.errors %}is-error{% endif %}">
             <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span>
             {{ form.password1 }}
-            <button type="button" class="ipt-field-action" onclick="togglePassword(this, '{{ form.password1.id_for_label }}')" aria-label="{% trans "Show password" %}">
+            <button type="button" class="ipt-field-action" data-toggle-password="{{ form.password1.id_for_label }}" aria-label="{% trans "Show password" %}">
               <span class="material-symbols-outlined text-[20px]" data-icon="eye">visibility</span>
             </button>
           </div>
@@ -267,7 +267,7 @@
           <div class="ipt-field-box {% if form.password2.errors %}is-error{% endif %}">
             <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">lock</span></span>
             {{ form.password2 }}
-            <button type="button" class="ipt-field-action" onclick="togglePassword(this, '{{ form.password2.id_for_label }}')" aria-label="{% trans 'Show password' %}">
+            <button type="button" class="ipt-field-action" data-toggle-password="{{ form.password2.id_for_label }}" aria-label="{% trans 'Show password' %}">
               <span class="material-symbols-outlined text-[20px]" data-icon="eye">visibility</span>
             </button>
           </div>
@@ -298,11 +298,11 @@
               I have read and agree to the
               <a href="{{ terms_link }}" target="_blank"
                  class="text-primary font-semibold hover:underline"
-                 onclick="event.stopPropagation()">Terms &amp; Conditions</a>
+                 data-stop-click>Terms &amp; Conditions</a>
               and the
               <a href="{{ privacy_link }}" target="_blank"
                  class="text-primary font-semibold hover:underline"
-                 onclick="event.stopPropagation()">Privacy Policy</a>
+                 data-stop-click>Privacy Policy</a>
               of the IPT Marketplace.
             {% endblocktrans %}
           </span>
@@ -331,7 +331,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   const RI = {
     weak: "{% filter escapejs %}{% trans 'Weak' %}{% endfilter %}",
     fair: "{% filter escapejs %}{% trans 'Fair' %}{% endfilter %}",
@@ -347,14 +347,6 @@
     pwMismatch: "{% filter escapejs %}{% trans 'Passwords do not match.' %}{% endfilter %}",
     tin: "{% filter escapejs %}{% trans 'A TIN has 9 digits, for example 123-456-789.' %}{% endfilter %}"
   };
-
-  function togglePassword(btn, id) {
-    const input = document.getElementById(id);
-    const icon = btn.querySelector('[data-icon]');
-    const show = input.type === "password";
-    input.type = show ? "text" : "password";
-    icon.textContent = show ? "visibility_off" : "visibility";
-  }
 
 
   // ── Wizard: students get 3 steps (role, personal, password); organizations get 4

@@ -25,7 +25,7 @@
           <span class="material-symbols-outlined text-[18px]">done_all</span>{% trans "Mark all as read" %}
         </button>
       </form>
-      <form method="post" action="{% url 'notifications-clear-read' %}" onsubmit="return confirm('{% trans 'Remove every notification you have already read?' %}');">
+      <form method="post" action="{% url 'notifications-clear-read' %}" data-ipt-confirm="{% trans 'Remove every notification you have already read?' %}">
         {% csrf_token %}
         <button type="submit" {% if not read_total %}disabled{% endif %}
                 class="px-md py-sm rounded-lg border border-error/40 text-error font-semibold text-body-md flex items-center gap-xs hover:bg-error/10 transition-colors disabled:opacity-40 disabled:pointer-events-none">
@@ -39,7 +39,7 @@
     <div class="flex flex-col gap-xs flex-1 min-w-0">
       <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="notif-status">{% trans "Show" %}</label>
       <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">mark_email_unread</span></span>
-        <select id="notif-status" name="status" onchange="this.form.submit()">
+        <select id="notif-status" name="status" data-autosubmit>
           <option value="">{% trans "All" %} ({{ total }})</option>
           <option value="unread" {% if status == 'unread' %}selected{% endif %}>{% trans "Unread" %} ({{ unread_total }})</option>
           <option value="read" {% if status == 'read' %}selected{% endif %}>{% trans "Read" %} ({{ read_total }})</option>
@@ -48,7 +48,7 @@
     <div class="flex flex-col gap-xs flex-1 min-w-0">
       <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="notif-type">{% trans "Type" %}</label>
       <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">category</span></span>
-        <select id="notif-type" name="type" onchange="this.form.submit()">
+        <select id="notif-type" name="type" data-autosubmit>
           <option value="">{% trans "All types" %}</option>
           {% for value, label in types %}<option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
         </select></div>

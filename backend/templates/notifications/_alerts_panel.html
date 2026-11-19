@@ -33,7 +33,7 @@
                 <span class="material-symbols-outlined text-[20px]">{% if alert.is_active %}pause{% else %}play_arrow{% endif %}</span>
               </button>
             </form>
-            <form method="post" action="{% url 'student-alerts' %}" onsubmit="return confirm('{% trans 'Delete this alert?' %}');">
+            <form method="post" action="{% url 'student-alerts' %}" data-ipt-confirm="{% trans 'Delete this alert?' %}">
               {% csrf_token %}
               <input type="hidden" name="action" value="delete"><input type="hidden" name="alert_id" value="{{ alert.id }}">
               <button type="submit" class="p-2 rounded-lg text-error hover:bg-error/10" title="{% trans 'Delete' %}" aria-label="{% trans 'Delete' %}"><span class="material-symbols-outlined text-[20px]">delete</span></button>

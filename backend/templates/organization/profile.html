@@ -124,7 +124,7 @@
                       <span class="material-symbols-outlined text-[20px]">visibility</span>
                     </a>
                     {% if can_manage_documents %}
-                    <form method="post" action="{% url 'organization-delete-doc' doc.id %}" onsubmit="return confirm('{% trans "Are you sure you want to delete this document? You will be required to upload a replacement before continuing." %}');">
+                    <form method="post" action="{% url 'organization-delete-doc' doc.id %}" data-ipt-confirm="{% trans "Are you sure you want to delete this document? You will be required to upload a replacement before continuing." %}">
                       {% csrf_token %}
                       <button type="submit" class="flex items-center text-error opacity-0 group-hover:opacity-100 transition-opacity" title="{% trans "Delete" %}">
                         <span class="material-symbols-outlined text-[20px]">delete</span>
@@ -183,7 +183,7 @@
                     </select></div>
                     <button type="submit" class="px-sm py-1.5 rounded-lg bg-surface-container text-on-surface text-metadata font-semibold">{% trans "Set role" %}</button>
                   </form>
-                  <form method="post" action="{% url 'organization-remove-member' m.id %}" class="flex items-center gap-xs" onsubmit="return confirm('{% trans "Revoke this member's access? Their history is kept." as revoke_msg %}{{ revoke_msg|escapejs }}');">
+                  <form method="post" action="{% url 'organization-remove-member' m.id %}" class="flex items-center gap-xs" data-ipt-confirm="{% trans "Revoke this member's access? Their history is kept." as revoke_msg %}{{ revoke_msg }}">
                     {% csrf_token %}
                     <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input name="reason" required maxlength="200" placeholder="{% trans 'Reason for removal' %}"></div>
                     <button type="submit" class="text-error hover:bg-error-container/40 p-1.5 rounded-lg transition-colors" title="{% trans 'Remove access' %}">
@@ -284,7 +284,7 @@
 {% block scripts %}
 <script src="{% static 'js/tabs.js' %}"></script>
 <script src="{% static 'js/form-sections.js' %}"></script>
-<script>
+<script nonce="{{ csp_nonce }}">
   window.IPT = window.IPT || {};
   window.IPT.regions = {{ regions_json|safe }};
   window.IPT.profileRegion = "{{ organization.region_id|default:'' }}";

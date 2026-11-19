@@ -132,7 +132,7 @@ def test_my_slots_actions_are_labelled_with_a_more_menu(ready_org, places):
     assert "p-1.5 text-on-surface-variant" not in body  # the unlabelled icon buttons are gone
     # Delete is the last item of the menu, red, with its confirm; a slot with applications explains why it cannot be deleted.
     delete_url = reverse("organization-slot-delete", args=[empty.id])
-    assert f'action="{delete_url}"' in body and "return confirm(" in body
+    assert f'action="{delete_url}"' in body and "data-ipt-confirm=" in body
     assert reverse("organization-slot-delete", args=[busy.id]) not in body
     assert body.count("cannot be deleted") == 1
     # The actions still work: pause through the menu's form.
@@ -208,7 +208,7 @@ def test_accept_buttons_ask_for_confirmation_with_the_students_name(ready_org, p
     for url in (reverse("organization-applicants", args=[slot.id]), reverse("organization-all-applicants"), reverse("organization-dashboard")):
         body = c.get(url).content.decode()
         form = body[body.index(f'action="{reverse("organization-acceptance-sms", args=[app.id])}"') :][:400]
-        assert "return confirm(" in form and "Asha Juma" in form and "cannot be undone" in form, url
+        assert "data-ipt-confirm=" in form and "Asha Juma" in form and "cannot be undone" in form, url
     bulk = c.get(reverse("organization-all-applicants")).content.decode()
     assert "data-confirm=" in bulk and "__N__" in bulk and "data-none=" in bulk
     # Kiswahili asks too

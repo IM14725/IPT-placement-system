@@ -21,7 +21,7 @@
       <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="applicants-education-level">{% trans "Education level" %}</label>
       <div class="ipt-field-box">
         <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">workspace_premium</span></span>
-        <select id="applicants-education-level" name="education_level" class="ipt-select" onchange="this.form.submit()">
+        <select id="applicants-education-level" name="education_level" class="ipt-select" data-autosubmit>
           <option value="">{% trans "Any level" %}</option>
           {% for value, label in education_levels %}
             <option value="{{ value }}" {% if selected_education_level == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
@@ -33,7 +33,7 @@
       <label class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="applicants-sort">{% trans "Sort by" %}</label>
       <div class="ipt-field-box">
         <span class="ipt-field-icon"><span class="material-symbols-outlined text-[18px]">sort</span></span>
-        <select id="applicants-sort" name="sort" class="ipt-select" onchange="this.form.submit()">
+        <select id="applicants-sort" name="sort" class="ipt-select" data-autosubmit>
           <option value="newest" {% if sort == 'newest' %}selected{% endif %}>{% trans "Newest paid" %}</option>
           <option value="earliest" {% if sort == 'earliest' %}selected{% endif %}>{% trans "Oldest paid" %}</option>
         </select>

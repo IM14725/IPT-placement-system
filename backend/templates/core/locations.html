@@ -64,7 +64,7 @@
                 <td class="py-sm px-md">
                   <div class="flex flex-wrap gap-xs items-center">
                     <a href="?kind={{ kind }}&edit={{ row.id }}" class="px-sm py-1 rounded-full bg-surface-container font-metadata text-metadata">Edit</a>
-                    <form method="post" onsubmit="return confirm('Delete this {{ label|lower }}?');">{% csrf_token %}
+                    <form method="post" data-ipt-confirm="Delete this {{ label|lower }}?">{% csrf_token %}
                       <input type="hidden" name="kind" value="{{ kind }}">
                       <input type="hidden" name="id" value="{{ row.id }}">
                       <button name="action" value="delete" class="px-sm py-1 rounded-full bg-error/10 text-error font-metadata text-metadata" type="submit">Delete</button>

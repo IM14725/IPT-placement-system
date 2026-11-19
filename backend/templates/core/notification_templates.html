@@ -13,7 +13,7 @@
       <div class="p-md bg-surface-container-low flex flex-col gap-sm">
         <div class="ipt-field-box">
           <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span>
-          <input id="template-search" type="search" placeholder="Search templates" oninput="filterTemplates(this.value)" autocomplete="off">
+          <input id="template-search" type="search" placeholder="Search templates" autocomplete="off">
         </div>
         {% if free_events %}
           <a href="?new=1" class="bg-primary text-on-primary hover:opacity-90 px-md py-sm rounded-lg font-body-md font-semibold flex items-center justify-center gap-xs transition-opacity">
@@ -61,7 +61,7 @@
               <label class="font-body-md font-semibold text-on-surface" for="pick-event">System message</label>
               <div class="ipt-field-box">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">bolt</span></span>
-                <select id="pick-event" name="event" onchange="this.form.submit()">
+                <select id="pick-event" name="event" data-autosubmit>
                   {% for e in free_events %}<option value="{{ e.key }}"{% if e.key == event.key %} selected{% endif %}>{{ e.label }}</option>{% endfor %}
                 </select>
               </div>
@@ -71,7 +71,7 @@
               <label class="font-body-md font-semibold text-on-surface" for="pick-copy">Start from</label>
               <div class="ipt-field-box">
                 <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">content_copy</span></span>
-                <select id="pick-copy" name="copy" onchange="this.form.submit()">
+                <select id="pick-copy" name="copy" data-autosubmit>
                   <option value="">The built-in wording</option>
                   {% for t in templates %}<option value="{{ t.key }}"{% if t.key == copy_from %} selected{% endif %}>Copy of: {{ t.name }}</option>{% endfor %}
                 </select>
@@ -103,7 +103,7 @@
                   <span class="material-symbols-outlined text-[18px]">content_copy</span>Duplicate
                 </a>
                 {% endif %}
-                <button type="submit" name="action" value="delete" formnovalidate onclick="return confirm('Delete this template? The built-in wording will be used instead.')"
+                <button type="submit" name="action" value="delete" formnovalidate data-ipt-confirm="Delete this template? The built-in wording will be used instead."
                         class="border border-error/50 text-error hover:bg-error/10 px-md py-sm rounded-lg font-body-md font-medium flex items-center gap-xs">
                   <span class="material-symbols-outlined text-[18px]">delete</span>Delete
                 </button>
@@ -216,13 +216,17 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   function filterTemplates(value) {
     var term = value.toLowerCase();
     document.querySelectorAll('#template-list > a').forEach(function (item) {
       item.style.display = item.textContent.toLowerCase().indexOf(term) !== -1 ? '' : 'none';
     });
   }
+  (function () {
+    var search = document.getElementById('template-search');
+    if (search) search.addEventListener('input', function () { filterTemplates(search.value); });
+  })();
   (function () {
     var form = document.getElementById('template-form');
     if (!form) return;

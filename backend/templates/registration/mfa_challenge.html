@@ -38,14 +38,14 @@
   {% endif %}
 
   <div class="flex justify-between font-metadata text-metadata">
-    <a class="text-primary hover:underline" href="{% url 'logout' %}">Cancel</a>
+    <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="text-primary hover:underline">Cancel</button></form>
     <a class="text-primary hover:underline" href="{% url 'admin-recovery-request' %}">Locked out? Request recovery</a>
   </div>
 </div>
 {% endblock %}
 {% block scripts %}
 <script src="{% load static %}{% static 'js/webauthn.js' %}"></script>
-<script>
+<script nonce="{{ csp_nonce }}">
   (function () {
     var btn = document.getElementById("use-key");
     if (!btn) return;

@@ -71,7 +71,7 @@
 </div>
 
 {% if regions_json %}
-<script>
+<script nonce="{{ csp_nonce }}">
   (function(){
     var regions = {{ regions_json|safe }};
     var regionSelect = document.getElementById('id_region');

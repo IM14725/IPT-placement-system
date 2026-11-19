@@ -115,7 +115,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   (function() {
     var region = document.getElementById("filter-region");
     var district = document.getElementById("filter-district");

@@ -13,7 +13,7 @@
     <li>Do not save them in a normal file, email, chat or shared password document.</li>
     <li>Any older codes are now invalid.</li>
   </ul>
-  <button type="button" onclick="window.print()" class="justify-self-start text-primary font-semibold hover:underline">Print</button>
+  <button type="button" data-print class="justify-self-start text-primary font-semibold hover:underline">Print</button>
   <a class="bg-primary text-on-primary font-semibold py-3 rounded-lg text-center" href="{% url 'mfa-settings' %}">I have stored them safely</a>
 </div>
 {% endblock %}

@@ -67,7 +67,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   window.IPT = window.IPT || {};
   window.IPT.paymentRef = "{{ payment.reference_id }}";
   window.IPT.paymentAmount = "{{ payment.amount }}";

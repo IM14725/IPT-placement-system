@@ -16,7 +16,7 @@
       </button>
     </form>
   {% else %}
-    <form method="post" action="{% url 'platform-account-status' %}" class="flex flex-col gap-xs" onsubmit="return confirm('Suspend this account? They will be signed out and unable to log in until reactivated.');">
+    <form method="post" action="{% url 'platform-account-status' %}" class="flex flex-col gap-xs" data-ipt-confirm="Suspend this account? They will be signed out and unable to log in until reactivated.">
       {% csrf_token %}
       <input type="hidden" name="kind" value="{{ kind }}">
       <input type="hidden" name="id" value="{{ obj_id }}">

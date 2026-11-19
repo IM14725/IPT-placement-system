@@ -53,7 +53,7 @@
       {% blocktrans with name=app.student.user.full_name|default:app.student.user.email asvar accept_msg %}Accept {{ name }}? They are notified by SMS and email and this cannot be undone.{% endblocktrans %}
       <details class="relative">
         <summary class="list-none cursor-pointer px-sm py-1.5 rounded-lg bg-[#166534] text-white font-semibold text-body-md inline-flex items-center gap-1 hover:bg-[#14532d]"><span class="material-symbols-outlined text-[16px]">how_to_reg</span>{% trans "Accept" %}</summary>
-        <form method="post" action="{% url 'organization-acceptance-sms' app.id %}" onsubmit="return confirm('{{ accept_msg|escapejs }}');" class="absolute right-0 z-20 mt-2 w-[min(20rem,calc(100vw-2rem))] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl p-sm flex flex-col gap-xs">
+        <form method="post" action="{% url 'organization-acceptance-sms' app.id %}" data-ipt-confirm="{{ accept_msg }}" class="absolute right-0 z-20 mt-2 w-[min(20rem,calc(100vw-2rem))] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl p-sm flex flex-col gap-xs">
           {% csrf_token %}
           <input type="hidden" name="next" value="{{ next_url }}">
           <label class="font-metadata text-metadata text-on-surface-variant" for="msg-{{ app.id }}">{% trans "Acceptance Note (Optional)" %}</label>

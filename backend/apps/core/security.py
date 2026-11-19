@@ -1,13 +1,13 @@
 """Core security utilities and middleware:
 - ``safe_json_dumps``: HTML-safe JSON serialization for inline ``<script>`` blocks.
-- ``SecurityHeadersMiddleware``: Content-Security-Policy, Permissions-Policy, Referrer-Policy, nosniff.
+- ``SecurityHeadersMiddleware``: Permissions-Policy, Referrer-Policy, nosniff; refuses TRACE/TRACK.
+  (Content-Security-Policy is ``settings.SECURE_CSP`` + Django's ContentSecurityPolicyMiddleware.)
 - ``MaintenanceModeMiddleware``: Enforces the ``maintenance_mode`` PlatformSetting (503 for non-admins).
 """
 
 import json
 
-from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotAllowed
 
 MAINTENANCE_EXEMPT_PREFIXES = (
     "/auth/",
@@ -41,6 +41,11 @@ class SecurityHeadersMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        if request.method in ("TRACE", "TRACK"):
+            # Never needed, and a classic vector for reflecting request headers back to a page.
+            response = HttpResponseNotAllowed(["GET", "HEAD", "POST", "OPTIONS"])
+            response["X-Content-Type-Options"] = "nosniff"
+            return response
         response = self.get_response(request)
         response.setdefault("X-Content-Type-Options", "nosniff")
         response.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
@@ -48,22 +53,9 @@ class SecurityHeadersMiddleware:
             "Permissions-Policy",
             "camera=(), microphone=(), geolocation=(), payment=()",
         )
-        if "Content-Security-Policy" not in response:
-            response["Content-Security-Policy"] = getattr(
-                settings,
-                "CONTENT_SECURITY_POLICY",
-                (
-                    "default-src 'self'; "
-                    "script-src 'self' 'unsafe-inline'; "
-                    "style-src 'self' 'unsafe-inline'; "
-                    "font-src 'self' data:; "
-                    "img-src 'self' data: blob:; "
-                    "connect-src 'self' ws: wss:; "
-                    "frame-ancestors 'none'; "
-                    "base-uri 'self'; "
-                    "form-action 'self'"
-                ),
-            )
+        # The Content-Security-Policy comes from settings.SECURE_CSP via Django's
+        # ContentSecurityPolicyMiddleware (it needs a per-request nonce); a view that sets its own
+        # policy (e.g. the sandboxed document viewer) keeps it.
         return response
 
 

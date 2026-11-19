@@ -53,13 +53,13 @@
                       </form>
                     {% endif %}
                     {% if uni.verification_status != 'REJECTED' %}
-                      <form method="post" onsubmit="return confirm('Reject this university? Students linked to it will be unlinked.');">{% csrf_token %}
+                      <form method="post" data-ipt-confirm="Reject this university? Students linked to it will be unlinked.">{% csrf_token %}
                         <input type="hidden" name="id" value="{{ uni.id }}">
                         <button name="action" value="reject" class="px-sm py-1 rounded-full bg-error/10 text-error font-metadata text-metadata" type="submit">Reject</button>
                       </form>
                     {% endif %}
                     {% if uni.verification_status == 'PENDING' %}
-                      <form method="post" class="flex items-center gap-xs" onsubmit="return confirm('Merge into the selected university? This record will be deleted.');">{% csrf_token %}
+                      <form method="post" class="flex items-center gap-xs" data-ipt-confirm="Merge into the selected university? This record will be deleted.">{% csrf_token %}
                         <input type="hidden" name="id" value="{{ uni.id }}">
                         <div class="ipt-field-box max-w-[11rem]"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><select name="target" required>
                           <option value="">Merge into…</option>

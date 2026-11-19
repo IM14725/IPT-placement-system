@@ -18,7 +18,7 @@
         {% if a.review_pending %}<p class="rounded-lg bg-error-container/40 px-sm py-xs text-on-error-container">Security review pending after use.</p>{% endif %}
         {% if a.rotation_required %}<p class="rounded-lg bg-[#fff4e5] text-[#a16207] px-sm py-xs">Credentials must be rotated.</p>{% endif %}
         <div class="flex flex-wrap gap-sm">
-          <form method="post">{% csrf_token %}<input type="hidden" name="account_id" value="{{ a.pk }}"><button name="action" value="rotate" class="bg-surface-container font-semibold px-md py-1.5 rounded-lg" type="submit" onclick="return confirm('Rotate the credential? The old one stops working.');">Rotate credentials</button></form>
+          <form method="post">{% csrf_token %}<input type="hidden" name="account_id" value="{{ a.pk }}"><button name="action" value="rotate" class="bg-surface-container font-semibold px-md py-1.5 rounded-lg" type="submit" data-ipt-confirm="Rotate the credential? The old one stops working.">Rotate credentials</button></form>
           {% if a.review_pending %}<form method="post">{% csrf_token %}<input type="hidden" name="account_id" value="{{ a.pk }}"><button name="action" value="reviewed" class="bg-primary text-on-primary font-semibold px-md py-1.5 rounded-lg" type="submit">Mark review complete</button></form>{% endif %}
         </div>
       </div>

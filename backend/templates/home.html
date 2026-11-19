@@ -326,7 +326,7 @@
 {% endblock %}
 {% block scripts %}
 <script src="{% static 'js/public-search.js' %}"></script>
-<script>
+<script nonce="{{ csp_nonce }}">
   (function () {
     var tabs = document.querySelectorAll("[data-how-tab]");
     var panels = { student: document.getElementById("panel-student"), org: document.getElementById("panel-org") };

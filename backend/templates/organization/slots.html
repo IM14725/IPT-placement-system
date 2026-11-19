@@ -53,7 +53,7 @@
   </div>
 
   {% if slots %}
-    <form class="ipt-filterbar bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm" data-filterbar data-list-filter data-filter-remove="{% trans 'Remove filter' %}" onsubmit="return false">
+    <form class="ipt-filterbar bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm" data-filterbar data-list-filter data-filter-remove="{% trans 'Remove filter' %}" data-no-submit>
       <div class="flex items-end gap-xs">
         <div class="flex-1 min-w-0 flex flex-col gap-xs">
           <label class="hidden md:block font-metadata text-metadata text-on-surface-variant uppercase tracking-wider" for="slot-q">{% trans "Search" %}</label>
@@ -153,7 +153,7 @@
                   <a href="{% url 'organization-slot-duplicate' slot.id %}" class="w-full px-sm min-h-[44px] flex items-center gap-sm rounded-lg text-body-md font-body-md text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">content_copy</span>{% trans "Duplicate (post again)" %}</a>
                   <div class="h-px bg-outline-variant/60 my-xs"></div>
                   {% if slot.can_delete %}
-                  <form method="post" action="{% url 'organization-slot-delete' slot.id %}" onsubmit="return confirm('{% trans "Delete this slot?" as delete_msg %}{{ delete_msg|escapejs }}');">
+                  <form method="post" action="{% url 'organization-slot-delete' slot.id %}" data-ipt-confirm="{% trans "Delete this slot?" as delete_msg %}{{ delete_msg }}">
                     {% csrf_token %}
                     <button class="w-full text-left px-sm min-h-[44px] flex items-center gap-sm rounded-lg text-body-md font-body-md text-error hover:bg-error-container/40 transition-colors"><span class="material-symbols-outlined text-[20px]">delete</span>{% trans "Delete" %}</button>
                   </form>

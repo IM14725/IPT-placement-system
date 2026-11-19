@@ -16,7 +16,7 @@ Uses: user, profile (students), organization + my_membership + can_edit_profile 
           <label class="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-container-lowest cursor-pointer shadow-md hover:bg-primary/90 transition-colors" title="{% trans 'Change logo' %}">
             <span class="material-symbols-outlined text-[18px]">camera_alt</span>
             <span class="sr-only">{% trans "Change logo" %}</span>
-            <input type="file" name="logo" accept="image/jpeg,image/png,image/webp" class="sr-only" onchange="this.form.submit()">
+            <input type="file" name="logo" accept="image/jpeg,image/png,image/webp" class="sr-only" data-autosubmit>
           </label>
         </form>
       {% endif %}

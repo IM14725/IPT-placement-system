@@ -53,8 +53,7 @@
     <form id="bulk-accept-form" method="post" action="{% url 'organization-bulk-accept' %}" data-bulk-bar
           class="hidden fixed inset-x-0 bottom-0 z-40 bg-surface-container-lowest border-t border-outline-variant shadow-2xl px-md py-sm flex-col gap-xs md:inset-x-auto md:right-md md:bottom-md md:w-[26rem] md:rounded-xl md:border"
           data-confirm="{% trans 'Accept __N__ selected applicant(s)? Each one is notified by SMS and email and this cannot be undone.' %}"
-          data-none="{% trans 'Select at least one applicant first.' %}"
-          onsubmit="var n = document.querySelectorAll('input[name=application]:checked').length; if (!n) { alert(this.dataset.none); return false; } return confirm(this.dataset.confirm.replace('__N__', n));">
+          data-none="{% trans 'Select at least one applicant first.' %}">
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ request.get_full_path }}">
       <details>
@@ -98,7 +97,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   (function () {
     var all = document.getElementById("select-all");
     var bar = document.querySelector("[data-bulk-bar]");
@@ -116,6 +115,11 @@
       all.checked = list.length > 0 && n === list.length;
       all.indeterminate = n > 0 && n < list.length;
     }
+    bar.addEventListener("submit", function (e) {
+      var n = document.querySelectorAll('input[name=application]:checked').length;
+      if (!n) { alert(bar.dataset.none); e.preventDefault(); return; }
+      if (!confirm(bar.dataset.confirm.replace("__N__", n))) e.preventDefault();
+    });
     all.addEventListener("change", function () {
       boxes().forEach(function (box) { box.checked = all.checked; });
       sync();
