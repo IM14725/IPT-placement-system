@@ -32,3 +32,6 @@ Thumbs.db
 *.log
 # Local tooling (standalone Tailwind CLI)
 tools/
+
+# Playwright MCP snapshots/screenshots
+.playwright-mcp/
