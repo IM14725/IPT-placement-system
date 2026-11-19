@@ -221,7 +221,7 @@ def test_unverified_saved_phone_gets_a_verify_button_and_it_works(capsys):
     code = re.search(r"code is (\d{6})", capsys.readouterr().out).group(1)
     verify_page = c.get("/auth/account/verify/phone/").content.decode()
     assert "Verify your phone" in verify_page and "Verify your new" not in verify_page
-    assert f">{code}<" in verify_page  # dev mock: the code is on screen
+    assert f">{code}<" not in verify_page and "Dev mode" not in verify_page  # the code is never on screen
     assert c.post("/auth/account/verify/phone/", {"code": code}).status_code == 302
     user.refresh_from_db()
     assert user.phone == "255712345678" and user.phone_verified
@@ -241,12 +241,14 @@ def test_verify_current_phone_needs_the_password():
 
 
 @pytest.mark.django_db
-def test_dev_code_is_not_shown_to_the_user_when_the_code_was_really_sent(settings, monkeypatch):
-    monkeypatch.setattr(otp, "send_sms", lambda phone, text, **kw: {"status": "SENT", "provider": "astracall-sms"})
+def test_verify_page_never_shows_the_code_even_when_delivery_is_mocked(settings, monkeypatch):
+    monkeypatch.setattr(otp, "send_sms", lambda phone, text, **kw: {"status": "SENT", "provider": "mock-sms"})
     user = _user(phone_verified=False)
     c = _login(user)
     c.post("/auth/account/phone/", {"phone": user.phone, "current_password": PW})
-    assert "Dev mode" not in c.get("/auth/account/verify/phone/").content.decode()
+    page = c.get("/auth/account/verify/phone/").content.decode()
+    code = otp.unseal(OneTimeCode.objects.get())
+    assert "Dev mode" not in page and code not in page
 
 
 # ── outcome bookkeeping ────────────────────────────────────────────────────────────────────────

@@ -201,24 +201,6 @@ def verify_otp(user, purpose, code):
     return INVALID
 
 
-def live_debug_code(user, purpose):
-    """Dev only: the live code, shown on the signed-in verify page when a mock adapter "sent" it
-    (nothing reaches a phone or inbox). None for any real delivery."""
-    if not getattr(settings, "OTP_STORE_MOCK_CODE", False):
-        return None
-    otp = (
-        OneTimeCode.objects.filter(
-            user=user, purpose=purpose, consumed_at__isnull=True, expires_at__gt=timezone.now()
-        )
-        .exclude(code_enc="")
-        .order_by("-created_at")
-        .first()
-    )
-    if otp is None or not otp.delivery_provider.startswith("mock"):
-        return None
-    return unseal(otp)
-
-
 def revoke(otp):
     """Void one pending code (admin action). Returns True if it was still live."""
     return bool(

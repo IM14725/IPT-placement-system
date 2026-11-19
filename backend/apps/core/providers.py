@@ -66,7 +66,7 @@ def send_sms(phone: str, text: str, *, kind: str = "transactional", idempotency_
     key = idempotency_key or str(uuid.uuid4())
     payload = {
         "to": _international(phone),
-        "sender_id": getattr(settings, "ASTRACALL_SENDER_ID", "") or "IPT MARKET",
+        "sender_id": getattr(settings, "ASTRACALL_SENDER_ID", "") or "POSTSMS",
         "message": text,
         "reference": key[:64],
     }

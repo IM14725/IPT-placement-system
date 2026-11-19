@@ -192,8 +192,6 @@ def verify_contact(request, kind):
             "heading": heading,
             "intro": intro,
             "submit_label": submit_label,
-            # Dev only (OTP_STORE_MOCK_CODE and a mock-delivered code): the SMS never leaves the machine.
-            "dev_code": otp.live_debug_code(user, purpose),
         },
     )
 

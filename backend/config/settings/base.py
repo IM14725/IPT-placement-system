@@ -285,8 +285,6 @@ SMS_BACKEND = env("SMS_BACKEND", default="auto")
 # from the OTP requests page and relay it by hand when SMS/email delivery fails (each view is audited).
 # Set False to stop storing codes at all.
 OTP_ADMIN_CAN_VIEW_CODES = env.bool("OTP_ADMIN_CAN_VIEW_CODES", default=True)
-# Dev only: also print the code on the signed-in verify page when SMS/email is mocked.
-OTP_STORE_MOCK_CODE = False
 
 # Payment Configuration (Selcom)
 SELCOM_BASE_URL = env("SELCOM_BASE_URL", default="https://apitest.selcommobile.com")
