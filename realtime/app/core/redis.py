@@ -12,7 +12,13 @@ _pub: aioredis.Redis | None = None
 def get_pub() -> aioredis.Redis:
     global _pub
     if _pub is None:
-        _pub = aioredis.from_url(settings.redis_url, decode_responses=True)
+        # redis>=8 enables TCP keepalive probes (30s idle + 3x5s) that fail
+        # with WinError 121 after ~45s on idle pubsub reads over WSL2 loopback.
+        _pub = aioredis.from_url(
+            settings.redis_url,
+            decode_responses=True,
+            socket_keepalive=False,
+        )
     return _pub
 
 
