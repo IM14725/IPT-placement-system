@@ -782,7 +782,7 @@ def payment(request, payment_id):
 
 @login_required
 def view_document(request, doc_id):
-    from apps.documents.validators import build_safe_file_response
+    from apps.documents.validators import build_safe_file_response, missing_file_response
 
     doc = get_object_or_404(Document, id=doc_id)
     user = request.user
@@ -892,6 +892,9 @@ def cancel_application(request, app_id):
         from apps.companies.permissions import APPLICANTS_VIEW
         from apps.core.audit import audit_event
         from apps.notifications.inapp import NotificationType, notify_many, organization_recipients
+    missing = missing_file_response(doc.file)
+    if missing is not None:
+        return missing
 
         organization = application.slot.organization
         notify_many(
@@ -915,7 +918,7 @@ def cancel_application(request, app_id):
     return redirect("student-applications")
 @login_required
 def view_application_letter(request, app_id):
-    from apps.documents.validators import build_safe_file_response
+    from apps.documents.validators import build_safe_file_response, missing_file_response
 
     if not request.user.is_student:
         return HttpResponseForbidden(gettext("Student account required."))
@@ -937,3 +940,6 @@ def view_application_letter(request, app_id):
             )
     filename = app.letter_original_name or "application_letter.pdf"
     return build_safe_file_response(app.application_letter, filename=filename)
+    missing = missing_file_response(app.application_letter)
+    if missing is not None:
+        return missing

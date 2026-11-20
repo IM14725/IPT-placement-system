@@ -78,6 +78,23 @@ def validate_upload(file) -> str:
     return sha256_of(file)
 
 
+def missing_file_response(file_field):
+    """A quick 404 when the stored file is gone from disk (else None).
+
+    Without this the open() below raised FileNotFoundError: a 500 (and, in dev, Django's slow debug
+    page) for every record whose file was lost, e.g. after media/ was cleared or not copied over.
+    """
+    from django.http import HttpResponseNotFound
+    from django.utils.translation import gettext
+
+    try:
+        if file_field and file_field.storage.exists(file_field.name):
+            return None
+    except Exception:  # noqa: BLE001 - an unreachable store counts as unavailable
+        pass
+    return HttpResponseNotFound(gettext("This file is no longer available. Please upload it again."))
+
+
 def build_safe_file_response(file_field, filename: str, declared_mime: str = ""):
     """Return a hardened FileResponse with server-verified MIME, CSP sandbox, and nosniff."""
     from pathlib import Path

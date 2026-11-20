@@ -1371,7 +1371,7 @@ def reviews(request):
 @login_required
 @org_permission_required(APPLICANTS_VIEW)
 def view_application_letter(request, app_id):
-    from apps.documents.validators import build_safe_file_response
+    from apps.documents.validators import build_safe_file_response, missing_file_response
 
     organization = _require_approved_organization(request)
     if organization is None:
@@ -1383,6 +1383,9 @@ def view_application_letter(request, app_id):
         return HttpResponseForbidden(gettext("This application has not been paid."))
     if not app.application_letter:
         return HttpResponseForbidden(gettext("No application letter uploaded."))
+    missing = missing_file_response(app.application_letter)
+    if missing is not None:
+        return missing
     if app.letter_sha256:
         app.application_letter.open("rb")
         try:

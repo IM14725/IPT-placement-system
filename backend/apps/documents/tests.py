@@ -115,3 +115,20 @@ def test_view_document_sets_security_headers_and_blocks_error_scan(owner, client
     resp_err = client.get(reverse("document-view", args=[doc.id]))
     assert resp_err.status_code == 410
 
+
+
+@pytest.mark.django_db
+def test_view_document_with_file_missing_on_disk_is_a_quick_404_not_a_500(owner, client):
+    from django.urls import reverse
+
+    doc = Document.objects.create(
+        owner=owner,
+        doc_type=Document.DocType.STUDENT_ID,
+        file=SimpleUploadedFile("card.png", make_png_bytes(), content_type="image/png"),
+        original_name="card.png",
+    )
+    doc.file.storage.delete(doc.file.name)  # the record survives, the file is gone
+    client.force_login(owner)
+    resp = client.get(reverse("document-view", args=[doc.id]))
+    assert resp.status_code == 404
+    assert b"no longer available" in resp.content

@@ -4579,6 +4579,9 @@ msgstr "Barua pepe hii tayari inahusishwa na akaunti. Tafadhali tumia barua pepe
 msgid "This field is required."
 msgstr "Sehemu hii inahitajika."
 
+msgid "This file is no longer available. Please upload it again."
+msgstr "Faili hii haipatikani tena. Tafadhali ipakie upya."
+
 msgid "This is a high-risk action. Confirm with your hardware security key, then submit again."
 msgstr "Hiki ni kitendo chenye hatari kubwa. Thibitisha kwa ufunguo wako wa usalama wa kifaa, kisha uwasilishe tena."
 
