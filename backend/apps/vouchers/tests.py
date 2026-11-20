@@ -752,3 +752,10 @@ def test_credit_payments_do_not_inflate_the_platform_metrics(admin_client, place
     from apps.core.views import _compute_metrics
 
     assert _compute_metrics("30")["total_fees"] == Decimal("15000")
+
+
+@pytest.mark.django_db
+def test_voucher_form_draws_multi_selects_with_the_chip_picker(admin_client):
+    page = admin_client.get(reverse("platform-voucher-new")).content.decode()
+    assert page.count("data-multi-picker") == 5  # universities, regions, districts, organizations, slot districts
+    assert 'data-empty="Any university"' in page and "/static/js/multi-picker.js" in page

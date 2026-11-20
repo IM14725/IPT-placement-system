@@ -9,7 +9,11 @@ from apps.vouchers.models import CodeMode, DiscountType, FeeVoucher, VoucherBatc
 from apps.vouchers.services import MAX_CODES_PER_REQUEST, normalize_code
 
 SELECT = {"class": "ipt-select"}
-MULTI = {"size": 6}
+def multi(empty):
+    """A multi-select drawn by static/js/multi-picker.js (chips + search); a plain list without JavaScript."""
+    return forms.SelectMultiple(attrs={"data-multi-picker": "", "data-empty": empty, "size": 6})
+
+
 DATETIME_FORMATS = ["%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M", "%Y-%m-%d"]
 
 
@@ -75,15 +79,15 @@ class VoucherBatchForm(forms.Form):
 
     # ---- Who may use it (empty = no limit; every filled restriction must match)
     universities = forms.ModelMultipleChoiceField(
-        queryset=None, required=False, label="Universities", widget=forms.SelectMultiple(attrs=MULTI),
-        help_text="Hold Ctrl (or Cmd) to pick several.",
+        queryset=None, required=False, label="Universities", widget=multi("Any university"),
+        help_text="Type to search and click to add. Leave empty for any university.",
     )
     courses = forms.CharField(
         required=False, label="Courses", widget=forms.Textarea(attrs={"rows": 3}),
         help_text="One per line, matched to the student's course ignoring capital letters.",
     )
-    regions = forms.ModelMultipleChoiceField(queryset=None, required=False, label="Student's region", widget=forms.SelectMultiple(attrs=MULTI))
-    districts = forms.ModelMultipleChoiceField(queryset=None, required=False, label="Student's district", widget=forms.SelectMultiple(attrs=MULTI))
+    regions = forms.ModelMultipleChoiceField(queryset=None, required=False, label="Student's region", widget=multi("Any region"))
+    districts = forms.ModelMultipleChoiceField(queryset=None, required=False, label="Student's district", widget=multi("Any district"))
     signup_from = forms.DateTimeField(
         required=False, label="Registered from", input_formats=DATETIME_FORMATS,
         widget=forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
@@ -100,14 +104,14 @@ class VoucherBatchForm(forms.Form):
 
     # ---- Which slots it applies to
     organizations = forms.ModelMultipleChoiceField(
-        queryset=None, required=False, label="Only these organizations", widget=forms.SelectMultiple(attrs=MULTI),
+        queryset=None, required=False, label="Only these organizations", widget=multi("Any organization"),
         help_text="For example a company funding its own intake.",
     )
     slot_ids = forms.CharField(
         required=False, label="Only these slots (IDs)", widget=forms.Textarea(attrs={"rows": 2}),
         help_text="One slot ID per line (from the slot's page address).",
     )
-    slot_districts = forms.ModelMultipleChoiceField(queryset=None, required=False, label="Slot is in district", widget=forms.SelectMultiple(attrs=MULTI))
+    slot_districts = forms.ModelMultipleChoiceField(queryset=None, required=False, label="Slot is in district", widget=multi("Any district"))
     slot_start_from = forms.DateField(required=False, label="Slot starts from", widget=forms.DateInput(attrs={"type": "date"}))
     slot_start_to = forms.DateField(required=False, label="Slot starts until", widget=forms.DateInput(attrs={"type": "date"}))
 
