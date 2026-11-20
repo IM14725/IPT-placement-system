@@ -616,6 +616,10 @@ def check_auth_task(request, task_id):
                 token = TimestampSigner(salt=AUTH_FINALIZE_SALT).sign(res['user_id'])
                 request.session[AUTH_FINALIZE_SESSION_KEY] = token
                 request.session.pop(AUTH_TASK_SESSION_KEY, None)
+                if res.get('resumed'):
+                    from apps.accounts.views_otp import RESUMED_KEY
+
+                    request.session[RESUMED_KEY] = True
                 return JsonResponse({'status': 'SUCCESS', 'token': token})
             else:
                 error_msg = res.get('message', 'Registration could not be completed.') if isinstance(res, dict) else 'Registration could not be completed.'

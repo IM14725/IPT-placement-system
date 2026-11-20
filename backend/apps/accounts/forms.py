@@ -151,9 +151,15 @@ class RegisterForm(AntiBotMixin, forms.ModelForm):
 
         return normalize_code(self.cleaned_data.get("voucher_code"))
 
+    @staticmethod
+    def _phone_taken(phone):
+        from apps.accounts.unclaimed import unclaimed_users
+
+        return User.objects.filter(phone=phone).exclude(pk__in=unclaimed_users().values("pk")).exists()
+
     def clean_phone(self):
         phone = normalize_phone(self.cleaned_data.get("phone"))
-        if phone and User.objects.filter(phone=phone).exists():
+        if phone and self._phone_taken(phone):
             raise forms.ValidationError(PHONE_UNAVAILABLE_MESSAGE)
         return self.cleaned_data.get("phone")
 

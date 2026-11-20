@@ -4205,6 +4205,9 @@ msgstr "Inaonyeshwa kwenye ukurasa wa shirika bila jina lako."
 msgid "Sign in"
 msgstr "Ingia"
 
+msgid "Sign in with your email and password to get a new verification code and finish creating your account."
+msgstr "Ingia kwa barua pepe na nenosiri lako ili upate msimbo mpya wa uthibitisho na ukamilishe kufungua akaunti yako."
+
 msgid "Sign out"
 msgstr "Toka"
 
@@ -5144,6 +5147,9 @@ msgstr "Karibu tena"
 
 msgid "Welcome back to your <span class=\"text-primary-fixed\">training journey.</span>"
 msgstr "Karibu tena katika <span class=\"text-primary-fixed\">safari yako ya mafunzo.</span>"
+
+msgid "Welcome back. Your account was already created, so it keeps the password from your first attempt. If you do not remember it, choose Forgot password on the sign-in page."
+msgstr "Karibu tena. Akaunti yako ilikuwa tayari imefunguliwa, kwa hiyo inabaki na nenosiri ulilotumia mara ya kwanza. Usipolikumbuka, chagua Umesahau nenosiri kwenye ukurasa wa kuingia."
 
 msgid "Welcome!"
 msgstr "Karibu!"

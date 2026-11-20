@@ -21,7 +21,7 @@ from apps.companies.test_dashboard_features import _client, _paid, _slot, alpha,
 def _accept(app, owner, **kw):
     accept_and_notify(app, letter=kw.pop("letter", sample_letter()), actor=owner, **kw)
     app.refresh_from_db()
-    return app.current_letter if hasattr(app, "current_letter") and False else AcceptanceLetter.objects.get(application=app, is_current=True)
+    return AcceptanceLetter.objects.get(application=app, is_current=True)
 
 
 @pytest.fixture
@@ -62,14 +62,14 @@ def test_only_real_pdfs_are_accepted(paid, name, content):
 
 @pytest.mark.django_db
 def test_oversized_and_password_protected_pdfs_are_refused(paid, settings):
-    from pypdf import PdfReader as R, PdfWriter
+    from pypdf import PdfWriter
 
     app, owner = paid
     settings.MAX_UPLOAD_SIZE = 1000
     with pytest.raises(AcceptanceError, match="2 MB"):
         accept_and_notify(app, letter=sample_letter(), actor=owner)
     settings.MAX_UPLOAD_SIZE = 2 * 1024 * 1024
-    writer = PdfWriter(clone_from=R(io.BytesIO(letter_pdf_bytes())))
+    writer = PdfWriter(clone_from=PdfReader(io.BytesIO(letter_pdf_bytes())))
     writer.encrypt("secret")
     out = io.BytesIO()
     writer.write(out)
@@ -95,7 +95,7 @@ def test_the_letter_is_stamped_on_the_last_page_locked_and_fingerprinted(alpha, 
     assert not (reader.user_access_permissions & 8)  # modify
     assert not (reader.user_access_permissions & 16)  # copy
     assert reader.user_access_permissions & 4  # print stays allowed
-    assert letter.source_sha256 == hashlib.sha256(letter_pdf_bytes(pages=2)).hexdigest() or letter.source_sha256
+    assert len(letter.source_sha256) == 64 and letter.source_sha256 != letter.sha256  # the upload and the stamped file differ
 
 
 @pytest.mark.django_db

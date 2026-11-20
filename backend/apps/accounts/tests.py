@@ -115,6 +115,7 @@ def test_organization_registration_form_requires_organization_and_first_member_d
     assert "first_name" in student_form.errors and "last_name" in student_form.errors
 
     process_registration_task(_task_data())
+    User.objects.update(email_verified=True)  # a real, verified organization: its name and email are taken
     dup = RegisterForm(
         _organization_form_data(
             email="other@personal.tz", phone="255712000222",

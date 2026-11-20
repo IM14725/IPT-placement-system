@@ -128,7 +128,7 @@ def can_resend(row):
         if row.destination != otp_lib.destination_for(row.user, row.channel):
             return False
     if row.purpose == OtpPurpose.RECOVERY:
-        return otp_lib.channel_verified(row.user, row.channel)
+        return otp_lib.recovery_allowed(row.user, row.channel)
     return True
 
 

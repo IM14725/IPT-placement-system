@@ -43,7 +43,7 @@ def _form_data(**over):
 # ------------------------------------------------------------------ #9 no account enumeration
 @pytest.mark.django_db
 def test_existing_email_gets_a_decoy_result_and_the_owner_is_told(mailoutbox):
-    User.objects.create_user(email="owner@example.tz", password=STRONG, role=UserRole.STUDENT)
+    User.objects.create_user(email="owner@example.tz", password=STRONG, role=UserRole.STUDENT, email_verified=True)
     result = process_registration_task(_form_data(email="owner@example.tz"))
     assert result == {"status": "success", "user_id": DECOY_USER_ID}
     assert User.objects.filter(email="owner@example.tz").count() == 1
@@ -55,7 +55,7 @@ def test_existing_email_gets_a_decoy_result_and_the_owner_is_told(mailoutbox):
 
 @pytest.mark.django_db
 def test_owner_is_not_spammed_by_repeated_attempts(mailoutbox):
-    User.objects.create_user(email="spam@example.tz", password=STRONG, role=UserRole.STUDENT)
+    User.objects.create_user(email="spam@example.tz", password=STRONG, role=UserRole.STUDENT, email_verified=True)
     for _ in range(4):
         process_registration_task(_form_data(email="spam@example.tz"))
     assert len(mailoutbox) == 1
@@ -63,7 +63,7 @@ def test_owner_is_not_spammed_by_repeated_attempts(mailoutbox):
 
 @pytest.mark.django_db
 def test_register_form_does_not_reveal_an_existing_email():
-    User.objects.create_user(email="taken@example.tz", password=STRONG, role=UserRole.STUDENT)
+    User.objects.create_user(email="taken@example.tz", password=STRONG, role=UserRole.STUDENT, email_verified=True)
     form = RegisterForm(
         {
             "role": "STUDENT", "email": "taken@example.tz", "first_name": "A", "last_name": "B",
@@ -75,7 +75,7 @@ def test_register_form_does_not_reveal_an_existing_email():
 
 @pytest.mark.django_db
 def test_duplicate_phone_message_does_not_say_why():
-    User.objects.create_user(email="p@example.tz", password=STRONG, role=UserRole.STUDENT, phone="255712345678")
+    User.objects.create_user(email="p@example.tz", password=STRONG, role=UserRole.STUDENT, phone="255712345678", email_verified=True)
     form = RegisterForm(
         {
             "role": "STUDENT", "email": "q@example.tz", "first_name": "A", "last_name": "B", "phone": "255712345678",
@@ -89,7 +89,7 @@ def test_duplicate_phone_message_does_not_say_why():
 
 @pytest.mark.django_db
 def test_phone_race_in_the_task_returns_the_generic_message():
-    User.objects.create_user(email="p2@example.tz", password=STRONG, role=UserRole.STUDENT, phone="255755000111")
+    User.objects.create_user(email="p2@example.tz", password=STRONG, role=UserRole.STUDENT, phone="255755000111", email_verified=True)
     result = process_registration_task(_form_data(email="fresh@example.tz", phone="255755000111"))
     assert result["status"] == "error"
     assert "can't be used" in result["message"] and "already" not in result["message"]
@@ -97,7 +97,7 @@ def test_phone_race_in_the_task_returns_the_generic_message():
 
 @pytest.mark.django_db
 def test_decoy_finalize_leads_to_the_code_page_and_no_code_ever_works(client):
-    User.objects.create_user(email="victim@example.tz", password=STRONG, role=UserRole.STUDENT)
+    User.objects.create_user(email="victim@example.tz", password=STRONG, role=UserRole.STUDENT, email_verified=True)
     token = TimestampSigner(salt=AUTH_FINALIZE_SALT).sign(DECOY_USER_ID)
     session = client.session
     session[AUTH_FINALIZE_SESSION_KEY] = token

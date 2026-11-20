@@ -88,6 +88,15 @@ def channel_verified(user, channel):
     return bool(user.phone and user.phone_verified)
 
 
+def recovery_allowed(user, channel):
+    """May a password-recovery code go to this channel? A phone must be verified. The email always may:
+    the code is only readable by whoever owns the mailbox, and entering it verifies the email (this is how
+    someone who stopped at the sign-up code page, and forgot their password, gets back in)."""
+    if channel == OtpChannel.EMAIL:
+        return bool(user.email)
+    return channel_verified(user, channel)
+
+
 def send_otp(user, purpose, channel, destination=None):
     if getattr(settings, "RATE_LIMIT_ENABLED", True):
         rl = consume(

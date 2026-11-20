@@ -1,6 +1,7 @@
 from celery import shared_task
 from django.db import IntegrityError, transaction
 from apps.accounts.models import User
+from apps.accounts.unclaimed import is_unclaimed, release_conflicts
 from apps.core.providers import send_email
 from apps.core.rate_limit import consume
 from apps.core.redis_client import acquire_lock, release_lock
@@ -54,9 +55,22 @@ def process_registration_task(form_data):
     # We acquire lock inside the task to prevent duplicate celery jobs
     token = acquire_lock(f"register:{email}", ttl_ms=10000, blocking=True)
     try:
-        if User.objects.filter(email=email).exists():
+        existing = User.objects.filter(email=email).first()
+        if existing is not None:
+            if is_unclaimed(existing):
+                # Someone who stopped at the code page and came back: nothing was ever proven, so do not
+                # leave them at a dead end. Keep the account as it is and send a fresh code to the mailbox.
+                return {"status": "success", "user_id": str(existing.id), "resumed": True}
             _notify_existing_owner(email, form_data.get("login_url", ""), form_data.get("reset_url", ""))
             return {"status": "success", "user_id": DECOY_USER_ID}
+
+        # An earlier attempt with a mistyped email may still hold this phone or organization name.
+        release_conflicts(
+            keep_email=email,
+            phone=form_data.get("phone", ""),
+            organization_name=form_data.get("organization_name", "") if form_data.get("role") == "ORGANIZATION" else "",
+            organization_email=form_data.get("organization_email", "") if form_data.get("role") == "ORGANIZATION" else "",
+        )
 
         user = User(
             email=email,
@@ -100,7 +114,10 @@ def process_registration_task(form_data):
         return {"status": "success", "user_id": str(user.id)}
     except IntegrityError:
         # A race on the unique constraints: an email clash is the decoy outcome, anything else is the phone.
-        if User.objects.filter(email=email).exists():
+        existing = User.objects.filter(email=email).first()
+        if existing is not None:
+            if is_unclaimed(existing):
+                return {"status": "success", "user_id": str(existing.id), "resumed": True}
             _notify_existing_owner(email, form_data.get("login_url", ""), form_data.get("reset_url", ""))
             return {"status": "success", "user_id": DECOY_USER_ID}
         return {"status": "error", "message": PHONE_UNAVAILABLE}

@@ -13,6 +13,7 @@ from apps.core.rate_limit import consume, token_bucket
 VERIFY_USER_KEY = "otp_register_user_id"
 RESET_EMAIL_KEY = "pwd_reset_email"
 RESET_CHANNEL_KEY = "pwd_reset_channel"
+RESUMED_KEY = "register_resumed"
 
 _EXPIRED_MSG = "That code has expired or can no longer be used. Request a new one."
 _INVALID_MSG = "Incorrect code. Please try again."
@@ -113,6 +114,10 @@ def verify_email(request):
         return _decoy_verify_email(request)
     user = User.objects.filter(pk=request.session.get(VERIFY_USER_KEY), is_active=True).first()
     if user is None:
+        messages.info(
+            request,
+            gettext("Sign in with your email and password to get a new verification code and finish creating your account."),
+        )
         return redirect("login")
     form = OtpCodeForm(request.POST or None)
     if request.method == "POST":
@@ -125,6 +130,11 @@ def verify_email(request):
                 user.email_verified = True
                 user.save(update_fields=["email_verified"])
                 request.session.pop(VERIFY_USER_KEY, None)
+                if request.session.pop(RESUMED_KEY, None):
+                    messages.info(
+                        request,
+                        gettext("Welcome back. Your account was already created, so it keeps the password from your first attempt. If you do not remember it, choose Forgot password on the sign-in page."),
+                    )
                 response, error = _start_session(request, user)
                 if response is not None:
                     return response
@@ -156,7 +166,7 @@ def reset_method(request):
     if request.method == "POST" and form.is_valid():
         channel = form.cleaned_data["channel"]
         user = User.objects.filter(email=email, is_active=True).first()
-        if user is not None and otp.channel_verified(user, channel):
+        if user is not None and otp.recovery_allowed(user, channel):
             otp.send_otp(user, OtpPurpose.RECOVERY, channel)
         request.session[RESET_CHANNEL_KEY] = channel
         return redirect("reset-verify")
@@ -177,17 +187,20 @@ def reset_verify(request):
     form = OtpCodeForm(request.POST or None)
     if request.method == "POST":
         if request.POST.get("action") == "resend":
-            if user is not None and otp.channel_verified(user, channel):
+            if user is not None and otp.recovery_allowed(user, channel):
                 otp.send_otp(user, OtpPurpose.RECOVERY, channel)
             messages.success(request, gettext("If a code can be sent, it is on its way."))
             return redirect("reset-verify")
         if form.is_valid():
             result = otp.EXPIRED
-            if user is not None and otp.channel_verified(user, channel):
+            if user is not None and otp.recovery_allowed(user, channel):
                 result = otp.verify_otp(user, OtpPurpose.RECOVERY, form.cleaned_data["code"])
             if result == otp.OK:
                 request.session.pop(RESET_EMAIL_KEY, None)
                 request.session.pop(RESET_CHANNEL_KEY, None)
+                if channel == OtpChannel.EMAIL and not user.email_verified:
+                    user.email_verified = True  # they just proved they own the mailbox
+                    user.save(update_fields=["email_verified"])
                 request.session["pwd_reset_verified_user_id"] = str(user.id)
                 return redirect("reset-password")
             form.add_error("code", _INVALID_MSG if result == otp.INVALID else _EXPIRED_MSG)

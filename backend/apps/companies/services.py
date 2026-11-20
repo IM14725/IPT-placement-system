@@ -22,15 +22,22 @@ class OrganizationSessionLimitError(Exception):
     pass
 
 
+def _held_by_real_accounts(qs):
+    """Organizations of an abandoned sign-up (see ``accounts.unclaimed``) do not block a new registration."""
+    from apps.accounts.unclaimed import unclaimed_users
+
+    return qs.exclude(user__in=unclaimed_users())
+
+
 def organization_name_taken(name):
-    return Organization.objects.filter(name__iexact=(name or "").strip()).exists()
+    return _held_by_real_accounts(Organization.objects.filter(name__iexact=(name or "").strip())).exists()
 
 
 organization_name_taken = organization_name_taken
 
 
 def organization_email_taken(email):
-    return Organization.objects.filter(email__iexact=(email or "").strip()).exists()
+    return _held_by_real_accounts(Organization.objects.filter(email__iexact=(email or "").strip())).exists()
 
 
 def create_organization(
