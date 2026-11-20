@@ -149,3 +149,12 @@ def test_receipt_email_stays_well_under_gmails_clipping_limit(places, org, setti
     settings.SITE_URL = "https://marketplace.example.co.tz"  # a longer production address makes a bigger QR
     html, _ = build_receipt_email(_paid(places, org), "Payment Receipt")
     assert len(html.encode()) < 70_000  # Gmail clips messages at about 102 KB
+
+
+@pytest.mark.django_db
+def test_receipt_email_footer_has_the_social_links(places, org):
+    from apps.core import email_layout
+
+    html, _images = build_receipt_email(_paid(places, org), "Payment Receipt")
+    for name, url, _color in email_layout.SOCIAL_LINKS:
+        assert f'href="{url}"' in html and f">{name}<" in html

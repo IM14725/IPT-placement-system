@@ -73,3 +73,12 @@ def test_hosted_logo_url_replaces_the_embedded_image(settings):
     settings.EMAIL_LOGO_URL = "http://insecure.example.tz/logo.png"  # only https is used
     providers.send_email("Welcome", ["a@x.tz"], "hello")
     assert "insecure.example.tz" not in _html(mail.outbox[-1])
+
+
+def test_every_email_footer_links_to_the_platform_social_profiles():
+    for subject, body in (("Welcome", "hello"), ("OTP", "Your IPT Marketplace verification code is 123456. It expires in 5 minutes.")):
+        providers.send_email(subject, ["a@x.tz"], body)
+        page = _html(mail.outbox[-1])
+        for name, url, _color in email_layout.SOCIAL_LINKS:
+            assert f'href="{url}"' in page and f">{name}<" in page
+        assert "Follow us" in page

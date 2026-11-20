@@ -29,6 +29,13 @@ TINT = "#EEF0FF"
 PAGE_BG = "#F4F5F7"
 ACCENT = "#F59A23"  # the orange in the logo
 
+# The same profiles as the site footer ("Follow Us" in templates/base.html), without the tracking parameters.
+SOCIAL_LINKS = (
+    ("Instagram", "https://www.instagram.com/semauya.tech", "#E1306C"),
+    ("TikTok", "https://www.tiktok.com/@semauya.tech", "#111111"),
+    ("Facebook", "https://www.facebook.com/share/1Z9PivTbuM/", "#1877F2"),
+)
+
 _URL = re.compile(r"https?://[^\s<>\"']+")
 _OTP = re.compile(r"verification code is\s+(\d{4,8})\.?\s*(.*)", re.I | re.S)
 _DETAIL = re.compile(r"^([A-Z][\w ]{1,28}):\s+(\S.*)$")
@@ -148,6 +155,7 @@ def render_email_html(
             "logo_url": _logo_url(),
             "has_logo": LOGO_PATH.exists(),
             "year": date.today().year,
+            "social_links": [{"name": n, "url": u, "color": c} for n, u, c in SOCIAL_LINKS],
             "c": {
                 "primary": PRIMARY, "primary_container": PRIMARY_CONTAINER, "ink": INK, "muted": MUTED,
                 "soft": SOFT, "line": LINE, "page": PAGE_BG, "accent": ACCENT,
