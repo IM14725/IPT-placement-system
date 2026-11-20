@@ -103,15 +103,56 @@ def send_sms(phone: str, text: str, *, kind: str = "transactional", idempotency_
     }
 
 
-def send_email(subject: str, to: list, body: str, attachments=None) -> dict:
+class _BrandedEmail:
+    """Mixin for ``EmailMultiAlternatives``: puts the logo inside the HTML part as an inline ``cid:`` image
+    (multipart/related), the layout Gmail, Outlook and phone clients all render without a download prompt."""
+
+    logo: bytes | None = None
+    logo_cid = "ipt-logo"
+
+    def message(self, *, policy=None):
+        msg = super().message(**({"policy": policy} if policy is not None else {}))
+        if self.logo:
+            html_part = msg.get_body(preferencelist=("html",))
+            if html_part is not None:
+                html_part.add_related(
+                    self.logo, "image", "png", cid=f"<{self.logo_cid}>", disposition="inline"
+                )
+        return msg
+
+
+def send_email(subject: str, to: list, body: str, attachments=None, *, html: bool = True) -> dict:
+    """Send an email. ``body`` is plain text; it is also sent as a branded HTML part (logo, platform
+    colours, OTP code box) unless ``html=False``. A problem building the HTML never blocks the email."""
+    from django.core.mail import EmailMultiAlternatives
+
+    class Branded(_BrandedEmail, EmailMultiAlternatives):
+        pass
+
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@iptmarketplace.com")
-    email = EmailMessage(
+    email = Branded(
         subject=subject,
         body=body,
         to=to,
         from_email=from_email,
     )
-    
+
+    if html:
+        try:
+            from apps.core import email_layout
+
+            page = email_layout.render_email_html(subject, body)
+            email.attach_alternative(page, "text/html")
+            if f"cid:{email_layout.LOGO_CID}" in page:
+                email.logo = email_layout.logo_bytes()
+                email.logo_cid = email_layout.LOGO_CID
+        except Exception:  # noqa: BLE001 - the plain-text email must still go out
+            import logging
+
+            logging.getLogger(__name__).warning("Branded HTML email could not be built; sending plain text", exc_info=True)
+            email.alternatives = []
+            email.logo = None
+
     if attachments:
         for attachment in attachments:
             if isinstance(attachment, str):
@@ -122,7 +163,7 @@ def send_email(subject: str, to: list, body: str, attachments=None) -> dict:
                     attachment.get("content", b""),
                     attachment.get("mimetype")
                 )
-                
+
     email.send(fail_silently=False)
     
     # If the default backend is the console, log it so dev knows it was mocked

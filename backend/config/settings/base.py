@@ -280,6 +280,9 @@ else:
 ASTRACALL_API_KEY = env("ASTRACALL_API_KEY", default="")
 ASTRACALL_BASE_URL = env("ASTRACALL_BASE_URL", default="https://astracall.cc/api/v1")
 ASTRACALL_SENDER_ID = env("ASTRACALL_SENDER_ID", default="POSTSMS")
+# Public https URL of the logo shown at the top of emails (a hosted image, like Google's emails, so Gmail shows no
+# attachment chip). Empty = embed the logo inside each email instead.
+EMAIL_LOGO_URL = env("EMAIL_LOGO_URL", default="")
 # "auto": real AstraCall when ASTRACALL_API_KEY is set, else the console mock. "mock" / "astracall" force one.
 SMS_BACKEND = env("SMS_BACKEND", default="auto")
 # Keep every OTP, encrypted, until it is used or expires, so an admin with user-management edit can read it

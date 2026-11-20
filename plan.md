@@ -728,3 +728,11 @@ Admin-issued discount codes for the application fee, a signup reference that app
 - **Kiswahili:** student-facing strings are in `scripts/sw/ui.json`; the admin pages/modules are listed in `apps/core/test_translations.py` as English-only.
 - **Not built (on purpose):** sponsor-purchased batches (a second payment flow, invoices, refunds on unused codes), sponsor self-service issuing, a "first application only" batch restriction, year-of-study/gender restrictions. Add a restriction by adding a field on `VoucherBatch`, a check in `student_restriction_blocker` / `slot_restriction_blocker` and a field in `vouchers/forms.py`.
 - **Tests:** `apps/vouchers/tests.py` (pricing, every restriction, caps and release, apply flow, registration reference, triggers, admin console permissions, ledger split).
+
+## Branded emails (2026-11-20)
+Every email now goes out as plain text **and** a branded HTML part, built centrally in `providers.send_email` (`apps/core/email_layout.py`, template `templates/email/branded.html`). Callers still pass plain text; `message.body` is unchanged, so code parsers and the text fallback keep working.
+- **Look:** platform tokens (indigo `#3525CD`/`#4F46E5`, ink `#191C1D`) with the logo's orange as the footer accent, table layout with inline styles (Gmail/Outlook/phones), 600 px max width, hidden preheader.
+- **Logo:** `static/images/email-logo.png` (cropped 300 px copy of `logo.png`) is embedded inline as a `cid:ipt-logo` image inside the HTML part (`multipart/related`), so it shows without a hosted URL and works on localhost/dev tunnels. Django 6.1 has no related-part API, so `_BrandedEmail.message()` uses stdlib `add_related`.
+- **Layouts picked from the text:** "verification code is NNNNNN" -> large spaced code box + expiry + "never share" note; a lone `Label: https://...` line -> button; 2+ consecutive `Key: value` lines -> details table (temporary passwords, sign-in URL); everything else -> paragraphs with http(s) links. All text is HTML-escaped; only http(s) URLs become links.
+- **Safety:** any error while building the HTML is logged and the plain-text email is still sent (an OTP must never be blocked by styling). `send_email(..., html=False)` skips the HTML.
+- **Tests:** `apps/core/test_email_layout.py`.
