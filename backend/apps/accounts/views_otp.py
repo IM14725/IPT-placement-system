@@ -30,7 +30,19 @@ def _mask_email(email):
 def begin_email_verification(request, user):
     """Registration sends the code to the email address only (no channel choice)."""
     request.session[VERIFY_USER_KEY] = str(user.id)
-    otp.send_otp(user, OtpPurpose.REGISTER, OtpChannel.EMAIL)
+    result = otp.send_otp(user, OtpPurpose.REGISTER, OtpChannel.EMAIL)
+    if not result.sent:
+        # The page says "we sent a code"; tell the user when that did not happen so they can retry.
+        if result.retry_after:
+            messages.warning(
+                request,
+                gettext('Please wait %(v1)s seconds before requesting another code.') % {"v1": result.retry_after},
+            )
+        else:
+            messages.warning(
+                request,
+                gettext('We could not send your code just now. Press "Send a new code" below to try again.'),
+            )
     return redirect("verify-email")
 
 

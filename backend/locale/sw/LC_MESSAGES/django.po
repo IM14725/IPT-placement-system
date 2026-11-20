@@ -5042,6 +5042,9 @@ msgstr "Hatukuweza kutuma msimbo. Tafadhali angalia taarifa na ujaribu tena."
 msgid "We could not send a code. Please try again shortly."
 msgstr "Hatukuweza kutuma msimbo. Tafadhali jaribu tena baadaye."
 
+msgid "We could not send your code just now. Press \"Send a new code\" below to try again."
+msgstr "Hatukuweza kutuma msimbo wako sasa hivi. Bonyeza \"Tuma msimbo mpya\" hapa chini ujaribu tena."
+
 msgid "We couldn't verify this request. Please reload the page and try again."
 msgstr "Hatukuweza kuthibitisha ombi hili. Tafadhali pakia ukurasa upya na ujaribu tena."
 

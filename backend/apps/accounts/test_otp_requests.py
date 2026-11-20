@@ -564,3 +564,42 @@ def test_expired_ciphertext_is_wiped_by_the_task_and_on_verify():
     OneTimeCode.objects.filter(consumed_at__isnull=True).update(expires_at=timezone.now() - timedelta(seconds=1))
     assert otp.verify_otp(user, OtpPurpose.CHANGE_PHONE, "123456") == otp.EXPIRED
     assert not OneTimeCode.objects.exclude(code_enc="").exists()
+
+
+@pytest.mark.django_db
+def test_verify_email_page_warns_when_the_first_code_could_not_be_sent(monkeypatch):
+    from django.core.signing import TimestampSigner
+
+    from apps.accounts.views import AUTH_FINALIZE_SALT, AUTH_FINALIZE_SESSION_KEY
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("smtp down")
+
+    monkeypatch.setattr(otp, "send_email", boom)
+    user = User.objects.create_user(email="new@x.tz", password=PW, role=UserRole.STUDENT, phone="255712300001")
+    c = Client()
+    token = TimestampSigner(salt=AUTH_FINALIZE_SALT).sign(str(user.id))
+    session = c.session
+    session[AUTH_FINALIZE_SESSION_KEY] = token
+    session.save()
+    assert c.post("/auth/finalize/", {"token": token}).url.endswith("/auth/verify-email/")
+    page = c.get("/auth/verify-email/").content.decode()
+    assert "could not send your code" in page
+    assert OneTimeCode.objects.get().delivery_status == OtpDelivery.FAILED
+
+
+@pytest.mark.django_db
+def test_verify_email_page_has_no_warning_when_the_code_was_sent(monkeypatch):
+    from django.core.signing import TimestampSigner
+
+    from apps.accounts.views import AUTH_FINALIZE_SALT, AUTH_FINALIZE_SESSION_KEY
+
+    monkeypatch.setattr(otp, "send_email", lambda *a, **k: {"status": "SENT", "provider": "smtp"})
+    user = User.objects.create_user(email="new2@x.tz", password=PW, role=UserRole.STUDENT, phone="255712300002")
+    c = Client()
+    token = TimestampSigner(salt=AUTH_FINALIZE_SALT).sign(str(user.id))
+    session = c.session
+    session[AUTH_FINALIZE_SESSION_KEY] = token
+    session.save()
+    c.post("/auth/finalize/", {"token": token})
+    assert "could not send your code" not in c.get("/auth/verify-email/").content.decode()

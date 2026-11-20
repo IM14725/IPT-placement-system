@@ -538,6 +538,7 @@
  "Select your university (optional)": "Chagua chuo chako (si lazima)",
  "Send SMS code": "Tuma msimbo kwa SMS",
  "Send a new code": "Tuma msimbo mpya",
+ "We could not send your code just now. Press \"Send a new code\" below to try again.": "Hatukuweza kutuma msimbo wako sasa hivi. Bonyeza \"Tuma msimbo mpya\" hapa chini ujaribu tena.",
  "Send code": "Tuma msimbo",
  "Send code to new email": "Tuma msimbo kwa barua pepe mpya",
  "Send report": "Tuma ripoti",
