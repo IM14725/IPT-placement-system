@@ -11,6 +11,10 @@ from django.conf import settings
 logger = logging.getLogger("security")
 
 DEFAULT_APPLICATION_FEE = Decimal("15000.00")
+# Gateway transaction ids of payments that were never paid in money: a free re-application after a
+# cancellation (full fee recorded, nothing collected) and a 100% voucher (amount 0).
+CREDIT_TXN_PREFIX = "CREDIT-"
+VOUCHER_TXN_PREFIX = "VOUCHER-"
 DEFAULT_WEBHOOK_MAX_AGE_SECONDS = 300
 
 

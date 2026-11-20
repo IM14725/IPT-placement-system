@@ -103,6 +103,22 @@ class RegisterForm(AntiBotMixin, forms.ModelForm):
         label=_("Your position in the organization"),
         widget=forms.TextInput(attrs={"class": FIELD_CLASS, "placeholder": _("e.g. Human Resources Manager")}),
     )
+    # A voucher or sponsor code (students only). It never blocks registration: whatever happens to
+    # it is reported to the student after the account exists (vouchers.services.attach_signup_reference).
+    voucher_code = forms.CharField(
+        required=False,
+        max_length=40,
+        label=_("Voucher or sponsor code"),
+        widget=forms.TextInput(
+            attrs={
+                "class": FIELD_CLASS + " uppercase tracking-wider",
+                "placeholder": "IPT-XXXX-XXXX",
+                "autocomplete": "off",
+                "autocapitalize": "characters",
+                "spellcheck": "false",
+            }
+        ),
+    )
 
     class Meta:
         model = User
@@ -128,6 +144,12 @@ class RegisterForm(AntiBotMixin, forms.ModelForm):
 
     def clean_tin(self):
         return normalize_tin(self.cleaned_data.get("tin"))
+
+    def clean_voucher_code(self):
+        # Only the shape is cleaned here; an unknown or expired code must not stop registration.
+        from apps.vouchers.services import normalize_code
+
+        return normalize_code(self.cleaned_data.get("voucher_code"))
 
     def clean_phone(self):
         phone = normalize_phone(self.cleaned_data.get("phone"))

@@ -2,10 +2,14 @@ from django.urls import path
 
 from apps.core import views, views_admins, views_governance, views_otp
 from apps.locations import views_admin as locations_admin
+from apps.vouchers import views_admin as voucher_admin
 
 urlpatterns = [
     path("", views.health, name="health"),
     path("ledger/", views.ledger, name="platform-ledger"),
+    path("vouchers/", voucher_admin.batch_list, name="platform-vouchers"),
+    path("vouchers/new/", voucher_admin.batch_create, name="platform-voucher-new"),
+    path("vouchers/<uuid:pk>/", voucher_admin.batch_detail, name="platform-voucher-detail"),
     path("metrics/", views.metrics, name="platform-metrics"),
     # Phase 5 — Admin console
     path("verifications/", views.verification_queue, name="platform-verifications"),

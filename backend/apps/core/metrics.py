@@ -98,9 +98,11 @@ def build_charts(range_key):
 
     # ---- Revenue (paid payments, by day of payment)
     paid = Payment.objects.filter(status=PaymentStatus.PAID, paid_at__isnull=False)
+    # Revenue is cash collected: a free re-application credit is recorded at the full fee but no money moved.
+    paid_cash = paid.exclude(gateway_txn_id__startswith="CREDIT-")
     trunc = TruncMonth("paid_at") if monthly else TruncDate("paid_at")
     revenue = _fill(
-        paid.filter(paid_at__gte=start).annotate(bucket=trunc).values("bucket").annotate(n=Sum("amount")),
+        paid_cash.filter(paid_at__gte=start).annotate(bucket=trunc).values("bucket").annotate(n=Sum("amount")),
         dates, monthly, cast=float,
     )
     trends.append(_series_chart("revenue", "Revenue (TZS)", "account_balance_wallet", labels,

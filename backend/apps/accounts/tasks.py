@@ -32,6 +32,20 @@ def _notify_existing_owner(email, login_url="", reset_url=""):
         pass
 
 
+def _attach_voucher_reference(user, raw_code):
+    """Save the voucher/sponsor code given at registration. A problem here must never undo the signup."""
+    if not raw_code:
+        return
+    try:
+        from apps.vouchers.services import attach_signup_reference
+
+        attach_signup_reference(user, raw_code)
+    except Exception:  # noqa: BLE001
+        import logging
+
+        logging.getLogger(__name__).exception("Could not record the signup voucher reference")
+
+
 @shared_task
 def process_registration_task(form_data):
     """Create the account. ``form_data`` carries ``password_hash`` (never the raw password)."""
@@ -79,6 +93,7 @@ def process_registration_task(form_data):
             user.last_name = (form_data.get("last_name") or "").strip()
             with transaction.atomic():  # a unique-constraint clash must leave the connection usable
                 user.save()
+            _attach_voucher_reference(user, form_data.get("voucher_code"))
         from apps.core.funnel import track
 
         track("account_created")

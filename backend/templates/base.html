@@ -398,6 +398,7 @@
         <a class="side-link {% is_active request 'platform-reports' %}" href="{% url 'platform-reports' %}"><span class="material-symbols-outlined">flag</span><span class="side-label">{% trans "Reports" %}</span></a>
         <p class="side-heading"><span class="side-label">{% trans "Finance &amp; insight" %}</span></p>
         <a class="side-link {% is_active request 'platform-ledger' %}" href="{% url 'platform-ledger' %}"><span class="material-symbols-outlined">receipt_long</span><span class="side-label">{% trans "Ledger" %}</span></a>
+        <a class="side-link {% is_active request 'platform-vouchers' %}" href="{% url 'platform-vouchers' %}"><span class="material-symbols-outlined">sell</span><span class="side-label">{% trans "Vouchers" %}</span></a>
         <a class="side-link {% is_active request 'platform-metrics' %}" href="{% url 'platform-metrics' %}"><span class="material-symbols-outlined">monitoring</span><span class="side-label">{% trans "Metrics" %}</span></a>
         <p class="side-heading"><span class="side-label">{% trans "System" %}</span></p>
         <a class="side-link {% is_active request 'platform-templates' %}" href="{% url 'platform-templates' %}"><span class="material-symbols-outlined">mail</span><span class="side-label">{% trans "Templates" %}</span></a>

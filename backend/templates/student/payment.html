@@ -32,6 +32,18 @@
         <span class="font-label-caps text-label-caps text-on-surface bg-surface-container px-2 py-1 rounded tracking-widest">{{ payment.reference_id }}</span>
       </div>
     </div>
+    {% if redemption %}
+    <div class="flex flex-col gap-xs bg-surface p-sm rounded-lg">
+      <div class="flex justify-between items-center">
+        <span class="font-metadata text-metadata text-on-surface-variant">{% trans "Application fee" %}</span>
+        <span class="font-body-md text-body-md text-on-surface font-medium">TZS {{ redemption.fee_amount|money }}</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="font-metadata text-metadata text-on-surface-variant">{% blocktrans trimmed with code=redemption.voucher.display_code %}Voucher {{ code }}{% endblocktrans %}</span>
+        <span class="font-body-md text-body-md text-primary font-medium">- TZS {{ redemption.discount_amount|money }}</span>
+      </div>
+    </div>
+    {% endif %}
     <div class="flex flex-col items-center justify-center bg-surface-container py-md px-lg rounded-lg shadow-inner">
       <span class="font-label-caps text-label-caps text-on-surface-variant mb-1">{% trans "Amount Due" %}</span>
       <div class="flex items-baseline gap-xs">

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}New voucher batch{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto flex flex-col gap-md">
+  <a href="{% url 'platform-vouchers' %}" class="text-primary font-semibold hover:underline flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Vouchers</a>
+  <h1 class="font-display text-display text-on-surface">New voucher batch</h1>
+  <p class="font-body-md text-on-surface-variant">Set the discount, how the codes work and who may use them. Anything you leave empty is not restricted. Issuing a batch needs your hardware key and is recorded in the audit log.</p>
+  {% if messages %}{% for message in messages %}<div class="rounded-lg bg-[#fff4e5] text-[#a16207] px-sm py-sm">{{ message }}</div>{% endfor %}{% endif %}
+  <form method="post" class="flex flex-col gap-md" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="rounded-lg bg-error-container/40 border-l-2 border-error px-sm py-sm text-on-error-container">{{ form.non_field_errors.0 }}</div>{% endif %}
+    {% for title, fields in groups %}
+      <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-md">
+        <h2 class="font-headline-md text-headline-md text-on-surface">{{ title }}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+          {% for field in fields %}
+            {% if field.name == "description" or field.name == "courses" or field.name == "allowed_emails" or field.name == "slot_ids" %}
+              {% include "includes/form_field.html" with field=field wrapper_class="md:col-span-2" %}
+            {% else %}
+              {% include "includes/form_field.html" with field=field %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endfor %}
+    <div class="flex justify-end"><button class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg" type="submit">Create batch</button></div>
+  </form>
+</div>
+{% endblock %}

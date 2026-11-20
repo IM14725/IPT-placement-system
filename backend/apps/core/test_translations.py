@@ -24,6 +24,7 @@ ADMIN_TEMPLATES = {
     "core/organization_verification.html", "core/recovery_queue.html", "core/reports.html",
     "core/role_management.html", "core/student_verification.html", "core/universities.html",
     "core/verification_queue.html",
+    "core/vouchers.html", "core/voucher_form.html", "core/voucher_detail.html",
     "includes/account_status.html",
     "registration/admin_recovery_request.html", "registration/mfa_challenge.html",
     "registration/mfa_recovery_codes.html", "registration/mfa_settings.html", "registration/mfa_step_up.html",
@@ -34,6 +35,7 @@ ADMIN_PYTHON = (
     "apps/core/admin", "apps/core/permissions.py", "apps/core/urls.py",
     "apps/accounts/views_mfa.py", "apps/accounts/mfa.py", "apps/accounts/recovery.py", "apps/accounts/breakglass.py",
     "apps/accounts/admins.py", "apps/locations/views_admin.py",
+    "apps/vouchers/views_admin.py", "apps/vouchers/forms.py", "apps/vouchers/stats.py",
 )
 GETTEXT_CALL = re.compile(r"\b(gettext|ngettext)\(")
 

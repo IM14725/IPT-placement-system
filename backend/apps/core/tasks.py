@@ -11,8 +11,11 @@ def aggregate():
     from apps.payments.models import Payment, PaymentStatus
     from apps.students.models import StudentProfile, VerificationStatus
 
-    totals = Payment.objects.filter(status=PaymentStatus.PAID).aggregate(
-        total_fees=Sum("amount"), paid_count=Count("id")
+    # Cash collected only: a free re-application credit is recorded at the full fee but no money moved.
+    totals = (
+        Payment.objects.filter(status=PaymentStatus.PAID)
+        .exclude(gateway_txn_id__startswith="CREDIT-")
+        .aggregate(total_fees=Sum("amount"), paid_count=Count("id"))
     )
     snapshot = {
         "total_fees": float(totals["total_fees"] or 0),

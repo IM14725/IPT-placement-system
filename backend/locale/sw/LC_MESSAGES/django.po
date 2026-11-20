@@ -855,6 +855,12 @@ msgstr "%(fill_percent)s%%%% Imejaa"
 msgid "%(get_category_display)s · sent %(created_at)s"
 msgstr "%(get_category_display)s · imetumwa %(created_at)s"
 
+msgid "%(label)s: fee TZS %(fee)s, discount TZS %(discount)s. You pay TZS %(charged)s."
+msgstr "%(label)s: ada TZS %(fee)s, punguzo TZS %(discount)s. Unalipa TZS %(charged)s."
+
+msgid "%(label)s: the fee is fully covered. You pay TZS 0."
+msgstr "%(label)s: ada imelipiwa yote. Unalipa TZS 0."
+
 msgid "%(n).1f days"
 msgstr "siku %(n).1f"
 
@@ -945,6 +951,9 @@ msgstr[1] "wiki %(n)s"
 msgid "%(org)s accepted your application for %(slot)s. Download your acceptance letter and see what to prepare."
 msgstr "%(org)s imekubali ombi lako la %(slot)s. Pakua barua yako ya kukubaliwa na uone cha kuandaa."
 
+msgid "%(percent)s%% off"
+msgstr "Punguzo la %(percent)s%%"
+
 msgid "%(slot)s closes %(when)s with %(n)d seat still empty"
 msgid_plural "%(slot)s closes %(when)s with %(n)d seats still empty"
 msgstr[0] "%(slot)s inafungwa %(when)s ikiwa na kiti %(n)d bado kiko wazi"
@@ -982,6 +991,9 @@ msgstr "/mwezi"
 
 msgid "/month"
 msgstr "/mwezi"
+
+msgid "100% waiver"
+msgstr "Msamaha kamili (100%)"
 
 msgid "14 days"
 msgstr "siku 14"
@@ -1442,6 +1454,9 @@ msgstr "Tarehe ya mwisho ya maombi"
 msgid "Application decisions from organizations"
 msgstr "Maamuzi ya maombi kutoka kwa mashirika"
 
+msgid "Application fee"
+msgstr "Ada ya maombi"
+
 msgid "Application has already been accepted by the organization."
 msgstr "Ombi tayari limekubaliwa na shirika."
 
@@ -1459,6 +1474,9 @@ msgstr "Ombi limewasilishwa kwa mafanikio kwa kutumia nafasi yako ya kughairi."
 
 msgid "Application submitted with your letter. Complete payment to finalize."
 msgstr "Ombi limewasilishwa pamoja na barua yako. Kamilisha malipo ili kukamilisha."
+
+msgid "Application submitted. Voucher %(code)s covered the whole fee, so there is nothing to pay."
+msgstr "Ombi limewasilishwa. Vocha %(code)s imelipia ada yote, kwa hiyo hakuna cha kulipa."
 
 msgid "Application, slot, document…"
 msgstr "Ombi, nafasi, nyaraka…"
@@ -1663,6 +1681,9 @@ msgstr "Kubadilisha nenosiri lako kunatoa vipindi vingine vyote."
 
 msgid "Chat with us on WhatsApp"
 msgstr "Ongea nasi kwenye WhatsApp"
+
+msgid "Check"
+msgstr "Kagua"
 
 msgid "Check back soon, or create your account now so you are ready to apply."
 msgstr "Rudi baadaye, au fungua akaunti yako sasa ili uwe tayari kuomba."
@@ -1876,6 +1897,9 @@ msgstr "Sahihisha Data Yangu"
 
 msgid "Could not be checked: upload it again"
 msgstr "Haikuweza kukaguliwa: ipakie tena"
+
+msgid "Could not check the code. Try again."
+msgstr "Imeshindwa kukagua msimbo. Jaribu tena."
 
 msgid "Could not load notifications."
 msgstr "Imeshindwa kupakia arifa."
@@ -2307,6 +2331,9 @@ msgstr "Kwanza, tuambie kuhusu shirika. Taarifa zako binafsi zinafuata kwenye ha
 msgid "Fix"
 msgstr "Rekebisha"
 
+msgid "Fixed amount off (TZS)"
+msgstr "Punguzo la kiasi maalum (TZS)"
+
 msgid "Follow Us"
 msgstr "Tufuate"
 
@@ -2370,6 +2397,9 @@ msgstr "Imejaa"
 msgid "Full name, email address, phone number."
 msgstr "Jina kamili, barua pepe, namba ya simu."
 
+msgid "Full waiver (no payment)"
+msgstr "Msamaha kamili (hakuna malipo)"
+
 msgid "GPA"
 msgstr "GPA"
 
@@ -2417,6 +2447,9 @@ msgstr "Mwaka wa kuhitimu"
 
 msgid "Harassment or abuse"
 msgstr "Unyanyasaji au matumizi mabaya"
+
+msgid "Have a different code? Enter it here."
+msgstr "Una msimbo mwingine? Uingize hapa."
 
 msgid "Hello IPT Marketplace, I need help with..."
 msgstr "Habari IPT Marketplace, nahitaji msaada kuhusu..."
@@ -3121,6 +3154,9 @@ msgstr "Ada moja ya maombi: TZS %(fee)s"
 msgid "One click automatically sends the student an SMS + email confirming acceptance and asking them to open their email for the acceptance letter."
 msgstr "Kubofya mara moja humtumia mwanafunzi SMS na barua pepe kuthibitisha kukubaliwa na kumuomba afungue barua pepe yake kupata barua ya kukubaliwa."
 
+msgid "One shared campaign code"
+msgstr "Msimbo mmoja wa kampeni unaoshirikiwa"
+
 msgid "One-tap mobile money payments"
 msgstr "Malipo ya pesa mtandaooni kwa mbofyo mmoja"
 
@@ -3168,6 +3204,12 @@ msgstr "Si lazima - tumia 2556 au 2557 ikifuatiwa na tarakimu 8, mfano 255712345
 
 msgid "Optional. After this time students can no longer start a new application."
 msgstr "Si lazima. Baada ya muda huu wanafunzi hawawezi tena kuanza ombi jipya."
+
+msgid "Optional. If a sponsor, university or campaign gave you a code, enter it. Your offer is applied to your first application. A wrong code never stops you from registering."
+msgstr "Si lazima. Ikiwa mfadhili, chuo au kampeni ilikupa msimbo, uingize hapa. Ofa yako itatumika kwenye ombi lako la kwanza. Msimbo usio sahihi hauzuii usajili wako."
+
+msgid "Optional. Leave it empty to use the offer you registered with, if you have one."
+msgstr "Si lazima. Iache wazi ili kutumia ofa uliyojisajili nayo, kama unayo."
 
 msgid "Optional. Length of the placement in weeks."
 msgstr "Si lazima. Muda wa uwekaji kwa wiki."
@@ -3453,6 +3495,9 @@ msgstr "Inasubiri ukaguzi"
 
 msgid "People whose access to %(name)s was revoked. Their accounts and everything they did are kept: opportunities, applications, documents and decisions stay with the organization, and their actions remain attributed to them in the activity log."
 msgstr "Watu ambao ufikiaji wao kwa %(name)s uliondolewa. Akaunti zao na kila walichofanya vinahifadhiwa: fursa, maombi, nyaraka na maamuzi vinabaki kwa shirika, na vitendo vyao vinaendelea kuhusishwa nao kwenye kumbukumbu ya shughuli."
+
+msgid "Percentage off"
+msgstr "Punguzo la asilimia"
 
 msgid "Percentages compare each step with the one before it. Viewed counts students who opened the slot's detail page."
 msgstr "Asilimia zinalinganisha kila hatua na ile iliyotangulia. Waliotazama ni wanafunzi waliofungua ukurasa wa maelezo ya nafasi."
@@ -4390,6 +4435,9 @@ msgstr "Cheti cha TIN"
 msgid "TRA Taxpayer Identification Number, 9 digits (optional)."
 msgstr "Namba ya Mlipakodi ya TRA, tarakimu 9 (si lazima)."
 
+msgid "TZS %(amount)s off"
+msgstr "Punguzo la TZS %(amount)s"
+
 msgid "TZS %(stipend_amount)s / month"
 msgstr "TZS %(stipend_amount)s / mwezi"
 
@@ -4486,6 +4534,12 @@ msgstr "Tarehe ya mwisho ya maombi lazima iwe ya baadaye."
 msgid "The application fee is <strong>TZS %(fee)s</strong>, paid by mobile money after you submit."
 msgstr "Ada ya maombi ni <strong>TZS %(fee)s</strong>, inayolipwa kwa pesa za simu baada ya kuwasilisha."
 
+msgid "The code you entered when registering is valid (%(batch)s: %(terms)s). It is applied automatically to your first application."
+msgstr "Msimbo uliouingiza ulipojisajili ni sahihi (%(batch)s: %(terms)s). Unatumika kiotomatiki kwenye ombi lako la kwanza."
+
+msgid "The code you entered when registering was not applied: %(reason)s Your account is ready; you can enter another code when you apply."
+msgstr "Msimbo uliouingiza ulipojisajili haukutumika: %(reason)s Akaunti yako iko tayari; unaweza kuingiza msimbo mwingine unapoomba."
+
 msgid "The conduct, safety, or professionalism of any organization or student during the placement period."
 msgstr "Mwenendo, usalama au weledi wa shirika au mwanafunzi yeyote wakati wa kipindi cha uwekaji."
 
@@ -4567,6 +4621,39 @@ msgstr "Ombi hili tayari limekubaliwa."
 msgid "This application letter failed its integrity check and is unavailable."
 msgstr "Barua hii ya ombi imeshindwa ukaguzi wa uadilifu na haipatikani."
 
+msgid "This code does not apply to this slot."
+msgstr "Msimbo huu hautumiki kwa nafasi hii."
+
+msgid "This code has already been used the maximum number of times."
+msgstr "Msimbo huu umeshatumika idadi ya juu ya mara."
+
+msgid "This code has expired."
+msgstr "Msimbo huu umeisha muda wake."
+
+msgid "This code is not active yet."
+msgstr "Msimbo huu bado haujaanza kutumika."
+
+msgid "This code is not valid."
+msgstr "Msimbo huu si sahihi."
+
+msgid "This code is only for students from specific districts."
+msgstr "Msimbo huu ni kwa wanafunzi kutoka wilaya maalum tu."
+
+msgid "This code is only for students from specific regions."
+msgstr "Msimbo huu ni kwa wanafunzi kutoka mikoa maalum tu."
+
+msgid "This code is only for students of specific courses."
+msgstr "Msimbo huu ni kwa wanafunzi wa kozi maalum tu."
+
+msgid "This code is only for students of specific universities."
+msgstr "Msimbo huu ni kwa wanafunzi wa vyuo maalum tu."
+
+msgid "This code is only for students who registered during a specific period."
+msgstr "Msimbo huu ni kwa wanafunzi waliojisajili katika kipindi maalum tu."
+
+msgid "This code was issued to specific students and your account is not on the list."
+msgstr "Msimbo huu ulitolewa kwa wanafunzi mahususi na akaunti yako haipo kwenye orodha."
+
 msgid "This document failed its integrity check and is unavailable."
 msgstr "Nyaraka hii imeshindwa ukaguzi wa uadilifu na haipatikani."
 
@@ -4587,6 +4674,9 @@ msgstr "Hiki ni kitendo chenye hatari kubwa. Thibitisha kwa ufunguo wako wa usal
 
 msgid "This member has already been removed."
 msgstr "Mwanachama huyu ameshaondolewa."
+
+msgid "This offer has run out of funds."
+msgstr "Ofa hii imeishiwa fedha."
 
 msgid "This organization is not accepting applications right now."
 msgstr "Shirika hili halipokei maombi kwa sasa."
@@ -4663,6 +4753,9 @@ msgstr "Ya kufanya"
 msgid "Toggle ON to receive promotional messages. Toggle OFF to opt out."
 msgstr "Washa ili kupokea ujumbe wa matangazo. Zima ili usipokee."
 
+msgid "Too many attempts. Wait a minute and try again."
+msgstr "Majaribio mengi mno. Subiri dakika moja ujaribu tena."
+
 msgid "Too many failed attempts."
 msgstr "Majaribio mengi yaliyoshindwa."
 
@@ -4695,6 +4788,9 @@ msgstr "Aina"
 
 msgid "Under Review"
 msgstr "Chini ya Uhakiki"
+
+msgid "Unique single-use codes"
+msgstr "Misimbo ya kipekee ya matumizi moja"
 
 msgid "Universities"
 msgstr "Vyuo vikuu"
@@ -4910,6 +5006,21 @@ msgstr "Waliotazama"
 msgid "Voluntary withdrawal from the IPT programme."
 msgstr "Kujiondoa kwa hiari kwenye programu ya IPT."
 
+msgid "Voucher %(code)s"
+msgstr "Vocha %(code)s"
+
+msgid "Voucher %(code)s applied. Complete payment of TZS %(amount)s to finalize."
+msgstr "Vocha %(code)s imetumika. Kamilisha malipo ya TZS %(amount)s ili kukamilisha."
+
+msgid "Voucher <strong>%(code)s</strong> is applied to this application. You pay <strong>TZS %(charged)s</strong>."
+msgstr "Vocha <strong>%(code)s</strong> imetumika kwenye ombi hili. Unalipa <strong>TZS %(charged)s</strong>."
+
+msgid "Voucher or sponsor code"
+msgstr "Vocha au msimbo wa mfadhili"
+
+msgid "Vouchers"
+msgstr "Vocha"
+
 msgid "Waiting"
 msgstr "Inasubiri"
 
@@ -5109,6 +5220,12 @@ msgstr "Una nafasi ya bure ya kuomba tena: hakuna ada inayotozwa kwa ombi hili."
 msgid "You have already applied to this slot."
 msgstr "Tayari umeomba nafasi hii."
 
+msgid "You have already used a full waiver. Only one is allowed per student."
+msgstr "Umeshatumia msamaha kamili wa ada. Mwanafunzi anaruhusiwa mmoja tu."
+
+msgid "You have already used this offer."
+msgstr "Umeshatumia ofa hii."
+
 msgid "You have applied: see My Applications"
 msgstr "Umeomba: tazama Maombi Yangu"
 
@@ -5202,6 +5319,9 @@ msgstr "Akaunti yako ni hai — weka taarifa zako zilizosasa."
 msgid "Your account will be deactivated immediately upon confirmation."
 msgstr "Akaunti yako itazimwa mara tu utakapothibitisha."
 
+msgid "Your code could not be applied"
+msgstr "Msimbo wako haukuweza kutumika"
+
 msgid "Your company is"
 msgstr "Kampuni yako ni"
 
@@ -5222,6 +5342,12 @@ msgstr "Hatua yako inayofuata"
 
 msgid "Your notification preferences have been saved."
 msgstr "Mapendeleo yako ya arifa yamehifadhiwa."
+
+msgid "Your offer from registration (%(label)s) is applied automatically: fee TZS %(fee)s, discount TZS %(discount)s. You pay <strong>TZS %(charged)s</strong>."
+msgstr "Ofa yako ya wakati wa usajili (%(label)s) inatumika kiotomatiki: ada TZS %(fee)s, punguzo TZS %(discount)s. Unalipa <strong>TZS %(charged)s</strong>."
+
+msgid "Your offer is saved"
+msgstr "Ofa yako imehifadhiwa"
 
 msgid "Your official acceptance letter. Print it or keep it on your phone: your university and the organization may ask for it."
 msgstr "Barua yako rasmi ya kukubaliwa. Ichapishe au ihifadhi kwenye simu yako: chuo chako na shirika vinaweza kuiomba."
@@ -5288,6 +5414,12 @@ msgstr "Wasifu wako umehifadhiwa. Tafadhali subiri sekunde %(v1)s, kisha ubadili
 msgid "Your rating"
 msgstr "Ukadiriaji wako"
 
+msgid "Your registration offer cannot be used for this application: %(reason)s"
+msgstr "Ofa yako ya usajili haiwezi kutumika kwa ombi hili: %(reason)s"
+
+msgid "Your registration offer was not applied: %(reason)s"
+msgstr "Ofa yako ya usajili haikutumika: %(reason)s"
+
 msgid "Your reports"
 msgstr "Ripoti zako"
 
@@ -5328,6 +5460,9 @@ msgid ""
 "Your verified student profile and documents are visible to organizations\n"
 "        whose slots you have applied for, strictly for placement review."
 msgstr "Wasifu wako wa mwanafunzi uliothibitishwa na nyaraka zako zinaonekana kwa mashirika ambayo nafasi zake umeziomba, kwa ukaguzi wa uwekaji pekee."
+
+msgid "Your voucher no longer applies (%(reason)s) so the full fee is charged."
+msgstr "Vocha yako haitumiki tena (%(reason)s), kwa hiyo ada kamili inatozwa."
 
 msgid "activity log"
 msgstr "kumbukumbu ya shughuli"

@@ -82,6 +82,33 @@
           <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.application_letter.errors.0 }}</p>
         {% endif %}
       </div>
+      {% if not has_credit %}
+      <div class="rounded-xl bg-surface-container-low p-md flex flex-col gap-sm" data-voucher-box data-check-url="{% url 'student-voucher-check' %}" data-slot-id="{{ slot.id }}" data-msg-invalid="{% trans 'This code is not valid.' %}" data-msg-rate="{% trans 'Too many attempts. Wait a minute and try again.' %}" data-msg-error="{% trans 'Could not check the code. Try again.' %}">
+        <h3 class="font-body-md text-body-md font-semibold text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-[20px] text-primary">sell</span>{% trans "Voucher or sponsor code" %}</h3>
+        {% if held_redemption %}
+          <p class="font-body-md text-body-md text-on-surface-variant">{% blocktrans trimmed with code=held_redemption.voucher.display_code charged=held_redemption.amount_charged|money %}Voucher <strong>{{ code }}</strong> is applied to this application. You pay <strong>TZS {{ charged }}</strong>.{% endblocktrans %}</p>
+        {% elif offer_quote %}
+          <p class="font-body-md text-body-md text-on-surface-variant" data-voucher-signup>{% blocktrans trimmed with label=offer_quote.voucher.batch.discount_label fee=offer_quote.fee|money discount=offer_quote.discount|money charged=offer_quote.charged|money %}Your offer from registration ({{ label }}) is applied automatically: fee TZS {{ fee }}, discount TZS {{ discount }}. You pay <strong>TZS {{ charged }}</strong>.{% endblocktrans %}</p>
+        {% endif %}
+        {% if offer_notice %}
+          <p class="font-body-md text-body-md text-on-surface-variant">{{ offer_notice }}</p>
+        {% endif %}
+        <div class="flex flex-col gap-xs">
+          <label class="font-body-md text-body-md text-on-surface-variant" for="{{ form.voucher_code.id_for_label }}">{% trans "Have a different code? Enter it here." %}</label>
+          <div class="flex gap-sm">
+            <div class="ipt-field-box flex-1 {% if form.voucher_code.errors %}is-error{% endif %}">
+              <span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">tag</span></span>
+              {{ form.voucher_code }}
+            </div>
+            <button type="button" data-voucher-check class="px-md py-2 rounded-lg border border-outline-variant text-on-surface font-body-md font-semibold hover:bg-surface-container transition-colors">{% trans "Check" %}</button>
+          </div>
+          <p class="font-body-md text-body-md text-on-surface-variant" data-voucher-result aria-live="polite"></p>
+          {% if form.voucher_code.errors %}
+            <p class="ipt-field-error"><span class="material-symbols-outlined">error</span>{{ form.voucher_code.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
       <div class="rounded-xl bg-surface-container-low p-md flex flex-col gap-xs">
         <h3 class="font-body-md text-body-md font-semibold text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-[20px] text-primary">gavel</span>{% trans "Before you apply" %}</h3>
         <ul class="flex flex-col gap-xs font-body-md text-body-md text-on-surface-variant list-disc pl-md">
@@ -114,4 +141,7 @@
     </form>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/voucher-check.js"></script>
 {% endblock %}

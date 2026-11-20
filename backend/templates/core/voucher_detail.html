@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load money_tags %}
+{% block title %}{{ batch.name }}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <a href="{% url 'platform-vouchers' %}" class="text-primary font-semibold hover:underline flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Vouchers</a>
+  <div class="flex flex-wrap items-start justify-between gap-md">
+    <div class="flex flex-col gap-xs">
+      <h1 class="font-display text-display text-on-surface">{{ batch.name }}</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant">{{ batch.discount_label }} · {{ batch.get_code_mode_display }} · issued {{ batch.created_at|date:"j M Y" }}{% if batch.issuer_label %} by {{ batch.issuer_label }}{% endif %}</p>
+      {% if batch.description %}<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">{{ batch.description }}</p>{% endif %}
+    </div>
+    <div class="flex flex-wrap items-center gap-sm">
+      <span class="px-sm py-1 rounded-full font-metadata text-metadata {% if state == 'active' %}bg-[#e8f5e9] text-[#1b5e20]{% elif state == 'scheduled' %}bg-surface-container text-on-surface-variant{% else %}bg-error/10 text-error{% endif %}">{{ state_label }}</span>
+      {% if can_edit %}
+        <form method="post">{% csrf_token %}
+          <button name="action" value="toggle" class="px-md py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high font-metadata text-metadata" type="submit">{% if batch.is_active %}Pause batch{% else %}Resume batch{% endif %}</button>
+        </form>
+        <a href="?export=csv" class="px-md py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high font-metadata text-metadata flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">download</span>Download codes</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if messages %}{% for message in messages %}<div class="rounded-lg bg-[#e8f5e9] text-[#1b5e20] px-sm py-sm">{{ message }}</div>{% endfor %}{% endif %}
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-md">
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm flex flex-col"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Codes</span><span class="font-headline-lg text-headline-lg font-bold">{{ numbers.codes }}</span></div>
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm flex flex-col"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Uses held / paid</span><span class="font-headline-lg text-headline-lg font-bold">{{ numbers.holding }} / {{ numbers.paid }}</span></div>
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm flex flex-col"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Discount given</span><span class="font-headline-lg text-headline-lg font-bold">TZS {{ numbers.given|money }}</span>{% if remaining_budget is not None %}<span class="font-metadata text-metadata text-on-surface-variant">TZS {{ remaining_budget|money }} left of {{ batch.budget_tzs|money }}</span>{% endif %}</div>
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm flex flex-col"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Cash collected</span><span class="font-headline-lg text-headline-lg font-bold">TZS {{ numbers.collected|money }}</span></div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+    <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-sm">
+      <h2 class="font-headline-md text-headline-md">Terms</h2>
+      <dl class="flex flex-col gap-xs font-body-md text-body-md">
+        <div class="flex justify-between gap-sm"><dt class="text-on-surface-variant">Valid from</dt><dd>{{ batch.starts_at|date:"j M Y H:i"|default:"now" }}</dd></div>
+        <div class="flex justify-between gap-sm"><dt class="text-on-surface-variant">Expires</dt><dd>{{ batch.expires_at|date:"j M Y H:i"|default:"never" }}</dd></div>
+        <div class="flex justify-between gap-sm"><dt class="text-on-surface-variant">Uses per student</dt><dd>{{ batch.per_student_limit }}</dd></div>
+        <div class="flex justify-between gap-sm"><dt class="text-on-surface-variant">Registered with it</dt><dd>{{ numbers.signup_saved }} ({{ numbers.signup_converted }} paid)</dd></div>
+      </dl>
+      <h3 class="font-body-md text-body-md font-semibold mt-sm">Who may use it</h3>
+      {% if restrictions %}
+        <dl class="flex flex-col gap-xs font-body-md text-body-md">
+          {% for label, text in restrictions %}<div><dt class="text-metadata font-metadata text-on-surface-variant">{{ label }}</dt><dd>{{ text }}</dd></div>{% endfor %}
+        </dl>
+      {% else %}
+        <p class="font-body-md text-body-md text-on-surface-variant">No restrictions: any student, any slot.</p>
+      {% endif %}
+    </section>
+
+    <section class="lg:col-span-2 bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+      <div class="p-md bg-surface-container-low border-b border-surface-container-highest flex flex-wrap items-center justify-between gap-sm">
+        <div class="flex flex-wrap gap-xs">
+          <a href="?" class="px-sm py-1 rounded-full font-metadata text-metadata {% if not codes_filter %}bg-primary text-on-primary{% else %}bg-surface-container{% endif %}">All</a>
+          <a href="?codes=used" class="px-sm py-1 rounded-full font-metadata text-metadata {% if codes_filter == 'used' %}bg-primary text-on-primary{% else %}bg-surface-container{% endif %}">Used</a>
+          <a href="?codes=unused" class="px-sm py-1 rounded-full font-metadata text-metadata {% if codes_filter == 'unused' %}bg-primary text-on-primary{% else %}bg-surface-container{% endif %}">Unused</a>
+          <a href="?codes=revoked" class="px-sm py-1 rounded-full font-metadata text-metadata {% if codes_filter == 'revoked' %}bg-primary text-on-primary{% else %}bg-surface-container{% endif %}">Revoked</a>
+        </div>
+        {% if can_edit and batch.code_mode == 'UNIQUE' %}
+          <form method="post" class="flex items-center gap-xs">{% csrf_token %}
+            <div class="ipt-field-box w-28"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">tag</span></span><input type="number" name="count" min="1" max="5000" value="10"></div>
+            <button name="action" value="add_codes" class="px-sm py-1 rounded-full bg-surface-container hover:bg-surface-container-high font-metadata text-metadata" type="submit">Add codes</button>
+          </form>
+        {% endif %}
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left min-w-[480px]">
+          <thead><tr class="text-metadata font-label-caps text-on-surface-variant border-b border-surface-variant">
+            <th class="py-sm px-md font-medium">Code</th><th class="py-sm px-md font-medium">Uses</th><th class="py-sm px-md font-medium">Status</th>{% if can_edit %}<th class="py-sm px-md font-medium"></th>{% endif %}
+          </tr></thead>
+          <tbody class="font-body-md text-body-md">
+            {% for code in codes %}
+              <tr class="border-b border-surface-variant">
+                <td class="py-sm px-md font-mono tracking-wider">{{ code.display_code }}</td>
+                <td class="py-sm px-md">{{ code.holding }} / {{ code.max_uses }}</td>
+                <td class="py-sm px-md">{% if not code.is_active %}<span class="text-error">Revoked</span>{% elif code.holding >= code.max_uses %}<span class="text-on-surface-variant">Used up</span>{% else %}Available{% endif %}</td>
+                {% if can_edit %}
+                <td class="py-sm px-md text-right">
+                  <form method="post" {% if code.is_active %}data-ipt-confirm="Revoke this code? Nobody can use it again unless you restore it."{% endif %}>{% csrf_token %}
+                    <input type="hidden" name="code_id" value="{{ code.id }}">
+                    <button name="action" value="{% if code.is_active %}revoke{% else %}restore{% endif %}" class="px-sm py-1 rounded-full {% if code.is_active %}bg-error/10 text-error{% else %}bg-surface-container{% endif %} font-metadata text-metadata" type="submit">{% if code.is_active %}Revoke{% else %}Restore{% endif %}</button>
+                  </form>
+                </td>
+                {% endif %}
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="py-lg text-center text-on-surface-variant">No codes match.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "includes/pagination.html" %}
+    </section>
+  </div>
+
+  <section class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+    <h2 class="font-headline-md text-headline-md p-md">Recent uses</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left min-w-[720px]">
+        <thead><tr class="text-metadata font-label-caps text-on-surface-variant border-b border-surface-variant">
+          <th class="py-sm px-md font-medium">When</th><th class="py-sm px-md font-medium">Student</th><th class="py-sm px-md font-medium">Slot</th><th class="py-sm px-md font-medium">Code</th><th class="py-sm px-md font-medium">Fee</th><th class="py-sm px-md font-medium">Discount</th><th class="py-sm px-md font-medium">Paid</th><th class="py-sm px-md font-medium">Application</th>
+        </tr></thead>
+        <tbody class="font-body-md text-body-md">
+          {% for r in redemptions %}
+            <tr class="border-b border-surface-variant">
+              <td class="py-sm px-md">{{ r.created_at|date:"j M Y H:i" }}</td>
+              <td class="py-sm px-md">{{ r.student.user.email }}{% if r.from_signup %} <span class="text-metadata font-metadata text-on-surface-variant">(from registration)</span>{% endif %}</td>
+              <td class="py-sm px-md">{{ r.application.slot.title }}<p class="text-metadata font-metadata text-on-surface-variant">{{ r.application.slot.organization.name }}</p></td>
+              <td class="py-sm px-md font-mono">{{ r.voucher.display_code }}</td>
+              <td class="py-sm px-md">{{ r.fee_amount|money }}</td>
+              <td class="py-sm px-md">{{ r.discount_amount|money }}</td>
+              <td class="py-sm px-md">{{ r.amount_charged|money }}</td>
+              <td class="py-sm px-md">{{ r.application.get_status_display }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="8" class="py-lg text-center text-on-surface-variant">Nobody has used this batch yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

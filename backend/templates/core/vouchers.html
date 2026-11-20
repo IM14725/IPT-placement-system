@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Vouchers{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-lg">
+  <div class="flex flex-wrap items-end justify-between gap-md">
+    <div class="flex flex-col gap-xs">
+      <span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Finance</span>
+      <h1 class="font-display text-display text-on-surface">Fee vouchers</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-2">
+        Discount codes for the application fee: sponsor and NGO cohorts, university departments and campaigns. A student enters a code when applying, or gives it at registration and it is applied to their first application. Totals are on the <a class="text-primary font-semibold hover:underline" href="{% url 'platform-ledger' %}">Ledger</a>.
+      </p>
+    </div>
+    {% if can_edit %}
+      <a href="{% url 'platform-voucher-new' %}" class="bg-primary text-on-primary font-semibold px-md py-2 rounded-lg flex items-center gap-xs"><span class="material-symbols-outlined text-[20px]">add</span>New batch</a>
+    {% endif %}
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm flex flex-col">
+      <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Registered with a valid code</span>
+      <span class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ signup.saved }}</span>
+    </div>
+    <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm flex flex-col">
+      <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Registered with a code that failed</span>
+      <span class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ signup.rejected }}</span>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-sm">
+    <a href="?" class="px-md py-1.5 rounded-full text-metadata font-metadata transition-colors {% if not state %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %}">All</a>
+    <a href="?state=active" class="px-md py-1.5 rounded-full text-metadata font-metadata transition-colors {% if state == 'active' %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %}">Active</a>
+    <a href="?state=paused" class="px-md py-1.5 rounded-full text-metadata font-metadata transition-colors {% if state == 'paused' %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %}">Paused</a>
+    <a href="?state=expired" class="px-md py-1.5 rounded-full text-metadata font-metadata transition-colors {% if state == 'expired' %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %}">Expired</a>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+    <form method="get" class="p-md bg-surface-container-low border-b border-surface-container-highest flex gap-sm">
+      <input type="hidden" name="state" value="{{ state }}">
+      <div class="ipt-field-box flex-1"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">search</span></span><input name="q" value="{{ q }}" placeholder="Batch name or a code"></div>
+      <button class="px-md py-2 bg-surface-container hover:bg-surface-container-high rounded-full font-metadata text-metadata" type="submit">Search</button>
+    </form>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left min-w-[880px]">
+        <thead>
+          <tr class="text-metadata font-label-caps text-on-surface-variant border-b border-surface-variant">
+            <th class="py-sm px-md font-medium">Batch</th>
+            <th class="py-sm px-md font-medium">Discount</th>
+            <th class="py-sm px-md font-medium">Codes</th>
+            <th class="py-sm px-md font-medium">Uses held</th>
+            <th class="py-sm px-md font-medium">Paid</th>
+            <th class="py-sm px-md font-medium">Discount given</th>
+            <th class="py-sm px-md font-medium">Signups</th>
+            <th class="py-sm px-md font-medium">Status</th>
+          </tr>
+        </thead>
+        <tbody class="font-body-md text-body-md text-on-surface">
+          {% for row in rows %}
+            <tr class="border-b border-surface-variant align-top">
+              <td class="py-sm px-md">
+                <a class="font-semibold text-primary hover:underline" href="{% url 'platform-voucher-detail' row.batch.pk %}">{{ row.batch.name }}</a>
+                <p class="text-metadata font-metadata text-on-surface-variant">{{ row.batch.created_at|date:"j M Y" }} · {{ row.batch.issuer_label|default:"—" }}</p>
+              </td>
+              <td class="py-sm px-md">{{ row.batch.discount_label }}</td>
+              <td class="py-sm px-md">{{ row.codes }}{% if row.revoked %} <span class="text-metadata font-metadata text-error">({{ row.revoked }} revoked)</span>{% endif %}</td>
+              <td class="py-sm px-md">{{ row.holding }}</td>
+              <td class="py-sm px-md">{{ row.paid }}</td>
+              <td class="py-sm px-md">TZS {{ row.given|floatformat:"0g" }}{% if row.batch.budget_tzs %}<p class="text-metadata font-metadata text-on-surface-variant">of TZS {{ row.batch.budget_tzs|floatformat:"0g" }}</p>{% endif %}</td>
+              <td class="py-sm px-md">{{ row.signup_saved }}{% if row.signup_saved %}<p class="text-metadata font-metadata text-on-surface-variant">{{ row.signup_converted }} paid</p>{% endif %}</td>
+              <td class="py-sm px-md">
+                {% if row.state == 'active' %}<span class="px-sm py-0.5 rounded-full bg-[#e8f5e9] text-[#1b5e20] font-metadata text-metadata">{{ row.state_label }}</span>
+                {% elif row.state == 'scheduled' %}<span class="px-sm py-0.5 rounded-full bg-surface-container text-on-surface-variant font-metadata text-metadata">{{ row.state_label }}</span>
+                {% else %}<span class="px-sm py-0.5 rounded-full bg-error/10 text-error font-metadata text-metadata">{{ row.state_label }}</span>{% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="8" class="py-xl text-center text-on-surface-variant">No voucher batches yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "includes/pagination.html" %}
+  </div>
+</div>
+{% endblock %}

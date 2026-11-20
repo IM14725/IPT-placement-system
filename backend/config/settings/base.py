@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     "apps.slots",
     "apps.applications",
     "apps.payments",
+    "apps.vouchers",
     "apps.notifications",
 ]
 

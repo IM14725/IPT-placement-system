@@ -26,7 +26,7 @@ from apps.core.rate_limit import token_bucket
 from apps.core.security import safe_json_dumps
 from apps.documents.models import Document
 from apps.payments.models import Payment
-from apps.payments.utils import get_application_fee
+from apps.payments.utils import VOUCHER_TXN_PREFIX, get_application_fee
 from apps.students.forms import DocumentUploadForm, StudentProfileForm
 from apps.students.models import StudentProfile, VerificationStatus, student_can_apply
 
@@ -701,10 +701,22 @@ def apply(request, slot_id):
         messages.error(request, blocker)
         return redirect("student-marketplace")
 
+    from apps.vouchers import services as voucher_services
+
+    fee = get_application_fee()
+    held = Application.objects.filter(student=profile, slot=slot).first()
     if request.method == "POST":
         form = ApplicationLetterForm(request.POST, request.FILES)
+        typed_code = voucher_services.normalize_code(request.POST.get("voucher_code"))
+        if form.is_valid() and typed_code and not profile.reapplication_credit:
+            # Tell the student about a bad code before the letter is stored and the seat is taken.
+            try:
+                voucher_services.quote(typed_code, profile=profile, slot=slot, fee=fee, exclude_application=held)
+            except voucher_services.VoucherError as exc:
+                form.add_error("voucher_code", str(exc))
         if form.is_valid():
             letter = form.cleaned_data["application_letter"]
+            offer = voucher_services.CheckoutOffer()
             try:
                 with transaction.atomic():
                     application = create_application(profile, slot)
@@ -724,16 +736,32 @@ def apply(request, slot_id):
                         ]
                     )
 
-                    fee = get_application_fee()
+                    # A voucher prices the application. The cancellation credit is already free, so
+                    # it wins and the voucher is not touched.
+                    if not is_credit:
+                        offer = voucher_services.resolve_checkout_offer(
+                            profile=profile, slot=slot, application=application, fee=fee,
+                            typed_code=typed_code, request=request,
+                        )
+                    amount = offer.amount if offer.redemption else fee
                     payment = getattr(application, "payment", None)
                     if payment is None:
                         payment = Payment.objects.create(
-                            student=profile, application=application, amount=fee
+                            student=profile, application=application, amount=amount
                         )
                     elif not payment.is_paid:
                         payment.status = "PENDING"
-                        payment.save(update_fields=["status", "updated_at"])
+                        payment.amount = amount
+                        payment.save(update_fields=["status", "amount", "updated_at"])
 
+                    if offer.redemption and amount == 0:
+                        # A 100% waiver: same path as the credit, no mobile-money step.
+                        voucher = offer.redemption.voucher
+                        finalize_verified_payment(
+                            payment,
+                            gateway_txn_id=f"{VOUCHER_TXN_PREFIX}{voucher.code}",
+                            payload={"voucher": voucher.display_code, "batch": offer.redemption.batch.name},
+                        )
                     if is_credit:
                         # Same path as a real payment, so the application only becomes PAID once a
                         # verified Payment exists (database trigger), the organization is told about
@@ -746,15 +774,47 @@ def apply(request, slot_id):
             except SlotFullError as exc:
                 messages.error(request, str(exc))
                 return redirect("student-marketplace")
-            if is_credit:
-                messages.success(request, gettext("Application submitted successfully using your cancellation credit."))
-                return redirect("student-applications")
-            messages.success(request, gettext("Application submitted with your letter. Complete payment to finalize."))
-            return redirect("student-payment", payment_id=application.payment.id)
+            except voucher_services.VoucherError as exc:
+                # Lost a race for the last use (or the budget) after the pre-check: nothing was saved.
+                form.add_error("voucher_code", str(exc))
+            else:
+                if offer.notice:
+                    messages.warning(request, offer.notice)
+                if is_credit:
+                    messages.success(request, gettext("Application submitted successfully using your cancellation credit."))
+                    return redirect("student-applications")
+                if offer.redemption and offer.redemption.amount_charged == 0:
+                    messages.success(
+                        request,
+                        gettext("Application submitted. Voucher %(code)s covered the whole fee, so there is nothing to pay.")
+                        % {"code": offer.redemption.voucher.display_code},
+                    )
+                    return redirect("student-applications")
+                if offer.redemption:
+                    messages.success(
+                        request,
+                        gettext("Voucher %(code)s applied. Complete payment of TZS %(amount)s to finalize.")
+                        % {"code": offer.redemption.voucher.display_code, "amount": f"{offer.redemption.amount_charged:,.0f}"},
+                    )
+                    return redirect("student-payment", payment_id=application.payment.id)
+                messages.success(request, gettext("Application submitted with your letter. Complete payment to finalize."))
+                return redirect("student-payment", payment_id=application.payment.id)
     else:
         form = ApplicationLetterForm()
 
     from apps.applications.models import PAYMENT_DEADLINE_HOURS
+
+    offer_quote, offer_notice = None, ""
+    held_redemption = None
+    if not profile.reapplication_credit:
+        if held is not None:
+            from apps.vouchers.models import VoucherRedemption
+
+            held_redemption = VoucherRedemption.objects.filter(application=held).select_related("voucher").first()
+        if held_redemption is None:
+            offer_quote, offer_notice = voucher_services.preview_checkout_offer(
+                profile=profile, slot=slot, fee=fee, exclude_application=held
+            )
 
     return render(
         request,
@@ -763,9 +823,12 @@ def apply(request, slot_id):
             "form": form,
             "slot": slot,
             "profile": profile,
-            "fee": get_application_fee(),
+            "fee": fee,
             "payment_hours": PAYMENT_DEADLINE_HOURS,
             "has_credit": profile.reapplication_credit,
+            "offer_quote": offer_quote,
+            "offer_notice": offer_notice,
+            "held_redemption": held_redemption,
         },
     )
 
@@ -777,7 +840,12 @@ def payment(request, payment_id):
     payment = get_object_or_404(
         Payment, id=payment_id, student__user=request.user
     )
-    return render(request, "student/payment.html", {"payment": payment})
+    from apps.vouchers.models import VoucherRedemption
+
+    redemption = (
+        VoucherRedemption.objects.filter(application_id=payment.application_id).select_related("voucher").first()
+    )
+    return render(request, "student/payment.html", {"payment": payment, "redemption": redemption})
 
 
 @login_required
@@ -824,6 +892,9 @@ def view_document(request, doc_id):
         )
     if doc.scan_status == "ERROR":
         return HttpResponseGone(gettext("This document failed security scanning and is unavailable."))
+    missing = missing_file_response(doc.file)
+    if missing is not None:
+        return missing
     if doc.sha256:
         doc.file.open("rb")
         try:
@@ -892,9 +963,6 @@ def cancel_application(request, app_id):
         from apps.companies.permissions import APPLICANTS_VIEW
         from apps.core.audit import audit_event
         from apps.notifications.inapp import NotificationType, notify_many, organization_recipients
-    missing = missing_file_response(doc.file)
-    if missing is not None:
-        return missing
 
         organization = application.slot.organization
         notify_many(
@@ -927,6 +995,9 @@ def view_application_letter(request, app_id):
     )
     if not app.application_letter:
         return HttpResponseForbidden(gettext("No application letter uploaded."))
+    missing = missing_file_response(app.application_letter)
+    if missing is not None:
+        return missing
     if app.letter_sha256:
         app.application_letter.open("rb")
         try:
@@ -940,6 +1011,3 @@ def view_application_letter(request, app_id):
             )
     filename = app.letter_original_name or "application_letter.pdf"
     return build_safe_file_response(app.application_letter, filename=filename)
-    missing = missing_file_response(app.application_letter)
-    if missing is not None:
-        return missing

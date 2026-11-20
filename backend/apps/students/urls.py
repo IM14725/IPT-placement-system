@@ -2,6 +2,7 @@ from django.urls import path
 from django.views.generic import RedirectView
 
 from apps.students import views
+from apps.vouchers import views_student as voucher_views
 
 urlpatterns = [
     # The Dashboard page was removed: Find a Slot is the first page after login. Old bookmarks and links still work.
@@ -20,6 +21,7 @@ urlpatterns = [
     path("applications/<uuid:app_id>/cancel/", views.cancel_application, name="student-cancel-application"),
     path("applications/<uuid:app_id>/letter/", views.view_application_letter, name="student-view-application-letter"),
     path("payments/<uuid:payment_id>/", views.payment, name="student-payment"),
+    path("voucher/check/", voucher_views.check_code, name="student-voucher-check"),
     path("documents/<uuid:doc_id>/view/", views.view_document, name="document-view"),
     path("recommended/", views.recommended, name="student-recommended"),
     path("discover/", views.discover, name="student-discover"),

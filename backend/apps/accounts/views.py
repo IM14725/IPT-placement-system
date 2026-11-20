@@ -257,6 +257,9 @@ def register(request):
                 "first_name": form.cleaned_data.get("first_name"),
                 "last_name": form.cleaned_data.get("last_name"),
                 "phone": form.cleaned_data.get("phone"),
+                "voucher_code": (
+                    form.cleaned_data.get("voucher_code") if str(form.cleaned_data.get("role")) == "STUDENT" else ""
+                ),
                 "login_url": request.build_absolute_uri(reverse("login")),
                 "reset_url": request.build_absolute_uri(reverse("forgot-password")),
             }
@@ -274,7 +277,14 @@ def register(request):
 
         track("register_view", request)
         role = ROLE_PARAMS.get((request.GET.get("role") or "").strip().lower())
-        form = RegisterForm(initial={"role": role} if role else None)
+        initial = {"role": role} if role else {}
+        # A sponsor link like /register/?code=IPT-7K3F-9QXM pre-fills the voucher field.
+        from apps.vouchers.services import normalize_code
+
+        shared_code = normalize_code(request.GET.get("code") or request.GET.get("voucher"))
+        if shared_code:
+            initial["voucher_code"] = shared_code
+        form = RegisterForm(initial=initial or None)
         preselected = bool(role)
     return render(
         request,

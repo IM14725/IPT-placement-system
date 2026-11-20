@@ -18,6 +18,22 @@ class ApplicationLetterForm(forms.Form):
             }
         ),
     )
+    voucher_code = forms.CharField(
+        required=False,
+        max_length=40,
+        label=_("Voucher or sponsor code"),
+        help_text=_("Optional. Leave it empty to use the offer you registered with, if you have one."),
+        widget=forms.TextInput(
+            attrs={
+                "class": "uppercase tracking-wider",
+                "placeholder": "IPT-XXXX-XXXX",
+                "autocomplete": "off",
+                "autocapitalize": "characters",
+                "spellcheck": "false",
+                "data-voucher-input": "",
+            }
+        ),
+    )
     accept_rules = forms.BooleanField(
         required=True,
         label=_("I understand the fee, the payment deadline and the cancellation rule."),

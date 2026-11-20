@@ -16,8 +16,8 @@
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span>
       </div>
       <div class="flex flex-col relative z-10">
-        <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Total Fees Collected</span>
-        <span class="font-headline-lg text-headline-lg text-on-surface font-bold">TZS {{ total_fees }}</span>
+        <span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Cash Collected</span>
+        <span class="font-headline-lg text-headline-lg text-on-surface font-bold">TZS {{ total_fees|floatformat:"0g" }}</span>
       </div>
     </div>
     <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm relative overflow-hidden flex items-center gap-md">
@@ -42,6 +42,20 @@
     </a>
   </div>
 
+  <div class="bg-surface-container-lowest rounded-xl p-lg shadow-sm flex flex-col gap-md">
+    <div class="flex flex-wrap items-center justify-between gap-sm">
+      <h2 class="font-headline-md text-headline-md text-on-surface">Fees, discounts and cash</h2>
+      <a href="{% url 'platform-vouchers' %}" class="text-primary font-semibold hover:underline flex items-center gap-xs"><span class="material-symbols-outlined text-[18px]">sell</span>Fee vouchers</a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-md">
+      <div class="flex flex-col"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Gross fees</span><span class="font-headline-md text-headline-md text-on-surface font-bold">TZS {{ totals.gross|floatformat:"0g" }}</span></div>
+      <a href="?source=voucher" class="flex flex-col hover:bg-surface-container-low rounded-lg"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Voucher discounts ({{ totals.voucher_count }})</span><span class="font-headline-md text-headline-md text-on-surface font-bold">TZS {{ totals.voucher_discounts|floatformat:"0g" }}</span></a>
+      <a href="?source=credit" class="flex flex-col hover:bg-surface-container-low rounded-lg"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Re-application credits ({{ totals.credit_count }})</span><span class="font-headline-md text-headline-md text-on-surface font-bold">TZS {{ totals.credit_discounts|floatformat:"0g" }}</span></a>
+      <a href="?source=cash" class="flex flex-col hover:bg-surface-container-low rounded-lg"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Cash collected</span><span class="font-headline-md text-headline-md text-on-surface font-bold">TZS {{ totals.cash|floatformat:"0g" }}</span></a>
+    </div>
+    <p class="font-metadata text-metadata text-on-surface-variant">Gross fees = cash collected + voucher discounts + re-application credits. Only paid applications are counted.</p>
+  </div>
+
   <form method="get" class="bg-surface-container-lowest p-md rounded-xl shadow-sm flex flex-wrap gap-md items-end">
     <div class="flex-1 min-w-[200px]">
       <label class="block font-metadata text-on-surface-variant mb-1">Search</label>
@@ -53,6 +67,15 @@
         <option value="">All</option>
         <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Paid</option>
         <option value="unpaid" {% if status_filter == 'unpaid' %}selected{% endif %}>Unpaid</option>
+      </select></div>
+    </div>
+    <div>
+      <label class="block font-metadata text-on-surface-variant mb-1">Source</label>
+      <div class="ipt-field-box w-full"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">sell</span></span><select name="source">
+        <option value="">All</option>
+        <option value="cash" {% if source_filter == 'cash' %}selected{% endif %}>Cash</option>
+        <option value="voucher" {% if source_filter == 'voucher' %}selected{% endif %}>Voucher</option>
+        <option value="credit" {% if source_filter == 'credit' %}selected{% endif %}>Credit</option>
       </select></div>
     </div>
     <div>
@@ -68,7 +91,7 @@
     </div>
   </form>
 
-  {% if payments or q or status_filter or start_date or end_date %}
+  {% if payments or q or status_filter or source_filter or start_date or end_date %}
     <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
       <div class="px-lg py-md bg-surface flex items-center justify-between border-b border-surface-container">
         <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-sm">
@@ -85,8 +108,11 @@
               <th class="px-lg py-3 font-semibold">Student</th>
               <th class="px-lg py-3 font-semibold">Slot</th>
               <th class="px-lg py-3 font-semibold">Organization</th>
+              <th class="px-lg py-3 font-semibold">Source</th>
               <th class="px-lg py-3 font-semibold">Status</th>
-              <th class="px-lg py-3 font-semibold text-right">Amount</th>
+              <th class="px-lg py-3 font-semibold text-right">Fee</th>
+              <th class="px-lg py-3 font-semibold text-right">Discount</th>
+              <th class="px-lg py-3 font-semibold text-right">Paid</th>
               <th class="px-lg py-3 font-semibold">Date</th>
             </tr>
           </thead>
@@ -97,6 +123,7 @@
                 <td class="px-lg py-md font-medium text-on-surface">{{ p.student.user.email }}</td>
                 <td class="px-lg py-md text-on-surface">{{ p.application.slot.title }}</td>
                 <td class="px-lg py-md text-on-surface-variant">{{ p.application.slot.organization.name }}</td>
+                <td class="px-lg py-md text-on-surface-variant">{{ p.ledger_source }}</td>
                 <td class="px-lg py-md text-on-surface">
                   {% if p.application.status == 'CANCELLED' %}
                     <span class="inline-flex items-center gap-1 text-error bg-error/10 px-2 py-0.5 rounded-full text-xs font-medium">
@@ -116,7 +143,9 @@
                     </span>
                   {% endif %}
                 </td>
-                <td class="px-lg py-md text-right font-semibold text-on-surface">TZS {{ p.amount }}</td>
+                <td class="px-lg py-md text-right text-on-surface-variant">{{ p.ledger_fee|floatformat:"0g" }}</td>
+                <td class="px-lg py-md text-right text-on-surface-variant">{% if p.ledger_discount %}-{{ p.ledger_discount|floatformat:"0g" }}{% else %}&mdash;{% endif %}</td>
+                <td class="px-lg py-md text-right font-semibold text-on-surface">TZS {{ p.ledger_cash|floatformat:"0g" }}</td>
                 <td class="px-lg py-md text-on-surface-variant">{{ p.created_at|date:"M j, Y H:i" }}</td>
               </tr>
             {% endfor %}

@@ -29,8 +29,16 @@ def build_payment_receipt(payment):
     rows = [
         ("Receipt Reference", payment.reference_id),
         ("Date", timezone.localtime(payment.paid_at or payment.created_at).strftime("%Y-%m-%d %H:%M")),
-        ("Amount", f"{payment.amount:,.2f} {payment.currency}"),
-        ("Payment Method", payment.get_method_display()),
+    ]
+    redemption = getattr(payment.application, "voucher_redemption", None)
+    if redemption is not None:
+        rows += [
+            ("Application Fee", f"{redemption.fee_amount:,.2f} {payment.currency}"),
+            (f"Voucher {redemption.voucher.display_code}", f"-{redemption.discount_amount:,.2f} {payment.currency}"),
+        ]
+    rows += [
+        ("Amount Paid", f"{payment.amount:,.2f} {payment.currency}"),
+        ("Payment Method", payment.get_method_display() or "-"),
         ("Gateway Transaction", payment.gateway_txn_id or "-"),
         ("Status", "PAID"),
     ]

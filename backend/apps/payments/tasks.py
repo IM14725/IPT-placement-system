@@ -44,8 +44,12 @@ def receipt_email(payment_id):
         fallback_body=(
             f"Dear {app.student.user.get_full_name() or app.student.user.email},\n\n"
             f"Thank you for your application to {app.slot.organization.name} "
-            f"({app.slot.title}). Your application fee of {payment.amount:,.2f} {payment.currency} "
-            f"has been received.\n\n"
+            f"({app.slot.title}). "
+            + (
+                "Your application fee was fully covered by a voucher, so there was nothing to pay.\n\n"
+                if payment.amount == 0
+                else f"Your application fee of {payment.amount:,.2f} {payment.currency} has been received.\n\n"
+            ) +
             f"Reference: {payment.reference_id}\n"
             f"Paid on: {payment.paid_at:%Y-%m-%d %H:%M}\n\n"
             f"Your application has been submitted and accepted. Please see the attached receipt.\n\n"

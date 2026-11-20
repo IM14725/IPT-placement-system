@@ -155,21 +155,41 @@ def ledger(request):
     from urllib.parse import urlencode
     from django.db.models import Q
 
-    payments = Payment.objects.select_related("student__user", "application__slot__organization")
+    from apps.payments.utils import CREDIT_TXN_PREFIX
+    from apps.vouchers import stats as voucher_stats
+
+    payments = Payment.objects.select_related(
+        "student__user", "application__slot__organization", "application__voucher_redemption__voucher"
+    )
 
     q = request.GET.get("q", "").strip()
     status_filter = request.GET.get("status")
+    source_filter = request.GET.get("source")
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
 
     if q:
-        payments = payments.filter(
+        code_part = "".join(ch for ch in q.upper() if ch.isalnum())
+        search = (
             Q(reference_id__icontains=q)
             | Q(student__user__email__icontains=q)
             | Q(student__user__first_name__icontains=q)
             | Q(student__user__last_name__icontains=q)
             | Q(application__slot__organization__name__icontains=q)
             | Q(amount__icontains=q)
+        )
+        if len(code_part) >= 4:
+            search |= Q(application__voucher_redemption__voucher__code__icontains=code_part)
+        payments = payments.filter(search)
+
+    # Where the money came from: mobile money, a voucher, or a free re-application credit.
+    if source_filter == "voucher":
+        payments = payments.filter(application__voucher_redemption__isnull=False)
+    elif source_filter == "credit":
+        payments = payments.filter(gateway_txn_id__startswith=CREDIT_TXN_PREFIX)
+    elif source_filter == "cash":
+        payments = payments.filter(application__voucher_redemption__isnull=True).exclude(
+            gateway_txn_id__startswith=CREDIT_TXN_PREFIX
         )
 
     if status_filter == "paid":
@@ -196,14 +216,8 @@ def ledger(request):
 
     payments = payments.order_by("-created_at")
 
-    totals = cache_get_or_set(
-        "admin:ledger-totals",
-        30,
-        producer=lambda: Payment.objects.filter(status=PaymentStatus.PAID).aggregate(
-            total_fees=Sum("amount"), paid_count=Count("id")
-        ),
-    )
-    
+    totals = cache_get_or_set("admin:ledger-totals-v2", 30, producer=voucher_stats.ledger_totals)
+
     unpaid_cancelled_count = cache_get_or_set(
         "admin:ledger-unpaid-cancelled-count",
         30,
@@ -211,6 +225,8 @@ def ledger(request):
     )
 
     page_obj = paginate(payments, request.GET.get("page"), page_size=50)
+    for payment in page_obj:
+        voucher_stats.describe_payment(payment)
     return render(
         request,
         "core/ledger.html",
@@ -218,11 +234,13 @@ def ledger(request):
             "payments": page_obj,
             "page_obj": page_obj,
             "querystring": urlencode({k: v for k, v in request.GET.items() if k != "page"}),
-            "total_fees": totals["total_fees"] or 0,
-            "paid_count": totals["paid_count"] or 0,
+            "total_fees": totals["cash"],
+            "paid_count": totals["paid_count"],
+            "totals": totals,
             "unpaid_cancelled_count": unpaid_cancelled_count,
             "q": q,
             "status_filter": status_filter,
+            "source_filter": source_filter,
             "start_date": start_date,
             "end_date": end_date,
         },
@@ -282,9 +300,10 @@ def _compute_metrics(range_key="30"):
             is_accepted=True
         ).count(),
         "payments": Payment.objects.filter(status=PaymentStatus.PAID).count(),
-        "total_fees": Payment.objects.filter(status=PaymentStatus.PAID).aggregate(
-            total=Sum("amount")
-        )["total"]
+        # Cash actually collected: a free re-application credit is recorded at the full fee but no money moved.
+        "total_fees": Payment.objects.filter(status=PaymentStatus.PAID)
+        .exclude(gateway_txn_id__startswith="CREDIT-")
+        .aggregate(total=Sum("amount"))["total"]
         or 0,
     }
 
