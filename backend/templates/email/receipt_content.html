@@ -1,0 +1,67 @@
+<p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:{{ c.ink }};">Dear {{ r.student }},</p>
+<p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:{{ c.ink }};">Thank you for applying to <strong>{{ r.organization }}</strong> for <strong>{{ r.slot }}</strong>. {% if r.is_money %}We have received your application fee.{% else %}No fee was due for this application.{% endif %} Your application has been submitted. Keep this receipt for your records.</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid {{ c.line }};border-radius:12px;margin:0 0 20px;">
+  <tr>
+    <td bgcolor="{{ c.tint }}" style="background:{{ c.tint }};padding:14px 18px;border-radius:12px 12px 0 0;border-bottom:1px solid {{ c.line }};">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+        <td style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:{{ c.soft }};">Receipt<br><span style="font-family:Consolas,Menlo,monospace;font-size:17px;font-weight:bold;letter-spacing:0;color:{{ c.primary }};text-transform:none;">{{ r.reference }}</span></td>
+        <td align="right" valign="middle"><span style="display:inline-block;background:{{ badge_color }};color:#FFFFFF;font-size:12px;font-weight:bold;letter-spacing:1px;padding:6px 12px;border-radius:999px;">{{ r.badge }}</span></td>
+      </tr></table>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:6px 18px 4px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        {% for label, value in rows %}
+        <tr>
+          <td style="padding:8px 0;font-size:14px;color:{{ c.soft }};vertical-align:top;white-space:nowrap;border-bottom:1px solid {{ c.line }};">{{ label }}</td>
+          <td align="right" style="padding:8px 0 8px 12px;font-size:14px;color:{{ c.ink }};vertical-align:top;border-bottom:1px solid {{ c.line }};word-break:break-word;">{{ value }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:6px 18px 16px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td style="padding:6px 0;font-size:14px;color:{{ c.muted }};">Application fee</td>
+          <td align="right" style="padding:6px 0;font-size:14px;color:{{ c.muted }};">{{ r.fee }}</td>
+        </tr>
+        {% if r.discount %}
+        <tr>
+          <td style="padding:6px 0;font-size:14px;color:{{ c.muted }};">{{ r.discount_label }}</td>
+          <td align="right" style="padding:6px 0;font-size:14px;color:{{ c.muted }};">- {{ r.discount }}</td>
+        </tr>
+        {% endif %}
+        <tr>
+          <td style="padding:12px 0 0;font-size:17px;font-weight:bold;color:{{ c.ink }};border-top:2px solid {{ c.ink }};">Total paid</td>
+          <td align="right" style="padding:12px 0 0;font-size:17px;font-weight:bold;color:{{ c.ink }};border-top:2px solid {{ c.ink }};">{{ r.paid }}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="{{ c.tint }}" style="background:{{ c.tint }};border:1px solid {{ c.line }};border-radius:12px;margin:0 0 20px;">
+  <tr>
+    <td align="center" style="padding:22px 16px 6px;">
+      <img src="cid:{{ qr_cid }}" width="150" height="150" alt="QR code to verify receipt {{ r.reference }}" style="display:block;border:0;outline:none;margin:0 auto;background:#FFFFFF;border-radius:8px;">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" style="padding:6px 20px 20px;font-size:14px;line-height:1.6;color:{{ c.muted }};">
+      <strong style="color:{{ c.ink }};">Scan to verify this receipt</strong><br>
+      Point your phone camera at the code, or use the button below, to confirm that IPT Marketplace issued this receipt.
+    </td>
+  </tr>
+</table>
+
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 20px;"><tr>
+  <td align="center" bgcolor="{{ c.primary }}" style="border-radius:8px;">
+    <a href="{{ verify_url }}" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;color:#FFFFFF;text-decoration:none;border-radius:8px;">Verify this receipt</a>
+  </td>
+</tr></table>
+<p style="margin:0 0 16px;font-size:13px;line-height:1.6;color:{{ c.soft }};text-align:center;word-break:break-all;">If the button does not work, copy this link into your browser:<br><a href="{{ verify_url }}" style="color:{{ c.primary }};">{{ verify_url }}</a></p>
+<p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:{{ c.muted }};">A PDF copy of this receipt is attached.</p>

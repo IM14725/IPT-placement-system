@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Q, Sum
 
 from apps.payments.models import Payment, PaymentStatus
-from apps.payments.utils import CREDIT_TXN_PREFIX
+from apps.payments.utils import CREDIT_TXN_PREFIX, WAIVED_TXN_PREFIX
 from apps.vouchers.models import ACTIVE_APPLICATION_STATUSES, FeeVoucher, SignupReference, VoucherRedemption
 
 ZERO = Decimal("0")
@@ -73,7 +73,12 @@ def ledger_totals():
     """
     paid = Payment.objects.filter(status=PaymentStatus.PAID)
     credit = paid.filter(gateway_txn_id__startswith=CREDIT_TXN_PREFIX).aggregate(total=Sum("amount"), n=Count("id"))
-    cash = paid.exclude(gateway_txn_id__startswith=CREDIT_TXN_PREFIX).aggregate(total=Sum("amount"), n=Count("id"))
+    waived_n = paid.filter(gateway_txn_id__startswith=WAIVED_TXN_PREFIX).count()
+    cash = (
+        paid.exclude(gateway_txn_id__startswith=CREDIT_TXN_PREFIX)
+        .exclude(gateway_txn_id__startswith=WAIVED_TXN_PREFIX)
+        .aggregate(total=Sum("amount"), n=Count("id"))
+    )
     vouchers = VoucherRedemption.objects.filter(application__status="PAID").aggregate(
         total=Sum("discount_amount"), n=Count("id")
     )
@@ -88,13 +93,17 @@ def ledger_totals():
         "paid_count": (cash["n"] or 0) + (credit["n"] or 0),
         "voucher_count": vouchers["n"] or 0,
         "credit_count": credit["n"] or 0,
+        # Applications let through while no payment key was set: recorded at 0, so no money either way.
+        "waived_count": waived_n,
     }
 
 
 def describe_payment(payment):
     """Fee, discount, cash and source of one ledger row (adds ``ledger_*`` attributes)."""
     redemption = _redemption(payment)
-    if (payment.gateway_txn_id or "").startswith(CREDIT_TXN_PREFIX):
+    if (payment.gateway_txn_id or "").startswith(WAIVED_TXN_PREFIX):
+        fee, discount, cash, source = ZERO, ZERO, ZERO, "Waived"
+    elif (payment.gateway_txn_id or "").startswith(CREDIT_TXN_PREFIX):
         fee, discount, cash, source = payment.amount, payment.amount, ZERO, "Credit"
     elif redemption is not None:
         fee, discount, cash = redemption.fee_amount, redemption.discount_amount, payment.amount

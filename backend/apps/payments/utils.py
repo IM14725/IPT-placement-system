@@ -15,7 +15,15 @@ DEFAULT_APPLICATION_FEE = Decimal("15000.00")
 # cancellation (full fee recorded, nothing collected) and a 100% voucher (amount 0).
 CREDIT_TXN_PREFIX = "CREDIT-"
 VOUCHER_TXN_PREFIX = "VOUCHER-"
+# Applications submitted while PAYMENT_WAIVED is on (no payment key yet): amount 0, never cash.
+WAIVED_TXN_PREFIX = "WAIVED-"
+WAIVED_TXN_ID = f"{WAIVED_TXN_PREFIX}NO-PAYMENT-KEY"
 DEFAULT_WEBHOOK_MAX_AGE_SECONDS = 300
+
+
+def payments_waived() -> bool:
+    """True while applications are accepted without a fee (``PAYMENT_WAIVED``)."""
+    return bool(getattr(settings, "PAYMENT_WAIVED", False))
 
 
 def get_application_fee() -> Decimal:

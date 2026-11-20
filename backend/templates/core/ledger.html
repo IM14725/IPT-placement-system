@@ -51,6 +51,7 @@
       <div class="flex flex-col"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Gross fees</span><span class="font-headline-md text-headline-md text-on-surface font-bold">TZS {{ totals.gross|floatformat:"0g" }}</span></div>
       <a href="?source=voucher" class="flex flex-col hover:bg-surface-container-low rounded-lg"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Voucher discounts ({{ totals.voucher_count }})</span><span class="font-headline-md text-headline-md text-on-surface font-bold">TZS {{ totals.voucher_discounts|floatformat:"0g" }}</span></a>
       <a href="?source=credit" class="flex flex-col hover:bg-surface-container-low rounded-lg"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Re-application credits ({{ totals.credit_count }})</span><span class="font-headline-md text-headline-md text-on-surface font-bold">TZS {{ totals.credit_discounts|floatformat:"0g" }}</span></a>
+      {% if totals.waived_count %}<a href="?source=waived" class="flex flex-col hover:bg-surface-container-low rounded-lg"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Waived applications</span><span class="font-headline-md text-headline-md text-on-surface font-bold">{{ totals.waived_count }}</span></a>{% endif %}
       <a href="?source=cash" class="flex flex-col hover:bg-surface-container-low rounded-lg"><span class="font-metadata text-metadata text-on-surface-variant uppercase tracking-wider">Cash collected</span><span class="font-headline-md text-headline-md text-on-surface font-bold">TZS {{ totals.cash|floatformat:"0g" }}</span></a>
     </div>
     <p class="font-metadata text-metadata text-on-surface-variant">Gross fees = cash collected + voucher discounts + re-application credits. Only paid applications are counted.</p>
@@ -76,6 +77,7 @@
         <option value="cash" {% if source_filter == 'cash' %}selected{% endif %}>Cash</option>
         <option value="voucher" {% if source_filter == 'voucher' %}selected{% endif %}>Voucher</option>
         <option value="credit" {% if source_filter == 'credit' %}selected{% endif %}>Credit</option>
+        <option value="waived" {% if source_filter == 'waived' %}selected{% endif %}>Waived (no payment key)</option>
       </select></div>
     </div>
     <div>

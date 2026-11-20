@@ -296,6 +296,16 @@ SELCOM_API_KEY = env("SELCOM_API_KEY", default="MOCK_API_KEY")
 SELCOM_API_SECRET = env("SELCOM_API_SECRET", default="MOCK_API_SECRET")
 SELCOM_VENDOR_TILL = env("SELCOM_VENDOR_TILL", default="MOCK_TILL")
 
+# Public address of the site, used where there is no request (emails and PDF receipts built by Celery):
+# the QR code and "verify this receipt" link on a receipt point here. Set it to the real https:// address
+# in production, or every receipt will carry a link to this machine.
+SITE_URL = env("SITE_URL", default="http://127.0.0.1:8000").rstrip("/")
+
+# Temporary switch for while there is no payment key: applications are submitted without paying and are
+# finalized at once through a zero-amount "WAIVED-" payment (visible to the organization, never cash).
+# Set False (or remove it) once the real gateway key is configured. Waived applications stay PAID.
+PAYMENT_WAIVED = env.bool("PAYMENT_WAIVED", default=False)
+
 # Upload limits (bytes) - strict 2MB per spec
 MAX_UPLOAD_SIZE = 2 * 1024 * 1024
 ALLOWED_DOC_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "webp", "doc", "docx"}

@@ -6,7 +6,7 @@ from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_GET
 
 PUBLIC_URL_NAMES = ("home", "register", "login", "legal-terms", "legal-privacy")
-PRIVATE_PREFIXES = ("/student/", "/organization/", "/platform/", "/api/", "/admin/", "/i18n/", "/report/", "/auth/account/")
+PRIVATE_PREFIXES = ("/student/", "/organization/", "/platform/", "/api/", "/admin/", "/i18n/", "/report/", "/auth/account/", "/verify/")
 
 
 @require_GET

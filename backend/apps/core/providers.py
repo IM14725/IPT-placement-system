@@ -109,19 +109,33 @@ class _BrandedEmail:
 
     logo: bytes | None = None
     logo_cid = "ipt-logo"
+    inline_images: dict | None = None  # {content id: PNG bytes}, e.g. a receipt's QR code
 
     def message(self, *, policy=None):
         msg = super().message(**({"policy": policy} if policy is not None else {}))
-        if self.logo:
+        if self.logo or self.inline_images:
             html_part = msg.get_body(preferencelist=("html",))
             if html_part is not None:
-                html_part.add_related(
-                    self.logo, "image", "png", cid=f"<{self.logo_cid}>", disposition="inline"
-                )
+                if self.logo:
+                    html_part.add_related(
+                        self.logo, "image", "png", cid=f"<{self.logo_cid}>", disposition="inline"
+                    )
+                # Independent of the logo: a hosted EMAIL_LOGO_URL means no logo part, but the QR still travels.
+                for cid, data in (self.inline_images or {}).items():
+                    html_part.add_related(data, "image", "png", cid=f"<{cid}>", disposition="inline")
         return msg
 
 
-def send_email(subject: str, to: list, body: str, attachments=None, *, html: bool = True) -> dict:
+def send_email(
+    subject: str,
+    to: list,
+    body: str,
+    attachments=None,
+    *,
+    html: bool = True,
+    html_content: str | None = None,
+    inline_images: dict | None = None,
+) -> dict:
     """Send an email. ``body`` is plain text; it is also sent as a branded HTML part (logo, platform
     colours, OTP code box) unless ``html=False``. A problem building the HTML never blocks the email."""
     from django.core.mail import EmailMultiAlternatives
@@ -141,17 +155,20 @@ def send_email(subject: str, to: list, body: str, attachments=None, *, html: boo
         try:
             from apps.core import email_layout
 
-            page = email_layout.render_email_html(subject, body)
+            # ``html_content`` is a finished page from a caller with its own layout (the receipt).
+            page = html_content or email_layout.render_email_html(subject, body)
             email.attach_alternative(page, "text/html")
             if f"cid:{email_layout.LOGO_CID}" in page:
                 email.logo = email_layout.logo_bytes()
                 email.logo_cid = email_layout.LOGO_CID
+            email.inline_images = {cid: data for cid, data in (inline_images or {}).items() if f"cid:{cid}" in page}
         except Exception:  # noqa: BLE001 - the plain-text email must still go out
             import logging
 
             logging.getLogger(__name__).warning("Branded HTML email could not be built; sending plain text", exc_info=True)
             email.alternatives = []
             email.logo = None
+            email.inline_images = None
 
     if attachments:
         for attachment in attachments:

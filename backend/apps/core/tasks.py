@@ -15,6 +15,7 @@ def aggregate():
     totals = (
         Payment.objects.filter(status=PaymentStatus.PAID)
         .exclude(gateway_txn_id__startswith="CREDIT-")
+        .exclude(gateway_txn_id__startswith="WAIVED-")
         .aggregate(total_fees=Sum("amount"), paid_count=Count("id"))
     )
     snapshot = {

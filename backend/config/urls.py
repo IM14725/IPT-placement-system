@@ -18,6 +18,7 @@ urlpatterns = [
     path("api/locations/", include("apps.locations.urls")),
     path("api/slots/", include("apps.slots.urls")),
     path("api/payments/", include("apps.payments.urls")),
+    path("verify/", include("apps.payments.urls_public")),
 ]
 
 if settings.DEBUG:

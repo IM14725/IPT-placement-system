@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Receipt verification — IPT Marketplace{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+{% block whatsapp_float %}{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto flex flex-col gap-lg pb-xl">
+  {% if found %}
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden" data-receipt-genuine>
+    <div class="p-lg flex flex-col items-center text-center gap-xs" style="background:#E8F6EE;border-bottom:1px solid #BFE3CE;">
+      <span class="material-symbols-outlined" style="font-size:48px;color:#1B7F4B;">verified</span>
+      <h1 class="font-headline-md text-headline-md font-bold" style="color:#1B7F4B;">Genuine receipt</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant">This receipt was issued by IPT Marketplace.</p>
+    </div>
+    <dl class="p-lg flex flex-col gap-sm font-body-md text-body-md">
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Receipt no.</dt><dd class="font-semibold text-on-surface" style="font-family:Consolas,Menlo,monospace;">{{ r.reference }}</dd></div>
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Date</dt><dd class="text-on-surface text-right">{{ r.date }}</dd></div>
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Status</dt><dd class="font-semibold text-on-surface text-right">{{ r.badge }}</dd></div>
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Amount paid</dt><dd class="font-semibold text-on-surface text-right">{{ r.paid }}</dd></div>
+      {% if r.discount %}<div class="flex justify-between gap-md"><dt class="text-on-surface-variant">{{ r.discount_label }}</dt><dd class="text-on-surface text-right">- {{ r.discount }}</dd></div>{% endif %}
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Student</dt><dd class="text-on-surface text-right">{{ r.student }}</dd></div>
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Organization</dt><dd class="text-on-surface text-right">{{ r.organization }}</dd></div>
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Placement</dt><dd class="text-on-surface text-right">{{ r.slot }}</dd></div>
+    </dl>
+    {% if cancelled %}
+    <p class="mx-lg mb-lg rounded-lg bg-surface-container-low px-md py-sm font-metadata text-metadata text-on-surface-variant">Note: the student later cancelled this application.</p>
+    {% endif %}
+    <p class="px-lg pb-lg font-metadata text-metadata text-on-surface-variant">The student's name is partly hidden for privacy. If the details above do not match the receipt you were given, do not accept it.</p>
+  </div>
+  {% else %}
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden" data-receipt-unverified>
+    <div class="p-lg flex flex-col items-center text-center gap-xs" style="background:#FDECEC;border-bottom:1px solid #F3C4C4;">
+      <span class="material-symbols-outlined" style="font-size:48px;color:#B3261E;">gpp_bad</span>
+      <h1 class="font-headline-md text-headline-md font-bold" style="color:#B3261E;">Receipt could not be verified</h1>
+    </div>
+    <p class="p-lg font-body-md text-body-md text-on-surface-variant">We have no receipt that matches this link. The link may have been copied incorrectly, or the receipt may not be genuine. Check the receipt number with the person who gave it to you, or contact IPT Marketplace support.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

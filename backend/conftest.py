@@ -18,6 +18,8 @@ def pytest_configure(config):
     settings.ADMIN_MFA_ENFORCED = False  # MFA tests switch it on explicitly
     settings.ASTRACALL_API_KEY = ""
     settings.SMS_BACKEND = "mock"
+    settings.PAYMENT_WAIVED = False  # a developer's .env may waive fees; waiver tests switch it on
+    settings.EMAIL_LOGO_URL = ""  # a developer's .env may host the logo; email tests expect the embedded one
     settings.OTP_ADMIN_CAN_VIEW_CODES = True  # on by default; tests that need it off set it themselves
     _install_fake_redis()
 

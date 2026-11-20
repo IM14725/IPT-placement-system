@@ -729,6 +729,17 @@ Admin-issued discount codes for the application fee, a signup reference that app
 - **Not built (on purpose):** sponsor-purchased batches (a second payment flow, invoices, refunds on unused codes), sponsor self-service issuing, a "first application only" batch restriction, year-of-study/gender restrictions. Add a restriction by adding a field on `VoucherBatch`, a check in `student_restriction_blocker` / `slot_restriction_blocker` and a field in `vouchers/forms.py`.
 - **Tests:** `apps/vouchers/tests.py` (pricing, every restriction, caps and release, apply flow, registration reference, triggers, admin console permissions, ledger split).
 
+## Payment waiver while there is no payment key (2026-11-20)
+
+Temporary switch so students can apply before the Selcom key exists. `PAYMENT_WAIVED` (env, `config/settings/base.py`, default False; helper `payments.utils.payments_waived()`).
+
+- **When on:** `students.views.apply` still takes the letter and the seat (same `create_application` locking), creates a `Payment` at **amount 0** and finalizes it through `finalize_verified_payment` with `gateway_txn_id="WAIVED-NO-PAYMENT-KEY"` (`WAIVED_TXN_PREFIX`). The DB trigger is satisfied (verified payment), the application is PAID at once and the organization is notified like any paid applicant. The 3 h hold and mobile-money step are skipped.
+- **Nothing is consumed or granted:** a saved cancellation credit stays; vouchers/sponsor codes are ignored (a redemption held by a re-booked PENDING seat is deleted, not consumed); `can_cancel=False`, so a waived application cannot be cancelled for a free re-application credit. Apply/slot pages show "No application fee is charged right now" and hide the voucher box.
+- **Money reporting:** amount 0 keeps revenue, `total_fees` and the metrics chart at cash only; `stats.ledger_totals` excludes waived rows from cash and counts them (`waived_count`); the ledger labels them source "Waived" and has a `source=waived` filter. The nightly snapshot (`core/tasks.py`) excludes them from `paid_transactions`.
+- **Turning it off:** set `PAYMENT_WAIVED=False` (or remove it) in `backend/.env`, add the real `SELCOM_*` values, restart Django. Waived applications stay PAID (paid rows are immutable) and keep the "Waived" label. A seat still PENDING from before the switch is simply paid normally.
+- **Not touched:** FastAPI (`realtime/`) and the webhook path; nothing there depends on the switch.
+- **Tests:** `apps/payments/test_waived.py`.
+
 ## Branded emails (2026-11-20)
 Every email now goes out as plain text **and** a branded HTML part, built centrally in `providers.send_email` (`apps/core/email_layout.py`, template `templates/email/branded.html`). Callers still pass plain text; `message.body` is unchanged, so code parsers and the text fallback keep working.
 - **Look:** platform tokens (indigo `#3525CD`/`#4F46E5`, ink `#191C1D`) with the logo's orange as the footer accent, table layout with inline styles (Gmail/Outlook/phones), 600 px max width, hidden preheader.
@@ -736,3 +747,15 @@ Every email now goes out as plain text **and** a branded HTML part, built centra
 - **Layouts picked from the text:** "verification code is NNNNNN" -> large spaced code box + expiry + "never share" note; a lone `Label: https://...` line -> button; 2+ consecutive `Key: value` lines -> details table (temporary passwords, sign-in URL); everything else -> paragraphs with http(s) links. All text is HTML-escaped; only http(s) URLs become links.
 - **Safety:** any error while building the HTML is logged and the plain-text email is still sent (an OTP must never be blocked by styling). `send_email(..., html=False)` skips the HTML.
 - **Tests:** `apps/core/test_email_layout.py`.
+
+## Professional receipts with a verification QR code (2026-11-20)
+
+The receipt email and the attached PDF now look like a receipt and carry a QR code that opens a public page confirming the receipt is genuine.
+
+- **Verification link:** `/verify/<reference>/<signature>/` (`apps/payments/verification.py`, view `views_verify.py`, route `receipt-verify`). The signature is a truncated HMAC-SHA256 of the reference with `SECRET_KEY`, so a link cannot be forged or built from a reference number alone; rotating `SECRET_KEY` invalidates old links. Forged signatures never reach the database; wrong signature and unknown reference return the same 404 "could not be verified" page. Rate limit `receipt-verify` (20 burst, 1 per 6 s per client). Responses are `no-store`, `noindex`, no referrer; `/verify/` is in robots.txt `Disallow`.
+- **What the page shows (masked):** reference, date, status/badge, amount, any discount, student as `A*** J***`, organization, placement, and a note if the application was later cancelled. No email, phone or ids. English only (same as emails).
+- **`SITE_URL`** (env, `base.py`, default `http://127.0.0.1:8000`): the link and QR must be absolute and are built by Celery with no request. **Set it to the real https address in production**, or every receipt will point at the local machine.
+- **Email** (`apps/payments/receipt_email.py`, `templates/email/receipt_content.html`): the branded frame with a receipt card (reference, PAID/FEE WAIVED badge, date, student, organization, placement, method, transaction id, fee, discount, total paid), the QR as an inline `cid:ipt-receipt-qr` image, a "Verify this receipt" button and the plain link. The plain-text part (still editable under notification templates) always ends with `Verify this receipt:` and the link. Any failure building the HTML falls back to the standard branded layout; the PDF stays attached. Plumbing: `send_email(html_content=, inline_images=)`, `dispatch_message` / `throttled_dispatch` pass them through (`_BrandedEmail` embeds any number of inline images).
+- **PDF** (`payments/services.py`): redesigned (logo, status badge, receipt and placement sections, totals box, QR with a clickable link, footer). `receipt_summary(payment)` works out the lines once for email, PDF and the verify page and handles cash, voucher, cancellation credit and waived payments (a waived or credit receipt shows the fee, the discount line and `Total paid 0`). PDFs already generated keep their old look (`receipt_pdf` is reused).
+- **Tests:** `apps/payments/test_receipt_verify.py`. `conftest.py` now forces `PAYMENT_WAIVED=False` and `EMAIL_LOGO_URL=""` so a developer's `.env` cannot change test outcomes.
+- **Not built:** a barcode (the QR is the only code), a Swahili version of the verify page and email.

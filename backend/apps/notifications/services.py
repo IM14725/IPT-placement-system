@@ -56,7 +56,7 @@ def render_template(key, channel, context=None, *, fallback_subject="", fallback
     return fallback_subject, fallback_body
 
 
-def dispatch_message(message: Message, attachments=None) -> Message:
+def dispatch_message(message: Message, attachments=None, *, html_content=None, inline_images=None) -> Message:
     """Send via the appropriate provider and update the delivery status."""
     from apps.core import providers
 
@@ -69,7 +69,9 @@ def dispatch_message(message: Message, attachments=None) -> Message:
                 subject=message.subject or "IPT Marketplace",
                 to=[message.user.email],
                 body=message.body,
-                attachments=attachments
+                attachments=attachments,
+                html_content=html_content,
+                inline_images=inline_images,
             )
         message.status = MessageStatus.SENT
         message.error = ""
@@ -82,7 +84,7 @@ def dispatch_message(message: Message, attachments=None) -> Message:
     return message
 
 
-def throttled_dispatch(message: Message, attachments=None) -> Message:
+def throttled_dispatch(message: Message, attachments=None, *, html_content=None, inline_images=None) -> Message:
     """Dispatch a message under the global outbound budget.
 
     Draws a token from the channel's Redis token bucket first; when the budget
@@ -100,4 +102,9 @@ def throttled_dispatch(message: Message, attachments=None) -> Message:
         )
         if not result.allowed:
             raise OutboundRateLimited(message.channel, result.retry_after)
-    return dispatch_message(message, attachments=attachments)
+    extra = {}
+    if html_content is not None:
+        extra["html_content"] = html_content
+    if inline_images:
+        extra["inline_images"] = inline_images
+    return dispatch_message(message, attachments=attachments, **extra)

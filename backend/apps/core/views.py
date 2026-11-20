@@ -155,7 +155,7 @@ def ledger(request):
     from urllib.parse import urlencode
     from django.db.models import Q
 
-    from apps.payments.utils import CREDIT_TXN_PREFIX
+    from apps.payments.utils import CREDIT_TXN_PREFIX, WAIVED_TXN_PREFIX
     from apps.vouchers import stats as voucher_stats
 
     payments = Payment.objects.select_related(
@@ -187,9 +187,13 @@ def ledger(request):
         payments = payments.filter(application__voucher_redemption__isnull=False)
     elif source_filter == "credit":
         payments = payments.filter(gateway_txn_id__startswith=CREDIT_TXN_PREFIX)
+    elif source_filter == "waived":
+        payments = payments.filter(gateway_txn_id__startswith=WAIVED_TXN_PREFIX)
     elif source_filter == "cash":
-        payments = payments.filter(application__voucher_redemption__isnull=True).exclude(
-            gateway_txn_id__startswith=CREDIT_TXN_PREFIX
+        payments = (
+            payments.filter(application__voucher_redemption__isnull=True)
+            .exclude(gateway_txn_id__startswith=CREDIT_TXN_PREFIX)
+            .exclude(gateway_txn_id__startswith=WAIVED_TXN_PREFIX)
         )
 
     if status_filter == "paid":

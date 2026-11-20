@@ -26,7 +26,7 @@ from apps.core.rate_limit import token_bucket
 from apps.core.security import safe_json_dumps
 from apps.documents.models import Document
 from apps.payments.models import Payment
-from apps.payments.utils import VOUCHER_TXN_PREFIX, get_application_fee
+from apps.payments.utils import VOUCHER_TXN_PREFIX, WAIVED_TXN_ID, get_application_fee, payments_waived
 from apps.students.forms import DocumentUploadForm, StudentProfileForm
 from apps.students.models import StudentProfile, VerificationStatus, student_can_apply
 
@@ -665,6 +665,7 @@ def slot_detail(request, slot_id):
             "closed_reason": closed_reason,
             "can_apply": student_can_apply(request.user),
             "fee": get_application_fee(),
+            "waived": payments_waived(),
             "payment_hours": PAYMENT_DEADLINE_HOURS,
             "average": round(summary["average"], 1) if summary["average"] else None,
             "review_total": summary["total"],
@@ -704,11 +705,12 @@ def apply(request, slot_id):
     from apps.vouchers import services as voucher_services
 
     fee = get_application_fee()
+    waived = payments_waived()
     held = Application.objects.filter(student=profile, slot=slot).first()
     if request.method == "POST":
         form = ApplicationLetterForm(request.POST, request.FILES)
         typed_code = voucher_services.normalize_code(request.POST.get("voucher_code"))
-        if form.is_valid() and typed_code and not profile.reapplication_credit:
+        if form.is_valid() and typed_code and not profile.reapplication_credit and not waived:
             # Tell the student about a bad code before the letter is stored and the seat is taken.
             try:
                 voucher_services.quote(typed_code, profile=profile, slot=slot, fee=fee, exclude_application=held)
@@ -720,11 +722,14 @@ def apply(request, slot_id):
             try:
                 with transaction.atomic():
                     application = create_application(profile, slot)
-                    is_credit = profile.reapplication_credit
+                    # Waived (no payment key yet): free for everyone. A saved credit or voucher is left
+                    # untouched for later.
+                    is_credit = profile.reapplication_credit and not waived
                     application.application_letter = letter
                     application.letter_original_name = letter.name
                     application.letter_sha256 = _file_sha256(letter)
-                    if is_credit:
+                    if is_credit or waived:
+                        # Nothing was paid, so there is nothing to credit back on cancellation.
                         application.can_cancel = False
                     application.save(
                         update_fields=[
@@ -738,12 +743,17 @@ def apply(request, slot_id):
 
                     # A voucher prices the application. The cancellation credit is already free, so
                     # it wins and the voucher is not touched.
-                    if not is_credit:
+                    if waived:
+                        # A voucher held by a re-booked seat is released, not consumed.
+                        from apps.vouchers.models import VoucherRedemption
+
+                        VoucherRedemption.objects.filter(application=application).delete()
+                    elif not is_credit:
                         offer = voucher_services.resolve_checkout_offer(
                             profile=profile, slot=slot, application=application, fee=fee,
                             typed_code=typed_code, request=request,
                         )
-                    amount = offer.amount if offer.redemption else fee
+                    amount = 0 if waived else (offer.amount if offer.redemption else fee)
                     payment = getattr(application, "payment", None)
                     if payment is None:
                         payment = Payment.objects.create(
@@ -754,6 +764,10 @@ def apply(request, slot_id):
                         payment.amount = amount
                         payment.save(update_fields=["status", "amount", "updated_at"])
 
+                    if waived:
+                        finalize_verified_payment(
+                            payment, gateway_txn_id=WAIVED_TXN_ID, payload={"waived": True, "fee": str(fee)}
+                        )
                     if offer.redemption and amount == 0:
                         # A 100% waiver: same path as the credit, no mobile-money step.
                         voucher = offer.redemption.voucher
@@ -780,6 +794,9 @@ def apply(request, slot_id):
             else:
                 if offer.notice:
                     messages.warning(request, offer.notice)
+                if waived:
+                    messages.success(request, gettext("Application submitted. No fee is charged right now, so it is already with the organization."))
+                    return redirect("student-applications")
                 if is_credit:
                     messages.success(request, gettext("Application submitted successfully using your cancellation credit."))
                     return redirect("student-applications")
@@ -806,7 +823,7 @@ def apply(request, slot_id):
 
     offer_quote, offer_notice = None, ""
     held_redemption = None
-    if not profile.reapplication_credit:
+    if not profile.reapplication_credit and not waived:
         if held is not None:
             from apps.vouchers.models import VoucherRedemption
 
@@ -825,7 +842,8 @@ def apply(request, slot_id):
             "profile": profile,
             "fee": fee,
             "payment_hours": PAYMENT_DEADLINE_HOURS,
-            "has_credit": profile.reapplication_credit,
+            "has_credit": profile.reapplication_credit and not waived,
+            "waived": waived,
             "offer_quote": offer_quote,
             "offer_notice": offer_notice,
             "held_redemption": held_redemption,

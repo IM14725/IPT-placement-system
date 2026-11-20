@@ -123,9 +123,22 @@ def build_blocks(body: str) -> tuple[str, str]:
     return "".join(parts), preheader
 
 
-def render_email_html(subject: str, body: str) -> str:
-    heading = re.sub(r"^\[TEST\]\s*", "", subject or "").strip() or "IPT Marketplace"
-    content, preheader = build_blocks(body)
+def render_email_html(
+    subject: str,
+    body: str,
+    *,
+    content_html: str | None = None,
+    preheader: str | None = None,
+    heading: str | None = None,
+    embed_logo: bool = False,
+) -> str:
+    """The branded page. ``content_html`` (trusted markup built by our own code, already escaped) replaces
+    the blocks normally worked out from the plain-text ``body``: used by the receipt email."""
+    heading = heading or re.sub(r"^\[TEST\]\s*", "", subject or "").strip() or "IPT Marketplace"
+    if content_html is None:
+        content, preheader = build_blocks(body)
+    else:
+        content, preheader = content_html, preheader or ""
     return render_to_string(
         "email/branded.html",
         {
@@ -133,7 +146,9 @@ def render_email_html(subject: str, body: str) -> str:
             "content": content,
             "preheader": preheader,
             "logo_cid": LOGO_CID,
-            "logo_url": _logo_url(),
+            # embed_logo: send the logo inside the email even when EMAIL_LOGO_URL is set (many mail apps
+            # hold back remote images, which leaves an empty placeholder on a receipt).
+            "logo_url": "" if embed_logo else _logo_url(),
             "has_logo": LOGO_PATH.exists(),
             "year": date.today().year,
             "c": {

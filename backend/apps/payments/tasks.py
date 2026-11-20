@@ -46,7 +46,7 @@ def receipt_email(payment_id):
             f"Thank you for your application to {app.slot.organization.name} "
             f"({app.slot.title}). "
             + (
-                "Your application fee was fully covered by a voucher, so there was nothing to pay.\n\n"
+                "No application fee was due, so there was nothing to pay.\n\n"
                 if payment.amount == 0
                 else f"Your application fee of {payment.amount:,.2f} {payment.currency} has been received.\n\n"
             ) +
@@ -56,6 +56,19 @@ def receipt_email(payment_id):
             f"IPT Marketplace"
         ),
     )
+    # Whatever the (editable) text says, the plain version always ends with the way to verify the receipt.
+    from apps.payments.verification import verification_url
+
+    body = f"{body.rstrip()}\n\nVerify this receipt:\n{verification_url(payment)}"
+    html, inline_images = None, None
+    try:
+        from apps.payments.receipt_email import build_receipt_email
+
+        html, inline_images = build_receipt_email(payment, subject)
+    except Exception:  # noqa: BLE001 - the receipt must still be sent, in the standard branded style
+        import logging
+
+        logging.getLogger(__name__).warning("Receipt email layout failed; sending the standard layout", exc_info=True)
     message = create_message(
         user=app.student.user,
         application=app,
@@ -63,5 +76,5 @@ def receipt_email(payment_id):
         subject=subject,
         body=body,
     )
-    throttled_dispatch(message, attachments=[pdf_path])
+    throttled_dispatch(message, attachments=[pdf_path], html_content=html, inline_images=inline_images)
     return {"message_id": message.id, "pdf": pdf_path}

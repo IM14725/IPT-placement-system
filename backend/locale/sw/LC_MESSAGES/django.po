@@ -1475,6 +1475,9 @@ msgstr "Ombi limewasilishwa kwa mafanikio kwa kutumia nafasi yako ya kughairi."
 msgid "Application submitted with your letter. Complete payment to finalize."
 msgstr "Ombi limewasilishwa pamoja na barua yako. Kamilisha malipo ili kukamilisha."
 
+msgid "Application submitted. No fee is charged right now, so it is already with the organization."
+msgstr "Ombi limetumwa. Hakuna ada inayotozwa kwa sasa, kwa hiyo tayari liko kwa shirika."
+
 msgid "Application submitted. Voucher %(code)s covered the whole fee, so there is nothing to pay."
 msgstr "Ombi limewasilishwa. Vocha %(code)s imelipia ada yote, kwa hiyo hakuna cha kulipa."
 
@@ -2994,6 +2997,9 @@ msgstr "Hakuna waombaji bado"
 
 msgid "No application deadline"
 msgstr "Hakuna tarehe ya mwisho ya maombi"
+
+msgid "No application fee is charged right now. Your application goes straight to the organization."
+msgstr "Hakuna ada ya maombi inayotozwa kwa sasa. Ombi lako linaenda moja kwa moja kwa shirika."
 
 msgid "No application letter uploaded."
 msgstr "Hakuna barua ya ombi iliyopakiwa."

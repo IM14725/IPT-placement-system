@@ -77,9 +77,13 @@
     </summary>
     <div class="ipt-section-body">
       <ul class="flex flex-col gap-xs font-body-md text-body-md text-on-surface-variant list-disc pl-md">
+      {% if waived %}
+      <li>{% trans "No application fee is charged right now. Your application goes straight to the organization." %}</li>
+      {% else %}
       <li>{% blocktrans with fee=fee|money %}You pay a one-time application fee of <strong>TZS {{ fee }}</strong> by mobile money. The organization only sees your application after you have paid.{% endblocktrans %}</li>
       <li>{% blocktrans with hours=payment_hours %}When you apply, your seat is held for <strong>{{ hours }} hours</strong>. If you do not pay in that time, the seat is released to other students.{% endblocktrans %}</li>
       <li>{% trans "After paying you can cancel once, within 24 hours, and get a free re-application credit. After that the fee cannot be refunded." %}</li>
+      {% endif %}
       <li>{% trans "A paid application is never rejected: the organization decides only whether to accept it, and you are notified by SMS and email." %}</li>
       </ul>
     </div>
