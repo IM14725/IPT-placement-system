@@ -27,7 +27,7 @@ def _notify_existing_owner(email, login_url="", reset_url=""):
         lines += [f"Forgot your password? Reset it here: {reset_url}"]
     lines += ["", "If this was not you, you can safely ignore this message."]
     try:
-        send_email("Someone tried to register with your email", [email], "\n".join(lines))
+        send_email("Someone tried to register with your email", [email], "\n".join(lines), tone="info")
     except Exception:  # noqa: BLE001 - a mail outage must not change what the visitor sees
         pass
 

@@ -24,6 +24,7 @@ from apps.accounts.models import (
     UserRole,
 )
 from apps.core.audit import audit_event
+from apps.core.email_layout import site_link
 from apps.core.providers import send_email
 
 
@@ -77,6 +78,8 @@ def request_recovery(email, request=None):
                 f"{target.email} has asked to have their MFA reset. Verify their identity out of band, "
                 f"then approve or reject in the admin console (Recovery). {required} approvals are needed. "
                 "You cannot approve a request you made yourself.",
+                tone="warning",
+                action=("Review recovery requests", site_link("platform-recovery")),
             )
         except Exception:  # noqa: BLE001
             pass
@@ -153,6 +156,8 @@ def _execute(req, request=None):
             [target.email],
             "Your recovery request was approved. Sign in with your password, then register a new "
             "security key (Super Admins) or authenticator app and generate new recovery codes.",
+            tone="success",
+            action=("Sign in", site_link("login")),
         )
     except Exception:  # noqa: BLE001
         pass

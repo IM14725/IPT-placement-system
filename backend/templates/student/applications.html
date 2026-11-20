@@ -51,7 +51,11 @@
 
         <div class="flex flex-wrap items-center gap-xs">
           {% if app.is_accepted %}
+            {% if app.current_letter %}
             <a href="{% url 'student-acceptance-letter' app.id %}" class="px-sm py-1.5 rounded-lg bg-primary text-on-primary font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">download</span>{% trans "Acceptance letter" %}</a>
+            {% else %}
+            <span class="font-metadata text-metadata text-on-surface-variant">{% trans "Your letter has not been sent yet." %}</span>
+            {% endif %}
             <a href="{% url 'student-checklist' app.id %}" class="px-sm py-1.5 rounded-lg bg-surface-container text-primary font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">checklist</span>{% trans "Next steps" %}</a>
           {% endif %}
           {% if app.status == 'PENDING' and app.payment and not app.payment.is_paid %}

@@ -128,24 +128,37 @@ def acceptance_blocker(application):
     return ""
 
 
-def accept_and_notify(application, *, company_message="", request=None, actor=None) -> Application:
-    """Accept a paid application and tell the student: in-app notification, SMS and email.
+def accept_and_notify(application, *, letter, company_message="", request=None, actor=None) -> Application:
+    """Accept a paid application with the organization's own letter and tell the student.
 
-    The one place every accept path (applicants page, dashboard, bulk accept) goes through.
-    Raises AcceptanceError when the application cannot be accepted.
+    ``letter`` is the uploaded PDF. It is stamped with a verification QR, locked against editing, saved,
+    and that same file is attached to the email. The student is also told in-app and by SMS.
+    The one place every accept path goes through. Raises AcceptanceError when the application cannot be
+    accepted or the letter is unusable; in that case nothing is saved.
     """
     from apps.core.audit import audit_event
     from apps.notifications.inapp import NotificationType, notify
 
+    from . import letter_services
     from .tasks import acceptance_email, acceptance_sms
 
     blocker = acceptance_blocker(application)
     if blocker:
         raise AcceptanceError(blocker)
+    try:
+        data = letter_services.check_upload(letter)
+    except letter_services.LetterStoreError as exc:
+        raise AcceptanceError(str(exc)) from exc
     company_message = (company_message or "").strip()[:500]
     actor = actor or getattr(request, "user", None)
     organization = application.slot.organization
-    accept_application(application, company_message=company_message)
+    try:
+        with transaction.atomic():
+            accept_application(application, company_message=company_message)
+            stored = letter_services.store_letter(application, letter, actor=actor, data=data)
+    except letter_services.LetterStoreError as exc:
+        application.is_accepted = False  # the transaction was rolled back; keep the object honest
+        raise AcceptanceError(str(exc)) from exc
     audit_event(
         request,
         action="Application Accepted",
@@ -154,20 +167,65 @@ def accept_and_notify(application, *, company_message="", request=None, actor=No
         organization=organization,
         target=application,
         target_label=f"{application.student.user.email} -> {application.slot.title}",
-        description="Accepted an application and sent confirmation",
+        description=f"Accepted an application and sent acceptance letter {letter_services.letter_reference(stored.id)}",
     )
     notify(
         application.student.user,
         NotificationType.ACCEPTANCE,
         "You have been accepted!",
         f"{organization.name} accepted your application for '{application.slot.title}'. "
-        "Your acceptance letter is ready to download.",
+        "Your acceptance letter is ready to download and was sent to your email.",
         link=f"/student/applications/{application.id}/next-steps/",
         actor=actor,
     )
     acceptance_sms.delay(application.id, company_message, actor_id=getattr(actor, "id", None))
-    acceptance_email.delay(application.id, company_message)
+    acceptance_email.delay(application.id, company_message, str(stored.id))
     return application
+
+
+def send_acceptance_letter(application, *, letter, request=None, actor=None):
+    """Upload the letter of an application accepted before letters existed, or replace the current one.
+
+    A replacement is allowed once: the first letter is then marked superseded (its QR page says so) and
+    the student gets the new one by email. Raises AcceptanceError.
+    """
+    from apps.core.audit import audit_event
+    from apps.notifications.inapp import NotificationType, notify
+
+    from . import letter_services
+    from .tasks import acceptance_email
+
+    if not application.is_accepted:
+        raise AcceptanceError(gettext("Only an accepted application has an acceptance letter."))
+    actor = actor or getattr(request, "user", None)
+    replacing = application.current_letter is not None
+    try:
+        stored = letter_services.store_letter(application, letter, actor=actor)
+    except letter_services.LetterStoreError as exc:
+        raise AcceptanceError(str(exc)) from exc
+    organization = application.slot.organization
+    audit_event(
+        request,
+        action="Acceptance Letter Replaced" if replacing else "Acceptance Letter Uploaded",
+        module="Applications",
+        actor=actor,
+        organization=organization,
+        target=application,
+        target_label=f"{application.student.user.email} -> {application.slot.title}",
+        description=f"Letter {letter_services.letter_reference(stored.id)} (version {stored.version})",
+    )
+    notify(
+        application.student.user,
+        NotificationType.ACCEPTANCE,
+        "Your acceptance letter was updated" if replacing else "Your acceptance letter is ready",
+        f"{organization.name} sent you "
+        + ("a corrected acceptance letter" if replacing else "your acceptance letter")
+        + f" for '{application.slot.title}'. It was sent to your email and can be downloaded in the app.",
+        link=f"/student/applications/{application.id}/next-steps/",
+        actor=actor,
+    )
+    acceptance_email.delay(application.id, application.company_message, str(stored.id), replacing)
+    return stored
 
 
 @transaction.atomic

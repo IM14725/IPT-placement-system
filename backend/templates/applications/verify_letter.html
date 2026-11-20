@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Letter verification — IPT Marketplace{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+{% block whatsapp_float %}{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto flex flex-col gap-lg pb-xl">
+  {% if found %}
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden" data-letter-genuine>
+    {% if superseded %}
+    <div class="p-lg flex flex-col items-center text-center gap-xs" style="background:#FFF8EC;border-bottom:1px solid #F1D9A8;">
+      <span class="material-symbols-outlined" style="font-size:48px;color:#A16207;">history</span>
+      <h1 class="font-headline-md text-headline-md font-bold" style="color:#A16207;">Replaced by a newer letter</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant">This letter was issued through IPT Marketplace, but the organization replaced it{% if replaced_on %} on {{ replaced_on|date:"j F Y" }}{% endif %}. Use the newer one.</p>
+    </div>
+    {% else %}
+    <div class="p-lg flex flex-col items-center text-center gap-xs" style="background:#E8F6EE;border-bottom:1px solid #BFE3CE;">
+      <span class="material-symbols-outlined" style="font-size:48px;color:#1B7F4B;">verified</span>
+      <h1 class="font-headline-md text-headline-md font-bold" style="color:#1B7F4B;">Genuine acceptance letter</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant">This letter was issued through IPT Marketplace.</p>
+    </div>
+    {% endif %}
+    <dl class="p-lg flex flex-col gap-sm font-body-md text-body-md">
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Letter no.</dt><dd class="font-semibold text-on-surface" style="font-family:Consolas,Menlo,monospace;">{{ reference }}</dd></div>
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Issued</dt><dd class="text-on-surface text-right">{{ issued|date:"j F Y" }}</dd></div>
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Organization</dt><dd class="font-semibold text-on-surface text-right">{{ organization }}</dd></div>
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Position</dt><dd class="text-on-surface text-right">{{ position }}</dd></div>
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Location</dt><dd class="text-on-surface text-right">{{ location }}</dd></div>
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Student</dt><dd class="text-on-surface text-right">{{ student }}</dd></div>
+      <div class="flex justify-between gap-md"><dt class="text-on-surface-variant">Fingerprint</dt><dd class="text-on-surface text-right" style="font-family:Consolas,Menlo,monospace;">{{ fingerprint }}</dd></div>
+    </dl>
+    <p class="px-lg pb-lg font-metadata text-metadata text-on-surface-variant">The student's name is partly hidden for privacy. If these details do not match the letter you were given, do not accept it.</p>
+  </div>
+
+  <section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg flex flex-col gap-sm" data-letter-check>
+    <h2 class="font-headline-md text-headline-md text-on-surface">Check the file you were given</h2>
+    <p class="font-body-md text-body-md text-on-surface-variant">A scanned QR code only proves the letter exists. To prove <strong>your copy</strong> was not changed, choose the PDF here. It is compared with the original and not stored.</p>
+    <form method="post" enctype="multipart/form-data" class="flex flex-col gap-sm">
+      {% csrf_token %}
+      <input type="file" name="file" accept="application/pdf,.pdf" required aria-label="Letter PDF" class="font-body-md text-body-md">
+      <button type="submit" class="self-start bg-primary text-on-primary px-md py-2 rounded-lg font-semibold">Check this file</button>
+    </form>
+    {% if check == "match" %}
+      <p class="rounded-lg px-md py-sm font-body-md text-body-md font-semibold" style="background:#E8F6EE;color:#1B7F4B;" data-check-result="match">This file is exactly the original letter. It has not been altered.</p>
+    {% elif check == "other_version" %}
+      <p class="rounded-lg px-md py-sm font-body-md text-body-md font-semibold" style="background:#FFF8EC;color:#A16207;" data-check-result="other_version">This is an older version of the letter that the organization replaced. Ask for the current one.</p>
+    {% elif check == "different" %}
+      <p class="rounded-lg px-md py-sm font-body-md text-body-md font-semibold" style="background:#FDECEC;color:#B3261E;" data-check-result="different">This file does NOT match the original letter. It was changed or is a different document. Do not accept it.</p>
+    {% elif check == "invalid" %}
+      <p class="rounded-lg px-md py-sm font-body-md text-body-md font-semibold" style="background:#FDECEC;color:#B3261E;" data-check-result="invalid">Choose the PDF file (up to 3 MB).</p>
+    {% endif %}
+  </section>
+
+  <a href="/" class="self-center bg-surface-container-lowest border border-outline-variant text-primary px-md py-2.5 rounded-lg font-semibold inline-flex items-center gap-xs shadow-sm"><span class="material-symbols-outlined text-[20px]">open_in_new</span>Open IPT Marketplace</a>
+  {% else %}
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden" data-letter-unverified>
+    <div class="p-lg flex flex-col items-center text-center gap-xs" style="background:#FDECEC;border-bottom:1px solid #F3C4C4;">
+      <span class="material-symbols-outlined" style="font-size:48px;color:#B3261E;">gpp_bad</span>
+      <h1 class="font-headline-md text-headline-md font-bold" style="color:#B3261E;">Letter could not be verified</h1>
+    </div>
+    <p class="p-lg font-body-md text-body-md text-on-surface-variant">We have no letter that matches this link. The link may have been copied incorrectly, or the letter may not be genuine. Do not accept it. Ask the organization to confirm, or contact IPT Marketplace support.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

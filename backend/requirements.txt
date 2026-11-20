@@ -30,3 +30,6 @@ argon2-cffi==25.1.0
 PyOTP==2.10.0
 segno==1.6.6
 webauthn==3.0.1
+
+# Acceptance letters: stamp a verification QR onto the uploaded PDF and lock it against editing
+pypdf==7.1.1

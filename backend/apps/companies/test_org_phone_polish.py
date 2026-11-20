@@ -1,5 +1,6 @@
 """Phone fixes for the organization slot and applicant pages (review of 2026-11-16)."""
 
+from apps.applications.testing import sample_letter
 from datetime import timedelta
 
 import pytest
@@ -160,7 +161,7 @@ def test_slot_applicants_uses_the_compact_rows_and_a_stats_summary(ready_org, pl
 
     slot = _slot(ready_org, places["kinondoni"], "Intern", capacity=5)
     apps = [_pay(_student(places, email=f"s{i}@x.tz"), slot) for i in range(3)]
-    accept_and_notify(apps[0], company_message="Welcome")
+    accept_and_notify(apps[0], letter=sample_letter(), company_message="Welcome")
     body = _client(ready_org.user).get(reverse("organization-applicants", args=[slot.id])).content.decode()
 
     # one compact row per applicant; the old tall card (notes box + note field + big button) is gone
@@ -209,8 +210,6 @@ def test_accept_buttons_ask_for_confirmation_with_the_students_name(ready_org, p
         body = c.get(url).content.decode()
         form = body[body.index(f'action="{reverse("organization-acceptance-sms", args=[app.id])}"') :][:400]
         assert "data-ipt-confirm=" in form and "Asha Juma" in form and "cannot be undone" in form, url
-    bulk = c.get(reverse("organization-all-applicants")).content.decode()
-    assert "data-confirm=" in bulk and "__N__" in bulk and "data-none=" in bulk
     # Kiswahili asks too
     c.cookies["django_language"] = "sw"
     sw = c.get(reverse("organization-applicants", args=[slot.id])).content.decode()
@@ -237,41 +236,6 @@ def test_all_applicants_search_row_layout(ready_org, places):
 
 
 # ── 12. bulk accept is a bottom bar that only shows once someone is ticked ─────
-
-@pytest.mark.django_db
-def test_bulk_accept_is_a_hidden_bar_with_select_all_in_the_list_heading(ready_org, places):
-    slot = _slot(ready_org, places["kinondoni"], "Intern", capacity=4)
-    for i in range(3):
-        _pay(_student(places, email=f"s{i}@x.tz"), slot)
-    body = _client(ready_org.user).get(reverse("organization-all-applicants")).content.decode()
-    form_start = body.index('id="bulk-accept-form"')
-    bar = body[form_start : body.index("</form>", form_start)]
-    assert "data-bulk-bar" in bar and 'class="hidden fixed inset-x-0 bottom-0' in bar  # hidden until a box is ticked
-    assert "<details>" in bar and 'id="bulk-message"' in bar and 'id="bulk-template"' in bar  # message fields open from the bar
-    assert "data-bulk-count" in bar and "Accept selected" in bar
-    assert "data-confirm=" in bar and "data-none=" in bar  # the safety step from fix 10 is kept
-    # "Select all on this page" lives with the list heading, before the first row
-    assert body.index('id="select-all"') < body.index('type="checkbox" name="application"')
-    assert "data-bulk-spacer" in body
-    assert body.count('type="checkbox" name="application"') == 3 and body.count('value="') and body.count('" form="bulk-accept-form"') == 3
-
-
-# ── 13. row checkbox: 20 px box inside a 44 px-high label that also covers the avatar ─────
-
-@pytest.mark.django_db
-def test_applicant_row_checkbox_has_a_big_tap_area(ready_org, places):
-    slot = _slot(ready_org, places["kinondoni"], "Intern", capacity=2)
-    _pay(_student(places), slot)
-    c = _client(ready_org.user)
-    body = c.get(reverse("organization-all-applicants")).content.decode()
-    label = body[body.index('<label class="flex items-start gap-sm shrink-0 min-h-[44px] cursor-pointer">') :][:900]
-    assert 'class="w-5 h-5' in label and "ipt-img" in label or "bg-primary/10" in label  # the avatar sits inside the same label
-    assert "</label>" in label and label.index('type="checkbox"') < label.index("</label>")
-    # rows that are not selectable (dashboard, slot page) have no label wrapper or checkbox
-    for url in (reverse("organization-dashboard"), reverse("organization-applicants", args=[slot.id])):
-        page = c.get(url).content.decode()
-        assert 'type="checkbox" name="application"' not in page
-
 
 # ── 14-17. the slot form: sections, stipend row, role type hints, date echo, Cancel button ─────
 

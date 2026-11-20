@@ -1,21 +1,11 @@
 {% load media_tags %}{% load i18n %}
-{# One paid applicant. Needs: app (with .blocker), can_accept, next_url. Optional: selectable, templates, hide_slot. #}
+{# One paid applicant. Needs: app (with .blocker), can_accept, next_url. Optional: templates, hide_slot. #}
 <div class="p-md flex flex-col lg:flex-row lg:items-center justify-between gap-sm border-b border-surface-container last:border-b-0">
   <div class="flex items-start gap-sm min-w-0 flex-1">
-    {% if selectable %}<label class="flex items-start gap-sm shrink-0 min-h-[44px] cursor-pointer">
-      <input type="checkbox" name="application" value="{{ app.id }}" form="bulk-accept-form" class="w-5 h-5 mt-3 rounded border-outline shrink-0" {% if app.blocker %}disabled{% endif %}
-             aria-label="{% trans 'Select' %} {{ app.student.user.full_name }}">
     {% if app.student.profile_photo %}
       <img src="{{ app.student.profile_photo|thumb:96 }}" width="44" height="44" loading="lazy" decoding="async" class="ipt-img w-11 h-11 rounded-full object-cover shrink-0" alt="">
     {% else %}
       <div class="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0"><span class="font-body-md font-bold text-primary">{{ app.student.user.full_name|default:app.student.user.email|slice:":2"|upper }}</span></div>
-    {% endif %}
-    </label>{% else %}
-    {% if app.student.profile_photo %}
-      <img src="{{ app.student.profile_photo|thumb:96 }}" width="44" height="44" loading="lazy" decoding="async" class="ipt-img w-11 h-11 rounded-full object-cover shrink-0" alt="">
-    {% else %}
-      <div class="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0"><span class="font-body-md font-bold text-primary">{{ app.student.user.full_name|default:app.student.user.email|slice:":2"|upper }}</span></div>
-    {% endif %}
     {% endif %}
     <div class="flex flex-col gap-0.5 min-w-0">
       <div class="flex items-center gap-xs flex-wrap">
@@ -48,14 +38,32 @@
     {% endif %}
     <a href="{% url 'organization-applicant-notes' app.id %}" class="px-sm py-1.5 rounded-lg text-primary bg-primary/5 hover:bg-primary/10 font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">sticky_note_2</span>{% trans "Notes" %}{% if app.note_count %} ({{ app.note_count }}){% endif %}</a>
     {% if app.is_accepted %}
-      <a href="{% url 'organization-applicant-acceptance-letter' app.id %}" class="px-sm py-1.5 rounded-lg text-primary bg-primary/5 hover:bg-primary/10 font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">download</span>{% trans "Acceptance letter" %}</a>
+      {% if app.current_letter %}
+        <a href="{% url 'organization-applicant-acceptance-letter' app.id %}" class="px-sm py-1.5 rounded-lg text-primary bg-primary/5 hover:bg-primary/10 font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">download</span>{% trans "Acceptance letter" %}{% if app.current_letter.version > 1 %} (v{{ app.current_letter.version }}){% endif %}</a>
+      {% endif %}
+      {% if can_accept and not app.current_letter or can_accept and app.can_replace_letter %}
+        <details class="relative">
+          <summary class="list-none cursor-pointer px-sm py-1.5 rounded-lg text-primary bg-primary/5 hover:bg-primary/10 font-semibold text-body-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">upload_file</span>{% if app.current_letter %}{% trans "Replace letter" %}{% else %}{% trans "Upload letter" %}{% endif %}</summary>
+          <form method="post" enctype="multipart/form-data" action="{% url 'organization-letter-upload' app.id %}" class="absolute right-0 z-20 mt-2 w-[min(20rem,calc(100vw-2rem))] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl p-sm flex flex-col gap-xs">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            <label class="font-metadata text-metadata text-on-surface-variant" for="letter-up-{{ app.id }}">{% trans "Acceptance letter (PDF)" %}</label>
+            <input id="letter-up-{{ app.id }}" type="file" name="acceptance_letter" accept="application/pdf,.pdf" required class="font-body-md text-body-md">
+            <p class="font-metadata text-metadata text-on-surface-variant">{% if app.current_letter %}{% trans "You can replace the letter once. The student gets the new letter by email and the old one is marked as replaced." %}{% else %}{% trans "The letter is sent to the student by email." %}{% endif %} {% trans "Leave the bottom right corner of the last page empty: a QR code is added there." %}</p>
+            <button type="submit" class="bg-primary text-on-primary font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-xs"><span class="material-symbols-outlined text-[18px]">send</span>{% trans "Send letter" %}</button>
+          </form>
+        </details>
+      {% endif %}
     {% elif can_accept and not app.blocker %}
-      {% blocktrans with name=app.student.user.full_name|default:app.student.user.email asvar accept_msg %}Accept {{ name }}? They are notified by SMS and email and this cannot be undone.{% endblocktrans %}
+      {% blocktrans with name=app.student.user.full_name|default:app.student.user.email asvar accept_msg %}Accept {{ name }}? They are notified by SMS and receive your letter by email, and this cannot be undone.{% endblocktrans %}
       <details class="relative">
         <summary class="list-none cursor-pointer px-sm py-1.5 rounded-lg bg-[#166534] text-white font-semibold text-body-md inline-flex items-center gap-1 hover:bg-[#14532d]"><span class="material-symbols-outlined text-[16px]">how_to_reg</span>{% trans "Accept" %}</summary>
-        <form method="post" action="{% url 'organization-acceptance-sms' app.id %}" data-ipt-confirm="{{ accept_msg }}" class="absolute right-0 z-20 mt-2 w-[min(20rem,calc(100vw-2rem))] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl p-sm flex flex-col gap-xs">
+        <form method="post" enctype="multipart/form-data" action="{% url 'organization-acceptance-sms' app.id %}" data-ipt-confirm="{{ accept_msg }}" class="absolute right-0 z-20 mt-2 w-[min(20rem,calc(100vw-2rem))] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl p-sm flex flex-col gap-xs">
           {% csrf_token %}
           <input type="hidden" name="next" value="{{ next_url }}">
+          <label class="font-metadata text-metadata text-on-surface-variant" for="letter-{{ app.id }}">{% trans "Acceptance letter (PDF)" %} *</label>
+          <input id="letter-{{ app.id }}" type="file" name="acceptance_letter" accept="application/pdf,.pdf" required class="font-body-md text-body-md">
+          <p class="font-metadata text-metadata text-on-surface-variant">{% trans "Upload your signed letter for this student. A QR code is added at the bottom right of the last page, so keep that corner empty." %}</p>
           <label class="font-metadata text-metadata text-on-surface-variant" for="msg-{{ app.id }}">{% trans "Acceptance Note (Optional)" %}</label>
           <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input id="msg-{{ app.id }}" type="text" name="message" maxlength="500" placeholder="{% trans 'e.g. Report on Monday 8 AM' %}"></div>
           {% if templates %}
@@ -63,7 +71,7 @@
               <select name="template" aria-label="{% trans 'Or use a saved message' %}"><option value="">{% trans "Or use a saved message" %}</option>{% for t in templates %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}</select></div>
           {% endif %}
           <button type="submit" class="bg-[#166534] hover:bg-[#14532d] text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-xs"><span class="material-symbols-outlined text-[18px]">campaign</span>{% trans "Send Confirmation" %}</button>
-          <p class="font-metadata text-metadata text-on-surface-variant">{% trans "The student is notified in the app, by SMS and by email. Acceptance cannot be undone." %}</p>
+          <p class="font-metadata text-metadata text-on-surface-variant">{% trans "The student is notified in the app and by SMS, and gets your letter by email. Acceptance cannot be undone." %}</p>
         </form>
       </details>
     {% elif app.blocker %}

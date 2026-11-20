@@ -232,18 +232,15 @@ def _own_accepted_application(request, app_id):
 @login_required
 def acceptance_letter(request, app_id):
     """Download the acceptance letter (PDF) for one of the student's accepted applications."""
-    from django.http import HttpResponse
-
-    from apps.applications.letters import build_acceptance_letter, letter_filename
+    from apps.applications import letter_services
 
     if not request.user.is_student:
         return HttpResponseForbidden(gettext("Student account required."))
     application = _own_accepted_application(request, app_id)
-    response = HttpResponse(build_acceptance_letter(application), content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="{letter_filename(application)}"'
-    response["Cache-Control"] = "no-store"
-    response["X-Content-Type-Options"] = "nosniff"
-    return response
+    letter = application.current_letter
+    if letter is None:
+        raise Http404  # accepted before letters were uploaded: the organization has not sent one yet
+    return letter_services.download_response(application, letter)
 
 
 @login_required

@@ -1,6 +1,7 @@
 """Student dashboard features: the apply rule without admin approval, next step, completeness,
 recommendations, saved slots, saved-search alerts, notifications centre, acceptance letter, reviews."""
 
+from apps.applications.testing import sample_letter
 from datetime import timedelta
 
 import pytest
@@ -368,7 +369,7 @@ def test_acceptance_letter_checklist_and_review(places, org):
     assert c.get(reverse("student-checklist", args=[app.id])).status_code == 404
     assert c.post(review_url, {"rating": "5"}).status_code == 404
 
-    accept_and_notify(app, company_message="Report Monday 8 AM", actor=org.user)
+    accept_and_notify(app, letter=sample_letter(), company_message="Report Monday 8 AM", actor=org.user)
     letter = c.get(letter_url)
     assert letter.status_code == 200 and letter["Content-Type"] == "application/pdf"
     assert letter.content.startswith(b"%PDF") and "attachment" in letter["Content-Disposition"]
@@ -555,7 +556,7 @@ def test_checklist_formats_the_phone_and_has_big_checkboxes_and_applications_dro
     c = _client(student.user)
     mine = c.get(reverse("student-applications")).content.decode()
     assert "Cancellation used" not in mine and "Cancellation window closed" in mine and "text-error italic" not in mine
-    accept_and_notify(app, company_message="Welcome")
+    accept_and_notify(app, letter=sample_letter(), company_message="Welcome")
     body = c.get(reverse("student-checklist", args=[app.id])).content.decode()
     assert "+255 700 000 001" in body and 'href="tel:+255700000001"' in body  # shown readable, dials correctly
     assert body.count("w-5 h-5 shrink-0 rounded border-outline") == 8 and "py-3 min-h-[48px]" in body

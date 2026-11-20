@@ -2,6 +2,7 @@
 industry default, capacity guard, slot detail + views, search tools, apply rules checkbox, release seat,
 application tabs, placement details, deadline extend/close, edit notices, applicant sort and the funnel."""
 
+from apps.applications.testing import sample_letter
 from datetime import timedelta
 
 import pytest
@@ -372,7 +373,7 @@ def test_my_applications_tabs_filter_and_count(places, org_owner):
     waiting = _paid_cancellable(student, s2)
     accepted = _paid_cancellable(student, s3)
     Application.objects.filter(pk=accepted.pk).update(can_cancel=False)
-    accept_and_notify(Application.objects.get(pk=accepted.pk))
+    accept_and_notify(Application.objects.get(pk=accepted.pk), letter=sample_letter())
     expired = _pending(student, s4)
     Application.objects.filter(pk=expired.pk).update(status=ApplicationStatus.UNPAID)
     c = _client(student.user)
@@ -482,25 +483,11 @@ def test_reporting_contact_is_only_for_accepted_students(places, org_owner):
 
     waiting_page = _client(paid.student.user).get(reverse("student-applications")).content.decode()
     assert "Ask for Ms Mushi" not in waiting_page
-    accept_and_notify(paid)
+    accept_and_notify(paid, letter=sample_letter())
     done = _client(paid.student.user).get(reverse("student-applications")).content.decode()
     assert "Ask for Ms Mushi" in done
     checklist = _client(paid.student.user).get(reverse("student-checklist", args=[paid.id])).content.decode()
     assert "Ask for Ms Mushi" in checklist and "Your placement" in checklist
-
-
-@pytest.mark.django_db
-def test_acceptance_letter_lists_the_placement(places, org_owner):
-    from datetime import date
-
-    from apps.applications.letters import build_acceptance_letter
-
-    org, _ = org_owner
-    slot = _slot(org, places["kinondoni"], start_date=date(2027, 1, 5), duration_weeks=8, reporting_contact="HR desk")
-    paid = _paid(slot, "pdf@x.tz")
-    accept_and_notify(paid)
-    paid.refresh_from_db()
-    assert build_acceptance_letter(paid).startswith(b"%PDF")
 
 
 # ── G: deadline lifecycle ───────────────────────────────────────────────────
@@ -666,7 +653,7 @@ def test_slot_funnel_numbers(places, org_owner):
     org, owner = org_owner
     slot = _slot(org, places["kinondoni"], capacity=6)
     accepted = _paid(slot, "a@x.tz")
-    accept_and_notify(accepted)
+    accept_and_notify(accepted, letter=sample_letter())
     paid = _paid(slot, "b@x.tz")
     waiting = _pending(_student(places, "c@x.tz"), slot)
     expired = _pending(_student(places, "d@x.tz"), slot)

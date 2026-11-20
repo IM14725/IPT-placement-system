@@ -106,6 +106,25 @@ def _otp_box(code: str, note: str) -> str:
     )
 
 
+# tone -> (label, text colour, background)
+TONES = {
+    "alert": ("Security alert", "#B3261E", "#FDECEC"),
+    "warning": ("Action needed", "#A16207", "#FFF8EC"),
+    "success": ("Completed", "#1B7F4B", "#E8F6EE"),
+    "info": ("Good to know", PRIMARY, TINT),
+}
+
+
+def _tone_box(tone: str) -> str:
+    label, color, background = TONES[tone]
+    return (
+        f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 18px;"><tr>'
+        f'<td bgcolor="{background}" style="background:{background};border-left:4px solid {color};border-radius:6px;'
+        f'padding:10px 14px;font-size:13px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:{color};">'
+        f"{escape(label)}</td></tr></table>"
+    )
+
+
 def build_blocks(body: str) -> tuple[str, str]:
     """Return ``(content_html, preheader)`` for the plain-text ``body``."""
     text = (body or "").replace("\r\n", "\n").strip()
@@ -138,12 +157,22 @@ def render_email_html(
     content_html: str | None = None,
     preheader: str | None = None,
     heading: str | None = None,
+    tone: str | None = None,
+    action: tuple[str, str] | None = None,
 ) -> str:
     """The branded page. ``content_html`` (trusted markup built by our own code, already escaped) replaces
-    the blocks normally worked out from the plain-text ``body``: used by the receipt email."""
+    the blocks normally worked out from the plain-text ``body``: used by the receipt and acceptance emails.
+
+    ``tone`` (``alert``, ``warning``, ``success`` or ``info``) puts a coloured label box above the text, and
+    ``action`` is a ``(label, https url)`` button added below it. Both are optional design hints for plain
+    text emails (security alerts, account notices); the text itself is unchanged."""
     heading = heading or re.sub(r"^\[TEST\]\s*", "", subject or "").strip() or "IPT Marketplace"
     if content_html is None:
         content, preheader = build_blocks(body)
+        if tone in TONES:
+            content = _tone_box(tone) + content
+        if action and re.match(r"https?://", action[1] or ""):
+            content += _button(action[0], action[1])
     else:
         content, preheader = content_html, preheader or ""
     return render_to_string(
@@ -186,3 +215,10 @@ def logo_bytes() -> bytes | None:
         return LOGO_PATH.read_bytes()
     except OSError:
         return None
+
+
+def site_link(url_name: str) -> str:
+    """Absolute address of a named page, for buttons in emails that are built without a request."""
+    from django.urls import reverse
+
+    return f"{settings.SITE_URL}{reverse(url_name)}"

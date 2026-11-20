@@ -135,6 +135,8 @@ def send_email(
     html: bool = True,
     html_content: str | None = None,
     inline_images: dict | None = None,
+    tone: str | None = None,
+    action: tuple | None = None,
 ) -> dict:
     """Send an email. ``body`` is plain text; it is also sent as a branded HTML part (logo, platform
     colours, OTP code box) unless ``html=False``. A problem building the HTML never blocks the email."""
@@ -156,7 +158,7 @@ def send_email(
             from apps.core import email_layout
 
             # ``html_content`` is a finished page from a caller with its own layout (the receipt).
-            page = html_content or email_layout.render_email_html(subject, body)
+            page = html_content or email_layout.render_email_html(subject, body, tone=tone, action=action)
             email.attach_alternative(page, "text/html")
             if f"cid:{email_layout.LOGO_CID}" in page:
                 email.logo = email_layout.logo_bytes()

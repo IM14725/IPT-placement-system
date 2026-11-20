@@ -1,6 +1,7 @@
 """Organization dashboard features: KPIs and to-do, applicants across slots, bulk accept, private notes,
 export, message templates, slot duplicate/delete rules, insights, activity and ratings."""
 
+from apps.applications.testing import sample_letter
 import pytest
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -186,7 +187,7 @@ def test_slot_and_applicant_pages_show_the_new_actions(alpha, district):
     assert applicants_page.status_code == 200
     assert reverse("organization-applicant-notes", args=[app.id]) in applicants_page.content.decode()
 
-    accept_and_notify(app, company_message="See you Monday", actor=owner)
+    accept_and_notify(app, letter=sample_letter(), company_message="See you Monday", actor=owner)
     letter = c.get(reverse("organization-applicant-acceptance-letter", args=[app.id]))
     assert letter.status_code == 200 and letter.content.startswith(b"%PDF")
 
@@ -212,12 +213,12 @@ def test_accept_notifies_the_student_in_app_and_respects_the_cancel_window(alpha
     slot = _slot(org, district)
     cooling = _paid(slot, "cool@x.tz", cooling_off=True)
     with pytest.raises(AcceptanceError):
-        accept_and_notify(cooling, actor=owner)
+        accept_and_notify(cooling, letter=sample_letter(), actor=owner)
 
     ready = _paid(slot, "ready@x.tz")
     resp = _client(owner).post(
         reverse("organization-acceptance-sms", args=[ready.id]),
-        {"message": "Report Monday 8 AM", "next": reverse("organization-dashboard")},
+        {"message": "Report Monday 8 AM", "next": reverse("organization-dashboard"), "acceptance_letter": sample_letter()},
     )
     assert resp.status_code == 302 and resp.url == reverse("organization-dashboard")
     ready.refresh_from_db()
@@ -236,36 +237,6 @@ def test_there_is_no_way_to_reject_a_paid_application():
     assert not [n for n in names if "reject" in n.lower() and "organization" in n.lower()]
 
 
-@pytest.mark.django_db
-def test_bulk_accept_uses_template_skips_ineligible_and_is_tenant_scoped(alpha, beta, district):
-    org, owner = alpha
-    beta_org, beta_owner = beta
-    slot = _slot(org, district, capacity=5)
-    one, two = _paid(slot, "one@x.tz"), _paid(slot, "two@x.tz")
-    cooling = _paid(slot, "three@x.tz", cooling_off=True)
-    foreign = _paid(_slot(beta_org, district, "Beta slot"), "foreign@x.tz")
-    template = AcceptanceTemplate.objects.create(organization=org, name="Jan", body="Report on 6 January.")
-
-    resp = _client(owner).post(
-        reverse("organization-bulk-accept"),
-        {"application": [str(one.id), str(two.id), str(cooling.id), str(foreign.id)], "template": str(template.id)},
-    )
-    assert resp.status_code == 302
-    for app in (one, two):
-        app.refresh_from_db()
-        assert app.is_accepted and app.company_message == "Report on 6 January."
-    cooling.refresh_from_db()
-    foreign.refresh_from_db()
-    assert not cooling.is_accepted and not foreign.is_accepted
-
-    # A recruiter may view applicants but not accept.
-    recruiter = _verified(
-        add_organization_member(org, "alpha-rec@o.tz", PW, role=OrganizationMemberRole.RECRUITER).user
-    )
-    assert _client(recruiter).post(reverse("organization-bulk-accept"), {"application": [str(cooling.id)]}).status_code == 403
-    assert _client(recruiter).get(reverse("organization-all-applicants")).status_code == 200
-
-
 # ── applicants list, notes, export ──────────────────────────────────────────
 
 @pytest.mark.django_db
@@ -274,7 +245,7 @@ def test_all_applicants_lists_only_own_and_filters(alpha, beta, district):
     beta_org, beta_owner = beta
     slot = _slot(org, district)
     mine = _paid(slot, "mine@x.tz")
-    accept_and_notify(_paid(slot, "done@x.tz"), actor=owner)
+    accept_and_notify(_paid(slot, "done@x.tz"), letter=sample_letter(), actor=owner)
     _paid(_slot(beta_org, district, "Beta slot"), "theirs@x.tz")
     c = _client(owner)
 
@@ -350,7 +321,7 @@ def test_insights_activity_and_reviews_pages(alpha, beta, district):
     org, owner = alpha
     slot = _slot(org, district)
     app = _paid(slot, "rated@x.tz")
-    accept_and_notify(app, actor=owner)
+    accept_and_notify(app, letter=sample_letter(), actor=owner)
     OrganizationReview.objects.create(application=app, organization=org, student=app.student, rating=4, comment="Great mentors")
     c = _client(owner)
 

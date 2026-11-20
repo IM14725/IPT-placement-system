@@ -25,9 +25,12 @@
       {% if blocker %}
         <p class="font-body-md text-body-md text-on-surface-variant flex items-start gap-xs"><span class="material-symbols-outlined text-[#a16207] text-[18px]">hourglass_empty</span>{{ blocker }}</p>
       {% else %}
-        <form method="post" action="{% url 'organization-acceptance-sms' application.id %}" class="flex flex-col gap-xs">
+        <form method="post" enctype="multipart/form-data" action="{% url 'organization-acceptance-sms' application.id %}" class="flex flex-col gap-xs">
           {% csrf_token %}
           <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <label class="font-metadata text-metadata text-on-surface-variant" for="letter-note">{% trans "Acceptance letter (PDF)" %} *</label>
+          <input id="letter-note" type="file" name="acceptance_letter" accept="application/pdf,.pdf" required class="font-body-md text-body-md">
+          <p class="font-metadata text-metadata text-on-surface-variant">{% trans "Upload your signed letter for this student. A QR code is added at the bottom right of the last page, so keep that corner empty." %}</p>
           <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">edit_note</span></span><input type="text" name="message" maxlength="500" placeholder="{% trans 'e.g. Report on Monday 8 AM' %}" aria-label="{% trans 'Acceptance Note (Optional)' %}"></div>
           {% if templates %}
             <div class="ipt-field-box"><span class="ipt-field-icon"><span class="material-symbols-outlined text-[20px]">chat</span></span>

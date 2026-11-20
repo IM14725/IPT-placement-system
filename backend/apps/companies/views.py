@@ -17,6 +17,7 @@ from apps.applications.services import (
     accept_and_notify,
     acceptance_blocker,
     get_organization_visible_applications,
+    send_acceptance_letter,
 )
 from apps.companies.forms import (
     OrganizationDocumentUploadForm,
@@ -938,14 +939,42 @@ def send_acceptance_sms(request, app_id):
         return HttpResponseForbidden(gettext("Not paid."))
     message = _acceptance_message(request, organization)
     try:
-        accept_and_notify(app, company_message=message, request=request)
+        accept_and_notify(
+            app, letter=request.FILES.get("acceptance_letter"), company_message=message, request=request
+        )
     except AcceptanceError as exc:
         messages.error(request, str(exc))
     else:
         messages.success(
             request,
-            gettext("Application confirmed. The student was notified in the app, and the SMS and email are queued to %(contact)s")
+            gettext("Application confirmed. The student was notified in the app, and the SMS and the email with your letter attached are queued to %(contact)s")
             % {"contact": app.student.user.phone or app.student.user.email},
+        )
+    return _redirect_next(request, "organization-applicants", slot_id=app.slot_id)
+
+
+@login_required
+@org_permission_required(APPLICANTS_ACCEPT)
+@token_bucket(capacity=10, refill_per_second=1 / 30, scope="org-letter-upload", methods=["POST"])
+def upload_acceptance_letter(request, app_id):
+    """Send the letter of an applicant accepted before letters existed, or replace the current letter once."""
+    if request.method != "POST":
+        return HttpResponseForbidden(gettext("POST required."))
+    organization = _require_approved_organization(request)
+    if organization is None:
+        return redirect("organization-profile")
+    app = get_object_or_404(Application, id=app_id, slot__organization=organization, is_accepted=True)
+    replacing = app.current_letter is not None
+    try:
+        send_acceptance_letter(app, letter=request.FILES.get("acceptance_letter"), request=request)
+    except AcceptanceError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(
+            request,
+            gettext("Corrected letter sent. The earlier letter is now marked as replaced.")
+            if replacing
+            else gettext("Acceptance letter sent to the student."),
         )
     return _redirect_next(request, "organization-applicants", slot_id=app.slot_id)
 
@@ -986,7 +1015,7 @@ def _acceptance_message(request, organization):
     return message[:500]
 
 
-# ── Applicants across all slots, bulk accept, export ─────────────────────────
+# ── Applicants across all slots, export ─────────────────────────
 
 def _filtered_applicants(request, organization):
     from django.db.models import Q
@@ -1057,47 +1086,6 @@ def all_applicants(request):
 
 
 @login_required
-@org_permission_required(APPLICANTS_ACCEPT)
-@token_bucket(capacity=10, refill_per_second=1 / 30, scope="org-bulk-accept", methods=["POST"])
-def bulk_accept(request):
-    """Accept several paid applicants with one message. Each one goes through the normal accept flow."""
-    if request.method != "POST":
-        return HttpResponseForbidden(gettext("POST required."))
-    organization = _require_approved_organization(request)
-    if organization is None:
-        return redirect("organization-profile")
-    ids = request.POST.getlist("application")[:50]
-    if not ids:
-        messages.error(request, gettext("Select at least one applicant to accept."))
-        return _redirect_next(request, "organization-all-applicants")
-    message = _acceptance_message(request, organization)
-    try:
-        # Tenant scoped: ids from another organization simply match nothing.
-        apps = list(
-            Application.objects.filter(id__in=ids, slot__organization=organization)
-            .select_related("student__user", "slot__organization", "payment")
-        )
-    except (ValueError, ValidationError):
-        apps = []
-    accepted, skipped = 0, []
-    for app in apps:
-        try:
-            accept_and_notify(app, company_message=message, request=request)
-            accepted += 1
-        except AcceptanceError as exc:
-            skipped.append(f"{app.student.user.full_name or app.student.user.email}: {exc}")
-    if accepted:
-        messages.success(request, gettext('%(accepted)s applicant(s) accepted. Each one was notified in the app, by SMS and by email.') % {"accepted": accepted})
-    for line in skipped[:5]:
-        messages.error(request, gettext('Not accepted. %(line)s') % {"line": line})
-    if len(skipped) > 5:
-        messages.error(request, gettext('%(v1)s more applicant(s) could not be accepted yet.') % {"v1": len(skipped) - 5})
-    if not accepted and not skipped:
-        messages.error(request, gettext("None of the selected applicants could be found."))
-    return _redirect_next(request, "organization-all-applicants")
-
-
-@login_required
 @org_permission_required(APPLICANTS_VIEW)
 def export_applicants(request):
     """Download the (filtered) applicant list as CSV. Audited: it contains personal data."""
@@ -1154,9 +1142,9 @@ def export_applicants(request):
 @org_permission_required(APPLICANTS_VIEW)
 def applicant_acceptance_letter(request, app_id):
     """The acceptance letter the student receives, for the organization's own records."""
-    from django.http import HttpResponse
+    from django.http import Http404
 
-    from apps.applications.letters import build_acceptance_letter, letter_filename
+    from apps.applications import letter_services
 
     organization = _require_approved_organization(request)
     if organization is None:
@@ -1167,10 +1155,10 @@ def applicant_acceptance_letter(request, app_id):
         ),
         id=app_id, slot__organization=organization, is_accepted=True,
     )
-    response = HttpResponse(build_acceptance_letter(app), content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="{letter_filename(app)}"'
-    response["Cache-Control"] = "no-store"
-    return response
+    letter = app.current_letter
+    if letter is None:
+        raise Http404
+    return letter_services.download_response(app, letter)
 
 
 # ── Private notes on an applicant ────────────────────────────────────────────

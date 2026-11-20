@@ -27,7 +27,7 @@ urlpatterns = [
     path("applicants/<uuid:app_id>/accept-sms/", views.send_acceptance_sms, name="organization-acceptance-sms"),
     path("slots/<uuid:slot_id>/duplicate/", views.slot_duplicate, name="organization-slot-duplicate"),
     path("applicants/", views.all_applicants, name="organization-all-applicants"),
-    path("applicants/bulk-accept/", views.bulk_accept, name="organization-bulk-accept"),
+    path("applicants/<uuid:app_id>/acceptance-letter/upload/", views.upload_acceptance_letter, name="organization-letter-upload"),
     path("applicants/export/", views.export_applicants, name="organization-export-applicants"),
     path("applicants/<uuid:app_id>/notes/", views.applicant_notes, name="organization-applicant-notes"),
     path(

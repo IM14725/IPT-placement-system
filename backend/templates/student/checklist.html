@@ -16,9 +16,14 @@
     <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm">
       <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary">description</span>{% trans "Acceptance letter" %}</h2>
       <p class="font-body-md text-body-md text-on-surface-variant">{% trans "Your official acceptance letter. Print it or keep it on your phone: your university and the organization may ask for it." %}</p>
+      {% if application.current_letter %}
       <a href="{% url 'student-acceptance-letter' application.id %}" class="bg-primary text-on-primary px-md py-sm rounded-lg font-semibold flex items-center justify-center gap-xs hover:bg-primary-container transition-colors">
         <span class="material-symbols-outlined text-[20px]">download</span>{% trans "Download letter (PDF)" %}
       </a>
+      <p class="font-metadata text-metadata text-on-surface-variant">{% trans "Scan the QR code at the bottom right of the last page to check the letter is genuine. Do not edit the file: an altered copy will not match." %}</p>
+      {% else %}
+      <p class="font-body-md text-body-md text-on-surface-variant">{% trans "The organization has not sent your letter yet. It will be emailed to you and appear here." %}</p>
+      {% endif %}
     </section>
 
     <section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col gap-sm">

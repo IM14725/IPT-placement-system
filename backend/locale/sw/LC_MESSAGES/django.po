@@ -1151,6 +1151,9 @@ msgstr "Kubali"
 msgid "Accept %(name)s? They are notified by SMS and email and this cannot be undone."
 msgstr "Kubali %(name)s? Atajulishwa kwa SMS na barua pepe na hili haliwezi kutenduliwa."
 
+msgid "Accept %(name)s? They are notified by SMS and receive your letter by email, and this cannot be undone."
+msgstr "Kubali %(name)s? Atajulishwa kwa SMS na atapokea barua yako kwa barua pepe, na hili haliwezi kutenduliwa."
+
 msgid "Accept __N__ selected applicant(s)? Each one is notified by SMS and email and this cannot be undone."
 msgstr "Kubali waombaji __N__ waliochaguliwa? Kila mmoja atajulishwa kwa SMS na barua pepe na hili haliwezi kutenduliwa."
 
@@ -1180,6 +1183,9 @@ msgstr "Barua ya kukubaliwa"
 
 msgid "Acceptance letter (PDF)"
 msgstr "Barua ya kukubaliwa (PDF)"
+
+msgid "Acceptance letter sent to the student."
+msgstr "Barua ya kukubaliwa imetumwa kwa mwanafunzi."
 
 msgid "Acceptance of Terms"
 msgstr "Kukubali Masharti"
@@ -1447,6 +1453,9 @@ msgstr "Ombi limeghairiwa kwa mafanikio. Nafasi yako imerudishwa na sasa una naf
 
 msgid "Application confirmed. The student was notified in the app, and the SMS and email are queued to %(contact)s"
 msgstr "Ombi limethibitishwa. Mwanafunzi amearifiwa kwenye programu, na SMS na barua pepe zimepangwa kutumwa kwa %(contact)s"
+
+msgid "Application confirmed. The student was notified in the app, and the SMS and the email with your letter attached are queued to %(contact)s"
+msgstr "Ombi limethibitishwa. Mwanafunzi alijulishwa kwenye programu, na SMS na barua pepe yenye barua yako vimewekwa kwenye foleni kwenda %(contact)s"
 
 msgid "Application deadline"
 msgstr "Tarehe ya mwisho ya maombi"
@@ -1897,6 +1906,9 @@ msgstr "Nyaraka za Shirika"
 
 msgid "Correct My Data"
 msgstr "Sahihisha Data Yangu"
+
+msgid "Corrected letter sent. The earlier letter is now marked as replaced."
+msgstr "Barua iliyorekebishwa imetumwa. Barua ya awali sasa imewekwa alama kuwa imebadilishwa."
 
 msgid "Could not be checked: upload it again"
 msgstr "Haikuweza kukaguliwa: ipakie tena"
@@ -2660,6 +2672,9 @@ msgstr "Msingi wa Kisheria (PDPA)"
 msgid "Leave blank to use your organization's industry."
 msgstr "Acha wazi ili kutumia tasnia ya shirika lako."
 
+msgid "Leave the bottom right corner of the last page empty: a QR code is added there."
+msgstr "Acha kona ya chini kulia ya ukurasa wa mwisho wazi: msimbo wa QR huongezwa hapo."
+
 msgid "Ledger"
 msgstr "Daftari"
 
@@ -3174,6 +3189,9 @@ msgstr "Taasisi za elimu ya juu zilizoidhinishwa za Tanzania pekee ndizo zinazow
 
 msgid "Only after your application fee is confirmed. This way organizations review serious, verified candidates."
 msgstr "Baada tu ya ada yako ya maombi kuthibitishwa. Hivyo mashirika hupitia waombaji makini na waliothibitishwa."
+
+msgid "Only an accepted application has an acceptance letter."
+msgstr "Ombi lililokubaliwa pekee ndilo lina barua ya kukubaliwa."
 
 msgid "Only an organization owner or manager can edit the profile."
 msgstr "Mmiliki au meneja wa shirika pekee ndiye anayeweza kuhariri wasifu."
@@ -3837,6 +3855,9 @@ msgstr "Rudia nenosiri lako jipya"
 msgid "Repeat your password"
 msgstr "Rudia nenosiri lako"
 
+msgid "Replace letter"
+msgstr "Badilisha barua"
+
 msgid "Report a problem"
 msgstr "Ripoti tatizo"
 
@@ -3996,6 +4017,9 @@ msgstr "Imehifadhiwa"
 msgid "Saved slots"
 msgstr "Nafasi zilizohifadhiwa"
 
+msgid "Scan the QR code at the bottom right of the last page to check the letter is genuine. Do not edit the file: an altered copy will not match."
+msgstr "Changanua msimbo wa QR chini kulia mwa ukurasa wa mwisho ili kuthibitisha kuwa barua ni halali. Usihariri faili: nakala iliyobadilishwa haitalingana."
+
 msgid "Scraping, crawling, or automated data extraction from the Platform without written authorisation."
 msgstr "Kuchota data, kutambaa au kutoa data kiotomatiki kutoka kwenye Jukwaa bila idhini ya maandishi."
 
@@ -4126,6 +4150,9 @@ msgstr "Tuma msimbo"
 
 msgid "Send code to new email"
 msgstr "Tuma msimbo kwa barua pepe mpya"
+
+msgid "Send letter"
+msgstr "Tuma barua"
 
 msgid "Send report"
 msgstr "Tuma ripoti"
@@ -4555,8 +4582,14 @@ msgstr "Barua pepe uliyoweka hailingani na barua pepe ya akaunti yako."
 msgid "The following notifications are required to operate your account and cannot be disabled:"
 msgstr "Arifa zifuatazo zinahitajika kuendesha akaunti yako na haziwezi kuzimwa:"
 
+msgid "The letter could not be processed. Save it again as a PDF and retry."
+msgstr "Barua haikuweza kuchakatwa. Ihifadhi tena kama PDF kisha ujaribu tena."
+
 msgid "The letter from your university requesting the placement (PDF/image/DOC, max 2MB)."
 msgstr "Barua kutoka chuo chikooomba uwekaji (PDF/picha/DOC, chini ya MB 2)."
+
+msgid "The letter is sent to the student by email."
+msgstr "Barua inatumwa kwa mwanafunzi kwa barua pepe."
 
 msgid "The logo must be under 2MB."
 msgstr "Nembo lazima iwe chini ya MB 2."
@@ -4569,6 +4602,9 @@ msgstr "Barua pepe rasmi ya shirika inahitajika."
 
 msgid "The organization has not published contact details."
 msgstr "Shirika halijachapisha taarifa za mawasiliano."
+
+msgid "The organization has not sent your letter yet. It will be emailed to you and appear here."
+msgstr "Shirika bado halijakutumia barua yako. Itatumwa kwa barua pepe yako na itaonekana hapa."
 
 msgid "The organization phone number is required."
 msgstr "Namba ya simu ya shirika inahitajika."
@@ -4590,6 +4626,9 @@ msgstr "Tarehe ya kuanza haiwezi kuwa ya zamani."
 
 msgid "The student can still cancel for 24 hours after paying. You can accept after that."
 msgstr "Mwanafunzi bado anaweza kughairi kwa saa 24 baada ya kulipa. Unaweza kukubali baada ya hapo."
+
+msgid "The student is notified in the app and by SMS, and gets your letter by email. Acceptance cannot be undone."
+msgstr "Mwanafunzi anajulishwa kwenye programu na kwa SMS, na anapokea barua yako kwa barua pepe. Kukubali hakuwezi kutenduliwa."
 
 msgid "The student is notified in the app, by SMS and by email. Acceptance cannot be undone."
 msgstr "Mwanafunzi anaarifiwa kwenye programu, kwa SMS na kwa barua pepe. Kukubali hakuwezi kutenduliwa."
@@ -4677,6 +4716,12 @@ msgstr "Faili hii haipatikani tena. Tafadhali ipakie upya."
 
 msgid "This is a high-risk action. Confirm with your hardware security key, then submit again."
 msgstr "Hiki ni kitendo chenye hatari kubwa. Thibitisha kwa ufunguo wako wa usalama wa kifaa, kisha uwasilishe tena."
+
+msgid "This letter failed its security check and cannot be downloaded. Contact the organization."
+msgstr "Barua hii imeshindwa ukaguzi wa usalama na haiwezi kupakuliwa. Wasiliana na shirika."
+
+msgid "This letter was already replaced once. A second correction is not allowed."
+msgstr "Barua hii tayari ilibadilishwa mara moja. Marekebisho ya pili hayaruhusiwi."
 
 msgid "This member has already been removed."
 msgstr "Mwanachama huyu ameshaondolewa."
@@ -4858,8 +4903,14 @@ msgstr "Pakia Waraka"
 msgid "Upload Document"
 msgstr "Pakia Waraka"
 
+msgid "Upload letter"
+msgstr "Pakia barua"
+
 msgid "Upload your Student ID and Results Matrix - the platform admin will verify your account."
 msgstr "Pakia Kadi yako ya Utambulisho na Matokeo - msimamizi wa jukwaa atathibitisha akaunti yako."
+
+msgid "Upload your signed letter for this student. A QR code is added at the bottom right of the last page, so keep that corner empty."
+msgstr "Pakia barua yako iliyotiwa saini kwa mwanafunzi huyu. Msimbo wa QR huongezwa chini kulia mwa ukurasa wa mwisho, kwa hiyo acha kona hiyo wazi."
 
 msgid "Upload your student ID and details so organizations can trust you."
 msgstr "Pakia kitambulisho chako cha mwanafunzi na taarifa zako ili mashirika yakuamini."
@@ -5211,6 +5262,9 @@ msgstr "Sasa unaweza kutangaza nafasi, ukaguzi waombaji, na kutuma SMS za kukuba
 msgid "You can only delete your own notes."
 msgstr "Unaweza kufuta maelezo yako mwenyewe pekee."
 
+msgid "You can replace the letter once. The student gets the new letter by email and the old one is marked as replaced."
+msgstr "Unaweza kubadilisha barua mara moja tu. Mwanafunzi hupokea barua mpya kwa barua pepe na ya zamani huwekwa alama kuwa imebadilishwa."
+
 msgid "You can try again now."
 msgstr "Sasa unaweza kujaribu tena."
 
@@ -5345,6 +5399,9 @@ msgstr "Barua pepe na simu yako ni njia zako za kuingia na kurejesha akaunti. Ma
 
 msgid "Your experience (optional)"
 msgstr "Uzoefu wako (si lazima)"
+
+msgid "Your letter has not been sent yet."
+msgstr "Barua yako bado haijatumwa."
 
 msgid "Your next step"
 msgstr "Hatua yako inayofuata"

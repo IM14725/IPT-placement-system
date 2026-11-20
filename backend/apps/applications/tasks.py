@@ -188,23 +188,29 @@ def acceptance_sms(application_id, company_message="", actor_id=None):
     retry_backoff_max=600,
     max_retries=8,
 )
-def acceptance_email(application_id, company_message=""):
-    """Type B notification — organization-triggered email confirming acceptance and
-    asking the student to open their email for the acceptance letter.
-    """
-    from apps.applications.models import Application
+def acceptance_email(application_id, company_message="", letter_id=None, replacement=False):
+    """Type B notification: organization-triggered email confirming acceptance, with the organization's own
+    letter (already stamped with its verification QR and locked) attached."""
+    import logging
+
+    from apps.applications import emails, letter_services
+    from apps.applications.models import AcceptanceLetter, Application
     from apps.notifications.models import MessageChannel
 
-    app = Application.objects.select_related("student__user", "slot__organization").get(
-        id=application_id
-    )
-    note = f"\n\nNote from {app.slot.organization.name}:\n{company_message}" if company_message else ""
+    app = Application.objects.select_related(
+        "student__user", "slot__organization", "slot__district__region"
+    ).get(id=application_id)
+    letters = AcceptanceLetter.objects.filter(application=app)
+    letter = letters.filter(id=letter_id).first() if letter_id else letters.filter(is_current=True).first()
+    org_name = app.slot.organization.name
+    note = f"\n\nNote from {org_name}:\n{company_message}" if company_message else ""
+    student_name = app.student.user.full_name or app.student.user.email
     subject, body = render_template(
         "acceptance_email",
         MessageChannel.EMAIL,
         {
-            "student_name": app.student.user.full_name or app.student.user.email,
-            "organization_name": app.slot.organization.name,
+            "student_name": student_name,
+            "organization_name": org_name,
             "slot_title": app.slot.title,
             "app_id": app.id,
             "company_message": company_message,
@@ -212,15 +218,39 @@ def acceptance_email(application_id, company_message=""):
         },
         fallback_subject=f"Congratulations! You have been accepted — {app.slot.title}",
         fallback_body=(
-            f"Dear {app.student.user.full_name or app.student.user.email},\n\n"
+            f"Dear {student_name},\n\n"
             f"Congratulations! Your application (ID: #{app.id}) for '{app.slot.title}' "
-            f"at {app.slot.organization.name} has been accepted.\n\n"
-            f"Please open your email and check for the official acceptance letter and "
-            f"further instructions from the organization. Contact {app.slot.organization.name} if "
+            f"at {org_name} has been accepted.\n\n"
+            f"Your official acceptance letter is attached to this email. Contact {org_name} if "
             f"you have any questions.{note}\n\n"
-            f"Best regards,\n{app.slot.organization.name}"
+            f"Best regards,\n{org_name}"
         ),
     )
+    if replacement:
+        subject = f"Updated acceptance letter — {app.slot.title}"
+        body = (
+            f"Dear {student_name},\n\n{org_name} has sent you a corrected acceptance letter "
+            f"for '{app.slot.title}'. It replaces the earlier letter; please use this one from now on."
+        )
+    html, attachments = None, None
+    if letter is not None:
+        body = (
+            f"{body.rstrip()}\n\nVerify this letter:\n{letter_services.verification_url(letter.id)}"
+            f"\n\nOpen the platform:\n{emails.app_url(app)}"
+        )
+        data = letter_services.read_verified(letter)
+        if data is None:  # missing or altered on disk: never send a file that does not match its fingerprint
+            logging.getLogger("security").error("Acceptance letter %s failed its integrity check; not attached", letter.id)
+        else:
+            attachments = [{
+                "filename": letter_services.letter_filename(app),
+                "content": data,
+                "mimetype": "application/pdf",
+            }]
+        try:
+            html = emails.build_acceptance_email(app, letter, subject, note=company_message, replacement=replacement)
+        except Exception:  # noqa: BLE001 - the email must still go out in the standard branded layout
+            logging.getLogger(__name__).warning("Acceptance email layout failed; sending the standard layout", exc_info=True)
     message = create_message(
         user=app.student.user,
         application=app,
@@ -228,5 +258,5 @@ def acceptance_email(application_id, company_message=""):
         subject=subject,
         body=body,
     )
-    throttled_dispatch(message)
+    throttled_dispatch(message, attachments=attachments, html_content=html)
     return {"message_id": message.id}

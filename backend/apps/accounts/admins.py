@@ -28,6 +28,8 @@ def _deliver_credentials(user, temp_password, login_url):
         f"The temporary password expires in {hours} hours and must be replaced at first sign-in. "
         "You will then set up multi-factor authentication before getting access. "
         "Never share this email.",
+        tone="info",
+        action=("Sign in", login_url),
     )
 
 

@@ -1,0 +1,52 @@
+<p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:{{ c.ink }};">Dear {{ student }},</p>
+{% if replacement %}
+<p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:{{ c.ink }};"><strong>{{ organization }}</strong> has sent you a corrected acceptance letter for <strong>{{ slot }}</strong>. It replaces the earlier letter, so please use this one from now on.</p>
+{% else %}
+<p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:{{ c.ink }};">Congratulations! <strong>{{ organization }}</strong> has accepted your application for <strong>{{ slot }}</strong>. Your official acceptance letter is attached to this email.</p>
+{% endif %}
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid {{ c.line }};border-radius:12px;margin:0 0 20px;">
+  <tr>
+    <td bgcolor="{{ c.tint }}" style="background:{{ c.tint }};padding:14px 18px;border-radius:12px 12px 0 0;border-bottom:1px solid {{ c.line }};">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+        <td style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:{{ c.soft }};">Acceptance<br><span style="font-family:Consolas,Menlo,monospace;font-size:17px;font-weight:bold;letter-spacing:0;color:{{ c.primary }};text-transform:none;">{{ reference }}</span></td>
+        <td align="right" valign="middle"><span style="display:inline-block;background:#1B7F4B;color:#FFFFFF;font-size:12px;font-weight:bold;letter-spacing:1px;padding:6px 12px;border-radius:999px;">{% if replacement %}UPDATED{% else %}ACCEPTED{% endif %}</span></td>
+      </tr></table>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:6px 18px 10px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        {% for label, value in rows %}
+        <tr>
+          <td style="padding:8px 0;font-size:14px;color:{{ c.soft }};vertical-align:top;white-space:nowrap;border-bottom:1px solid {{ c.line }};">{{ label }}</td>
+          <td align="right" style="padding:8px 0 8px 12px;font-size:14px;color:{{ c.ink }};vertical-align:top;border-bottom:1px solid {{ c.line }};word-break:break-word;">{{ value }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </td>
+  </tr>
+</table>
+
+{% if note %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;"><tr>
+  <td bgcolor="#FFF8EC" style="background:#FFF8EC;border-left:4px solid {{ c.accent }};border-radius:6px;padding:12px 16px;font-size:15px;line-height:1.6;color:{{ c.ink }};">
+    <strong>Note from {{ organization }}</strong><br>{{ note }}
+  </td>
+</tr></table>
+{% endif %}
+
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 20px;"><tr>
+  <td align="center" bgcolor="{{ c.primary }}" style="border-radius:8px;">
+    <a href="{{ app_url }}" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;color:#FFFFFF;text-decoration:none;border-radius:8px;">Open my application</a>
+  </td>
+</tr></table>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="{{ c.tint }}" style="background:{{ c.tint }};border:1px solid {{ c.line }};border-radius:12px;margin:0 0 16px;"><tr>
+  <td style="padding:14px 18px;font-size:14px;line-height:1.6;color:{{ c.muted }};">
+    <strong style="color:{{ c.ink }};">How to check this letter is genuine</strong><br>
+    The attached PDF carries a QR code at the bottom right of its last page. Scan it, or open the link below, to confirm the letter was issued through IPT Marketplace. The file is locked against editing: do not change or re-type it, because any altered copy will not match.<br>
+    <a href="{{ verify_url }}" style="color:{{ c.primary }};word-break:break-all;">{{ verify_url }}</a>
+  </td>
+</tr></table>
+<p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:{{ c.muted }};">Bring a printed copy of the letter, your student identity card and your university introduction letter when you report.</p>

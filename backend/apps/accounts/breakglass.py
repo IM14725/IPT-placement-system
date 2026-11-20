@@ -14,6 +14,7 @@ from django.utils import timezone
 
 from apps.accounts.models import BreakGlassAccount, User, UserRole
 from apps.core.audit import audit_event
+from apps.core.email_layout import site_link
 from apps.core.providers import send_email
 
 
@@ -96,6 +97,8 @@ def alert_break_glass_used(request, user):
                 f"The emergency account {user.email} just signed in from "
                 f"{request.META.get('REMOTE_ADDR', 'unknown')}. If this was not an agreed emergency, "
                 "treat it as a security incident. Review the audit log, then rotate its credentials.",
+                tone="alert",
+                action=("Review the audit log", site_link("platform-audit-logs")),
             )
         except Exception:  # noqa: BLE001
             pass

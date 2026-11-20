@@ -90,6 +90,20 @@ class Application(TimeStampedModel):
             return False
         return timezone.now() <= self.payment.paid_at + timedelta(hours=24)
 
+    @property
+    def current_letter(self):
+        """The acceptance letter the student holds now (``None`` until the organization uploads one)."""
+        cached = getattr(self, "_current_letter", False)
+        if cached is not False:
+            return cached
+        self._current_letter = self.acceptance_letters.filter(is_current=True).first()
+        return self._current_letter
+
+    @property
+    def can_replace_letter(self):
+        letter = self.current_letter
+        return bool(self.is_accepted and letter and letter.version < AcceptanceLetter.MAX_VERSIONS)
+
     def accept(self):
         self.is_accepted = True
         self.save(update_fields=["is_accepted", "updated_at"])
@@ -120,6 +134,48 @@ class Application(TimeStampedModel):
 
     def __str__(self):
         return f"Application #{self.pk} - {self.student} -> {self.slot}"
+
+
+def acceptance_letter_upload_path(instance, filename):
+    return f"acceptance_letters/{instance.application_id}/v{instance.version}-{instance.id}.pdf"
+
+
+class AcceptanceLetter(TimeStampedModel):
+    """The letter an organization uploads when it accepts an applicant (PDF only).
+
+    The stored file is the *stamped* copy: a verification QR code was added and the PDF locked against
+    editing before it was saved and emailed. A letter is never edited or deleted (database trigger); a
+    correction is a second version, which marks the first one superseded. ``sha256`` is the fingerprint
+    of the stored file, re-checked on every download and by the public check-a-file page.
+    """
+
+    MAX_VERSIONS = 2  # the original plus one replacement
+
+    application = models.ForeignKey(Application, on_delete=models.PROTECT, related_name="acceptance_letters")
+    version = models.PositiveSmallIntegerField(default=1)
+    file = models.FileField(upload_to=acceptance_letter_upload_path)
+    original_name = models.CharField(max_length=255, blank=True)
+    sha256 = models.CharField(max_length=64)
+    source_sha256 = models.CharField(max_length=64, help_text="Fingerprint of the PDF as the organization uploaded it.")
+    page_count = models.PositiveSmallIntegerField(default=1)
+    uploaded_by = models.ForeignKey(
+        "accounts.User", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    uploaded_by_label = models.CharField(max_length=200, blank=True)
+    is_current = models.BooleanField(default=True)
+    superseded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-version"]
+        constraints = [
+            models.UniqueConstraint(fields=["application", "version"], name="uniq_letter_version"),
+            models.UniqueConstraint(
+                fields=["application"], condition=models.Q(is_current=True), name="uniq_current_letter"
+            ),
+        ]
+
+    def __str__(self):
+        return f"Acceptance letter v{self.version} for {self.application_id}"
 
 
 class ApplicantNote(TimeStampedModel):

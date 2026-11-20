@@ -110,3 +110,27 @@ def test_icon_files_exist_for_every_social_link():
 
     for name, _url, _color in email_layout.SOCIAL_LINKS:
         assert (Path(email_layout.LOGO_PATH).parent / f"email-icon-{name.lower()}.png").exists()
+
+
+def test_tone_adds_a_coloured_label_and_action_a_button_for_plain_text_emails():
+    providers.send_email(
+        "[URGENT] Break-glass emergency account was used", ["a@x.tz"], "The emergency account just signed in.",
+        tone="alert", action=("Review the audit log", "https://x.tz/platform/audit-logs/"),
+    )
+    page = _html(mail.outbox[-1])
+    assert "Security alert" in page and "#B3261E" in page
+    assert ">Review the audit log<" in page and 'href="https://x.tz/platform/audit-logs/"' in page
+    assert mail.outbox[-1].body == "The emergency account just signed in."  # the text part is unchanged
+
+
+def test_an_action_that_is_not_an_http_link_is_ignored():
+    page = email_layout.render_email_html("S", "hello", tone="nonsense", action=("Go", "javascript:alert(1)"))
+    assert "javascript:" not in page and "Security alert" not in page
+
+
+def test_security_emails_use_the_designed_layouts(db, settings):
+    from apps.accounts import recovery
+    from apps.core.email_layout import site_link
+
+    assert site_link("login").startswith(settings.SITE_URL) and site_link("platform-recovery").endswith("/recovery/")
+    assert recovery.site_link is site_link
