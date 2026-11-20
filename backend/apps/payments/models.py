@@ -58,10 +58,8 @@ class Payment(TimeStampedModel):
 
     class Meta:
         ordering = ["-created_at"]
-        indexes = [
-            models.Index(fields=["reference_id"]),
-            models.Index(fields=["status"]),
-        ]
+        # reference_id is already indexed by unique=True; a status-only index is too low-selectivity.
+        indexes = []
 
     def mark_paid(self, gateway_txn_id="", payload=None):
         self.status = PaymentStatus.PAID

@@ -45,8 +45,12 @@ RATE_LIMIT_FAIL_CLOSED = env.bool("RATE_LIMIT_FAIL_CLOSED", default=True)
 
 if _DATABASE_URL:
     DATABASES = {
-        "default": dj_database_url.config(default=_DATABASE_URL, conn_max_age=60)
+        "default": dj_database_url.config(
+            default=_DATABASE_URL, conn_max_age=0 if DB_POOL_ENABLED else 60, conn_health_checks=not DB_POOL_ENABLED
+        )
     }
+    if DB_POOL_ENABLED:
+        DATABASES["default"].setdefault("OPTIONS", {})["pool"] = DB_POOL_OPTIONS
 
 
 # Static files: hashed filenames + gzip copies (brotli too if the `brotli` package is installed), served by WhiteNoise (run `collectstatic` on deploy).

@@ -776,3 +776,15 @@ The system no longer writes acceptance letters. The organization uploads its own
 - **Kiswahili:** new organization/student strings are in `ui.json`; the verification pages and emails are English.
 - **Tests:** `apps/applications/test_acceptance_letters.py` (18), `apps/applications/testing.py` (`sample_letter()` for any test that accepts an applicant), plus tone tests in `apps/core/test_email_layout.py`.
 - **Limits worth knowing:** the stamp is drawn over the last page's bottom-right corner on a white tile, so anything the organization placed there is covered. The PDF lock stops ordinary editors but a determined person can strip it; that is what the verification page's check-a-file and the stored fingerprint are for.
+
+## Single-server scaling (2026-11-20)
+
+Windows server, 8 GB RAM, everything on one box. Details and the numbers: `docs/postgres-tuning.md`.
+
+- **Indexes:** migrations `*_scaling_indexes` add `Application(status, payment_deadline)` and `(slot, status)`, `Slot(status, organization)` and `(status, application_deadline)`, `Notification(user, is_read, -created_at)`, `Message(status, created_at)`. Dropped redundant ones: `Payment(reference_id)` and `(status)`, `IntegrityRecord.record_type`, `OrganizationSession.session_key` db_index. Dropping an index leaves the immutability triggers alone.
+- **N+1:** `apps/core/test_query_counts.py` renders the busy organization and notification pages with 2 rows then with more and fails if the query count grows. The notification list now uses one aggregate query for its three counts.
+- **Pooling (no PgBouncer, it has no maintained Windows build):** `DB_POOL=1` turns on the psycopg pool for Django (`DB_POOL_MIN/MAX/TIMEOUT`); FastAPI's engine reads `DB_POOL_SIZE`, `DB_MAX_OVERFLOW`, `DB_POOL_TIMEOUT`, `DB_POOL_RECYCLE`. Keep (processes x pool max) plus Celery and realtime under Postgres `max_connections` (100).
+- **Postgres config:** `scripts\postgres_tune.ps1` applies tuned values with `ALTER SYSTEM` and enables `pg_stat_statements` (service restart needed once); `scripts\slow_queries.sql` reports slow queries, seq scans, unused indexes, dead tuples, connections.
+- **Retention:** `notifications.purge_old_read` (daily beat) deletes read notifications older than `NOTIFICATION_RETENTION_DAYS` (90). Unread are kept.
+- **Partitioning: deliberately not done.** The ledger/immutable tables make it risky and the data is small; the thresholds to revisit are in the doc.
+- **Index drift found in the dev DB (fixed):** hand-made indexes `app_slot_status_idx` (blocked migration 0007, which now drops same-named leftovers first), `app_deadline_idx`, `audit_actor_time_idx` and `pay_ref_idx` duplicated indexes Django already keeps; the last three were dropped by hand. `VoucherRedemption`'s own `Index(voucher)` / `Index(batch)` duplicated the FK indexes and went in `vouchers.0003`. The dev DB also still has `search_*` tables from a removed `search` app (migration `search.0001` recorded); left alone. Other environments may carry the same hand-made indexes, so run `scripts\slow_queries.sql` / compare `pg_indexes` there before deploying.

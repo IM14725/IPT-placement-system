@@ -133,7 +133,7 @@ class VoucherRedemption(TimeStampedModel):
 
     class Meta:
         ordering = ["-created_at"]
-        indexes = [models.Index(fields=["voucher"]), models.Index(fields=["batch"])]
+        # voucher and batch are ForeignKeys, which Postgres/Django already index; no extra indexes needed.
 
     def __str__(self):
         return f"{self.voucher} on {self.application_id}"

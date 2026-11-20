@@ -59,6 +59,12 @@ class Application(TimeStampedModel):
                 fields=["student", "slot"], name="uniq_student_slot_application"
             )
         ]
+        indexes = [
+            # expire_unpaid / expiring-reminder beat jobs filter on status + payment_deadline
+            models.Index(fields=["status", "payment_deadline"], name="app_status_deadline_idx"),
+            # capacity counts (PENDING + PAID per slot)
+            models.Index(fields=["slot", "status"], name="app_slot_status_idx"),
+        ]
 
     @property
     def is_paid(self):

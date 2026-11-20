@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     mock_gateway_webhook_secret: str = "dev-mock-webhook-secret"
     enable_mock_gateway: bool = False
     cors_allowed_origins: list[str] = ["http://localhost:8000", "http://127.0.0.1:8000"]
+    # Pool for this service. Keep (pool_size + max_overflow) small: Django, Celery and this service
+    # share one Postgres max_connections budget (see docs/postgres-tuning.md).
+    db_pool_size: int = 5
+    db_max_overflow: int = 5
+    db_pool_timeout: int = 10  # seconds to wait for a free connection before erroring
+    db_pool_recycle: int = 1800  # replace connections older than 30 minutes
     cache_key_prefix: str = "ipt"
     trusted_proxy_count: int = 0
     ws_host: str = "127.0.0.1"

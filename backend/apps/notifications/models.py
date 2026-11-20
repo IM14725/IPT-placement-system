@@ -36,6 +36,10 @@ class Notification(TimeStampedModel):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            # bell / unread count / inbox list per user
+            models.Index(fields=["user", "is_read", "-created_at"], name="notif_user_read_idx"),
+        ]
 
     def __str__(self):
         return f"{self.get_type_display()}: {self.title}"
@@ -76,6 +80,7 @@ class Message(TimeStampedModel):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [models.Index(fields=["status", "created_at"], name="msg_status_created_idx")]
 
     def __str__(self):
         return f"{self.get_channel_display()} to {self.user_id} ({self.status})"

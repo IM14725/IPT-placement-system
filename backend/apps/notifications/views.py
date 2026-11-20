@@ -7,6 +7,7 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -41,6 +42,8 @@ def notification_list(request):
     if type_ in NotificationType.values:
         qs = qs.filter(type=type_)
     page_obj = paginate(qs.order_by("-created_at"), request.GET.get("page"))
+    # One aggregate query instead of three separate COUNTs.
+    counts = base.aggregate(total=Count("id"), unread=Count("id", filter=Q(is_read=False)))
     alerts, max_alerts = [], 0
     if request.user.is_student:
         # Slot alerts (saved searches) are managed on this same page.
@@ -63,9 +66,9 @@ def notification_list(request):
             "status": status,
             "selected_type": type_,
             "types": NotificationType.choices,
-            "unread_total": base.filter(is_read=False).count(),
-            "read_total": base.filter(is_read=True).count(),
-            "total": base.count(),
+            "unread_total": counts["unread"],
+            "read_total": counts["total"] - counts["unread"],
+            "total": counts["total"],
         },
     )
 

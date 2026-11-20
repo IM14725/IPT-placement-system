@@ -74,6 +74,10 @@ class Slot(TimeStampedModel):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["status", "organization"], name="slot_status_org_idx"),
+            models.Index(fields=["status", "application_deadline"], name="slot_status_deadline_idx"),
+        ]
 
     @property
     def region(self):

@@ -250,7 +250,7 @@ class OrganizationSession(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="organization_sessions",
     )
-    session_key = models.CharField(max_length=64, unique=True, db_index=True)
+    session_key = models.CharField(max_length=64, unique=True)
 
     class Meta:
         ordering = ["created_at"]

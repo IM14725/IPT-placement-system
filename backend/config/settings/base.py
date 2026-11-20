@@ -155,6 +155,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+# Connection pooling (single server, no PgBouncer): with DB_POOL=1 each Django process keeps a psycopg
+# pool of DB_POOL_MIN..DB_POOL_MAX connections and hands them out per request/transaction. Without it
+# connections are reused for CONN_MAX_AGE seconds (checked before use). Budget: processes x DB_POOL_MAX
+# + Celery + realtime must stay under Postgres max_connections (see docs/postgres-tuning.md).
+DB_POOL_ENABLED = env.bool("DB_POOL", default=False)
+DB_POOL_OPTIONS = {
+    "min_size": env.int("DB_POOL_MIN", default=2),
+    "max_size": env.int("DB_POOL_MAX", default=10),
+    "timeout": env.int("DB_POOL_TIMEOUT", default=10),  # seconds to wait for a free connection
+    "max_idle": 300,
+    "max_lifetime": 1800,
+}
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -163,8 +175,9 @@ DATABASES = {
         "PASSWORD": env("DB_PASSWORD", default="ipt_dev_password"),
         "HOST": env("DB_HOST", default="127.0.0.1"),
         "PORT": env("DB_PORT", default="5432"),
-        "CONN_MAX_AGE": 0 if env("DB_POOL", default=False) else 60,
-        "OPTIONS": {"pool": True} if env("DB_POOL", default=False) else {},
+        "CONN_MAX_AGE": 0 if DB_POOL_ENABLED else 60,
+        "CONN_HEALTH_CHECKS": not DB_POOL_ENABLED,
+        "OPTIONS": {"pool": DB_POOL_OPTIONS} if DB_POOL_ENABLED else {},
     }
 }
 
@@ -360,7 +373,12 @@ CELERY_BEAT_SCHEDULE = {
         "task": "applications.remind_expiring",
         "schedule": 600.0,  # every 10 minutes; one in-app reminder per reservation
     },
+    "purge-old-read-notifications": {
+        "task": "notifications.purge_old_read",
+        "schedule": 24 * 60 * 60.0,  # daily; only read notifications older than the retention window
+    },
 }
+NOTIFICATION_RETENTION_DAYS = env.int("NOTIFICATION_RETENTION_DAYS", default=90)
 
 # FastAPI service (realtime)
 FASTAPI_URL = env("FASTAPI_URL", default="http://127.0.0.1:8001")

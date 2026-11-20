@@ -124,7 +124,7 @@ class IntegrityRecord(models.Model):
     """Append-only, tamper-evident ledger of sealed critical records."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    record_type = models.CharField(max_length=30, db_index=True)
+    record_type = models.CharField(max_length=30)  # covered by the (record_type, record_id) index below
     record_id = models.UUIDField()
     record_hash = models.CharField(max_length=64)
     prev_hash = models.CharField(max_length=64, default="", blank=True)
