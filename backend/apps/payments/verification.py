@@ -42,6 +42,35 @@ def qr_png(url: str, *, scale: int = 6) -> bytes:
     return buffer.getvalue()
 
 
+def qr_table_html(url: str, *, border: int = 2) -> str:
+    """The QR code as a pure HTML table: no image part, so the email has no attachment chip, nothing for a
+    mail app to block and nothing to host. Runs of same-coloured modules are merged with ``colspan``."""
+    matrix = [list(row) for row in segno.make(url, error="m").matrix]
+    size = len(matrix) + 2 * border
+    cell = 4 if size <= 41 else 3
+    blank = [0] * size
+    rows = [blank] * border + [[0] * border + row + [0] * border for row in matrix] + [blank] * border
+    out = []
+    for row in rows:
+        cells, i = [], 0
+        while i < size:
+            j = i
+            while j < size and row[j] == row[i]:
+                j += 1
+            run = j - i
+            # Kept tiny: Gmail cuts a message off at about 100 KB, and a QR is hundreds of cells.
+            bg = ' bgcolor="#191C1D"' if row[i] else ""
+            cells.append(f'<td colspan="{run}" width="{run * cell}" height="{cell}"{bg}>&nbsp;</td>')
+            i = j
+        out.append(f"<tr>{''.join(cells)}</tr>")
+    return (
+        f'<table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" '
+        f'width="{size * cell}" bgcolor="#FFFFFF" data-qr '
+        f'style="border-collapse:collapse;border-spacing:0;background:#FFFFFF;margin:0 auto;font-size:1px;line-height:1px;">'
+        f"{''.join(out)}</table>"
+    )
+
+
 def mask_name(full_name: str) -> str:
     """'Asha Juma' -> 'A*** J***': enough for the owner to recognise, not enough to identify."""
     parts = [p for p in (full_name or "").replace("@", " ").split() if p]

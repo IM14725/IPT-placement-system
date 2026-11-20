@@ -6,13 +6,14 @@ from django.template.loader import render_to_string
 
 from apps.core import email_layout
 from apps.payments.services import receipt_summary
-from apps.payments.verification import QR_CID, qr_png, verification_url
+from apps.payments.verification import qr_table_html, verification_url
 
 GREEN = "#1B7F4B"
 
 
 def build_receipt_email(payment, subject: str) -> tuple[str, dict]:
-    """``(html, inline_images)`` for the receipt email of a paid ``payment``."""
+    """``(html, inline_images)`` for the receipt email of a paid ``payment``. The QR is part of the HTML (a table)
+    and the logo follows the other emails, so nothing is attached and Gmail shows no image chips."""
     r = receipt_summary(payment)
     url = verification_url(payment)
     rows = [
@@ -30,7 +31,7 @@ def build_receipt_email(payment, subject: str) -> tuple[str, dict]:
             "r": r,
             "rows": rows,
             "verify_url": url,
-            "qr_cid": QR_CID,
+            "qr_html": qr_table_html(url),
             "badge_color": GREEN if r["is_money"] else email_layout.PRIMARY,
             "c": {
                 "primary": email_layout.PRIMARY, "ink": email_layout.INK, "muted": email_layout.MUTED,
@@ -44,6 +45,5 @@ def build_receipt_email(payment, subject: str) -> tuple[str, dict]:
         content_html=content,
         preheader=f"Receipt {r['reference']} for {r['slot']} at {r['organization']}. Scan the QR code to verify it.",
         heading="Your application receipt",
-        embed_logo=True,
     )
-    return page, {QR_CID: qr_png(url, scale=6)}
+    return page, {}

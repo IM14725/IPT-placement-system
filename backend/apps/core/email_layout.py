@@ -130,7 +130,6 @@ def render_email_html(
     content_html: str | None = None,
     preheader: str | None = None,
     heading: str | None = None,
-    embed_logo: bool = False,
 ) -> str:
     """The branded page. ``content_html`` (trusted markup built by our own code, already escaped) replaces
     the blocks normally worked out from the plain-text ``body``: used by the receipt email."""
@@ -146,9 +145,7 @@ def render_email_html(
             "content": content,
             "preheader": preheader,
             "logo_cid": LOGO_CID,
-            # embed_logo: send the logo inside the email even when EMAIL_LOGO_URL is set (many mail apps
-            # hold back remote images, which leaves an empty placeholder on a receipt).
-            "logo_url": "" if embed_logo else _logo_url(),
+            "logo_url": _logo_url(),
             "has_logo": LOGO_PATH.exists(),
             "year": date.today().year,
             "c": {

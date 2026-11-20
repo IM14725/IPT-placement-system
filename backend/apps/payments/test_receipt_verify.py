@@ -82,31 +82,39 @@ def test_waived_receipt_says_no_fee_and_is_marked(places, org):
 
 
 @pytest.mark.django_db
-def test_receipt_email_has_the_card_the_qr_and_the_verify_link(places, org, settings):
-    settings.EMAIL_LOGO_URL = ""  # a developer's .env may host the logo; this test checks the embedded one
+def test_receipt_email_has_the_card_the_qr_and_the_verify_link(places, org):
     payment = _paid(places, org)
     html, images = build_receipt_email(payment, "Payment Receipt")
     assert payment.reference_id in html and "TZS 15,000.00" in html and "Total paid" in html
-    assert f"cid:{verification.QR_CID}" in html and "cid:ipt-logo" in html
-    assert verification.verification_url(payment) in html
-    assert images[verification.QR_CID].startswith(b"\x89PNG")
+    assert "data-qr" in html and verification.verification_url(payment) in html
+    assert images == {} and "cid:" not in html or "cid:ipt-logo" in html  # the QR is HTML, never an image part
+
+
+def test_qr_table_contains_every_dark_module_of_the_code():
+    import segno
+
+    url = "https://example.tz/verify/IPT-AAAAAAAAAA/0123456789abcdef01234567/"
+    html = verification.qr_table_html(url)
+    matrix = [list(r) for r in segno.make(url, error="m").matrix]
+    dark = sum(int(m) for m in re.findall(r'colspan="(\d+)"[^>]*bgcolor="#191C1D"', html))
+    assert dark == sum(sum(r) for r in matrix)
+    assert html.count("<tr>") == len(matrix) + 4 and "<img" not in html
 
 
 @pytest.mark.django_db
-def test_receipt_task_sends_html_with_both_images_inline_and_the_pdf_attached(places, org, settings):
-    settings.EMAIL_LOGO_URL = ""
+def test_receipt_task_sends_html_with_the_pdf_as_the_only_attachment(places, org, settings):
     from apps.payments.tasks import receipt_email
+
+    settings.EMAIL_LOGO_URL = "https://cdn.example.tz/logo.png"  # as in the real .env: hosted, like the OTP email
 
     mail.outbox.clear()
     payment = _paid(places, org)
     receipt_email(payment.id)  # eager Celery already ran it once on finalize; run explicitly for the assertions
     sent = mail.outbox[-1]
     assert verification.verification_url(payment) in sent.body
-    raw = sent.message()
-    related = raw.get_body(preferencelist=("related",)) or raw.get_payload()[-1]
-    cids = re.findall(r"Content-ID: <([^>]+)>", related.as_string())
-    assert "ipt-logo" in cids and verification.QR_CID in cids
-    assert any(name.endswith(".pdf") for name, *_ in sent.attachments)
+    raw = sent.message().as_string()
+    assert "data-qr" in raw and "Content-Type: image/" not in raw  # no inline image parts, so no chips in Gmail
+    assert [name for name, *_ in sent.attachments] == [f"{payment.reference_id}.pdf"]
 
 
 @pytest.mark.django_db
@@ -122,17 +130,22 @@ def test_pdf_receipt_is_built_with_qr_and_link(places, org, tmp_path, settings):
 
 
 @pytest.mark.django_db
-def test_qr_and_logo_are_embedded_even_when_a_hosted_logo_url_is_configured(places, org, settings):
-    """Regression: with EMAIL_LOGO_URL set the QR image used to be dropped, leaving an empty placeholder."""
+def test_receipt_logo_follows_the_other_emails_so_a_hosted_logo_is_not_attached(places, org, settings):
+    """Gmail listed an embedded logo/QR as a 'noname' attachment chip; the receipt now matches the OTP email."""
     from apps.core import providers
 
     settings.EMAIL_LOGO_URL = "https://cdn.example.tz/logo.png"
     payment = _paid(places, org)
     html, images = build_receipt_email(payment, "Payment Receipt")
-    assert "cid:ipt-logo" in html and "cdn.example.tz" not in html
+    assert 'src="https://cdn.example.tz/logo.png"' in html and "cid:" not in html
     mail.outbox.clear()
     providers.send_email("Receipt", ["a@x.tz"], "text", attachments=[{"filename": "r.pdf", "content": b"%PDF", "mimetype": "application/pdf"}],
                          html_content=html, inline_images=images)
-    raw = mail.outbox[-1].message().as_string()
-    assert "Content-ID: <ipt-logo>" in raw and f"Content-ID: <{verification.QR_CID}>" in raw
-    assert raw.count("Content-Disposition: inline") >= 2
+    assert "Content-Type: image/" not in mail.outbox[-1].message().as_string()
+
+
+@pytest.mark.django_db
+def test_receipt_email_stays_well_under_gmails_clipping_limit(places, org, settings):
+    settings.SITE_URL = "https://marketplace.example.co.tz"  # a longer production address makes a bigger QR
+    html, _ = build_receipt_email(_paid(places, org), "Payment Receipt")
+    assert len(html.encode()) < 70_000  # Gmail clips messages at about 102 KB

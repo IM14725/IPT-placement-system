@@ -47,7 +47,7 @@
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="{{ c.tint }}" style="background:{{ c.tint }};border:1px solid {{ c.line }};border-radius:12px;margin:0 0 20px;">
   <tr>
     <td align="center" style="padding:22px 16px 6px;">
-      <img src="cid:{{ qr_cid }}" width="150" height="150" alt="QR code to verify receipt {{ r.reference }}" style="display:block;border:0;outline:none;margin:0 auto;background:#FFFFFF;border-radius:8px;">
+      {{ qr_html|safe }}
     </td>
   </tr>
   <tr>
