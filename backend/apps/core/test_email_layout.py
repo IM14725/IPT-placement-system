@@ -82,3 +82,31 @@ def test_every_email_footer_links_to_the_platform_social_profiles():
         for name, url, _color in email_layout.SOCIAL_LINKS:
             assert f'href="{url}"' in page and f">{name}<" in page
         assert "Follow us" in page
+
+
+def test_social_links_use_hosted_icons_next_to_the_hosted_logo(settings):
+    settings.EMAIL_LOGO_URL = "https://cdn.example.tz/static/images/email-logo.png"
+    providers.send_email("Welcome", ["a@x.tz"], "hello")
+    page = _html(mail.outbox[-1])
+    for name, url, _color in email_layout.SOCIAL_LINKS:
+        assert f'href="{url}"' in page
+        assert f'src="https://cdn.example.tz/static/images/email-icon-{name.lower()}.png"' in page
+        assert f'alt="{name}"' in page
+    assert ">Instagram<" not in page  # icons replace the text buttons
+
+
+def test_each_email_ends_with_its_own_invisible_token_so_gmail_does_not_trim_it():
+    import re
+
+    providers.send_email("Same subject", ["a@x.tz"], "same body")
+    providers.send_email("Same subject", ["a@x.tz"], "same body")
+    first, second = (_html(m) for m in mail.outbox[-2:])
+    tail = lambda page: re.search(r'text-align:center;">([0-9a-f]{12})</div>\s*</body>', page).group(1)
+    assert tail(first) != tail(second)
+
+
+def test_icon_files_exist_for_every_social_link():
+    from pathlib import Path
+
+    for name, _url, _color in email_layout.SOCIAL_LINKS:
+        assert (Path(email_layout.LOGO_PATH).parent / f"email-icon-{name.lower()}.png").exists()

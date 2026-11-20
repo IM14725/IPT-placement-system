@@ -8,6 +8,7 @@ Colours are the platform tokens from ``tailwind.config.js`` / ``theme.css``.
 from __future__ import annotations
 
 import re
+import uuid
 from datetime import date
 from html import escape
 from pathlib import Path
@@ -155,7 +156,12 @@ def render_email_html(
             "logo_url": _logo_url(),
             "has_logo": LOGO_PATH.exists(),
             "year": date.today().year,
-            "social_links": [{"name": n, "url": u, "color": c} for n, u, c in SOCIAL_LINKS],
+            "social_links": [
+                {"name": n, "url": u, "color": c, "icon": _icon_url(n)} for n, u, c in SOCIAL_LINKS
+            ],
+            # Different in every email and invisible: Gmail hides the ending an email shares with the previous
+            # ones of a conversation behind a "show trimmed content" button; a unique last line prevents that.
+            "nonce": uuid.uuid4().hex[:12],
             "c": {
                 "primary": PRIMARY, "primary_container": PRIMARY_CONTAINER, "ink": INK, "muted": MUTED,
                 "soft": SOFT, "line": LINE, "page": PAGE_BG, "accent": ACCENT,
@@ -167,6 +173,12 @@ def render_email_html(
 def _logo_url() -> str:
     url = (getattr(settings, "EMAIL_LOGO_URL", "") or "").strip()
     return url if url.startswith("https://") else ""
+
+
+def _icon_url(name: str) -> str:
+    """Hosted PNG next to the hosted logo (``email-icon-<name>.png``); empty means "use a text button"."""
+    base = _logo_url()
+    return f"{base.rsplit('/', 1)[0]}/email-icon-{name.lower()}.png" if base else ""
 
 
 def logo_bytes() -> bytes | None:

@@ -38,8 +38,8 @@
           </tr>
           <tr>
             <td bgcolor="#F0F0F5" align="center" style="background:#F0F0F5;padding:18px 24px;border:1px solid {{ c.line }};border-top:3px solid {{ c.accent }};border-radius:0 0 12px 12px;font-size:12px;line-height:1.6;color:{{ c.soft }};">
-              {% if social_links %}<div style="font-size:13px;font-weight:bold;color:{{ c.muted }};margin:0 0 8px;">Follow us</div>
-              <div style="margin:0 0 14px;">{% for s in social_links %}<a href="{{ s.url }}" style="display:inline-block;margin:3px 4px;padding:8px 16px;background:{{ s.color }};border-radius:999px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;color:#FFFFFF;text-decoration:none;">{{ s.name }}</a>{% endfor %}</div>{% endif %}
+              {% if social_links %}<div style="font-size:13px;font-weight:bold;color:{{ c.muted }};margin:0 0 10px;">Follow us</div>
+              <div style="margin:0 0 14px;">{% for s in social_links %}{% if s.icon %}<a href="{{ s.url }}" style="display:inline-block;margin:0 6px;text-decoration:none;"><img src="{{ s.icon }}" width="36" height="36" alt="{{ s.name }}" title="{{ s.name }}" style="display:block;border:0;border-radius:18px;width:36px;height:36px;background:{{ s.color }};color:#FFFFFF;font-size:11px;line-height:36px;text-align:center;"></a>{% else %}<a href="{{ s.url }}" style="display:inline-block;margin:3px 4px;padding:8px 16px;background:{{ s.color }};border-radius:999px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;color:#FFFFFF;text-decoration:none;">{{ s.name }}</a>{% endif %}{% endfor %}</div>{% endif %}
               Connecting Tanzanian university students with companies for Industrial Practical Training.<br>
               This is an automated message, please do not reply to it.<br>
               &copy; {{ year }} IPT Marketplace
@@ -49,5 +49,6 @@
       </td>
     </tr>
   </table>
+  <div style="font-size:1px;line-height:1px;color:{{ c.page }};text-align:center;">{{ nonce }}</div>
 </body>
 </html>
