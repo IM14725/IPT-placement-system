@@ -2,7 +2,7 @@ from .base import *  # noqa: F401,F403
 
 DEBUG = True
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# Email: base.py picks real SMTP when SMTP_HOST is set in backend/.env, else the console backend.
 
 # Local dev uses the console SMS mock unless SMS_BACKEND=astracall is set in backend/.env (a key in
 # .env does not switch dev to live SMS on its own). Mock-sent codes are readable only on the admin

@@ -126,7 +126,7 @@ def send_email(subject: str, to: list, body: str, attachments=None) -> dict:
     email.send(fail_silently=False)
     
     # If the default backend is the console, log it so dev knows it was mocked
-    provider = "smtp" if getattr(settings, "EMAIL_HOST", "") else "mock-email"
+    provider = "smtp" if "smtp" in getattr(settings, "EMAIL_BACKEND", "") else "mock-email"
     if provider == "mock-email":
         print(f"[EMAIL:MOCK] -> {', '.join(to)} | {subject} (Attachments: {len(attachments or [])})")
         
